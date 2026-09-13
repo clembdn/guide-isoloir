@@ -1,0 +1,122 @@
+---
+/*
+ * Gabarit provisoire de la phase 0.
+ *
+ * Aucune direction visuelle n'est arrêtée : typographie système, une seule
+ * teinte neutre, aucune décoration. Les tokens définitifs seront figés dans
+ * DESIGN_SYSTEM.md à l'issue de la phase de design, puis reportés dans
+ * src/styles/base.css. Voir l'en-tête de ce fichier.
+ *
+ * Aucun script tiers, aucune police distante, aucun analytics : la politique
+ * de sécurité de public/_headers l'interdit et un test Playwright le vérifie.
+ *
+ * Les valeurs d'identité (nom de l'éditeur, contact, domaine) peuvent être
+ * nulles. Le gabarit omet alors la mention : il n'affiche jamais d'espace
+ * réservé. C'est le garde-fou de build qui interdit la publication dans cet
+ * état, pas la page qui s'en excuse.
+ */
+import "../styles/base.css";
+import { SITE_NAME, SITE_URL, FOOTER_NAV, EDITOR_NAME } from "../lib/site";
+
+type Props = {
+  title: string;
+  description: string;
+  /** Date ISO `AAAA-MM-JJ` de dernière mise à jour, reprise dans le balisage. */
+  updated?: string;
+  /** `/resultat` et `/test` ne doivent pas être indexés. */
+  noindex?: boolean;
+};
+
+const { title, description, updated, noindex = false } = Astro.props;
+
+/*
+ * `build.format: "file"` fait apparaître `.html` dans `Astro.url.pathname` au
+ * build, alors que le serveur de développement donne l'URL propre. Le canonical
+ * doit être identique dans les deux cas, et sans extension.
+ */
+const cleanPath = Astro.url.pathname.replace(/index\.html$/, "").replace(/\.html$/, "") || "/";
+const canonical = new URL(cleanPath, SITE_URL).href;
+const fullTitle = title === SITE_NAME ? title : `${title} — ${SITE_NAME}`;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebPage",
+  name: title,
+  description,
+  url: canonical,
+  inLanguage: "fr-FR",
+  ...(updated ? { dateModified: updated } : {}),
+  isPartOf: {
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: SITE_URL,
+  },
+  // Aucun `publisher` tant que l'éditeur n'est pas nommé : un balisage
+  // `Person` sans nom vaut moins qu'une absence de balisage.
+  ...(EDITOR_NAME ? { publisher: { "@type": "Person", name: EDITOR_NAME } } : {}),
+};
+---
+
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="fr_FR" />
+
+    {!noindex && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />}
+  </head>
+
+  <body>
+    <div class="page">
+      <a class="evitement" href="#contenu">Aller au contenu</a>
+
+      <header class="entete">
+        <div class="enveloppe">
+          <a href="/">{SITE_NAME}</a>
+        </div>
+      </header>
+
+      <main class="contenu" id="contenu">
+        <div class="enveloppe">
+          <slot />
+        </div>
+      </main>
+
+      <footer class="pied">
+        <div class="enveloppe">
+          <nav aria-label="Pages d'information">
+            <ul>
+              {
+                FOOTER_NAV.map((entry) => (
+                  <li>
+                    <a href={entry.href}>{entry.label}</a>
+                  </li>
+                ))
+              }
+            </ul>
+          </nav>
+          <p>
+            {
+              EDITOR_NAME && (
+                <>
+                  {SITE_NAME} est édité par {EDITOR_NAME}.{" "}
+                </>
+              )
+            }Aucune publicité, aucun analytics, aucun script tiers.
+          </p>
+        </div>
+      </footer>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+---
+/*
+ * Route du résultat. Vide en phase 0.
+ *
+ * `noindex, nofollow` est définitif : un résultat indexé serait un problème de
+ * confidentialité et de neutralité. La page n'est pas bloquée dans robots.txt,
+ * sinon aucun robot ne pourrait lire cette directive.
+ *
+ * Aucun identifiant de candidat ne figurera jamais dans cette URL. Les réponses
+ * transiteront par le stockage de session, jamais par l'URL.
+ *
+ * Contrainte permanente : aucun script tiers, aucune police distante, aucun
+ * analytics sur cette route.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout title="Votre résultat" description="Page de résultat de Guide Isoloir." noindex={true}>
+  <h1>Aucun résultat à afficher</h1>
+
+  <p>
+    Cette page affiche le résultat de votre test. Le test n'est pas encore disponible, et cette page
+    ne contient donc rien.
+  </p>
+
+  <p>
+    Elle ne contiendra jamais d'identifiant dans son adresse, et son contenu ne sera jamais envoyé
+    ni enregistré. Le calcul s'effectuera exclusivement dans votre navigateur.
+  </p>
+
+  <p><a href="/">Retour à l'accueil</a></p>
+</BaseLayout>

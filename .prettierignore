@@ -1,0 +1,12 @@
+dist/
+node_modules/
+.astro/
+package-lock.json
+playwright-report/
+test-results/
+coverage/
+
+# Documents de référence et instructions : leur mise en forme est celle de leur
+# auteur, Prettier n'a pas à la réécrire.
+docs/
+CLAUDE.md

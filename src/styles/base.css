@@ -1,0 +1,269 @@
+/*
+ * Styles provisoires de la phase 0.
+ *
+ * AUCUNE DIRECTION VISUELLE N'EST ARRÊTÉE ICI. Les valeurs ci-dessous sont des
+ * réglages neutres destinés à tenir jusqu'à la remise du travail de design :
+ *   - typographie : piles système, aucune police à choisir ni à héberger ;
+ *   - couleur : une seule teinte neutre (encre) sur un fond, plus un gris de
+ *     texte secondaire. Aucune couleur signature, aucune couleur de parti ;
+ *   - aucune décoration : pas de carte arrondie, pas d'ombre, pas de dégradé,
+ *     pas de rayon, pas d'animation d'entrée.
+ *
+ * Les tokens définitifs (couleur signature, famille typographique, échelles,
+ * rayons, mode sombre) seront figés dans DESIGN_SYSTEM.md à l'issue de la
+ * phase de design, puis reportés ici. Ne pas enrichir ce fichier d'ici là :
+ * toute valeur ajoutée maintenant est une décision visuelle prise par défaut.
+ *
+ * Voir docs/BRIEF-DESIGN.md, en particulier la section 9 (liste de refus).
+ */
+
+:root {
+  color-scheme: light dark;
+
+  /* Une seule teinte neutre, déclinée. */
+  --couleur-fond: #ffffff;
+  --couleur-encre: #1a1a1a;
+  --couleur-encre-faible: #565656; /* 7.0:1 sur blanc */
+  --couleur-trait: #d4d4d4;
+
+  --police-texte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --mesure: 34rem; /* longueur de ligne de lecture */
+  --gouttiere: 1.25rem;
+
+  --pas-1: 0.5rem;
+  --pas-2: 1rem;
+  --pas-3: 1.5rem;
+  --pas-4: 2.5rem;
+  --pas-5: 4rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --couleur-fond: #141414;
+    --couleur-encre: #ededed;
+    --couleur-encre-faible: #a8a8a8; /* 7.3:1 sur #141414 */
+    --couleur-trait: #3d3d3d;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--couleur-fond);
+  color: var(--couleur-encre);
+  font-family: var(--police-texte);
+  font-size: 1.0625rem;
+  line-height: 1.6;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+  text-wrap: balance;
+  font-weight: 600;
+  margin: var(--pas-4) 0 var(--pas-2);
+}
+
+h1 {
+  font-size: 1.625rem;
+  margin-top: 0;
+}
+
+h2 {
+  font-size: 1.25rem;
+}
+
+h3 {
+  font-size: 1.0625rem;
+}
+
+p,
+ul,
+ol,
+dl {
+  margin: 0 0 var(--pas-2);
+}
+
+ul,
+ol {
+  padding-left: 1.25rem;
+}
+
+li {
+  margin-bottom: var(--pas-1);
+}
+
+li > ul,
+li > ol {
+  margin-top: var(--pas-1);
+}
+
+dt {
+  font-weight: 600;
+}
+
+dd {
+  margin: 0 0 var(--pas-2);
+}
+
+a {
+  color: inherit;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
+}
+
+a:hover {
+  text-decoration-thickness: 2px;
+}
+
+:focus-visible {
+  outline: 2px solid currentcolor;
+  outline-offset: 2px;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--couleur-trait);
+  margin: var(--pas-4) 0;
+}
+
+/* Mise en page : une colonne, 375 px d'abord. */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.enveloppe {
+  width: 100%;
+  max-width: var(--mesure);
+  margin: 0 auto;
+  padding-inline: var(--gouttiere);
+}
+
+.contenu {
+  flex: 1;
+  padding-block: var(--pas-4) var(--pas-5);
+}
+
+.entete {
+  padding-block: var(--pas-3);
+  border-bottom: 1px solid var(--couleur-trait);
+}
+
+.entete a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.entete a:hover,
+.entete a:focus-visible {
+  text-decoration: underline;
+}
+
+.pied {
+  border-top: 1px solid var(--couleur-trait);
+  padding-block: var(--pas-3) var(--pas-4);
+  color: var(--couleur-encre-faible);
+  font-size: 0.9375rem;
+}
+
+.pied ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 var(--pas-2);
+}
+
+.pied li {
+  margin-bottom: var(--pas-1);
+}
+
+.pied a {
+  color: var(--couleur-encre);
+}
+
+/* Lien d'évitement. */
+
+.evitement {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--couleur-fond);
+  color: var(--couleur-encre);
+  padding: var(--pas-1) var(--pas-2);
+  border: 1px solid var(--couleur-encre);
+}
+
+.evitement:focus {
+  left: var(--gouttiere);
+  z-index: 1;
+}
+
+/* Date de mise à jour. */
+
+.mise-a-jour {
+  color: var(--couleur-encre-faible);
+  font-size: 0.9375rem;
+  margin-bottom: var(--pas-4);
+}
+
+/* Signature d'auteur. */
+
+.signature {
+  color: var(--couleur-encre-faible);
+  font-size: 0.9375rem;
+  margin-top: var(--pas-4);
+  padding-top: var(--pas-2);
+  border-top: 1px solid var(--couleur-trait);
+}
+
+/* Encadré d'avertissement : un trait à gauche, pas une carte. */
+
+.reserve {
+  border-left: 3px solid var(--couleur-encre-faible);
+  padding-left: var(--pas-2);
+  margin-bottom: var(--pas-3);
+  color: var(--couleur-encre-faible);
+}
+
+.reserve :last-child {
+  margin-bottom: 0;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: var(--pas-3);
+  font-size: 0.9375rem;
+}
+
+th,
+td {
+  text-align: left;
+  vertical-align: top;
+  padding: var(--pas-1) var(--pas-2) var(--pas-1) 0;
+  border-bottom: 1px solid var(--couleur-trait);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

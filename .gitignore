@@ -1,0 +1,61 @@
+# Dépendances
+node_modules/
+.pnp/
+.pnp.*
+.yarn/
+
+# Documentation
+CLAUDE.md
+docs/
+
+# Sortie de build — jamais versionnée : elle est reconstruite à chaque
+# déploiement à partir du commit vérifié.
+dist/
+.astro/
+.output/
+.vercel/
+.netlify/
+.wrangler/
+
+# Tests
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+playwright/.cache/
+coverage/
+.nyc_output/
+
+# Secrets et environnement — rien de tout cela ne doit être déployé ni poussé.
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+*.p12
+*.pfx
+.cloudflare/
+.wrangler-config.json
+
+# Journaux et fichiers temporaires
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.cache/
+.tmp/
+tmp/
+*.tmp
+
+# Éditeurs et systèmes
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

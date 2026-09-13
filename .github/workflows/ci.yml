@@ -1,0 +1,99 @@
+# Intégration continue.
+#
+# La CI échoue si un test échoue. Aucune étape n'est tolérante : pas de
+# `continue-on-error`, pas de `|| true`. Le déploiement (deploy.yml) attend que
+# ce workflow soit vert.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # Aucune donnée ne sort vers un tiers, y compris depuis la CI.
+  ASTRO_TELEMETRY_DISABLED: "1"
+
+jobs:
+  verifications:
+    name: Types, style et tests unitaires
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifier les types
+        run: npm run check
+
+      - name: Vérifier le style
+        run: npm run lint
+
+      - name: Tests unitaires
+        run: npm test
+
+      - name: Construire le site
+        run: npm run build
+
+      # Non bloquant ici : la CI doit rester verte tant que le site n'est pas
+      # publiable. C'est `npm run build:prod`, dans le workflow de déploiement,
+      # qui refuse la mise en ligne. Cette étape sert à garder la liste des
+      # points restants sous les yeux à chaque exécution.
+      - name: Points restants avant publication
+        run: npm run verify:pages
+
+      - name: Conserver le site construit
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist
+          retention-days: 7
+
+  e2e:
+    name: Tests de bout en bout
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Installer le navigateur
+        run: npx playwright install --with-deps chromium
+
+      # Ce bloc contient le test « aucune requête tierce » sur /test et
+      # /resultat. S'il échoue, rien n'est déployé. Ne jamais le contourner.
+      - name: Tests Playwright
+        run: npm run test:e2e
+
+      - name: Conserver le rapport en cas d'échec
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7

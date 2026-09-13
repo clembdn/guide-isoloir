@@ -1,0 +1,19 @@
+<!--
+  Favicon provisoire.
+
+  Il existe uniquement pour supprimer la requête 404 que les navigateurs
+  émettent sur chaque page. Ce n'est pas une marque : aucune couleur signature,
+  aucune forme porteuse de sens, rien du rideau d'isoloir prévu au brief.
+
+  Il sera remplacé par le logo une fois celui-ci arrêté et figé dans
+  DESIGN_SYSTEM.md. Voir docs/BRIEF-DESIGN.md, section 4.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <style>
+    .trait { fill: none; stroke: #1a1a1a; stroke-width: 2.5; }
+    @media (prefers-color-scheme: dark) {
+      .trait { stroke: #ededed; }
+    }
+  </style>
+  <rect class="trait" x="4.5" y="4.5" width="23" height="23" />
+</svg>
