@@ -1,0 +1,37 @@
+---
+/**
+ * Signature d'auteur nommée, avec balisage `Person`.
+ *
+ * Sujet YMYL : une page sans auteur identifiable ne se classe pas, et surtout
+ * elle ne se défend pas. Voir CLAUDE.md, section SEO.
+ *
+ * Tant que le nom de l'éditeur n'est pas renseigné, la signature n'est pas
+ * rendue du tout. Une signature vide serait pire qu'aucune : elle laisserait
+ * croire que la page est signée. Le garde-fou de build refuse alors la
+ * publication d'une page qui déclare avoir une signature.
+ */
+import { EDITOR_NAME, SITE_URL } from "../lib/site";
+
+const personLd = EDITOR_NAME
+  ? {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      name: EDITOR_NAME,
+      url: new URL("/a-propos", SITE_URL).href,
+    }
+  : null;
+---
+
+{
+  EDITOR_NAME && (
+    <p class="signature">
+      Rédigé par{" "}
+      <span itemscope itemtype="https://schema.org/Person">
+        <span itemprop="name">{EDITOR_NAME}</span>
+      </span>
+      , éditeur du site. <a href="/a-propos">Qui je suis</a>.
+    </p>
+  )
+}
+
+{personLd && <script type="application/ld+json" set:html={JSON.stringify(personLd)} is:inline />}

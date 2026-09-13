@@ -1,0 +1,82 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME, ELECTION } from "../lib/site";
+import { formatDateFr } from "../lib/date";
+
+const UPDATED = "2026-09-14";
+
+const websiteLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE_NAME,
+  url: SITE_URL,
+  inLanguage: "fr-FR",
+  description: SITE_TAGLINE,
+  // Pas de `publisher` tant que l'éditeur n'est pas nommé : un balisage
+  // `Person` sans nom vaut moins qu'une absence de balisage.
+  ...(EDITOR_NAME
+    ? {
+        publisher: {
+          "@type": "Person",
+          name: EDITOR_NAME,
+          url: new URL("/a-propos", SITE_URL).href,
+        },
+      }
+    : {}),
+};
+---
+
+<BaseLayout title={SITE_NAME} description={SITE_TAGLINE} updated={UPDATED}>
+  <h1>{SITE_NAME}</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p>
+    {SITE_TAGLINE} Le premier tour a lieu le {formatDateFr(ELECTION.round1)}, le second le {
+      formatDateFr(ELECTION.round2)
+    }.
+  </p>
+
+  <div class="reserve">
+    <p>
+      Le site est en construction. Les pages ci-dessous décrivent la méthode et les engagements
+      avant que le contenu n'existe, pour qu'ils puissent être critiqués à l'avance. Le test
+      comparatif n'est pas encore disponible.
+    </p>
+  </div>
+
+  <h2>Ce qui est déjà publié</h2>
+
+  <ul>
+    <li><a href="/a-propos">À propos</a> — qui édite ce site, pourquoi, et à quel titre.</li>
+    <li>
+      <a href="/methodologie">Méthodologie</a> — comment les positions sont établies, ce que le calcul
+      fait et ne fait pas.
+    </li>
+    <li>
+      <a href="/charte-editoriale">Charte éditoriale</a> — quels candidats sont référencés, et comment
+      une erreur est corrigée.
+    </li>
+    <li>
+      <a href="/corrections">Corrections</a> — le registre daté de ce qui a été corrigé, et pourquoi.
+    </li>
+    <li>
+      <a href="/financement">Financement</a> — qui paie, et pourquoi il n'y a aucune publicité.
+    </li>
+    <li><a href="/mentions-legales">Mentions légales</a> — l'éditeur, identifié.</li>
+  </ul>
+
+  <h2>Ce que ce site vous promet</h2>
+
+  <ul>
+    <li>
+      Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un
+      identifiant. Le calcul s'effectue exclusivement dans votre navigateur.
+    </li>
+    <li>Aucune publicité, aucun analytics, aucun script tiers.</li>
+    <li>Un éditeur identifié par son nom, responsable de chaque page.</li>
+    <li>Une méthode publiée, et des désaccords publiés avec elle.</li>
+  </ul>
+
+  <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} is:inline />
+</BaseLayout>

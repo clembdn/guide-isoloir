@@ -1,0 +1,125 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import { EDITOR_NAME, CONTACT_EMAIL } from "../lib/site";
+
+const UPDATED = "2026-09-14";
+---
+
+<BaseLayout
+  title="À propos"
+  description="Qui édite Guide Isoloir, pourquoi, et à quel titre. Le site est signé d'un nom réel et d'un visage."
+  updated={UPDATED}
+>
+  <h1>À propos</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  {
+    EDITOR_NAME ? (
+      <p>
+        Guide Isoloir est édité par {EDITOR_NAME}, à titre personnel. Ce site n'appartient à aucun
+        parti, à aucun média et à aucune organisation.
+      </p>
+    ) : (
+      <p>
+        Guide Isoloir est édité par une personne physique, à titre personnel. Ce site n'appartient à
+        aucun parti, à aucun média et à aucune organisation.
+      </p>
+    )
+  }
+
+  <h2>Pourquoi ce site existe</h2>
+
+  <p>
+    En avril 2027, plusieurs millions de personnes voteront pour la première fois à une élection
+    présidentielle. Beaucoup d'entre elles arrivent devant trois questions en même temps : pour qui
+    voter, comment voter, et ce qu'un président peut réellement décider.
+  </p>
+
+  <p>
+    Des comparateurs existent déjà et certains sont sérieux. Ils supposent en revanche que vous
+    savez déjà ce que vous cherchez. Guide Isoloir vise l'étape d'avant : comprendre le scrutin,
+    situer ses propres idées, puis savoir quoi faire le jour du vote.
+  </p>
+
+  <h2>À quel titre</h2>
+
+  <p>
+    Ce site n'est pas un organe de presse. Il n'a pas d'équipe éditoriale et ne prétend à aucune
+    autorité institutionnelle. Ce qu'il apporte est une méthode écrite, publiée, vérifiable, et un
+    nom attaché à chaque page.
+  </p>
+
+  <h2>Pourquoi un nom plutôt qu'un collectif anonyme</h2>
+
+  <p>
+    Sur un sujet politique, vous ne pouvez pas vérifier un algorithme. Vous pouvez en revanche
+    vérifier qui l'a écrit. Un éditeur identifié est responsable de ce qu'il publie, y compris
+    juridiquement. C'est la garantie la plus simple qui puisse vous être offerte, et c'est celle qui
+    expose le plus.
+  </p>
+
+  <p>
+    L'anonymat protège l'auteur, pas le lecteur. Ce site fait le choix inverse. Les <a
+      href="/mentions-legales">mentions légales</a
+    > identifient l'éditeur, comme la loi l'exige.
+  </p>
+
+  <h2>Ce que ce site fait</h2>
+
+  <ul>
+    <li>Expliquer comment se déroule l'élection présidentielle, en quelques minutes de lecture.</li>
+    <li>Expliquer ce qu'un président décide seul, ce qu'il ne décide pas, et avec qui.</li>
+    <li>
+      Vous aider à situer vos idées par rapport aux positions des candidats, à partir de sources
+      citées.
+    </li>
+    <li>Publier sa méthode, ses désaccords internes et ses limites.</li>
+  </ul>
+
+  <h2>Ce que ce site ne fait pas</h2>
+
+  <ul>
+    <li>Il ne vous dit pas pour qui voter. Un classement n'est pas une recommandation.</li>
+    <li>
+      Il ne collecte rien. Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou
+      associés à un identifiant. Le calcul s'effectue exclusivement dans votre navigateur.
+    </li>
+    <li>
+      Il ne publie aucune statistique agrégée sur les réponses de ses visiteurs. Ce serait
+      assimilable à un sondage, et les sondages électoraux sont strictement encadrés.
+    </li>
+    <li>
+      Il n'affiche aucune publicité jusqu'après le second tour, et n'achète aucune promotion. Voir
+      la page <a href="/financement">financement</a>.
+    </li>
+    <li>
+      Il ne reformule pas service-public.fr. Pour l'information administrative, allez à la source.
+    </li>
+  </ul>
+
+  <h2>Signaler une erreur</h2>
+
+  <p>
+    Une position mal codée, une source manquante, une erreur de fait : la procédure de signalement
+    et le droit de réponse des équipes de campagne sont décrits dans la <a href="/charte-editoriale"
+      >charte éditoriale</a
+    >. Les corrections déjà publiées sont consignées dans le <a href="/corrections"
+      >registre des corrections</a
+    >.
+    {
+      CONTACT_EMAIL && (
+        <>
+          {" "}
+          Vous pouvez écrire directement à <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        </>
+      )
+    }
+  </p>
+
+  <p>
+    La méthode de codage des positions et les tests d'audit sont détaillés sur la page <a
+      href="/methodologie">méthodologie</a
+    >.
+  </p>
+</BaseLayout>

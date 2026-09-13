@@ -1,0 +1,106 @@
+---
+/*
+ * Registre public des corrections.
+ *
+ * Tant qu'aucune donnée politique n'est publiée, le registre est vide et le dit.
+ * Un registre vide est une information : il montre que le dispositif existe
+ * avant qu'il ait servi, et qu'il n'a pas été créé après le premier incident.
+ *
+ * Les entrées viendront d'un fichier de données versionné, pas d'une saisie en
+ * dur dans cette page.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import Signature from "../components/Signature.astro";
+import { formatDateFr } from "../lib/date";
+
+const UPDATED = "2026-09-14";
+
+type Correction = {
+  /** Date ISO `AAAA-MM-JJ` de publication de la correction. */
+  date: string;
+  /** Page ou donnée concernée. */
+  portee: string;
+  /** Ce qui était publié, et ce qui l'est désormais. */
+  description: string;
+  /** Origine : signalement extérieur, relecture interne, droit de réponse. */
+  origine: string;
+};
+
+const CORRECTIONS: readonly Correction[] = [];
+---
+
+<BaseLayout
+  title="Corrections"
+  description="Registre public et daté des corrections apportées aux positions, aux sources et au calcul de Guide Isoloir."
+  updated={UPDATED}
+>
+  <h1>Registre des corrections</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p>
+    Toute correction significative apportée à une position, à une source, à une question ou au
+    calcul est inscrite ici, avec sa date et ce qui a changé. Les corrections ne sont pas
+    silencieuses : un site qui modifie ses données sans le dire ne peut pas être vérifié.
+  </p>
+
+  <h2>Ce qui est inscrit</h2>
+
+  <ul>
+    <li>une position modifiée, retirée ou ajoutée après publication ;</li>
+    <li>une source corrigée, remplacée ou retirée ;</li>
+    <li>une question reformulée ou supprimée après publication ;</li>
+    <li>une modification du calcul qui change un classement déjà publié ;</li>
+    <li>une réponse publiée au titre du droit de réponse.</li>
+  </ul>
+
+  <p>
+    Les corrections de forme sans effet sur le sens — faute de frappe, lien mort, mise en page — ne
+    sont pas inscrites. L'historique complet du dépôt les conserve de toute façon.
+  </p>
+
+  <h2>Registre</h2>
+
+  {
+    CORRECTIONS.length === 0 ? (
+      <p>
+        Aucune correction n'a encore été publiée. Aucune donnée politique n'est en ligne à ce jour :
+        il n'y a rien à corriger. Ce registre existe avant d'avoir servi, et non après le premier
+        incident.
+      </p>
+    ) : (
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">Date</th>
+            <th scope="col">Portée</th>
+            <th scope="col">Correction</th>
+            <th scope="col">Origine</th>
+          </tr>
+        </thead>
+        <tbody>
+          {CORRECTIONS.map((correction) => (
+            <tr>
+              <td>
+                <time datetime={correction.date}>{formatDateFr(correction.date)}</time>
+              </td>
+              <td>{correction.portee}</td>
+              <td>{correction.description}</td>
+              <td>{correction.origine}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )
+  }
+
+  <h2>Signaler une erreur</h2>
+
+  <p>
+    La procédure, les garanties et le droit de réponse des équipes de campagne sont décrits dans la
+    <a href="/charte-editoriale">charte éditoriale</a>. La méthode d'établissement des positions est
+    détaillée sur la page <a href="/methodologie">méthodologie</a>.
+  </p>
+
+  <Signature />
+</BaseLayout>

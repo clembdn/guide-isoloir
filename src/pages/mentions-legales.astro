@@ -1,0 +1,190 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import { CONTACT_EMAIL, EDITOR_NAME, REPOSITORY_URL, SITE_NAME, SITE_URL } from "../lib/site";
+
+const UPDATED = "2026-09-14";
+
+// Le domaine n'est affiché que s'il en est réellement un.
+const domaine = SITE_URL.endsWith(".invalid") ? null : new URL(SITE_URL).host;
+---
+
+<BaseLayout
+  title="Mentions légales"
+  description="Identité de l'éditeur, directeur de la publication, hébergeur, licences et traitement des données personnelles de Guide Isoloir."
+  updated={UPDATED}
+>
+  <h1>Mentions légales</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p>
+    La loi pour la confiance dans l'économie numérique du 21 juin 2004 impose d'identifier l'éditeur
+    d'un service de communication au public en ligne. Une personne qui édite un site à titre non
+    professionnel peut, si elle le souhaite, ne communiquer son identité qu'à son hébergeur et
+    n'afficher publiquement que les coordonnées de celui-ci.
+  </p>
+
+  <p>
+    Ce site ne se prévaut pas de cette possibilité. Un site qui propose de comparer des positions
+    politiques doit dire qui l'écrit : vous devez pouvoir savoir qui vous parle, et à qui vous
+    adresser.
+  </p>
+
+  <h2>Éditeur du site</h2>
+
+  <dl>
+    <dt>Nom du site</dt>
+    <dd>{SITE_NAME}</dd>
+
+    {
+      domaine && (
+        <>
+          <dt>Adresse</dt>
+          <dd>{domaine}</dd>
+        </>
+      )
+    }
+
+    {
+      EDITOR_NAME && (
+        <>
+          <dt>Éditeur</dt>
+          <dd>{EDITOR_NAME}, personne physique, éditant à titre non professionnel.</dd>
+
+          <dt>Directeur de la publication</dt>
+          <dd>{EDITOR_NAME}</dd>
+        </>
+      )
+    }
+
+    {
+      CONTACT_EMAIL && (
+        <>
+          <dt>Adresse de contact</dt>
+          <dd>
+            <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          </dd>
+        </>
+      )
+    }
+  </dl>
+
+  <h2>Hébergeur</h2>
+
+  <p>
+    Le site est hébergé sur Cloudflare Pages, service de Cloudflare, Inc., 101 Townsend Street, San
+    Francisco, CA 94107, États-Unis.
+  </p>
+
+  <p>
+    L'hébergeur traite les requêtes HTTP nécessaires à l'affichage des pages. Cela ne concerne ni
+    vos réponses au test, ni vos résultats, qui ne quittent jamais votre navigateur.
+  </p>
+
+  <h2>Données personnelles</h2>
+
+  <p>
+    Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un identifiant.
+    Le calcul s'effectue exclusivement dans votre navigateur.
+  </p>
+
+  <p>
+    Les opinions politiques sont des données sensibles au sens du règlement général sur la
+    protection des données. Le choix retenu ici est de ne pas les collecter du tout, plutôt que de
+    les collecter en promettant de bien les garder.
+  </p>
+
+  <p>Concrètement :</p>
+
+  <ul>
+    <li>aucun compte, aucune inscription, aucun formulaire avant le résultat ;</li>
+    <li>aucun outil de mesure d'audience, aucun pixel, aucun script tiers ;</li>
+    <li>aucun cookie publicitaire ou de suivi, donc aucune bannière de consentement ;</li>
+    <li>
+      le transfert de vos réponses entre la page du test et la page de résultat utilise le stockage
+      de session du navigateur, effacé à la fermeture de l'onglet, et un bouton permet de les
+      effacer immédiatement.
+    </li>
+  </ul>
+
+  {
+    CONTACT_EMAIL && (
+      <p>
+        Si vous écrivez à l'adresse de contact, votre message et votre adresse électronique sont
+        conservés le temps nécessaire au traitement de votre demande, puis supprimés. Vous pouvez
+        demander leur suppression à tout moment à la même adresse.
+      </p>
+    )
+  }
+
+  <h2>Licences et réutilisation</h2>
+
+  <p>
+    Le dépôt contient deux natures de travaux, sous deux licences distinctes. Le détail, fichier par
+    fichier, est publié dans le dépôt sous le nom <code>LICENSES.md</code>.
+  </p>
+
+  <dl>
+    <dt>Code source — GNU AGPL v3</dt>
+    <dd>
+      Le moteur de calcul, le gabarit des pages, les scripts et les tests. L'AGPL impose de publier
+      les modifications à toute personne qui utilise le service en réseau : un comparateur politique
+      dont le moteur ne serait pas vérifiable n'aurait aucune raison d'être cru.
+      {
+        REPOSITORY_URL && (
+          <>
+            {" "}
+            Le code est publié à l'adresse <a href={REPOSITORY_URL}>{REPOSITORY_URL}</a>.
+          </>
+        )
+      }
+    </dd>
+
+    <dt>Données — CC BY-SA 4.0</dt>
+    <dd>
+      Les questions, les acteurs politiques, les positions, les sources et les exports publiés. Leur
+      réutilisation est libre, à condition de citer {SITE_NAME} et de conserver la même licence.
+    </dd>
+
+    <dt>Textes éditoriaux — droit d'auteur</dt>
+    <dd>
+      Les pages rédactionnelles et la charte restent la propriété de leur auteur. Leur citation est
+      libre dans les limites du droit de citation.
+    </dd>
+  </dl>
+
+  <p>
+    Les contenus provenant de tiers, notamment les programmes et déclarations cités, restent soumis
+    au droit de leurs auteurs. Ils sont cités à des fins d'information, avec leur source.
+  </p>
+
+  <h2>Responsabilité</h2>
+
+  <p>
+    Les informations publiées sont vérifiées selon la méthode décrite sur la page <a
+      href="/methodologie">méthodologie</a
+    >. Elles peuvent malgré cela comporter des erreurs, en particulier avant la publication des
+    programmes officiels. Le résultat du test est une aide à la réflexion, jamais une recommandation
+    de vote.
+  </p>
+
+  <p>
+    Les corrections apportées sont consignées dans le <a href="/corrections"
+      >registre des corrections</a
+    >. Pour signaler une erreur ou exercer un droit de réponse, la procédure est décrite dans la <a
+      href="/charte-editoriale">charte éditoriale</a
+    >.
+  </p>
+
+  <h2>Liens sortants</h2>
+
+  <p>
+    Le site renvoie vers des sources externes : documents officiels, programmes, déclarations. Ces
+    pages ne sont pas sous le contrôle de l'éditeur, et leur contenu peut changer ou disparaître
+    après avoir été cité.
+  </p>
+
+  <h2>Droit applicable</h2>
+
+  <p>Le présent site est soumis au droit français.</p>
+</BaseLayout>

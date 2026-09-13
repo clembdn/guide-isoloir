@@ -1,0 +1,215 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import Signature from "../components/Signature.astro";
+import { CONTACT_EMAIL } from "../lib/site";
+
+const UPDATED = "2026-09-14";
+---
+
+<BaseLayout
+  title="Méthodologie"
+  description="Comment les positions des candidats sont établies, ce que le calcul fait et ne fait pas, les invariants vérifiés à chaque publication, et le protocole de double codage à l'aveugle."
+  updated={UPDATED}
+>
+  <h1>Méthodologie</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <div class="reserve">
+    <p>
+      Le site est en construction. Aucune position de candidat n'est publiée à ce jour. Cette page
+      décrit la méthode avant qu'elle produise des résultats, pour qu'elle puisse être critiquée
+      avant, et pas seulement après.
+    </p>
+  </div>
+
+  <h2>Comment une position est établie</h2>
+
+  <p>
+    Une position est une valeur sur une échelle à cinq degrés, d'un désaccord net à un accord net,
+    attribuée à un acteur politique sur une affirmation précise. Elle n'est jamais attribuée de
+    mémoire : elle vient d'un document daté, cité, et consultable.
+  </p>
+
+  <p>
+    L'entité de référence n'est pas le candidat mais l'acteur politique, parce qu'un candidat peut
+    contredire son parti, se retirer, ou sortir d'une primaire. Un parti, une coalition et une
+    campagne sont des acteurs distincts.
+  </p>
+
+  <h3>Chaîne de résolution</h3>
+
+  <p>Les sources sont consultées dans cet ordre, la première disponible l'emporte :</p>
+
+  <ol>
+    <li>le programme du candidat ;</li>
+    <li>une déclaration directe et récente du candidat ;</li>
+    <li>la plateforme de campagne ou de coalition ;</li>
+    <li>la ligne du parti ;</li>
+    <li>une inférence documentée, explicitement présentée comme telle ;</li>
+    <li>à défaut, position inconnue.</li>
+  </ol>
+
+  <p>
+    Le niveau retenu est affiché avec la position. Vous verrez par exemple « position provisoire
+    dérivée du programme du parti, aucune déclaration personnelle trouvée ». Une inférence n'est
+    jamais présentée comme une déclaration du candidat.
+  </p>
+
+  <h3>Quatre grandeurs distinctes</h3>
+
+  <p>
+    La position, la qualité des preuves, la couverture des thèmes et l'incertitude finale sont
+    quatre choses différentes et restent séparées.
+  </p>
+
+  <p>
+    En particulier, une position mal documentée n'est pas ramenée vers le centre. Le faire
+    avantagerait mécaniquement les candidats les mieux couverts par la presse, c'est-à-dire les
+    mieux installés. Un manque d'information est signalé comme un manque d'information, pas traduit
+    en modération.
+  </p>
+
+  <h2>Ce que le calcul fait</h2>
+
+  <ul>
+    <li>Il compare vos réponses aux positions codées, question par question.</li>
+    <li>Il produit un classement de proximité, accompagné du détail par thème.</li>
+    <li>Il est déterministe : les mêmes réponses donnent toujours le même résultat.</li>
+    <li>Il s'exécute dans votre navigateur, sans qu'aucune réponse ne soit transmise.</li>
+    <li>Il signale les profils peu marqués, pour lesquels un classement a peu de sens.</li>
+  </ul>
+
+  <h2>Ce que le calcul ne fait pas</h2>
+
+  <ul>
+    <li>
+      Il ne mesure pas ce que vous devriez voter. Il mesure une distance entre des réponses et des
+      positions écrites, rien de plus.
+    </li>
+    <li>
+      Il ne tient pas compte de ce qui décide souvent un vote : la confiance dans une personne,
+      l'histoire d'un mouvement, la stratégie du second tour, la crédibilité d'une promesse.
+    </li>
+    <li>Il ne pondère pas les candidats selon leurs chances d'être élus.</li>
+    <li>
+      Il ne pénalise ni ne favorise un candidat en fonction du nombre de positions documentées le
+      concernant.
+    </li>
+    <li>Il ne mémorise rien entre deux visites.</li>
+  </ul>
+
+  <h2>Double codage à l'aveugle</h2>
+
+  <p>
+    Chaque position est codée deux fois, indépendamment, par deux personnes de sensibilités
+    politiques différentes. Les deux relevés sont verrouillés avant d'être comparés : aucune des
+    deux personnes ne voit le travail de l'autre avant la confrontation.
+  </p>
+
+  <p>
+    Les écarts sont ensuite examinés un par un. Un écart se résout en revenant à la source, jamais
+    par compromis. Lorsqu'aucune des deux lectures ne l'emporte, le désaccord est publié comme tel
+    et la position est marquée incertaine.
+  </p>
+
+  <p>Après chaque campagne de codage, cette page publie :</p>
+
+  <ul>
+    <li>le taux d'accord exact entre les deux relevés ;</li>
+    <li>le taux d'accord à un niveau près sur l'échelle ;</li>
+    <li>le nombre de désaccords non résolus ;</li>
+    <li>la couverture atteinte par thème ;</li>
+    <li>la date de la dernière campagne.</li>
+  </ul>
+
+  <div class="reserve">
+    <p>
+      Aucune campagne de double codage n'a encore eu lieu. Les chiffres ci-dessus apparaîtront ici
+      dès la première, et l'historique restera consultable.
+    </p>
+  </div>
+
+  <h2>Invariants vérifiés automatiquement</h2>
+
+  <p>
+    Une commande d'audit s'exécute à chaque modification du code ou des données. Elle ne certifie
+    pas une absence de biais : aucun script ne peut le faire. Elle vérifie des propriétés
+    mécaniques, décidées et publiées à l'avance :
+  </p>
+
+  <ul>
+    <li>permuter deux acteurs ne change aucun score ;</li>
+    <li>l'ordre des acteurs dans les fichiers de données n'a aucun effet sur le résultat ;</li>
+    <li>les données manquantes sont traitées de façon identique pour tous les acteurs ;</li>
+    <li>la couverture des thèmes reste comparable d'un acteur à l'autre ;</li>
+    <li>aucun avantage systématique ne bénéficie aux acteurs les mieux documentés ;</li>
+    <li>les échelles de réponse sont symétriques ;</li>
+    <li>
+      le résultat est stable : une même série de réponses produit toujours le même classement.
+    </li>
+  </ul>
+
+  <p>
+    Si l'un de ces contrôles échoue, la publication est bloquée. La formulation que ce site
+    s'autorise est : « aucun écart mécanique ou éditorial non expliqué selon les invariants publiés
+    ». Jamais « aucun biais ».
+  </p>
+
+  <h2>Séparation des modifications</h2>
+
+  <p>
+    Une modification du calcul et une modification des positions ne sont jamais publiées ensemble.
+    Sans cette règle, il deviendrait impossible de savoir si un classement a changé parce qu'un
+    candidat a changé d'avis, ou parce que la méthode a changé.
+  </p>
+
+  <p>
+    Chaque modification de données indique sa source, sa date et sa justification. L'historique
+    complet est public.
+  </p>
+
+  <h2>Limites connues</h2>
+
+  <ul>
+    <li>
+      Une dizaine d'affirmations ne résument pas un programme. Le résultat est un point de départ
+      pour aller lire, pas une conclusion.
+    </li>
+    <li>
+      Le choix des affirmations est lui-même un choix éditorial. Il oriente le résultat autant que
+      le codage. Les critères de sélection sont publiés dans la <a href="/charte-editoriale"
+        >charte éditoriale</a
+      >.
+    </li>
+    <li>
+      Avant la publication des programmes, les positions reposent surtout sur les lignes de parti.
+      Elles sont marquées comme provisoires.
+    </li>
+    <li>
+      Un candidat qui ne s'exprime pas sur un sujet reste sans position. Ce n'est pas une note.
+    </li>
+  </ul>
+
+  <h2>Signaler une erreur de méthode</h2>
+
+  <p>
+    Si un contrôle vous paraît insuffisant, ou une position mal établie, la procédure de signalement
+    est décrite dans la <a href="/charte-editoriale">charte éditoriale</a>.
+    {
+      CONTACT_EMAIL && (
+        <>
+          {" "}
+          Vous pouvez écrire directement à <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        </>
+      )
+    }
+  </p>
+
+  <p>
+    Toute correction apportée à une position, à une source ou au calcul est consignée, datée et
+    conservée dans le <a href="/corrections">registre des corrections</a>.
+  </p>
+
+  <Signature />
+</BaseLayout>

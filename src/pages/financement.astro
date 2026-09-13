@@ -1,0 +1,186 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import Signature from "../components/Signature.astro";
+import { formatDateFr } from "../lib/date";
+import { CONTACT_EMAIL, ELECTION } from "../lib/site";
+
+const UPDATED = "2026-09-14";
+
+/** Fin de l'interdiction publicitaire que le site s'impose : après le second tour. */
+const FIN_INTERDICTION_PUB = ELECTION.round2;
+
+/**
+ * Article L. 52-1 du code électoral : interdiction de la publicité commerciale à
+ * des fins de propagande électorale pendant les six mois précédant le mois du
+ * scrutin. Scrutin en avril 2027, donc à compter du 1er octobre 2026.
+ */
+const DEBUT_INTERDICTION_PROMOTION = "2026-10-01";
+---
+
+<BaseLayout
+  title="Financement"
+  description="Comment Guide Isoloir est financé, pourquoi il n'affiche aucune publicité jusqu'après le 2 mai 2027, et pourquoi il refuse les dons de partis et de candidats."
+  updated={UPDATED}
+>
+  <h1>Financement</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p>
+    Un site qui vous aide à choisir un bulletin doit dire qui le paie. Cette page répond à cette
+    question et s'engage sur ce qui ne changera pas d'ici le second tour.
+  </p>
+
+  <h2>Aucune publicité jusqu'après le {formatDateFr(FIN_INTERDICTION_PUB)}</h2>
+
+  <p>
+    Aucune publicité n'est affichée sur ce site, sur aucune page, jusqu'au lendemain du second tour.
+    Ni régie programmatique, ni bannière, ni article sponsorisé, ni placement de produit, ni lien
+    affilié.
+  </p>
+
+  <p>Trois raisons, dans cet ordre.</p>
+
+  <ol>
+    <li>
+      Une régie publicitaire charge un script tiers, et un script tiers peut lire la page où il
+      s'exécute. Sur le test et sur la page de résultat, cela contredirait directement la promesse
+      faite : vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un
+      identifiant.
+    </li>
+    <li>
+      Une publicité choisie par un tiers apparaîtrait à côté de contenus politiques, sans que
+      l'éditeur ne contrôle ce qui s'affiche. Le rapprochement serait subi et interprété.
+    </li>
+    <li>
+      La publicité rémunère l'audience. Elle pousse à faire durer les visites plutôt qu'à répondre
+      vite et bien à une question.
+    </li>
+  </ol>
+
+  <p>
+    Cette décision est plus stricte que la loi. Elle est prise pour la durée de l'élection et
+    publiée ici pour pouvoir vous être opposée.
+  </p>
+
+  <h2>Aucune promotion payante à compter du {formatDateFr(DEBUT_INTERDICTION_PROMOTION)}</h2>
+
+  <p>
+    L'article L. 52-1 du code électoral interdit la publicité commerciale à des fins de propagande
+    électorale pendant les six mois qui précèdent le mois du scrutin. Le premier tour ayant lieu en
+    avril 2027, cette période s'ouvre le 1<sup>er</sup> octobre 2026.
+  </p>
+
+  <p>À compter de cette date, et jusqu'au second tour, ce site s'interdit :</p>
+
+  <ul>
+    <li>l'achat de mots-clés et toute campagne de recherche payante ;</li>
+    <li>toute publication sponsorisée sur un réseau social ;</li>
+    <li>toute rémunération d'un créateur de contenu pour parler du site ;</li>
+    <li>tout achat d'espace, sous quelque forme que ce soit.</li>
+  </ul>
+
+  <p>
+    Il ne reste donc que trois moyens de faire connaître ce site : le référencement naturel, des
+    publications non sponsorisées, et des relations presse. C'est plus lent. C'est la contrepartie
+    assumée.
+  </p>
+
+  <h2>Ce que ce site coûte</h2>
+
+  <p>
+    Le site est entièrement statique. Il n'a ni base de données, ni serveur applicatif, ni service
+    payant à l'usage. Les seuls coûts réels sont le nom de domaine et le temps passé.
+  </p>
+
+  <p>
+    L'hébergement est assuré par une offre gratuite, décrite dans les <a href="/mentions-legales"
+      >mentions légales</a
+    >. Un pic de trafic un soir de débat ne déclenche pas de facture, et ne crée donc aucune
+    pression à chercher un financement dans l'urgence.
+  </p>
+
+  <h2>D'où vient l'argent</h2>
+
+  <p>
+    Le développement est assuré sur les fonds personnels de l'éditeur. C'est la totalité du
+    financement du site.
+  </p>
+
+  <p>
+    <strong>Aucun don n'est accepté.</strong> Aucune collecte n'est ouverte, aucun formulaire de don n'existe
+    sur le site, et aucune plateforme de financement participatif n'est utilisée. Un don reçu malgré tout
+    est restitué.
+  </p>
+
+  <p>
+    Si une collecte devait un jour être ouverte, elle serait annoncée sur cette page avant de
+    commencer, avec ses règles, ses plafonds et son emploi.
+  </p>
+
+  <h2>Ce qui serait refusé en tout état de cause</h2>
+
+  <p>
+    Cette liste ne décrit pas la situation actuelle : rien n'est accepté aujourd'hui. Elle fixe à
+    l'avance ce qui resterait refusé si une collecte était ouverte un jour, y compris après
+    l'élection :
+  </p>
+
+  <ul>
+    <li>tout don, direct ou indirect, d'un parti politique, d'un candidat ou de son entourage ;</li>
+    <li>tout don d'une association de financement électoral ou d'un mandataire financier ;</li>
+    <li>
+      tout don d'une organisation ayant pris position publiquement en faveur d'un candidat pendant
+      la campagne ;
+    </li>
+    <li>toute contrepartie éditoriale, même implicite, à un financement quel qu'il soit ;</li>
+    <li>
+      tout financement conditionné à la publication, au retrait ou à la modification d'un contenu.
+    </li>
+  </ul>
+
+  <p>
+    Une somme reçue en violation de ces règles est restituée. Si la restitution est impossible, elle
+    est versée à un organisme sans lien avec la campagne et le versement est publié sur cette page.
+  </p>
+
+  <h2>Aucun analytics, aucun script tiers</h2>
+
+  <p>
+    Ce site ne charge aucun outil de mesure d'audience, aucune police distante, aucun outil de suivi
+    d'erreurs, aucun pixel. Ce n'est pas seulement une promesse : un test automatique échoue, et
+    empêche la publication, si une requête sort vers un domaine tiers depuis les pages du test ou du
+    résultat.
+  </p>
+
+  <p>
+    Les seuls outils utilisés sont la Search Console de Google et le Webmaster Tools de Bing, qui
+    n'exigent aucun script sur les pages.
+  </p>
+
+  <h2>Aucune donnée revendue</h2>
+
+  <p>
+    Il n'y a rien à revendre. Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou
+    associés à un identifiant. Le calcul s'effectue exclusivement dans votre navigateur. La méthode
+    est décrite sur la page <a href="/methodologie">méthodologie</a>.
+  </p>
+
+  <h2>Une question sur ce financement</h2>
+
+  <p>
+    L'éditeur y répond nominativement. La voie de contact est indiquée dans les <a
+      href="/mentions-legales">mentions légales</a
+    >.
+    {
+      CONTACT_EMAIL && (
+        <>
+          {" "}
+          Vous pouvez écrire à <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        </>
+      )
+    }
+  </p>
+
+  <Signature />
+</BaseLayout>

@@ -1,0 +1,20 @@
+---
+/**
+ * Date de dernière mise à jour, visible et balisée.
+ *
+ * La même date alimente `dateModified` dans le JSON-LD du gabarit : les deux
+ * viennent de la constante `UPDATED` de la page, jamais saisies deux fois.
+ */
+import { formatDateFr } from "../lib/date";
+
+type Props = {
+  /** Date ISO `AAAA-MM-JJ`. */
+  date: string;
+};
+
+const { date } = Astro.props;
+---
+
+<p class="mise-a-jour">
+  Dernière mise à jour : <time datetime={date}>{formatDateFr(date)}</time>
+</p>

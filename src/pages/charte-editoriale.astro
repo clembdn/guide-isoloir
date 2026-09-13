@@ -1,0 +1,279 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import Signature from "../components/Signature.astro";
+import { CONTACT_EMAIL, EDITOR_NAME, REPOSITORY_URL } from "../lib/site";
+
+const UPDATED = "2026-09-14";
+---
+
+<BaseLayout
+  title="Charte éditoriale"
+  description="Qui choisit les candidats référencés, selon quelles règles, comment les désaccords sont tranchés, et comment une équipe de campagne peut exercer son droit de réponse."
+  updated={UPDATED}
+>
+  <h1>Charte éditoriale</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p>
+    Cette page décrit les décisions éditoriales que le calcul ne prend pas : qui figure sur le site,
+    quelles questions sont posées, et que faire quand quelqu'un conteste.
+  </p>
+
+  <h2>Qui décide</h2>
+
+  <p>
+    {EDITOR_NAME ? `${EDITOR_NAME} décide, seul, et assume.` : "L'éditeur décide, seul, et assume."}
+    Il n'y a ni comité, ni rédaction, ni conseil consultatif. Prétendre le contraire donnerait une fausse
+    impression de collégialité.
+  </p>
+
+  <p>
+    Cette concentration est une faiblesse, et elle est compensée par trois choses : les règles sont
+    écrites à l'avance, le codage des positions est fait à deux à l'aveugle, et l'ensemble du code
+    et des données est public.
+  </p>
+
+  <h2>Quels candidats sont référencés</h2>
+
+  <div class="reserve">
+    <p>
+      <strong>Proposition de travail, non validée.</strong> Les trois règles ci-dessous sont publiées
+      pour être discutées avant d'être appliquées : une règle d'inclusion écrite après coup n'est pas
+      une règle, c'est une justification. Elles n'ont encore été appliquées à personne, aucun candidat
+      n'étant référencé à ce jour. Leur version définitive sera datée sur cette page.
+    </p>
+  </div>
+
+  <p>
+    Trois décisions différentes sont souvent confondues : apparaître sur le site, entrer dans le
+    calcul du quiz, et figurer au classement des résultats. Elles répondent ici à trois règles
+    distinctes.
+  </p>
+
+  <h3>Règle 1 — présence dans l'annuaire</h3>
+
+  <p>
+    Un acteur politique dispose d'une page dès lors que sa candidature est déclarée publiquement par
+    l'intéressé et vérifiable sur un document daté et accessible : déclaration officielle,
+    désignation par un parti ou une coalition, résultat d'une primaire.
+  </p>
+
+  <p>
+    Cette règle ne fait intervenir aucun seuil de notoriété et aucun sondage. Faire dépendre le
+    référencement d'instituts de sondage reviendrait à leur déléguer une décision éditoriale.
+  </p>
+
+  <h3>Règle 2 — présence dans le quiz</h3>
+
+  <p>
+    Figurer dans l'annuaire ne suffit pas à entrer dans le calcul. Un acteur n'y entre que si sa
+    couverture documentaire est suffisante pour que la comparaison signifie quelque chose :
+  </p>
+
+  <ul>
+    <li>
+      aucun thème entièrement vide : chaque thème du quiz doit compter au moins une position ;
+    </li>
+    <li>
+      une couverture globale comparable à celle des autres acteurs déjà inclus, le seuil retenu
+      étant publié sur la page <a href="/methodologie">méthodologie</a> avec les taux réels ;
+    </li>
+    <li>
+      des positions établies sur des sources, et non sur des inférences seules. Une page dont
+      l'essentiel du codage repose sur des inférences reste dans l'annuaire mais n'entre pas au
+      classement.
+    </li>
+  </ul>
+
+  <p>
+    Un acteur absent du quiz garde sa page, qui indique explicitement pourquoi il n'apparaît pas
+    dans les résultats. L'absence est une information, pas un silence.
+  </p>
+
+  <h3>Règle 3 — après la liste du Conseil constitutionnel</h3>
+
+  <p>
+    Dès que le Conseil constitutionnel arrête la liste des candidats, cette liste devient la seule
+    source du classement. Seuls les candidats officiels y figurent, tous sans exception, et aucun ne
+    peut en être écarté pour manque de notoriété ou de sondages.
+  </p>
+
+  <p>
+    Les pages des acteurs non retenus sont conservées, avec leur statut — candidature non aboutie,
+    parrainages insuffisants, retrait — et l'historique de leurs positions. Supprimer ces pages
+    effacerait une information utile et casserait les liens existants.
+  </p>
+
+  <h3>Ordre d'affichage</h3>
+
+  <p>
+    Hors classement, les acteurs sont affichés dans l'ordre alphabétique. La clé de tri est saisie à
+    la main pour chaque acteur et publiée avec les données : un nom composé, une particule, un sigle
+    de parti et une coalition ne se trient pas selon la même règle, et un tri automatique produirait
+    un ordre qui paraîtrait arbitraire. L'ordre n'exprime aucune préférence et n'est jamais pondéré
+    par la notoriété ou les sondages.
+  </p>
+
+  <h2>Quelles questions sont posées</h2>
+
+  <p>Une affirmation n'est retenue que si elle remplit toutes ces conditions :</p>
+
+  <ul>
+    <li>
+      elle porte sur une décision qui relève réellement du président ou de la majorité qu'il cherche
+      à former ;
+    </li>
+    <li>
+      elle sépare effectivement les candidats : une affirmation qui fait consensus est retirée ;
+    </li>
+    <li>
+      elle est formulée sans terme connoté, et elle peut être approuvée ou rejetée sans que l'une
+      des deux réponses paraisse déraisonnable ;
+    </li>
+    <li>elle porte sur une seule idée à la fois ;</li>
+    <li>
+      elle peut être rattachée à une source pour la majorité des candidats référencés, faute de quoi
+      elle ne mesure rien.
+    </li>
+  </ul>
+
+  <p>
+    L'équilibre entre thèmes est surveillé : un thème surreprésenté déplace mécaniquement les
+    résultats. La couverture par thème est publiée sur la page <a href="/methodologie"
+      >méthodologie</a
+    >.
+  </p>
+
+  <h2>Comment les désaccords sont tranchés</h2>
+
+  <h3>Désaccord entre les deux relecteurs</h3>
+
+  <p>
+    Un désaccord se résout en revenant à la source, jamais par moyenne ni par compromis. Si les deux
+    lectures restent défendables, la position est marquée incertaine et le désaccord est publié.
+  </p>
+
+  <h3>Désaccord avec un candidat ou son équipe</h3>
+
+  <p>Le traitement dépend de la nature de la contestation.</p>
+
+  <dl>
+    <dt>La source est mal lue, périmée ou sortie de son contexte.</dt>
+    <dd>
+      La position est corrigée, et la correction est inscrite au <a href="/corrections">registre</a
+      >.
+    </dd>
+
+    <dt>La position est exacte mais l'équipe la juge mal formulée.</dt>
+    <dd>
+      La formulation est revue si elle prête à confusion. La position elle-même ne change que sur
+      production d'une source.
+    </dd>
+
+    <dt>L'équipe conteste sans produire de source contraire.</dt>
+    <dd>
+      La position est maintenue, et la contestation est mentionnée sur la page concernée avec sa
+      date.
+    </dd>
+  </dl>
+
+  <h3>Auto-positionnement des équipes</h3>
+
+  <p>
+    La grille de questions est envoyée aux équipes de campagne, qui peuvent y répondre elles-mêmes.
+    Leurs réponses sont publiées à côté du codage interne, et les écarts sont affichés plutôt que
+    fondus. Une équipe qui ne répond pas conserve son codage sourcé : le silence ne fait pas
+    disparaître une position, et ne vaut pas non plus approbation.
+  </p>
+
+  <h2>Droit de réponse</h2>
+
+  <p>
+    La loi française ouvre un droit de réponse à toute personne nommée ou désignée dans un service
+    de communication au public en ligne. Ce droit s'exerce ici sans condition et sans discussion
+    préalable.
+  </p>
+
+  <p>Procédure :</p>
+
+  <ol>
+    <li>la demande identifie la page et le passage visés ;</li>
+    <li>sa réception est accusée dans les meilleurs délais ;</li>
+    <li>
+      la réponse est publiée sur la page concernée, au même niveau de visibilité que le passage
+      contesté, sans commentaire inséré à l'intérieur ;
+    </li>
+    <li>
+      si l'éditeur souhaite répondre à son tour, sa réponse est placée après, clairement séparée et
+      signée ;
+    </li>
+    <li>la réponse publiée n'est jamais retirée ensuite, sauf demande de son auteur.</li>
+  </ol>
+
+  <p>
+    Une demande n'est refusée que si elle est contraire à la loi, si elle vise une page où la
+    personne n'est ni nommée ni désignée, ou si elle a déjà donné lieu à une réponse publiée sur le
+    même passage. Tout refus est motivé par écrit.
+  </p>
+
+  <h2>Signaler une erreur</h2>
+
+  <p>
+    N'importe qui peut signaler une erreur, sans se justifier et sans avoir de lien avec une
+    campagne. Un signalement gagne à indiquer la page, le passage, et si possible une source.
+  </p>
+
+  {
+    (CONTACT_EMAIL || REPOSITORY_URL) && (
+      <ul>
+        {CONTACT_EMAIL && (
+          <li>
+            Par courriel à <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+          </li>
+        )}
+        {REPOSITORY_URL && (
+          <li>
+            Publiquement, en ouvrant un signalement sur le{" "}
+            <a href={REPOSITORY_URL}>dépôt de code</a>.
+          </li>
+        )}
+      </ul>
+    )
+  }
+
+  <p>Ce qui est garanti :</p>
+
+  <ul>
+    <li>la réception du signalement est accusée dans les meilleurs délais ;</li>
+    <li>
+      les erreurs susceptibles de modifier un résultat sont examinées en priorité, avant les erreurs
+      de forme ;
+    </li>
+    <li>
+      la correction est publiée après vérification des sources, et jamais avant : corriger vite dans
+      le mauvais sens est pire que corriger tard ;
+    </li>
+    <li>
+      toute correction significative est inscrite au <a href="/corrections"
+        >registre des corrections</a
+      >, daté et public. Les corrections ne sont pas silencieuses.
+    </li>
+  </ul>
+
+  <p>
+    Aucun délai chiffré n'est annoncé. Un engagement de durée qui ne serait pas tenu ferait plus de
+    dégâts à la crédibilité du site que l'absence d'engagement.
+  </p>
+
+  <h2>Période de réserve</h2>
+
+  <p>
+    Aucune modification de candidat, de question, de position ou de comparaison n'est publiée à
+    partir du vendredi soir précédant chaque tour, afin de couvrir également les territoires
+    ultramarins qui votent la veille. Seuls des correctifs de sécurité indispensables restent
+    envisageables pendant cette période.
+  </p>
+
+  <Signature />
+</BaseLayout>
