@@ -1,6 +1,13 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 4321;
+/*
+ * PAS 4321 : c'est le port par défaut d'`astro dev`. Avec `reuseExistingServer`,
+ * un serveur de développement laissé ouvert était réutilisé à la place du site
+ * construit — donc sans `dist/_headers`, donc sans politique de sécurité HTTP,
+ * donc sans l'intersection de CSP que ces tests doivent précisément exercer.
+ * L'erreur était silencieuse : les tests passaient.
+ */
+const PORT = 4331;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 
 export default defineConfig({
@@ -34,7 +41,14 @@ export default defineConfig({
     // c'est ce qui est déployé qui doit être exempt de requêtes tierces.
     command: `npm run build && npm run serve:dist -- ${PORT}`,
     url: BASE_URL,
-    reuseExistingServer: !process.env.CI,
+    /*
+     * Jamais de réutilisation, même en local. Un serveur déjà en écoute sert un
+     * `dist/` dont rien ne garantit qu'il correspond au code courant, et la
+     * commande ci-dessus — donc le build — est alors purement et simplement
+     * sautée. Le build prend moins d'une seconde : ça ne vaut pas le risque de
+     * tester autre chose que ce qu'on vient d'écrire.
+     */
+    reuseExistingServer: false,
     timeout: 180_000,
   },
 });

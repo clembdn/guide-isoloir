@@ -1,11 +1,17 @@
 /**
  * Contenu de public/_headers.
  *
- * Cloudflare Pages n'applique ce fichier qu'en production : ni `astro dev` ni
- * `astro preview` ne le lisent, donc aucun test de navigateur ne peut vérifier
- * ces en-têtes avant déploiement. Ce test relit le fichier tel qu'il sera servi.
+ * CE FICHIER EST UN GABARIT. Les empreintes de la CSP y sont représentées par
+ * deux jetons, remplacés au build par celles qu'Astro a réellement émises — voir
+ * l'intégration `csp-en-tetes` dans astro.config.mjs. Ce test garde donc la
+ * FORME de la politique, pas ses empreintes.
  *
- * Il échoue si une directive de sécurité est retirée ou affaiblie.
+ * La politique EFFECTIVE, elle, se vérifie en navigateur contre le site
+ * construit et servi : `tests/e2e/csp-hydratation.spec.ts`. C'est le seul
+ * endroit où l'intersection entre l'en-tête HTTP et la balise meta d'Astro
+ * s'observe vraiment.
+ *
+ * Ici : il échoue si une directive est retirée ou affaiblie.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -44,7 +50,7 @@ describe("public/_headers", () => {
       "default-src": "'self'",
       // Interdit tout analytics, tout pixel, toute régie publicitaire.
       "script-src": "'self'",
-      "style-src": "'self' 'unsafe-inline'",
+      "style-src": "'self'",
       // Interdit les polices distantes : elles sont auto-hébergées.
       "font-src": "'self'",
       "img-src": "'self' data: blob:",
@@ -71,9 +77,33 @@ describe("public/_headers", () => {
       expect(scriptSrc).not.toContain("unsafe-eval");
     });
 
+    it("n'autorise plus 'unsafe-inline' pour les styles", () => {
+      // Le gabarit annonçait une politique plus permissive que celle réellement
+      // appliquée : Astro hache ses styles, l'en-tête ouvrait tous les styles en
+      // ligne. Un gabarit qui ment sur la politique est pire qu'un gabarit
+      // strict, parce qu'on le lit pour savoir ce qui est autorisé.
+      const styleSrc = /style-src([^;]*)/.exec(csp)?.[1] ?? "";
+      expect(styleSrc).not.toContain("unsafe-inline");
+    });
+
+    it("réserve la place des empreintes émises au build", () => {
+      // Sans ces jetons, l'intégration n'aurait rien à remplacer, et l'en-tête
+      // interdirait les scripts en ligne qu'Astro vient de hacher : plus aucun
+      // îlot ne s'hydraterait, en silence.
+      expect(csp).toContain("__EMPREINTES_SCRIPT__");
+      expect(csp).toContain("__EMPREINTES_STYLE__");
+    });
+
     it("n'autorise aucun hôte distant", () => {
       expect(csp).not.toMatch(/https?:\/\//);
       expect(csp).not.toContain("*");
+    });
+
+    it("interdit toute requête sortante, y compris vers nous-mêmes", () => {
+      // `connect-src 'none'` est ce qui empêche un `fetch` d'emporter des
+      // réponses de quiz, même vers notre propre domaine. Mesuré : Chromium
+      // refuse la requête si tôt qu'aucun objet de requête n'est créé.
+      expect(csp).toContain("connect-src 'none'");
     });
   });
 

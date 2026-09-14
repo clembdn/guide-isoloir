@@ -2,18 +2,29 @@
 #
 # La politique de sécurité est définie dans CLAUDE.md. Elle n'est pas décorative :
 # elle est la contrepartie technique de la promesse faite sur /financement et
-# /mentions-legales. `script-src 'self'` interdit tout analytics, tout pixel et
-# toute régie publicitaire ; `font-src 'self'` interdit les polices distantes ;
-# `connect-src 'none'` interdit toute requête sortante, y compris vers
-# nous-mêmes : aucune page n'a besoin d'appeler le réseau après son chargement.
+# /mentions-legales.
 #
-# Ce fichier n'est appliqué qu'en production : `astro dev` et `astro preview` ne
-# le lisent pas. Un test unitaire vérifie donc son contenu, et un test Playwright
-# vérifie séparément qu'aucune requête ne sort vers un domaine tiers.
+# DEUX POLITIQUES SE COMPOSENT, ET ELLES SE COMPOSENT EN INTERSECTION.
+#
+# Astro (`security.csp: true`) ajoute dans chaque page une balise meta qui
+# déclare les empreintes de ses propres scripts et styles en ligne. Le navigateur
+# applique les deux politiques séparément : une ressource doit être autorisée par
+# CHACUNE pour être chargée. Un `script-src 'self'` nu dans cet en-tête interdit
+# donc tout script en ligne, y compris ceux qu'Astro vient de hacher — et l'îlot
+# d'hydratation ne démarre jamais. C'est silencieux : la page s'affiche, elle ne
+# réagit pas.
+#
+# CE FICHIER EST UN GABARIT. Les deux jetons ci-dessous sont remplacés au build
+# par les empreintes réellement émises, relevées dans dist/*.html. Voir
+# l'intégration `csp-en-tetes` dans astro.config.mjs. Le build échoue si un jeton
+# subsiste ou si aucune empreinte n'est trouvée : l'en-tête ne peut pas se
+# désynchroniser d'une montée de version d'Astro en silence.
+#
+# Ne pas écrire les empreintes à la main ici. Elles changent avec Astro.
 
 /*
   Referrer-Policy: no-referrer
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self' __EMPREINTES_SCRIPT__; style-src 'self' __EMPREINTES_STYLE__; font-src 'self'; img-src 'self' data: blob:; connect-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; object-src 'none'
   X-Content-Type-Options: nosniff
   Cross-Origin-Opener-Policy: same-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()
