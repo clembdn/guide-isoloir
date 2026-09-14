@@ -1,40 +1,41 @@
 ---
 /*
- * Route du test comparatif. Vide en phase 0.
+ * Route du test comparatif.
  *
- * Elle existe dès maintenant pour deux raisons :
- *   - le test Playwright « aucune requête tierce » doit avoir une page à vérifier
- *     avant que le quiz existe, et non après ;
- *   - l'URL est définitive et ne changera pas.
+ * L'écran fonctionne, mais il tourne sur TROIS QUESTIONS FACTICES. Aucune donnée
+ * politique n'existe encore dans le dépôt : ni candidat, ni position, ni source.
+ * Les questions viennent de `src/factice/`, jamais de `src/data/`.
  *
- * `noindex` est temporaire, le temps que la page soit vide. À retirer quand le
- * quiz est publié. La page de résultat, elle, reste `noindex` pour toujours.
+ * `noindex` reste donc en place, en plus du noindex global tant que le site
+ * n'est pas publiable. Il sera retiré quand les vraies questions seront écrites
+ * et vérifiées. La page de résultat, elle, reste `noindex` pour toujours.
  *
  * Contrainte permanente : aucun script tiers, aucune police distante, aucun
- * analytics sur cette route.
+ * analytics sur cette route. Deux tests de bout en bout la gardent :
+ * `aucune-requete-tierce` et `aucune-fuite-de-reponse`.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import Quiz from "../../components/Quiz.svelte";
 ---
 
 <BaseLayout
   title="Test comparatif"
-  description="Le test comparatif de Guide Isoloir n'est pas encore disponible."
+  description="Le test comparatif de Guide Isoloir tourne sur des questions d'exemple : il n'est pas encore utilisable."
   noindex={true}
 >
-  <h1>Le test n'est pas encore disponible</h1>
+  <h1>Test comparatif</h1>
 
   <p>
-    Cette adresse accueillera le test comparatif. Il n'est pas encore publié, et aucune question
-    n'est encore rédigée.
+    Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un identifiant.
+    Le calcul s'effectue exclusivement dans votre navigateur, et vos réponses disparaissent quand
+    vous fermez cet onglet.
   </p>
 
-  <p>
-    Quand il le sera, vos réponses et vos résultats ne seront jamais envoyés, enregistrés ou
-    associés à un identifiant : le calcul s'effectuera exclusivement dans votre navigateur.
-  </p>
+  <Quiz client:load />
 
   <p>
-    En attendant, la <a href="/methodologie">méthodologie</a> décrit comment les positions seront établies,
-    et la <a href="/charte-editoriale">charte éditoriale</a> comment les candidats seront référencés.
+    La <a href="/methodologie">méthodologie</a> décrit comment les positions seront établies, et la&#32;<a
+      href="/charte-editoriale">charte éditoriale</a
+    > comment les candidats seront référencés.
   </p>
 </BaseLayout>

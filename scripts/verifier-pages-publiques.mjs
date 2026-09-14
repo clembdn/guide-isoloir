@@ -214,6 +214,47 @@ if (presents.has("mentions-legales.html")) {
   }
 }
 
+/*
+ * 5. Aucune donnée factice ne subsiste dans ce qui est servi.
+ *
+ * L'écran de quiz tourne aujourd'hui sur trois questions d'exemple, dans
+ * `src/factice/`. Elles sont inoffensives tant qu'elles restent un outil de
+ * mise au point ; publiées, elles feraient passer un comparateur politique pour
+ * un site qui n'a rien à comparer.
+ *
+ * On cherche les identifiants dans le JavaScript servi, pas seulement dans le
+ * HTML : le quiz est un îlot, ses questions vivent dans un bundle.
+ */
+const MOTIF_FACTICE = /factice-sentinelle|QUESTIONS_FACTICES|AVERTISSEMENT_FACTICE/;
+
+/*
+ * 6. Aucun mot collé à une balise en ligne.
+ *
+ * Astro supprime le nœud de texte quand un saut de ligne sépare un mot d'une
+ * balise en ligne, et rend « et lacharte éditoriale ». Prettier replie les
+ * lignes tout seul : le défaut réapparaît sans que personne l'ait écrit, et il
+ * ne se voit qu'à la lecture de la page rendue.
+ *
+ * Deux occurrences trouvées dans ce dépôt le jour où ce contrôle a été ajouté,
+ * dont une antérieure au quiz. Un site qui se présente comme sérieux ne peut
+ * pas publier des mots collés.
+ */
+const MOTIF_MOT_COLLE = /[a-zàâçéèêëîïôûùüÿœ]{2,}<(?:a|strong|em|code|time)\b/gi;
+
+for (const fichier of [...presents].filter((f) => f.endsWith(".html") || f.endsWith(".js"))) {
+  const contenu = await readFile(join(RACINE, fichier), "utf8");
+  if (MOTIF_FACTICE.test(contenu)) {
+    signaler(fichier, "données factices servies : le quiz tourne encore sur src/factice/");
+  }
+}
+
+for (const fichier of PAGES_PUBLIQUES) {
+  const contenu = await readFile(join(RACINE, fichier), "utf8");
+  for (const collision of contenu.match(MOTIF_MOT_COLLE) ?? []) {
+    signaler(fichier, `mot collé à une balise : « ${collision} »`);
+  }
+}
+
 // Rapport.
 if (fautes.length === 0) {
   console.log("Pages publiques : complètes, aucune mention manquante.");
