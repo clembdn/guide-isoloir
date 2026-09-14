@@ -14,12 +14,14 @@
 /**
  * Domaine du site.
  *
- * `example.invalid` est réservé par la RFC 2606 et ne peut être enregistré par
- * personne : aucune requête ne peut aboutir vers un site réel par erreur. La
- * valeur doit être remplacée par le domaine réellement acheté, ici et dans
- * `astro.config.mjs`.
+ * Doit coïncider EXACTEMENT avec `site` dans `astro.config.mjs` : même
+ * protocole, même hôte, aucune barre oblique finale. Une divergence ferait
+ * diverger les URL canoniques et le sitemap sans qu'aucun test ne le voie.
+ *
+ * L'apex seul. `www.guide-isoloir.fr` est redirigé en 301 vers l'apex par une
+ * Redirect Rule Cloudflare : le site n'existe qu'à une adresse.
  */
-export const SITE_URL = "https://example.invalid";
+export const SITE_URL = "https://guide-isoloir.fr";
 
 export const SITE_NAME = "Guide Isoloir";
 
@@ -27,20 +29,25 @@ export const SITE_TAGLINE =
   "Comprendre l'élection présidentielle de 2027, se situer, et savoir comment voter.";
 
 /**
- * Nom de l'éditeur, tel qu'il figurera dans les mentions légales et sur chaque
- * signature d'article. `null` tant qu'il n'a pas été fourni.
+ * Nom de l'éditeur, tel qu'il figure dans les mentions légales et sur chaque
+ * signature d'article.
  */
-export const EDITOR_NAME: string | null = null;
+export const EDITOR_NAME: string | null = "Clément Boudon";
 
 /**
- * Adresse de contact publique. `null` tant qu'elle n'existe pas.
+ * Adresse de contact publique. Redirection Cloudflare Email Routing vers
+ * l'adresse personnelle de l'éditeur : aucune boîte n'est hébergée ici.
+ *
+ * Ne jamais publier ici une adresse qui ne reçoit pas. Un site dont l'argument
+ * est le sérieux ne peut pas afficher une adresse morte.
  */
-export const CONTACT_EMAIL: string | null = null;
+export const CONTACT_EMAIL: string | null = "contact@guide-isoloir.fr";
 
 /**
- * Adresse du dépôt public. `null` tant qu'il n'est pas publié.
+ * Adresse du dépôt public. L'AGPL impose que le code soit accessible : ce lien
+ * est publié dans les mentions légales et dans la charte éditoriale.
  */
-export const REPOSITORY_URL: string | null = null;
+export const REPOSITORY_URL: string | null = "https://github.com/clembdn/guide-isoloir";
 
 /** Dates du scrutin (métropole). */
 export const ELECTION = {
@@ -74,5 +81,8 @@ export const FOOTER_NAV: readonly NavEntry[] = [
  * qui ne promet rien de ce qui n'existe pas encore. Ne dispense pas du
  * garde-fou de build : ceci décide de la rédaction, celui-là interdit la
  * publication.
+ *
+ * Vaut `true` depuis le branchement du domaine. Le `noindex` global est donc
+ * levé : toutes les pages sauf `/test` et `/resultat` sont indexables.
  */
 export const IS_PUBLISHABLE = EDITOR_NAME !== null && !SITE_URL.endsWith(".invalid");

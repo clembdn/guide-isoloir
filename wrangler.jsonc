@@ -1,8 +1,12 @@
-// Cloudflare Pages, sortie statique.
+// Worker Cloudflare servant des ressources statiques (Workers Static Assets).
 //
-// Le déploiement passe par l'INTÉGRATION GIT du tableau de bord Cloudflare :
-// Cloudflare construit et publie à chaque push, et fournit les
-// prévisualisations de pull request. Il n'y a donc pas de workflow de
+// Il n'y a pas d'entrée `main` : aucun code ne s'exécute à la requête, le Worker
+// ne fait que servir `dist/`. `_headers` et `_redirects` y sont pris en charge
+// comme sur Pages.
+//
+// Le déploiement passe par l'INTÉGRATION GIT du tableau de bord Cloudflare
+// (Workers Builds) : Cloudflare construit et publie à chaque push, et fournit
+// les prévisualisations de pull request. Il n'y a donc pas de workflow de
 // déploiement dans .github/ — deux chemins produiraient deux déploiements par
 // commit.
 //
@@ -17,23 +21,38 @@
 //   Build output dir     dist
 //   Node version         22   (ou variable NODE_VERSION = 22)
 //
-// AU LANCEMENT, quand le domaine est acheté et le nom de l'éditeur renseigné
-// dans src/lib/site.ts, remplacer la commande de build par :
+// POURQUOI PAS ENCORE `npm run build:prod`. `build:prod` ajoute le garde-fou de
+// publication, qui refuse entre autres qu'une donnée factice soit servie. Or
+// /test et /resultat tournent aujourd'hui sur src/factice/ : le garde-fou
+// échouerait à chaque build, et plus rien ne se déploierait. Le domaine et
+// l'identité de l'éditeur, eux, sont renseignés — ce n'est plus ce qui bloque.
 //
-//   Build command        npm run build:prod
+// À BASCULER sur `npm run build:prod` le jour où /test et /resultat tournent
+// sur de vraies questions. C'est la seule commande qui empêche réellement
+// Cloudflare de publier un site incomplet ; jusque-là, ce filet n'existe pas.
+// `npm run verify:pages` permet de voir l'état des points bloquants sans
+// interrompre un build.
 //
-// `build:prod` ajoute le garde-fou de publication : il échoue si une page
-// publique contient un espace réservé, un domaine .invalid, ou s'il manque une
-// mention légale obligatoire. À partir de ce moment, Cloudflare refusera de
-// publier un site incomplet.
-//
-// En attendant, tout le site est servi en `noindex` : voir IS_PUBLISHABLE dans
-// src/lib/site.ts. Rien de ce qui est déployé aujourd'hui ne peut être indexé.
+// CE QUI EST INDEXABLE. IS_PUBLISHABLE (src/lib/site.ts) vaut désormais `true` :
+// le `noindex` global est levé. Seules /test et /resultat restent en noindex,
+// par leur propre déclaration.
 {
   "name": "guide-isoloir",
   "compatibility_date": "2026-09-14",
+
+  // Aucune URL *.workers.dev. Le site n'existe qu'à une seule adresse : sinon
+  // Google indexe deux copies du même site, et la moins légitime peut gagner.
+  "workers_dev": false,
+
   "assets": {
     "directory": "./dist",
+
+    // Astro construit en `build.format: "file"` et `trailingSlash: "never"` :
+    // la page est `a-propos.html` et l'URL canonique est `/a-propos`. Cloudflare
+    // redirige donc `/a-propos/` vers `/a-propos` en 308, au lieu de servir la
+    // même page à deux adresses.
+    "html_handling": "drop-trailing-slash",
+
     "not_found_handling": "404-page",
   },
 }

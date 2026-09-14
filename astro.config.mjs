@@ -87,13 +87,13 @@ function cspEnTetes() {
 }
 
 /*
- * Le domaine n'est pas encore acheté. `example.invalid` est réservé par la
- * RFC 2606 : aucune requête ne peut aboutir vers un site réel par erreur, et le
- * garde-fou de publication refuse tout build de production qui le contient.
- *
- * À corriger ici ET dans src/lib/site.ts — les deux valeurs doivent coïncider.
+ * Domaine de production. Cette valeur et `SITE_URL` dans src/lib/site.ts
+ * doivent coïncider EXACTEMENT : même protocole, même hôte, aucune barre
+ * oblique finale. C'est d'ici que sortent les URL canoniques ; c'est de
+ * src/lib/site.ts que sortent le sitemap, robots.txt et llms.txt. Deux valeurs
+ * différentes produiraient deux versions du site sans qu'aucun test n'échoue.
  */
-const SITE = "https://example.invalid";
+const SITE = "https://guide-isoloir.fr";
 
 export default defineConfig({
   site: SITE,

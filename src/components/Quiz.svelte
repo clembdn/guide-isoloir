@@ -36,8 +36,6 @@
   type Proprietes = { questions: readonly QuestionAffichee[] };
   const { questions }: Proprietes = $props();
 
-  const ids = questions.map((question) => question.id);
-
   let indice = $state(0);
   let reponses = $state<Record<string, Reponse>>({});
 
@@ -52,6 +50,7 @@
   const reponseCourante = $derived(question ? reponses[question.id] : undefined);
   const aRepondu = $derived(reponseCourante !== undefined);
   const dernier = $derived(indice === questions.length - 1);
+  const ids = $derived(questions.map((question) => question.id));
   const complet = $derived(estComplet({ version: 0, reponses }, ids));
 
   /*

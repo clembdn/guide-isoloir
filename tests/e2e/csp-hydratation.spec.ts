@@ -6,7 +6,7 @@
  * Deux politiques de sécurité se composent sur ce site, et elles se composent en
  * INTERSECTION, pas en union :
  *
- *   - l'en-tête HTTP de `public/_headers`, servi par Cloudflare Pages ;
+ *   - l'en-tête HTTP de `public/_headers`, servi par Cloudflare Workers ;
  *   - la balise meta qu'Astro insère, qui déclare les empreintes de ses propres
  *     scripts en ligne (`security.csp: true`).
  *

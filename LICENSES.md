@@ -11,7 +11,7 @@ Relèvent de l'AGPL v3 :
 - tout fichier `.ts`, `.js`, `.mjs`, `.astro`, `.svelte`, `.css` ;
 - les fichiers de configuration à la racine (`astro.config.mjs`, `tsconfig.json`,
   `eslint.config.js`, `playwright.config.ts`, `vitest.config.ts`,
-  `wrangler.toml`, `package.json`) ;
+  `wrangler.jsonc`, `package.json`) ;
 - le contenu de `scripts/`, `src/` et `tests/` ;
 - les workflows de `.github/`.
 
