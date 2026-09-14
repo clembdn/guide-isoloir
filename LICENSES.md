@@ -33,10 +33,29 @@ Relèvent de CC BY-SA 4.0 :
 La réutilisation est libre, à condition de citer la source et de conserver la
 même licence.
 
+## Police de caractères — SIL Open Font License 1.1
+
+Fichier : [`src/polices/OFL.txt`](src/polices/OFL.txt)
+
+Relèvent de l'OFL 1.1 :
+
+- `src/polices/instrument-sans-latin.woff2` ;
+- `src/polices/instrument-sans-latin-ext.woff2`.
+
+**Instrument Sans**, par Rodrigo Fuenzalida et Jordan Egstad
+(`github.com/Instrument/instrument-sans`), copyright 2022 The Instrument Sans
+Project Authors. L'OFL autorise l'usage commercial, la modification et
+l'auto-hébergement sans redevance, et impose de conserver le texte de licence,
+ce que fait `src/polices/OFL.txt`. Elle interdit de vendre la police seule et
+d'employer les noms réservés pour une version modifiée.
+
+La police est auto-hébergée, pas appelée à distance : `font-src 'self'` l'impose,
+et un test Playwright vérifie qu'aucune requête ne sort vers un domaine tiers.
+
 ## Ni l'un ni l'autre
 
-- `CLAUDE.md` et le contenu de `docs/` sont des documents de travail internes.
-  Ils ne sont pas publiés sous licence libre.
+- `CLAUDE.md`, `DESIGN_SYSTEM.md` et le contenu de `docs/` sont des documents de
+  travail internes. Ils ne sont pas publiés sous licence libre.
 - Les textes rédactionnels des pages publiques (`/a-propos`, `/methodologie`,
   `/charte-editoriale`, `/financement`, `/mentions-legales`, `/corrections`)
   restent la propriété de leur auteur. Leur citation est libre dans les limites
@@ -47,4 +66,6 @@ même licence.
 ## En cas de doute
 
 Un fichier non listé ci-dessus et qui s'exécute relève de l'AGPL. Un fichier non
-listé et qui décrit une position politique relève de CC BY-SA.
+listé et qui décrit une position politique relève de CC BY-SA. Un fichier tiers
+apporté dans le dépôt — police, icône, jeu de données — n'est jamais couvert par
+défaut : il porte sa propre licence, à ajouter ici avant d'être commité.

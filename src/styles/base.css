@@ -1,51 +1,135 @@
 /*
- * Styles provisoires de la phase 0.
+ * Feuille de base — direction « Signal ».
  *
- * AUCUNE DIRECTION VISUELLE N'EST ARRÊTÉE ICI. Les valeurs ci-dessous sont des
- * réglages neutres destinés à tenir jusqu'à la remise du travail de design :
- *   - typographie : piles système, aucune police à choisir ni à héberger ;
- *   - couleur : une seule teinte neutre (encre) sur un fond, plus un gris de
- *     texte secondaire. Aucune couleur signature, aucune couleur de parti ;
- *   - aucune décoration : pas de carte arrondie, pas d'ombre, pas de dégradé,
- *     pas de rayon, pas d'animation d'entrée.
+ * La direction visuelle est arrêtée. La référence est DESIGN_SYSTEM.md : ce
+ * fichier l'implémente, il ne la définit pas. Toute valeur ajoutée ici sans
+ * exister là-bas est une décision prise en douce.
  *
- * Les tokens définitifs (couleur signature, famille typographique, échelles,
- * rayons, mode sombre) seront figés dans DESIGN_SYSTEM.md à l'issue de la
- * phase de design, puis reportés ici. Ne pas enrichir ce fichier d'ici là :
- * toute valeur ajoutée maintenant est une décision visuelle prise par défaut.
+ * Trois règles portent la direction, et rien ne doit les contredire :
  *
- * Voir docs/BRIEF-DESIGN.md, en particulier la section 9 (liste de refus).
+ *   1. UN ACCENT UNIQUE, À MOINS DE 2 % DE COUVERTURE. Le bronze ne sert qu'aux
+ *      liens, à l'action principale et à l'anneau de focus. Il n'entre jamais en
+ *      contact avec un contenu politique : il dit où l'on peut agir, rien de
+ *      plus. Aucun candidat, aucune position, aucun score ne sera jamais teinté.
+ *   2. LA HIÉRARCHIE TIENT À L'ÉCHELLE ET À L'ESPACE, jamais à un trait ni à une
+ *      couleur. Un filet doit signifier quelque chose, sinon il ne s'écrit pas.
+ *   3. LE RAYON DIT « CECI SE CLIQUE ». Zéro sur les blocs, 4 px sur les seuls
+ *      éléments actionnables. Pas d'exception.
+ *
+ * Aucune requête distante : la police est auto-hébergée dans src/polices/, ce
+ * que `font-src 'self'` impose et qu'un test Playwright vérifie.
  */
+
+/*
+ * Instrument Sans, OFL 1.1. Voir src/polices/OFL.txt.
+ *
+ * C'est une police VARIABLE : un seul fichier par plage Unicode couvre toute
+ * l'étendue des graisses. D'où `font-weight: 400 600` plutôt que deux règles —
+ * le navigateur interpole, et il ne télécharge qu'un fichier.
+ *
+ * Seule la plage `latin` se charge sur une page en français : é è à ç ù œ y
+ * sont tous. `latin-ext` n'arrive que si un caractère la déclenche.
+ * Coût réel d'une page : 29 ko.
+ */
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("../polices/instrument-sans-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: "Instrument Sans";
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url("../polices/instrument-sans-latin-ext.woff2") format("woff2");
+  unicode-range:
+    U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+    U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+
+/* Tokens. Contrastes mesurés, pas estimés — voir DESIGN_SYSTEM.md. */
 
 :root {
   color-scheme: light dark;
 
-  /* Une seule teinte neutre, déclinée. */
-  --couleur-fond: #ffffff;
-  --couleur-encre: #1a1a1a;
-  --couleur-encre-faible: #565656; /* 7.0:1 sur blanc */
-  --couleur-trait: #d4d4d4;
+  /* Neutres. Un gris à peine chaud, jamais un fond crème. */
+  --couleur-fond: #f3f3f1;
+  --couleur-encre: #151618; /* 16,3:1 */
+  --couleur-encre-faible: #55565a; /* 6,6:1 */
+  --couleur-trait: #c5c5c1; /* 1,6:1, plancher de lisibilité */
 
-  --police-texte: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  /* Accent bronze. `aplat` porte l'action, `sur-aplat` ce qui s'écrit dessus. */
+  --couleur-signature: #8a5a10; /* 5,3:1 */
+  --couleur-aplat: #8a5a10;
+  --couleur-sur-aplat: #ffffff; /* 5,9:1 sur l'aplat */
 
-  --mesure: 34rem; /* longueur de ligne de lecture */
+  --police-texte: "Instrument Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+
+  /* Échelle typographique, ratio 1,25. */
+  --t-petit: 0.9375rem;
+  --t-corps: clamp(1.0625rem, 1rem + 0.27vw, 1.1875rem);
+  --t-h3: 1.1875rem;
+  --t-h2: clamp(1.375rem, 1.25rem + 0.5vw, 1.625rem);
+  --t-h1: clamp(2rem, 1.55rem + 1.9vw, 3rem);
+
+  --interligne-corps: 1.6;
+  --interligne-titre: 1.15;
+
+  /* Espacement. */
+  --pas-1: 0.375rem; /* 6 px */
+  --pas-2: 0.75rem; /* 12 px */
+  --pas-3: 1.25rem; /* 20 px */
+  --pas-4: 2rem; /* 32 px */
+  --pas-5: 3.5rem; /* 56 px */
+  --pas-6: 5.5rem; /* 88 px */
+
+  /* Rayons. Le rayon signale l'action, il ne décore pas. */
+  --rayon: 0;
+  --rayon-actionnable: 4px;
+
+  /* Gabarit. */
+  --mesure: 32rem;
   --gouttiere: 1.25rem;
 
-  --pas-1: 0.5rem;
-  --pas-2: 1rem;
-  --pas-3: 1.5rem;
-  --pas-4: 2.5rem;
-  --pas-5: 4rem;
+  /* Mouvement : une courbe, une durée. */
+  --sortie: cubic-bezier(0.23, 1, 0.32, 1);
+  --duree: 140ms;
+}
+
+/*
+ * À partir de 1024 px la colonne s'élargit. 32 rem est juste pour le corps mais
+ * étrangle le titre : à 48 px il partait sur trois lignes, ce qui annule l'effet
+ * d'échelle. 36 rem tient le titre en deux lignes, corps à environ 68 signes.
+ */
+@media (min-width: 64rem) {
+  :root {
+    --mesure: 36rem;
+  }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --couleur-fond: #141414;
-    --couleur-encre: #ededed;
-    --couleur-encre-faible: #a8a8a8; /* 7.3:1 sur #141414 */
-    --couleur-trait: #3d3d3d;
+    --couleur-fond: #131416;
+    --couleur-encre: #eaeae8; /* 15,3:1 */
+    --couleur-encre-faible: #9c9d9f; /* 6,8:1 */
+    --couleur-trait: #34353a; /* 1,5:1 */
+
+    --couleur-signature: #d9a441; /* 8,2:1 */
+    --couleur-aplat: #d9a441;
+    /* Sur un bronze éclairci, seul un texte sombre passe AA. Inversion voulue. */
+    --couleur-sur-aplat: #17130a; /* 8,2:1 sur l'aplat */
   }
 }
+
+/* Socle. */
 
 *,
 *::before,
@@ -62,100 +146,29 @@ body {
   background: var(--couleur-fond);
   color: var(--couleur-encre);
   font-family: var(--police-texte);
-  font-size: 1.0625rem;
-  line-height: 1.6;
+  font-size: var(--t-corps);
+  line-height: var(--interligne-corps);
+  font-variant-numeric: lining-nums;
 }
 
-h1,
-h2,
-h3 {
-  line-height: 1.25;
-  text-wrap: balance;
-  font-weight: 600;
-  margin: var(--pas-4) 0 var(--pas-2);
-}
-
-h1 {
-  font-size: 1.625rem;
-  margin-top: 0;
-}
-
-h2 {
-  font-size: 1.25rem;
-}
-
-h3 {
-  font-size: 1.0625rem;
-}
-
-p,
-ul,
-ol,
-dl {
-  margin: 0 0 var(--pas-2);
-}
-
-ul,
-ol {
-  padding-left: 1.25rem;
-}
-
-li {
-  margin-bottom: var(--pas-1);
-}
-
-li > ul,
-li > ol {
-  margin-top: var(--pas-1);
-}
-
-dt {
-  font-weight: 600;
-}
-
-dd {
-  margin: 0 0 var(--pas-2);
-}
-
-a {
-  color: inherit;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 0.2em;
-}
-
-a:hover {
-  text-decoration-thickness: 2px;
-}
-
-:focus-visible {
-  outline: 2px solid currentcolor;
-  outline-offset: 2px;
-}
-
-hr {
-  border: 0;
-  border-top: 1px solid var(--couleur-trait);
-  margin: var(--pas-4) 0;
-}
-
-/* Mise en page : une colonne, 375 px d'abord. */
+/* Mise en page : une colonne centrée, 375 px d'abord. */
 
 .page {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .enveloppe {
   width: 100%;
   max-width: var(--mesure);
-  margin: 0 auto;
+  margin-inline: auto;
   padding-inline: var(--gouttiere);
 }
 
 .contenu {
   flex: 1;
-  padding-block: var(--pas-4) var(--pas-5);
+  padding-block: var(--pas-5) var(--pas-6);
 }
 
 .entete {
@@ -164,34 +177,159 @@ hr {
 }
 
 .entete a {
+  color: inherit;
   font-weight: 600;
   text-decoration: none;
+  letter-spacing: -0.015em;
 }
 
 .entete a:hover,
 .entete a:focus-visible {
   text-decoration: underline;
+  text-underline-offset: 0.22em;
 }
 
 .pied {
   border-top: 1px solid var(--couleur-trait);
-  padding-block: var(--pas-3) var(--pas-4);
+  padding-block: var(--pas-4) var(--pas-5);
   color: var(--couleur-encre-faible);
-  font-size: 0.9375rem;
+  font-size: var(--t-petit);
 }
 
 .pied ul {
   list-style: none;
   padding: 0;
-  margin: 0 0 var(--pas-2);
+  margin: 0 0 var(--pas-3);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--pas-2) var(--pas-3);
 }
 
 .pied li {
-  margin-bottom: var(--pas-1);
+  margin: 0;
 }
 
-.pied a {
-  color: var(--couleur-encre);
+.pied p {
+  margin: 0;
+}
+
+/* Titres. Grande échelle, aucune couleur, aucun filet : l'espace suffit. */
+
+h1,
+h2,
+h3 {
+  line-height: var(--interligne-titre);
+  text-wrap: balance;
+  font-weight: 600;
+  margin: 0 0 var(--pas-3);
+  letter-spacing: -0.022em;
+}
+
+h1 {
+  font-size: var(--t-h1);
+  margin-bottom: var(--pas-4);
+}
+
+h2 {
+  font-size: var(--t-h2);
+  margin-top: var(--pas-6);
+  letter-spacing: -0.018em;
+}
+
+h3 {
+  font-size: var(--t-h3);
+  margin-top: var(--pas-4);
+  letter-spacing: -0.012em;
+}
+
+p,
+ul,
+ol,
+dl {
+  margin: 0 0 var(--pas-3);
+}
+
+ul,
+ol {
+  padding-left: 1.15rem;
+}
+
+li {
+  margin-bottom: var(--pas-2);
+}
+
+li:last-child {
+  margin-bottom: 0;
+}
+
+li > ul,
+li > ol {
+  margin-top: var(--pas-2);
+}
+
+dt {
+  font-weight: 600;
+}
+
+dd {
+  margin: 0 0 var(--pas-3);
+}
+
+/* Une date ne se coupe pas au milieu : « 14 / septembre 2026 » se lit mal. */
+time {
+  white-space: nowrap;
+}
+
+code {
+  font-family: ui-monospace, "SFMono-Regular", "Menlo", "Consolas", monospace;
+  font-size: 0.9em;
+}
+
+/* Liens : bronze, soulignés. Le décalage bouge de 2 à 3 px au survol. */
+
+a {
+  color: var(--couleur-signature);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: text-underline-offset var(--duree) var(--sortie);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  a:hover {
+    text-underline-offset: 3px;
+  }
+}
+
+/* Focus : instantané. Jamais animé, jamais retardé. */
+:focus-visible {
+  outline: 2px solid var(--couleur-signature);
+  outline-offset: 2px;
+  transition: none;
+}
+
+/*
+ * Action principale. Le seul bouton plein du site.
+ * Retour tactile à la pression : `transform` uniquement, 140 ms, ease-out.
+ */
+
+.action {
+  display: inline-block;
+  background: var(--couleur-aplat);
+  color: var(--couleur-sur-aplat);
+  text-decoration: none;
+  font-weight: 600;
+  padding: var(--pas-2) var(--pas-4);
+  border-radius: var(--rayon-actionnable);
+  transition: transform var(--duree) var(--sortie);
+}
+
+.action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.action:active {
+  transform: scale(0.98);
 }
 
 /* Lien d'évitement. */
@@ -202,8 +340,10 @@ hr {
   top: 0;
   background: var(--couleur-fond);
   color: var(--couleur-encre);
-  padding: var(--pas-1) var(--pas-2);
-  border: 1px solid var(--couleur-encre);
+  padding: var(--pas-2) var(--pas-3);
+  border: 2px solid var(--couleur-signature);
+  border-radius: var(--rayon-actionnable);
+  text-decoration: none;
 }
 
 .evitement:focus {
@@ -211,28 +351,44 @@ hr {
   z-index: 1;
 }
 
-/* Fil d'Ariane. */
+/* Fil d'Ariane, dates, bandeau de chantier : même registre secondaire. */
 
-.fil-ariane {
-  font-size: 0.9375rem;
+.fil-ariane,
+.mise-a-jour,
+.chantier {
   color: var(--couleur-encre-faible);
-  margin-bottom: var(--pas-3);
+  font-size: var(--t-petit);
+  margin: 0 0 var(--pas-3);
 }
 
 .fil-ariane a {
-  color: var(--couleur-encre-faible);
+  color: inherit;
 }
 
-/* Question à laquelle l'article répond : un chapeau, pas un encadré. */
+/*
+ * Astro supprime les nœuds de texte vides entre deux éléments : sans cette
+ * règle, le fil d'Ariane s'écrit « Guide Isoloir/Comprendre », séparateur collé.
+ */
+.fil-ariane [aria-hidden="true"] {
+  margin-inline: 0.35em;
+}
+
+/* Le bandeau de chantier disparaît seul quand le site devient publiable. */
+.chantier {
+  margin-bottom: var(--pas-5);
+}
+
+/* Question à laquelle la page répond : un chapeau, pas un encadré. */
 
 .question {
-  font-size: 1.125rem;
-  line-height: 1.5;
-  color: var(--couleur-encre);
+  font-size: calc(var(--t-corps) * 1.22);
+  line-height: 1.42;
+  color: var(--couleur-encre-faible);
   margin-bottom: var(--pas-4);
+  text-wrap: pretty;
 }
 
-/* Liste d'articles : des entrées séparées par un trait, pas des cartes. */
+/* Liste d'articles : des entrées espacées, pas des cartes. */
 
 .liste-articles {
   list-style: none;
@@ -241,12 +397,10 @@ hr {
 }
 
 .liste-articles li {
-  border-top: 1px solid var(--couleur-trait);
-  padding-top: var(--pas-2);
-  margin-bottom: var(--pas-3);
+  margin-bottom: var(--pas-4);
 }
 
-.liste-articles li > a {
+.liste-articles > li > a {
   font-weight: 600;
 }
 
@@ -257,42 +411,34 @@ hr {
 /* Sources d'un article. */
 
 .sources {
-  font-size: 0.9375rem;
+  font-size: var(--t-petit);
+  line-height: 1.5;
 }
 
-/* Date de mise à jour. */
-
-.mise-a-jour {
-  color: var(--couleur-encre-faible);
-  font-size: 0.9375rem;
-  margin-bottom: var(--pas-4);
+.sources li {
+  margin-bottom: var(--pas-3);
 }
 
-/* Signature d'auteur. */
+/* Date de mise à jour en tête d'article : voir .mise-a-jour ci-dessus. */
+
+/* Signature d'auteur. Le filet sépare l'article de son appareil. */
 
 .signature {
   color: var(--couleur-encre-faible);
-  font-size: 0.9375rem;
-  margin-top: var(--pas-4);
-  padding-top: var(--pas-2);
+  font-size: var(--t-petit);
+  margin-top: var(--pas-5);
+  padding-top: var(--pas-3);
   border-top: 1px solid var(--couleur-trait);
 }
 
-/* Bandeau de chantier. Disparaît seul quand le site devient publiable. */
-
-.chantier {
-  border-bottom: 1px solid var(--couleur-trait);
-  padding-bottom: var(--pas-2);
-  margin-bottom: var(--pas-4);
-  color: var(--couleur-encre-faible);
-  font-size: 0.9375rem;
-}
-
-/* Encadré d'avertissement : un trait à gauche, pas une carte. */
+/*
+ * Encadré d'avertissement : un filet à gauche, pas une carte. Ce filet signifie
+ * « ceci est une réserve », c'est pour cela qu'il a le droit d'exister.
+ */
 
 .reserve {
   border-left: 3px solid var(--couleur-encre-faible);
-  padding-left: var(--pas-2);
+  padding-left: var(--pas-3);
   margin-bottom: var(--pas-3);
   color: var(--couleur-encre-faible);
 }
@@ -301,20 +447,44 @@ hr {
   margin-bottom: 0;
 }
 
+/* Corps d'article rendu depuis le Markdown. */
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+/* Tableaux. Chiffres tabulaires : une colonne de nombres doit s'aligner. */
+
 table {
   border-collapse: collapse;
   width: 100%;
   margin-bottom: var(--pas-3);
-  font-size: 0.9375rem;
+  font-size: var(--t-petit);
+  font-variant-numeric: tabular-nums lining-nums;
 }
 
 th,
 td {
   text-align: left;
   vertical-align: top;
-  padding: var(--pas-1) var(--pas-2) var(--pas-1) 0;
+  padding: var(--pas-2) var(--pas-3) var(--pas-2) 0;
   border-bottom: 1px solid var(--couleur-trait);
 }
+
+hr {
+  border: 0;
+  border-top: 1px solid var(--couleur-trait);
+  margin: var(--pas-5) 0;
+}
+
+/*
+ * Réduction du mouvement. On retire le déplacement, on garde les transitions de
+ * couleur : elles aident à comprendre plutôt que de distraire.
+ */
 
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -322,7 +492,8 @@ td {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+    transition-property:
+      color, background-color, border-color, text-decoration-color, outline-color !important;
     scroll-behavior: auto !important;
   }
 }
