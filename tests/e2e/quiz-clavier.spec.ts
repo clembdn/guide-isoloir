@@ -12,13 +12,18 @@
  * déclenche ne l'est pas.
  */
 import { test, expect } from "@playwright/test";
+import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
+
+/** Lu dans les données : coder le nombre en dur rendrait ces tests faux au
+ *  premier ajout de question, sans que le quiz soit pour autant cassé. */
+const TOTAL = QUESTIONS_FACTICES.length;
 
 test("le quiz se parcourt entièrement au clavier", async ({ page }) => {
   await page.goto("/test", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 
   const progression = page.locator(".progression-texte");
-  await expect(progression).toHaveText("Question 1 sur 3");
+  await expect(progression).toHaveText(`Question 1 sur ${TOTAL}`);
 
   // Atteindre le premier bouton radio à la seule force de Tab.
   const premiereReponse = page.locator('input[type="radio"]').first();
@@ -39,7 +44,7 @@ test("le quiz se parcourt entièrement au clavier", async ({ page }) => {
 
   // Entrée dans le groupe passe à la question suivante : le chemin rapide.
   await page.keyboard.press("Enter");
-  await expect(progression).toHaveText("Question 2 sur 3");
+  await expect(progression).toHaveText(`Question 2 sur ${TOTAL}`);
 
   // Le retour arrière est atteignable au clavier lui aussi.
   await expect(page.getByRole("button", { name: "Question précédente" })).toBeVisible();
@@ -61,7 +66,7 @@ test("aucune animation quand l'action vient du clavier", async ({ page }) => {
   await page.locator('input[type="radio"]').nth(0).focus();
   await page.keyboard.press("ArrowDown");
   await page.keyboard.press("Enter");
-  await expect(page.locator(".progression-texte")).toHaveText("Question 3 sur 3");
+  await expect(page.locator(".progression-texte")).toHaveText(`Question 3 sur ${TOTAL}`);
   await expect(ecran).toHaveAttribute("data-anime", "non");
 });
 

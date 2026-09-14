@@ -16,6 +16,23 @@
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Quiz from "../../components/Quiz.svelte";
+import { validerQuestions } from "../../lib/questions";
+import { QUESTIONS_FACTICES } from "../../factice/questions-factices";
+import { projeter } from "../../lib/projection";
+
+/*
+ * Validation au build. Ce frontmatter ne s'exécute QUE côté serveur : le schéma
+ * zod échoue le build si une question est mal formée, sans partir dans le
+ * bundle. Une infobulle sans source, un thème vide ou un identifiant en double
+ * arrêtent la construction ici.
+ */
+validerQuestions(QUESTIONS_FACTICES);
+
+/*
+ * Projection : l'îlot ne reçoit que ce qui s'affiche. `direction` reste ici,
+ * côté serveur, et n'est ni rendu ni embarqué dans le bundle.
+ */
+const questions = projeter(QUESTIONS_FACTICES);
 ---
 
 <BaseLayout
@@ -31,7 +48,19 @@ import Quiz from "../../components/Quiz.svelte";
     vous fermez cet onglet.
   </p>
 
-  <Quiz client:load />
+  <Quiz client:load questions={questions} />
+
+  <noscript>
+    <p class="reserve">
+      Le test a besoin de JavaScript pour fonctionner : c'est ce qui permet de calculer vos
+      résultats dans votre navigateur, sans jamais envoyer vos réponses. La première question
+      ci-dessus est lisible, mais vous ne pourrez ni y répondre ni passer à la suivante.
+    </p>
+    <p class="reserve">
+      La <a href="/methodologie">méthodologie</a> décrit la méthode de calcul, et la rubrique
+      <a href="/comprendre">Comprendre</a> ne demande aucun JavaScript.
+    </p>
+  </noscript>
 
   <p>
     La <a href="/methodologie">méthodologie</a> décrit comment les positions seront établies, et la&#32;<a

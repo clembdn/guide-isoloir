@@ -31,6 +31,9 @@ import { test, expect, type Page, type Request } from "@playwright/test";
 import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
 import { CLE_SESSION } from "../../src/lib/session-test";
 
+/** Lu dans les données plutôt que codé en dur. */
+const TOTAL = QUESTIONS_FACTICES.length;
+
 /** Fragments dont l'apparition dans une requête prouverait une fuite. */
 const SENTINELLES = [
   ...QUESTIONS_FACTICES.map((question) => question.id),
@@ -142,21 +145,24 @@ test("aucune réponse ne sort du navigateur, même vers notre propre domaine", a
   const suivante = page.getByRole("button", { name: "Question suivante" });
   const precedente = page.getByRole("button", { name: "Question précédente" });
 
-  // Question 1 : « Tout à fait d'accord », première de l'échelle.
-  await reponses.nth(0).check();
-  await suivante.click();
-
-  // Question 2 : « Pas du tout d'accord », dernière de l'échelle.
-  await reponses.nth(4).check();
-  await suivante.click();
-
-  // Question 3 : « Je n'ai pas d'avis », la sixième réponse.
-  await reponses.nth(5).check();
+  /*
+   * On répond à TOUTES les questions, en variant les positions pour que la
+   * signature stockée soit reconnaissable. Le parcours est générique : coder le
+   * nombre de questions en dur casserait ce test au premier ajout, sans qu'une
+   * fuite soit pour autant apparue.
+   */
+  for (let index = 0; index < TOTAL; index += 1) {
+    await expect(page.locator(".progression-texte")).toHaveText(
+      `Question ${index + 1} sur ${TOTAL}`,
+    );
+    // 0 = « tout à fait d'accord », 4 = « pas du tout d'accord », 5 = « sans avis ».
+    await reponses.nth(index === TOTAL - 1 ? 5 : index % 5).check();
+    if (index < TOTAL - 1) await suivante.click();
+  }
 
   // Retour arrière, puis modification d'une réponse déjà donnée.
   await precedente.click();
-  await expect(page.locator(".progression-texte")).toHaveText("Question 2 sur 3");
-  await expect(reponses.nth(4)).toBeChecked();
+  await expect(page.locator(".progression-texte")).toHaveText(`Question ${TOTAL - 1} sur ${TOTAL}`);
   await reponses.nth(1).check();
   await suivante.click();
 
@@ -178,10 +184,12 @@ test("aucune réponse ne sort du navigateur, même vers notre propre domaine", a
   expect(stocke, "Les réponses n'ont pas survécu à la navigation vers /resultat").not.toBeNull();
 
   const etat = JSON.parse(stocke ?? "{}") as { reponses: Record<string, unknown> };
+  expect(Object.keys(etat.reponses)).toHaveLength(TOTAL);
   expect(etat.reponses[QUESTIONS_FACTICES[0]!.id]).toBe(2);
-  // La modification a bien remplacé la réponse initiale, pas ajouté une seconde.
-  expect(etat.reponses[QUESTIONS_FACTICES[1]!.id]).toBe(1);
-  expect(etat.reponses[QUESTIONS_FACTICES[2]!.id]).toBe("sans-avis");
+  // La dernière question a reçu « sans avis », qui n'est pas un nombre.
+  expect(etat.reponses[QUESTIONS_FACTICES[TOTAL - 1]!.id]).toBe("sans-avis");
+  // La modification a remplacé la réponse de l'avant-dernière, pas ajouté une seconde.
+  expect(etat.reponses[QUESTIONS_FACTICES[TOTAL - 2]!.id]).toBe(1);
 
   // L'URL de résultat ne porte ni paramètre ni fragment.
   const url = new URL(page.url());
@@ -219,7 +227,7 @@ test("le bouton « Effacer mes réponses » vide réellement le stockage", async
     await page.evaluate((cle) => sessionStorage.getItem(cle), CLE_SESSION),
     "La clé de session subsiste après effacement",
   ).toBeNull();
-  await expect(page.locator(".progression-texte")).toHaveText("Question 1 sur 3");
+  await expect(page.locator(".progression-texte")).toHaveText(`Question 1 sur ${TOTAL}`);
   await expect(page.locator('input[type="radio"]:checked')).toHaveCount(0);
 });
 
@@ -239,7 +247,7 @@ test("un test déjà terminé repart de zéro", async ({ page }) => {
   await page.reload({ waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 
-  await expect(page.locator(".progression-texte")).toHaveText("Question 1 sur 3");
+  await expect(page.locator(".progression-texte")).toHaveText(`Question 1 sur ${TOTAL}`);
   await expect(page.locator('input[type="radio"]:checked')).toHaveCount(0);
   expect(await page.evaluate((cle) => sessionStorage.getItem(cle), CLE_SESSION)).toBeNull();
 });

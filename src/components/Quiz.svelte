@@ -16,12 +16,8 @@
       réponses au clavier perçoit toute animation comme de la latence.
 -->
 <script lang="ts">
-  import {
-    QUESTIONS_FACTICES,
-    ECHELLE,
-    AVERTISSEMENT_FACTICE,
-    type QuestionFactice,
-  } from "../factice/questions-factices";
+  import { ECHELLE, AVERTISSEMENT_FACTICE } from "../factice/questions-factices";
+  import type { QuestionAffichee } from "../lib/projection";
   import {
     SANS_AVIS,
     effacerEtat,
@@ -32,14 +28,18 @@
     type Reponse,
   } from "../lib/session-test";
 
-  type Proprietes = { questions?: readonly QuestionFactice[] };
-  const { questions = QUESTIONS_FACTICES }: Proprietes = $props();
+  /*
+   * Les questions arrivent en propriété, projetées côté serveur. Le composant
+   * n'importe pas le module de données : `direction` ne doit se trouver ni dans
+   * le HTML ni dans ce bundle.
+   */
+  type Proprietes = { questions: readonly QuestionAffichee[] };
+  const { questions }: Proprietes = $props();
 
   const ids = questions.map((question) => question.id);
 
   let indice = $state(0);
   let reponses = $state<Record<string, Reponse>>({});
-  let pret = $state(false);
 
   /*
    * Modalité de la dernière interaction. Sert uniquement à décider s'il faut
@@ -73,7 +73,6 @@
       const premierSansReponse = ids.findIndex((id) => !(id in etat.reponses));
       indice = premierSansReponse === -1 ? 0 : premierSansReponse;
     }
-    pret = true;
   });
 
   function enregistrer(id: string, valeur: Reponse) {
@@ -115,10 +114,16 @@
 />
 
 <!--
-  Le contenu n'est rendu qu'une fois l'état de session relu. Sans cela, la
-  première image montrerait la question 1 avant de sauter à la question reprise.
+  La première question est rendue par le serveur, donc lisible avant même que
+  l'îlot s'hydrate et présente dans le HTML statique.
+  
+  On ne l'attend PAS derrière `pret`. Le faire évitait un bref saut de la
+  question 1 vers la question reprise, mais au prix d'un écran vide sans
+  JavaScript — ce que CLAUDE.md interdit. Le saut ne concerne que la reprise
+  d'un test interrompu, et il dure le temps d'une hydratation ; le vide, lui,
+  concernait tout le monde.
 -->
-{#if pret && question}
+{#if question}
   <div class="quiz">
     <p class="avertissement-factice">{AVERTISSEMENT_FACTICE}</p>
 
@@ -132,7 +137,7 @@
     {#key indice}
       <div class="ecran" data-anime={anime ? "oui" : "non"}>
         <fieldset class="groupe">
-          <legend class="affirmation">{question.affirmation}</legend>
+          <legend class="affirmation">{question.texte}</legend>
 
           <div class="choix" onkeydown={raccourciEntree} role="none">
             {#each ECHELLE as position (position.valeur)}
