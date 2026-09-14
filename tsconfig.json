@@ -16,6 +16,9 @@
       "~/*": ["src/*"]
     }
   },
-  "include": [".astro/types.d.ts", "src/**/*", "tests/**/*", "*.config.ts", "*.config.mjs"],
-  "exclude": ["dist", "node_modules", ".astro"]
+  // `.astro/` porte les types générés des collections de contenu : l'exclure
+  // ferait retomber chaque entrée sur `any`, et le schéma Zod ne protégerait
+  // plus rien côté TypeScript.
+  "include": [".astro/**/*.d.ts", "src/**/*", "tests/**/*", "*.config.ts", "*.config.mjs"],
+  "exclude": ["dist", "node_modules"]
 }

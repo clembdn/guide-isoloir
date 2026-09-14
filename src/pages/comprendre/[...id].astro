@@ -1,0 +1,27 @@
+---
+/*
+ * Page d'un article de /comprendre.
+ *
+ * Seuls les articles relus (`relecture: verifie`) sont générés. Un brouillon
+ * n'a pas d'URL : il ne peut donc pas fuiter par un lien direct.
+ */
+import { render } from "astro:content";
+import ArticleLayout from "../../layouts/ArticleLayout.astro";
+import { articlesPublies } from "../../lib/comprendre";
+import type { GetStaticPaths } from "astro";
+
+export const getStaticPaths = (async () => {
+  const articles = await articlesPublies();
+  return articles.map((article) => ({
+    params: { id: article.id },
+    props: { article },
+  }));
+}) satisfies GetStaticPaths;
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+---
+
+<ArticleLayout article={article} corps={article.body ?? ""}>
+  <Content />
+</ArticleLayout>

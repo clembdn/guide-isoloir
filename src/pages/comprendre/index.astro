@@ -1,0 +1,71 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import { articlesPublies } from "../../lib/comprendre";
+import { formatDateFr } from "../../lib/date";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
+
+const UPDATED = "2026-09-14";
+const articles = await articlesPublies();
+
+const filAriane = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Comprendre",
+      item: new URL("/comprendre", SITE_URL).href,
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Comprendre l'élection présidentielle"
+  description="Comment se déroule l'élection présidentielle, comment s'inscrire, comment voter, et ce qu'un président décide réellement. Réponses courtes et sourcées."
+  updated={UPDATED}
+>
+  <h1>Comprendre l'élection présidentielle</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p>
+    Des réponses courtes à des questions précises : comment se déroule le scrutin, comment
+    s'inscrire, comment voter quand on est absent, et ce qu'un président peut réellement décider.
+    Chaque réponse cite ses sources et indique quand elle a été vérifiée.
+  </p>
+
+  <p>
+    Ces pages ne remplacent pas service-public.fr, qui reste la source officielle. Elles répondent
+    plus vite, sur téléphone, sans vocabulaire administratif.
+  </p>
+
+  {
+    articles.length === 0 ? (
+      <p>
+        Aucun article n'est encore en ligne. Les premiers sont en cours de rédaction et de
+        vérification : un article n'est publié qu'une fois ses faits contrôlés sur des sources
+        citées.
+      </p>
+    ) : (
+      <ul class="liste-articles">
+        {articles.map((article) => (
+          <li>
+            <a href={`/comprendre/${article.id}`}>{article.data.titre}</a>
+            <p>{article.data.question}</p>
+            <p class="mise-a-jour">
+              Mis à jour le{" "}
+              <time datetime={article.data.misAJourLe}>
+                {formatDateFr(article.data.misAJourLe)}
+              </time>
+            </p>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+</BaseLayout>

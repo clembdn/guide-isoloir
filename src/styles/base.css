@@ -211,6 +211,55 @@ hr {
   z-index: 1;
 }
 
+/* Fil d'Ariane. */
+
+.fil-ariane {
+  font-size: 0.9375rem;
+  color: var(--couleur-encre-faible);
+  margin-bottom: var(--pas-3);
+}
+
+.fil-ariane a {
+  color: var(--couleur-encre-faible);
+}
+
+/* Question à laquelle l'article répond : un chapeau, pas un encadré. */
+
+.question {
+  font-size: 1.125rem;
+  line-height: 1.5;
+  color: var(--couleur-encre);
+  margin-bottom: var(--pas-4);
+}
+
+/* Liste d'articles : des entrées séparées par un trait, pas des cartes. */
+
+.liste-articles {
+  list-style: none;
+  padding: 0;
+  margin: var(--pas-4) 0 0;
+}
+
+.liste-articles li {
+  border-top: 1px solid var(--couleur-trait);
+  padding-top: var(--pas-2);
+  margin-bottom: var(--pas-3);
+}
+
+.liste-articles li > a {
+  font-weight: 600;
+}
+
+.liste-articles p {
+  margin: var(--pas-1) 0 0;
+}
+
+/* Sources d'un article. */
+
+.sources {
+  font-size: 0.9375rem;
+}
+
 /* Date de mise à jour. */
 
 .mise-a-jour {
@@ -227,6 +276,16 @@ hr {
   margin-top: var(--pas-4);
   padding-top: var(--pas-2);
   border-top: 1px solid var(--couleur-trait);
+}
+
+/* Bandeau de chantier. Disparaît seul quand le site devient publiable. */
+
+.chantier {
+  border-bottom: 1px solid var(--couleur-trait);
+  padding-bottom: var(--pas-2);
+  margin-bottom: var(--pas-4);
+  color: var(--couleur-encre-faible);
+  font-size: 0.9375rem;
 }
 
 /* Encadré d'avertissement : un trait à gauche, pas une carte. */

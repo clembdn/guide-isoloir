@@ -18,6 +18,12 @@ type Entree = {
 const PAGES: readonly Entree[] = [
   { chemin: "/", titre: "Accueil", resume: "ce qu'est le site, ce qui est publié" },
   {
+    chemin: "/comprendre",
+    titre: "Comprendre",
+    resume:
+      "réponses courtes et sourcées sur le déroulement du scrutin, l'inscription, le vote et les pouvoirs du président",
+  },
+  {
     chemin: "/a-propos",
     titre: "À propos",
     resume: "qui édite le site, pourquoi, à quel titre",

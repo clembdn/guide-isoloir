@@ -2,9 +2,11 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME, ELECTION } from "../lib/site";
+import { articlesPublies } from "../lib/comprendre";
 import { formatDateFr } from "../lib/date";
 
 const UPDATED = "2026-09-14";
+const articles = await articlesPublies();
 
 const websiteLd = {
   "@context": "https://schema.org",
@@ -28,54 +30,98 @@ const websiteLd = {
 ---
 
 <BaseLayout title={SITE_NAME} description={SITE_TAGLINE} updated={UPDATED}>
-  <h1>{SITE_NAME}</h1>
+  <h1>Vous votez pour la première fois en 2027 ?</h1>
   <DerniereMiseAJour date={UPDATED} />
 
-  <p>
-    {SITE_TAGLINE} Le premier tour a lieu le {formatDateFr(ELECTION.round1)}, le second le {
-      formatDateFr(ELECTION.round2)
-    }.
+  <p class="question">
+    Guide Isoloir répond à trois questions dans l'ordre : comment se déroule l'élection, ce qu'un
+    président peut réellement décider, et de quels candidats vos idées sont les plus proches.
   </p>
 
-  <div class="reserve">
-    <p>
-      Le site est en construction. Les pages ci-dessous décrivent la méthode et les engagements
-      avant que le contenu n'existe, pour qu'ils puissent être critiqués à l'avance. Le test
-      comparatif n'est pas encore disponible.
-    </p>
-  </div>
+  <p>
+    Le premier tour a lieu le {formatDateFr(ELECTION.round1)}, le second le {
+      formatDateFr(ELECTION.round2)
+    }. En Guadeloupe, en Martinique, en Guyane, à Saint-Pierre-et-Miquelon, en Polynésie française
+    et dans les Amériques, on vote la veille.
+  </p>
 
-  <h2>Ce qui est déjà publié</h2>
+  <h2>Vos réponses ne sortent pas de votre téléphone</h2>
+
+  <p>
+    Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un identifiant.
+    Le calcul s'effectue exclusivement dans votre navigateur. Il n'y a ni compte, ni inscription, ni
+    bandeau de consentement, parce qu'il n'y a rien à consentir.
+  </p>
+
+  <p>
+    Ce n'est pas qu'une promesse écrite : aucun script tiers n'est chargé, et un test automatique
+    échoue si une requête sort vers un autre domaine. Le détail est sur la page <a
+      href="/financement">financement</a
+    >.
+  </p>
+
+  <h2>Comprendre avant de comparer</h2>
+
+  {
+    articles.length === 0 ? (
+      <p>
+        Les premières réponses sont en cours de rédaction : comment s'inscrire sur les listes, où et
+        comment voter, ce qu'est un parrainage, comment donner procuration, ce qu'un président
+        décide seul. Un article n'est mis en ligne qu'une fois ses faits vérifiés sur des sources
+        citées. <a href="/comprendre">Voir la rubrique</a>.
+      </p>
+    ) : (
+      <>
+        <p>Des réponses courtes et sourcées aux questions qu'on se pose avant un premier vote.</p>
+        <ul class="liste-articles">
+          {articles.slice(0, 5).map((article) => (
+            <li>
+              <a href={`/comprendre/${article.id}`}>{article.data.titre}</a>
+            </li>
+          ))}
+        </ul>
+        <p>
+          <a href="/comprendre">Toutes les réponses</a>
+        </p>
+      </>
+    )
+  }
+
+  <h2>Le test comparatif</h2>
+
+  <p>
+    Il n'est pas encore disponible. Il posera une dizaine d'affirmations et vous montrera de quels
+    candidats vos réponses sont les plus proches, avec les sources de chaque position et le niveau
+    de certitude.
+  </p>
+
+  <p>
+    Il ne vous dira pas pour qui voter. Un classement n'est pas une recommandation : c'est un point
+    de départ pour aller lire. La <a href="/methodologie">méthodologie</a> explique comment les positions
+    sont établies, et ce que le calcul ne fait pas.
+  </p>
+
+  <h2>Pourquoi vous pouvez vérifier ce site</h2>
 
   <ul>
-    <li><a href="/a-propos">À propos</a> — qui édite ce site, pourquoi, et à quel titre.</li>
     <li>
-      <a href="/methodologie">Méthodologie</a> — comment les positions sont établies, ce que le calcul
-      fait et ne fait pas.
+      <a href="/a-propos">Un éditeur identifié par son nom</a>, responsable de chaque page, y
+      compris juridiquement.
     </li>
     <li>
-      <a href="/charte-editoriale">Charte éditoriale</a> — quels candidats sont référencés, et comment
-      une erreur est corrigée.
+      <a href="/methodologie">Une méthode publiée avant ses résultats</a>, avec les désaccords
+      internes et les taux d'accord entre relecteurs.
     </li>
     <li>
-      <a href="/corrections">Corrections</a> — le registre daté de ce qui a été corrigé, et pourquoi.
+      <a href="/charte-editoriale">Des règles de référencement écrites à l'avance</a>, et un droit
+      de réponse ouvert aux équipes de campagne.
     </li>
     <li>
-      <a href="/financement">Financement</a> — qui paie, et pourquoi il n'y a aucune publicité.
+      <a href="/corrections">Un registre public des corrections</a> : rien n'est modifié en silence.
     </li>
-    <li><a href="/mentions-legales">Mentions légales</a> — l'éditeur, identifié.</li>
-  </ul>
-
-  <h2>Ce que ce site vous promet</h2>
-
-  <ul>
     <li>
-      Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un
-      identifiant. Le calcul s'effectue exclusivement dans votre navigateur.
+      <a href="/financement">Aucune publicité, aucun don, aucun analytics</a> jusqu'après le second tour.
     </li>
-    <li>Aucune publicité, aucun analytics, aucun script tiers.</li>
-    <li>Un éditeur identifié par son nom, responsable de chaque page.</li>
-    <li>Une méthode publiée, et des désaccords publiés avec elle.</li>
   </ul>
 
   <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} is:inline />

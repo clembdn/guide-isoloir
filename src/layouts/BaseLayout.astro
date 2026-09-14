@@ -16,7 +16,7 @@
  * état, pas la page qui s'en excuse.
  */
 import "../styles/base.css";
-import { SITE_NAME, SITE_URL, FOOTER_NAV, EDITOR_NAME } from "../lib/site";
+import { SITE_NAME, SITE_URL, FOOTER_NAV, EDITOR_NAME, IS_PUBLISHABLE } from "../lib/site";
 
 type Props = {
   title: string;
@@ -28,6 +28,18 @@ type Props = {
 };
 
 const { title, description, updated, noindex = false } = Astro.props;
+
+/*
+ * Tant que le site n'est pas publiable — domaine non acheté, éditeur non nommé —
+ * TOUTES les pages sont en noindex, pas seulement /test et /resultat.
+ *
+ * Cloudflare déploie à chaque push, sans attendre la CI. Ce qui est en ligne
+ * aujourd'hui est donc un chantier visible, et un chantier indexé serait une
+ * dette : des pages sans auteur identifiable sur un sujet YMYL, référencées
+ * avant d'être finies. Le noindex tombe tout seul le jour où src/lib/site.ts
+ * est renseigné.
+ */
+const horsIndex = noindex || !IS_PUBLISHABLE;
 
 /*
  * `build.format: "file"` fait apparaître `.html` dans `Astro.url.pathname` au
@@ -65,7 +77,7 @@ const jsonLd = {
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {horsIndex && <meta name="robots" content="noindex, nofollow" />}
 
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content={SITE_NAME} />
@@ -74,7 +86,11 @@ const jsonLd = {
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content="fr_FR" />
 
-    {!noindex && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />}
+    {
+      !horsIndex && (
+        <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} is:inline />
+      )
+    }
   </head>
 
   <body>
@@ -89,6 +105,14 @@ const jsonLd = {
 
       <main class="contenu" id="contenu">
         <div class="enveloppe">
+          {
+            !IS_PUBLISHABLE && !noindex && (
+              <p class="chantier">
+                Site en préparation. Les pages sont mises en ligne au fur et à mesure de leur
+                rédaction, et aucune n'est référencée par les moteurs de recherche.
+              </p>
+            )
+          }
           <slot />
         </div>
       </main>

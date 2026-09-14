@@ -1,0 +1,42 @@
+---
+/*
+ * Page 404.
+ *
+ * Cloudflare sert ce fichier pour toute URL inconnue : `not_found_handling` est
+ * réglé sur `404-page` dans wrangler.jsonc. Sans elle, le visiteur tomberait
+ * sur la page d'erreur générique de Cloudflare, qui ne dit rien et ne ramène
+ * nulle part.
+ *
+ * `noindex` : une page d'erreur n'a rien à faire dans un index.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Page introuvable"
+  description="Cette adresse ne correspond à aucune page de Guide Isoloir."
+  noindex={true}
+>
+  <h1>Cette page n'existe pas</h1>
+
+  <p>
+    L'adresse demandée ne correspond à aucune page du site. Elle a peut-être changé, ou le lien que
+    vous avez suivi comportait une erreur.
+  </p>
+
+  <p>Voici par où reprendre :</p>
+
+  <ul>
+    <li><a href="/">L'accueil</a>, qui résume ce que fait ce site.</li>
+    <li>
+      <a href="/comprendre">Comprendre l'élection</a> — comment voter, comment s'inscrire, ce qu'un président
+      décide.
+    </li>
+    <li><a href="/methodologie">La méthodologie</a> — comment les positions sont établies.</li>
+  </ul>
+
+  <p>
+    Si vous êtes arrivé ici depuis un lien de ce site, c'est une erreur de notre part :
+    <a href="/charte-editoriale">la charte éditoriale</a> explique comment la signaler.
+  </p>
+</BaseLayout>

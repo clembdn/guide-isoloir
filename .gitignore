@@ -50,6 +50,28 @@ pnpm-debug.log*
 tmp/
 *.tmp
 
+# Outillage d'agents — hors dépôt.
+#
+# Les skills installés localement (Claude Code, gstack, emilkowalski/skills)
+# sont de l'outillage personnel, pas du code du projet. Trois raisons de ne pas
+# les versionner ici :
+#   - ce sont des milliers de lignes de contenu tiers dans un dépôt public
+#     publié sous AGPL, avec une question de licence sans réponse claire ;
+#   - ils changent au rythme de leurs auteurs, pas à celui du projet ;
+#   - ils noieraient les diffs de revue.
+#
+# CLAUDE.md décrit quelles skills utiliser et dans quel ordre de priorité :
+# c'est la seule chose qui doit vivre dans le dépôt.
+.agents/
+.claude/skills/
+skills-lock.json
+
+# En revanche, un réglage Claude Code propre au projet a sa place dans le
+# dépôt : il fait partie de la façon de travailler ici, pas de l'outillage
+# personnel. On ignore donc les skills, pas tout .claude/.
+.claude/*
+!.claude/settings.json
+
 # Éditeurs et systèmes
 .DS_Store
 Thumbs.db

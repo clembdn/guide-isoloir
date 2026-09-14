@@ -1,0 +1,116 @@
+---
+/*
+ * Gabarit des articles de /comprendre.
+ *
+ * Balisage `Article` + `BreadcrumbList`, signature nommée, date de mise à jour
+ * et date de vérification des faits, sources listées en fin d'article.
+ *
+ * Pas de `FAQPage` : depuis 2023 les résultats enrichis FAQ sont réservés aux
+ * sites gouvernementaux et de santé reconnus. Voir CLAUDE.md, section SEO.
+ */
+import BaseLayout from "./BaseLayout.astro";
+import { formatDateFr } from "../lib/date";
+import { minutesDeLecture, type Article } from "../lib/comprendre";
+import { EDITOR_NAME, SITE_NAME, SITE_URL } from "../lib/site";
+
+type Props = {
+  article: Article;
+  corps: string;
+};
+
+const { article, corps } = Astro.props;
+const { data } = article;
+
+const url = new URL(`/comprendre/${article.id}`, SITE_URL).href;
+const minutes = minutesDeLecture(corps);
+
+const articleLd = {
+  "@context": "https://schema.org",
+  "@type": "Article",
+  headline: data.titre,
+  description: data.description,
+  inLanguage: "fr-FR",
+  datePublished: data.publieLe,
+  dateModified: data.misAJourLe,
+  mainEntityOfPage: url,
+  ...(EDITOR_NAME
+    ? {
+        author: { "@type": "Person", name: EDITOR_NAME, url: new URL("/a-propos", SITE_URL).href },
+        publisher: { "@type": "Person", name: EDITOR_NAME },
+      }
+    : {}),
+  citation: data.sources.map((source) => ({
+    "@type": "CreativeWork",
+    name: source.titre,
+    url: source.url,
+    publisher: { "@type": "Organization", name: source.editeur },
+  })),
+};
+
+const filAriane = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Comprendre",
+      item: new URL("/comprendre", SITE_URL).href,
+    },
+    { "@type": "ListItem", position: 3, name: data.titre, item: url },
+  ],
+};
+---
+
+<BaseLayout title={data.titre} description={data.description} updated={data.misAJourLe}>
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <a href="/">{SITE_NAME}</a>
+    <span aria-hidden="true">/</span>
+    <a href="/comprendre">Comprendre</a>
+  </nav>
+
+  <h1>{data.titre}</h1>
+
+  <p class="mise-a-jour">
+    Mis à jour le <time datetime={data.misAJourLe}>{formatDateFr(data.misAJourLe)}</time> ·
+    {minutes} minute{minutes > 1 ? "s" : ""} de lecture
+  </p>
+
+  <p class="question">{data.question}</p>
+
+  <div class="prose">
+    <slot />
+  </div>
+
+  <h2 id="sources">Sources</h2>
+
+  <ol class="sources">
+    {
+      data.sources.map((source) => (
+        <li>
+          <a href={source.url} rel="noopener">
+            {source.titre}
+          </a>{" "}
+          — {source.editeur}, consulté le{" "}
+          <time datetime={source.consulteLe}>{formatDateFr(source.consulteLe)}</time>
+        </li>
+      ))
+    }
+  </ol>
+
+  {
+    data.verifiePar && data.verifieLe && (
+      <p class="signature">
+        Faits vérifiés par {data.verifiePar} le{" "}
+        <time datetime={data.verifieLe}>{formatDateFr(data.verifieLe)}</time>. Une erreur ? La
+        procédure de signalement est décrite dans la{" "}
+        <a href="/charte-editoriale">charte éditoriale</a>, et les corrections déjà publiées dans le{" "}
+        <a href="/corrections">registre</a>.
+      </p>
+    )
+  }
+
+  <script type="application/ld+json" set:html={JSON.stringify(articleLd)} is:inline />
+  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+</BaseLayout>

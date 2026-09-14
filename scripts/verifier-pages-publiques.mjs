@@ -28,8 +28,9 @@ const STRICT = process.argv.includes("--strict");
  * `/test` et `/resultat` sont volontairement absentes : elles sont vides par
  * construction en phase 0 et portent un noindex.
  */
-const PAGES_PUBLIQUES = [
+const PAGES_FIXES = [
   "index.html",
+  "comprendre.html",
   "a-propos.html",
   "methodologie.html",
   "charte-editoriale.html",
@@ -37,6 +38,13 @@ const PAGES_PUBLIQUES = [
   "financement.html",
   "mentions-legales.html",
 ];
+
+/**
+ * Les articles de /comprendre sont générés depuis la collection : leur nombre
+ * n'est pas connu d'avance. Ils sont ramassés par ce motif, et soumis aux mêmes
+ * contrôles que les pages fixes.
+ */
+const MOTIF_ARTICLES = /^comprendre\/.+\.html$/;
 
 /** Fichiers servis qui ne sont pas des pages mais ne doivent pas fuiter de domaine. */
 const AUTRES_FICHIERS_SERVIS = ["robots.txt", "llms.txt", "sitemap.xml"];
@@ -137,14 +145,20 @@ try {
   process.exit(1);
 }
 
-for (const page of PAGES_PUBLIQUES) {
+for (const page of PAGES_FIXES) {
   if (!presents.has(page)) {
     signaler(page, "page publique attendue, absente de dist/");
   }
 }
 
+/** Pages fixes présentes, plus tous les articles publiés. */
+const PAGES_PUBLIQUES = [
+  ...PAGES_FIXES.filter((page) => presents.has(page)),
+  ...[...presents].filter((fichier) => MOTIF_ARTICLES.test(fichier)).sort(),
+];
+
 // 2. Aucun espace réservé dans le texte servi.
-const aExaminer = [...PAGES_PUBLIQUES, ...AUTRES_FICHIERS_SERVIS].filter((f) => presents.has(f));
+const aExaminer = [...PAGES_PUBLIQUES, ...AUTRES_FICHIERS_SERVIS.filter((f) => presents.has(f))];
 
 for (const fichier of aExaminer) {
   const contenu = await readFile(join(RACINE, fichier), "utf8");
@@ -179,7 +193,7 @@ const editeur = /<dt>\s*Éditeur\s*<\/dt>\s*<dd>\s*([^,<]+)/i.exec(mentionsHtml)
 if (!editeur) {
   signaler("mentions-legales.html", "le nom de l'éditeur est absent");
 } else {
-  for (const page of PAGES_PUBLIQUES.filter((f) => presents.has(f))) {
+  for (const page of PAGES_PUBLIQUES) {
     const texte = texteVisible(await readFile(join(RACINE, page), "utf8"));
     if (!texte.includes(editeur)) {
       signaler(page, `le nom de l'éditeur (« ${editeur} ») n'apparaît pas`);

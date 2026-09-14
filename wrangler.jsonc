@@ -1,3 +1,34 @@
+// Cloudflare Pages, sortie statique.
+//
+// Le déploiement passe par l'INTÉGRATION GIT du tableau de bord Cloudflare :
+// Cloudflare construit et publie à chaque push, et fournit les
+// prévisualisations de pull request. Il n'y a donc pas de workflow de
+// déploiement dans .github/ — deux chemins produiraient deux déploiements par
+// commit.
+//
+// CONSÉQUENCE IMPORTANTE : Cloudflare NE REGARDE PAS le résultat de la CI
+// GitHub. Une CI rouge n'empêche pas une mise en ligne. Le seul garde-fou qui
+// bloque réellement une publication est la commande de build configurée dans
+// le tableau de bord Cloudflare.
+//
+// Réglages attendus (Workers & Pages > le projet > Settings > Build) :
+//
+//   Build command        npm run build        <- aujourd'hui
+//   Build output dir     dist
+//   Node version         22   (ou variable NODE_VERSION = 22)
+//
+// AU LANCEMENT, quand le domaine est acheté et le nom de l'éditeur renseigné
+// dans src/lib/site.ts, remplacer la commande de build par :
+//
+//   Build command        npm run build:prod
+//
+// `build:prod` ajoute le garde-fou de publication : il échoue si une page
+// publique contient un espace réservé, un domaine .invalid, ou s'il manque une
+// mention légale obligatoire. À partir de ce moment, Cloudflare refusera de
+// publier un site incomplet.
+//
+// En attendant, tout le site est servi en `noindex` : voir IS_PUBLISHABLE dans
+// src/lib/site.ts. Rien de ce qui est déployé aujourd'hui ne peut être indexé.
 {
   "name": "guide-isoloir",
   "compatibility_date": "2026-09-14",

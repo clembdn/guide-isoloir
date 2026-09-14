@@ -1,8 +1,14 @@
 # Intégration continue.
 #
 # La CI échoue si un test échoue. Aucune étape n'est tolérante : pas de
-# `continue-on-error`, pas de `|| true`. Le déploiement (deploy.yml) attend que
-# ce workflow soit vert.
+# `continue-on-error`, pas de `|| true`.
+#
+# ATTENTION : le déploiement passe par l'intégration Git de Cloudflare Pages,
+# qui ne regarde pas le résultat de ce workflow. Une CI rouge n'empêche pas une
+# mise en ligne. Le garde-fou qui bloque réellement une publication est la
+# commande de build configurée côté Cloudflare — voir wrangler.toml.
+#
+# Cette CI sert donc à détecter avant le push, pas à bloquer après.
 
 name: CI
 

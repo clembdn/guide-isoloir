@@ -56,8 +56,9 @@ type NavEntry = {
   label: string;
 };
 
-/** Pages publiques, dans l'ordre du pied de page. */
+/** Sections atteignables depuis le pied de page, dans l'ordre. */
 export const FOOTER_NAV: readonly NavEntry[] = [
+  { href: "/comprendre", label: "Comprendre" },
   { href: "/a-propos", label: "À propos" },
   { href: "/methodologie", label: "Méthodologie" },
   { href: "/charte-editoriale", label: "Charte éditoriale" },

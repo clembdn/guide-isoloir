@@ -41,6 +41,15 @@ export default defineConfig({
      */
     csp: true,
   },
+  markdown: {
+    /*
+     * Coloration syntaxique désactivée. Shiki produit des styles en ligne que
+     * `style-src` haché rejette, et Astro avertit à chaque build. Un parcours
+     * pédagogique sur le vote n'affiche pas de code : la fonctionnalité coûte
+     * un conflit de sécurité pour un besoin qui n'existe pas.
+     */
+    syntaxHighlight: false,
+  },
   integrations: [svelte()],
   devToolbar: {
     enabled: false,
