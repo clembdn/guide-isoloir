@@ -1,6 +1,14 @@
 ---
 /*
- * Route du résultat.
+ * Route du résultat — DÉSACTIVÉE, voir src/routes-desactivees/README.md.
+ *
+ * Ce fichier vit hors de `src/pages/` : Astro ne le construit pas, la route
+ * n'existe pas. L'écran tourne sur des ACTEURS ET POSITIONS FACTICES. Le
+ * garde-fou de publication (`scripts/verifier-pages-publiques.mjs`) refuse un
+ * build de production tant que c'est le cas — d'où l'absence de cette route
+ * plutôt qu'un garde-fou affaibli.
+ *
+ * Une fois remise dans `src/pages/resultat.astro` avec de vraies données :
  *
  * `noindex, nofollow` est définitif : un résultat indexé serait un problème de
  * confidentialité autant que de neutralité. La page n'est pas bloquée dans
@@ -9,13 +17,11 @@
  * AUCUN IDENTIFIANT NE FIGURE JAMAIS DANS CETTE URL. Les réponses transitent par
  * le stockage de session, jamais par l'adresse : une URL de résultat partagée,
  * copiée dans un historique ou envoyée dans un `Referer` exposerait des opinions
- * politiques. `tests/e2e/resultat.spec.ts` le vérifie.
+ * politiques. `tests/e2e/resultat.spec.ts` le vérifie — aujourd'hui en
+ * `test.skip`.
  *
- * L'écran tourne aujourd'hui sur des ACTEURS ET POSITIONS FACTICES. Le garde-fou
- * de publication refuse un build de production tant que c'est le cas.
- *
- * Contrainte permanente : aucun script tiers, aucune police distante, aucun
- * analytics sur cette route.
+ * Contrainte permanente une fois réactivée : aucun script tiers, aucune police
+ * distante, aucun analytics sur cette route.
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Resultat from "../components/Resultat.svelte";

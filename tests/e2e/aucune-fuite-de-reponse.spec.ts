@@ -31,6 +31,13 @@ import { test, expect, type Page, type Request } from "@playwright/test";
 import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
 import { CLE_SESSION } from "../../src/lib/session-test";
 
+/*
+ * TESTS EN SKIP : /test est retirée de `src/pages/` tant qu'elle tourne sur
+ * src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste écrit
+ * et à jour ; il se réactive de lui-même en retirant `.skip` une fois la route
+ * remise en place avec de vraies questions.
+ */
+
 /** Lu dans les données plutôt que codé en dur. */
 const TOTAL = QUESTIONS_FACTICES.length;
 
@@ -134,7 +141,9 @@ function surveiller(page: Page): Emission[] {
   return emissions;
 }
 
-test("aucune réponse ne sort du navigateur, même vers notre propre domaine", async ({ page }) => {
+test.skip("aucune réponse ne sort du navigateur, même vers notre propre domaine", async ({
+  page,
+}) => {
   const emissions = surveiller(page);
   const tentatives = await suivreTentativesDeSortie(page);
 
@@ -214,7 +223,7 @@ test("aucune réponse ne sort du navigateur, même vers notre propre domaine", a
   ).toEqual([]);
 });
 
-test("le bouton « Effacer mes réponses » vide réellement le stockage", async ({ page }) => {
+test.skip("le bouton « Effacer mes réponses » vide réellement le stockage", async ({ page }) => {
   await page.goto("/test", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 
@@ -231,7 +240,7 @@ test("le bouton « Effacer mes réponses » vide réellement le stockage", async
   await expect(page.locator('input[type="radio"]:checked')).toHaveCount(0);
 });
 
-test("un test déjà terminé repart de zéro", async ({ page }) => {
+test.skip("un test déjà terminé repart de zéro", async ({ page }) => {
   // « État vidé au démarrage d'un nouveau test » : revenir sur /test après avoir
   // vu ses résultats, c'est vouloir recommencer, pas relire la dernière question.
   await page.goto("/test", { waitUntil: "networkidle" });

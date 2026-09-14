@@ -1,18 +1,24 @@
 ---
 /*
- * Route du test comparatif.
+ * Route du test comparatif — DÉSACTIVÉE, voir src/routes-desactivees/README.md.
  *
- * L'écran fonctionne, mais il tourne sur TROIS QUESTIONS FACTICES. Aucune donnée
- * politique n'existe encore dans le dépôt : ni candidat, ni position, ni source.
- * Les questions viennent de `src/factice/`, jamais de `src/data/`.
+ * Ce fichier vit hors de `src/pages/` : Astro ne le construit pas, la route
+ * n'existe pas. L'écran fonctionne, mais il tourne sur TROIS QUESTIONS
+ * FACTICES. Aucune donnée politique n'existe encore dans le dépôt : ni
+ * candidat, ni position, ni source. Les questions viennent de `src/factice/`,
+ * jamais de `src/data/`. Publier cette route reviendrait à publier un
+ * comparateur qui ne compare rien — le garde-fou de build
+ * (`scripts/verifier-pages-publiques.mjs`) le refuse, à raison.
  *
- * `noindex` reste donc en place, en plus du noindex global tant que le site
- * n'est pas publiable. Il sera retiré quand les vraies questions seront écrites
- * et vérifiées. La page de résultat, elle, reste `noindex` pour toujours.
+ * Une fois remise dans `src/pages/test/` avec de vraies questions :
+ * `noindex` reste en place jusqu'à vérification, en plus du noindex global
+ * tant que le site n'est pas publiable. La page de résultat, elle, reste
+ * `noindex` pour toujours.
  *
- * Contrainte permanente : aucun script tiers, aucune police distante, aucun
- * analytics sur cette route. Deux tests de bout en bout la gardent :
- * `aucune-requete-tierce` et `aucune-fuite-de-reponse`.
+ * Contrainte permanente une fois réactivée : aucun script tiers, aucune police
+ * distante, aucun analytics sur cette route. Deux tests de bout en bout la
+ * gardent, aujourd'hui en `test.skip` : `aucune-requete-tierce` et
+ * `aucune-fuite-de-reponse`.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import Quiz from "../../components/Quiz.svelte";

@@ -18,7 +18,14 @@ import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
  *  premier ajout de question, sans que le quiz soit pour autant cassé. */
 const TOTAL = QUESTIONS_FACTICES.length;
 
-test("le quiz se parcourt entièrement au clavier", async ({ page }) => {
+/*
+ * TESTS EN SKIP : /test est retirée de `src/pages/` tant qu'elle tourne sur
+ * src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste écrit
+ * et à jour ; il se réactive de lui-même en retirant `.skip` une fois la route
+ * remise en place avec de vraies questions.
+ */
+
+test.skip("le quiz se parcourt entièrement au clavier", async ({ page }) => {
   await page.goto("/test", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 
@@ -50,7 +57,7 @@ test("le quiz se parcourt entièrement au clavier", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Question précédente" })).toBeVisible();
 });
 
-test("aucune animation quand l'action vient du clavier", async ({ page }) => {
+test.skip("aucune animation quand l'action vient du clavier", async ({ page }) => {
   await page.goto("/test", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 
@@ -70,7 +77,7 @@ test("aucune animation quand l'action vient du clavier", async ({ page }) => {
   await expect(ecran).toHaveAttribute("data-anime", "non");
 });
 
-test("« sans avis » est présenté comme distinct du point milieu", async ({ page }) => {
+test.skip("« sans avis » est présenté comme distinct du point milieu", async ({ page }) => {
   await page.goto("/test", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 

@@ -38,6 +38,13 @@ import { test, expect, type Page } from "@playwright/test";
 /** Routes portant un îlot hydraté. À compléter quand il y en aura d'autres. */
 const ROUTES_AVEC_ILOT = ["/test"] as const;
 
+/*
+ * TESTS EN SKIP : /test est retirée de `src/pages/` tant qu'elle tourne sur
+ * src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste écrit
+ * et à jour ; il se réactive de lui-même en retirant `.skip` une fois la route
+ * remise en place avec de vraies questions.
+ */
+
 type Violation = { directive: string; bloque: string };
 
 declare global {
@@ -70,7 +77,7 @@ async function violations(page: Page): Promise<Violation[]> {
 }
 
 for (const route of ROUTES_AVEC_ILOT) {
-  test(`${route} est servie avec une CSP qui autorise les scripts hachés d'Astro`, async ({
+  test.skip(`${route} est servie avec une CSP qui autorise les scripts hachés d'Astro`, async ({
     request,
   }) => {
     const reponse = await request.get(route);
@@ -100,7 +107,7 @@ for (const route of ROUTES_AVEC_ILOT) {
     expect(scriptSrc).not.toContain("unsafe-eval");
   });
 
-  test(`${route} n'émet aucune violation de CSP`, async ({ page }) => {
+  test.skip(`${route} n'émet aucune violation de CSP`, async ({ page }) => {
     await suivreViolations(page);
     await page.goto(route, { waitUntil: "networkidle" });
     await page.waitForTimeout(500);
@@ -115,7 +122,7 @@ for (const route of ROUTES_AVEC_ILOT) {
     ).toEqual([]);
   });
 
-  test(`${route} hydrate son îlot et réagit à une interaction`, async ({ page }) => {
+  test.skip(`${route} hydrate son îlot et réagit à une interaction`, async ({ page }) => {
     await suivreViolations(page);
     await page.goto(route, { waitUntil: "networkidle" });
 

@@ -16,6 +16,13 @@ import { test, expect, type Page } from "@playwright/test";
 import { CLE_SESSION } from "../../src/lib/session-test";
 import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
 
+/*
+ * TESTS EN SKIP : /resultat est retirée de `src/pages/` tant qu'elle tourne
+ * sur src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste
+ * écrit et à jour ; il se réactive de lui-même en retirant `.skip` une fois la
+ * route remise en place avec de vraies données.
+ */
+
 /** Profil tranché, pour obtenir un classement exploitable et non « incertain ». */
 const PROFIL = Object.fromEntries(
   QUESTIONS_FACTICES.map((question, index) => [question.id, index % 2 === 0 ? 2 : -2]),
@@ -32,7 +39,7 @@ async function avecReponses(page: Page) {
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 }
 
-test("aucun identifiant ne figure dans l'URL", async ({ page }) => {
+test.skip("aucun identifiant ne figure dans l'URL", async ({ page }) => {
   await avecReponses(page);
 
   const url = new URL(page.url());
@@ -41,7 +48,7 @@ test("aucun identifiant ne figure dans l'URL", async ({ page }) => {
   expect(url.hash, `Fragment dans l'URL de résultat : ${url.hash}`).toBe("");
 });
 
-test("la page porte noindex et reste hors du sitemap", async ({ request }) => {
+test.skip("la page porte noindex et reste hors du sitemap", async ({ request }) => {
   const page = await request.get("/resultat");
   expect(await page.text()).toMatch(/<meta\s+name="robots"\s+content="noindex, nofollow"\s*\/?>/i);
 
@@ -49,7 +56,7 @@ test("la page porte noindex et reste hors du sitemap", async ({ request }) => {
   expect(sitemap.includes("/resultat"), "/resultat figure dans le sitemap").toBe(false);
 });
 
-test("aucun pourcentage n'est affiché", async ({ page }) => {
+test.skip("aucun pourcentage n'est affiché", async ({ page }) => {
   await avecReponses(page);
   const texte = await page.locator("main").innerText();
 
@@ -59,7 +66,7 @@ test("aucun pourcentage n'est affiché", async ({ page }) => {
   expect(pourcentages, `Pourcentage(s) affiché(s) : ${pourcentages.join(", ")}`).toEqual([]);
 });
 
-test("les qualifications remplacent les chiffres", async ({ page }) => {
+test.skip("les qualifications remplacent les chiffres", async ({ page }) => {
   await avecReponses(page);
   const texte = await page.locator("main").innerText();
 
@@ -70,7 +77,7 @@ test("les qualifications remplacent les chiffres", async ({ page }) => {
   ).toBe(true);
 });
 
-test("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ page }) => {
+test.skip("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ page }) => {
   await avecReponses(page);
 
   const acteurs = page.locator(".classement > li");
@@ -85,7 +92,7 @@ test("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ 
   expect(texte).toContain("Ce classement n'est pas une recommandation");
 });
 
-test("toutes les barres partagent une teinte et une opacité", async ({ page }) => {
+test.skip("toutes les barres partagent une teinte et une opacité", async ({ page }) => {
   await avecReponses(page);
 
   const remplissages = await page.locator(".barre-valeur").evaluateAll((barres) =>
@@ -108,7 +115,7 @@ test("toutes les barres partagent une teinte et une opacité", async ({ page }) 
   expect(new Set(largeurs).size, "Toutes les barres ont la même longueur").toBeGreaterThan(1);
 });
 
-test("la géométrie des barres passe par un attribut, pas par un style en ligne", async ({
+test.skip("la géométrie des barres passe par un attribut, pas par un style en ligne", async ({
   request,
 }) => {
   // La CSP hachée bloquerait un `style=""`. Un `width` sur `<rect>` est un
@@ -117,7 +124,7 @@ test("la géométrie des barres passe par un attribut, pas par un style en ligne
   expect(html).not.toMatch(/<rect[^>]*\sstyle=/i);
 });
 
-test("l'état vide explique au lieu d'afficher un classement", async ({ page }) => {
+test.skip("l'état vide explique au lieu d'afficher un classement", async ({ page }) => {
   await page.goto("/resultat", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 

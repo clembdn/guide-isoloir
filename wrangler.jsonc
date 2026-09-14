@@ -17,25 +17,25 @@
 //
 // Réglages attendus (Workers & Pages > le projet > Settings > Build) :
 //
-//   Build command        npm run build        <- aujourd'hui
+//   Build command        npm run build:prod
 //   Build output dir     dist
 //   Node version         22   (ou variable NODE_VERSION = 22)
 //
-// POURQUOI PAS ENCORE `npm run build:prod`. `build:prod` ajoute le garde-fou de
-// publication, qui refuse entre autres qu'une donnée factice soit servie. Or
-// /test et /resultat tournent aujourd'hui sur src/factice/ : le garde-fou
-// échouerait à chaque build, et plus rien ne se déploierait. Le domaine et
-// l'identité de l'éditeur, eux, sont renseignés — ce n'est plus ce qui bloque.
+// `build:prod` ajoute le garde-fou de publication (npm run verify:pages en
+// mode strict) : il échoue si une page publique contient un espace réservé,
+// un domaine .invalid, une mention légale manquante, ou une donnée factice.
+// C'est la seule commande qui empêche réellement Cloudflare de publier un
+// site incomplet — `npm run build` seul ne vérifie rien.
 //
-// À BASCULER sur `npm run build:prod` le jour où /test et /resultat tournent
-// sur de vraies questions. C'est la seule commande qui empêche réellement
-// Cloudflare de publier un site incomplet ; jusque-là, ce filet n'existe pas.
-// `npm run verify:pages` permet de voir l'état des points bloquants sans
-// interrompre un build.
+// /test et /resultat tournaient sur src/factice/ (questions et acteurs
+// d'exemple) et faisaient échouer ce garde-fou à chaque build. Elles ont été
+// déplacées hors de `src/pages/` vers `src/routes-desactivees/` : elles ne
+// sont plus construites, donc plus indexables et plus dans le sitemap, tant
+// que de vraies données ne les remplacent pas. Voir
+// src/routes-desactivees/README.md pour la condition de réactivation.
 //
-// CE QUI EST INDEXABLE. IS_PUBLISHABLE (src/lib/site.ts) vaut désormais `true` :
-// le `noindex` global est levé. Seules /test et /resultat restent en noindex,
-// par leur propre déclaration.
+// CE QUI EST INDEXABLE. IS_PUBLISHABLE (src/lib/site.ts) vaut `true` : le
+// `noindex` global est levé sur tout ce qui est construit.
 {
   "name": "guide-isoloir",
   "compatibility_date": "2026-09-14",

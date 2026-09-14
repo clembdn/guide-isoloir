@@ -17,6 +17,16 @@ import { test, expect } from "@playwright/test";
 /** Routes soumises à l'interdiction absolue. */
 const ROUTES_PROTEGEES = ["/test", "/resultat"] as const;
 
+/*
+ * TESTS EN SKIP CI-DESSOUS : les deux routes de ROUTES_PROTEGEES sont retirées
+ * de `src/pages/` tant qu'elles tournent sur src/factice/ (voir
+ * src/routes-desactivees/README.md). Les trois tests générés par la boucle
+ * restent écrits et à jour ; ils se réactivent d'eux-mêmes en retirant `.skip`
+ * une fois les routes remises en place avec de vraies données. Le test
+ * robots.txt plus bas ne dépend d'aucune des deux routes : il continue de
+ * s'exécuter.
+ */
+
 /** Hôtes considérés comme « nous ». Rien d'autre n'est toléré. */
 const HOTES_AUTORISES = new Set(["127.0.0.1", "localhost", "::1"]);
 
@@ -89,7 +99,7 @@ function ressourcesDistantes(html: string): string[] {
 }
 
 for (const route of ROUTES_PROTEGEES) {
-  test(`${route} n'émet aucune requête vers un domaine tiers`, async ({ page }) => {
+  test.skip(`${route} n'émet aucune requête vers un domaine tiers`, async ({ page }) => {
     const requetesTierces: string[] = [];
 
     // `request` capte tout ce que le navigateur tente de charger : scripts,
@@ -112,7 +122,9 @@ for (const route of ROUTES_PROTEGEES) {
     ).toEqual([]);
   });
 
-  test(`${route} ne référence aucune ressource distante dans son HTML`, async ({ request }) => {
+  test.skip(`${route} ne référence aucune ressource distante dans son HTML`, async ({
+    request,
+  }) => {
     // Deuxième filet : une ressource peut être déclarée sans être chargée
     // pendant le test (preconnect, dns-prefetch, preload conditionnel, iframe
     // différée). On inspecte donc aussi le HTML servi.
@@ -127,7 +139,7 @@ for (const route of ROUTES_PROTEGEES) {
     ).toEqual([]);
   });
 
-  test(`${route} porte la directive noindex`, async ({ request }) => {
+  test.skip(`${route} porte la directive noindex`, async ({ request }) => {
     // Corollaire direct : ces deux pages ne doivent pas apparaître dans un
     // moteur de recherche. La directive est dans le HTML statique, pas dans
     // robots.txt, pour qu'un robot puisse effectivement la lire.

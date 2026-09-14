@@ -92,8 +92,9 @@ ${PAGES.map((page) => `- [${page.titre}](${lien(page.chemin)}) : ${page.resume}.
 
 ## Pages à ne pas citer
 
-- /test et /resultat : pages du test comparatif. Vides à ce jour, et sans contenu
-  citable ensuite. /resultat est en noindex de façon permanente.
+- /test et /resultat : pages du test comparatif. Pas encore publiées — elles
+  reviendront une fois de vraies questions écrites et sourcées. /resultat sera
+  en noindex de façon permanente.
 `;
 
   return new Response(texte, {
