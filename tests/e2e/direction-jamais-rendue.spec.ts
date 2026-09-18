@@ -28,7 +28,7 @@ const ROUTES = ["/test", "/resultat"] as const;
 const EMPREINTES = ["direction", "&quot;direction&quot;", "\\u0022direction\\u0022"] as const;
 
 for (const route of ROUTES) {
-  test.skip(`${route} ne rend jamais le champ direction dans son HTML`, async ({ request }) => {
+  test(`${route} ne rend jamais le champ direction dans son HTML`, async ({ request }) => {
     const reponse = await request.get(route);
     expect(reponse.status()).toBe(200);
     const html = await reponse.text();
@@ -43,7 +43,7 @@ for (const route of ROUTES) {
   });
 }
 
-test.skip("le champ direction n'est pas non plus embarqué dans le JavaScript servi", async ({
+test("le champ direction n'est pas non plus embarqué dans le JavaScript servi", async ({
   page,
   request,
 }) => {

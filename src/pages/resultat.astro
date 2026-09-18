@@ -1,0 +1,116 @@
+---
+/*
+ * Route du résultat.
+ *
+ * `noindex, nofollow` est définitif : un résultat indexé serait un problème de
+ * confidentialité autant que de neutralité. La page n'est pas bloquée dans
+ * robots.txt, sinon aucun robot ne pourrait lire cette directive.
+ *
+ * AUCUN IDENTIFIANT NE FIGURE JAMAIS DANS CETTE URL. Les réponses transitent par
+ * le stockage de session, jamais par l'adresse : une URL de résultat partagée,
+ * copiée dans un historique ou envoyée dans un `Referer` exposerait des opinions
+ * politiques. `tests/e2e/resultat.spec.ts` le vérifie.
+ *
+ * NE SERT QUE LES POSITIONS RELUES. `positionsPubliables` écarte `draft` et
+ * `double-coded` : un codage qui n'a pas été confronté n'entre pas dans un
+ * classement public. Tant qu'aucune position n'est réconciliée, la page le dit
+ * au lieu d'afficher un classement de zéros.
+ *
+ * Contrainte permanente : aucun script tiers, aucune police distante, aucun
+ * analytics sur cette route.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Resultat from "../components/Resultat.svelte";
+import { validerQuestions, validerSourcesInfobulles } from "../lib/questions";
+import {
+  positionsPubliables,
+  validerActeurs,
+  validerCandidatures,
+  validerPositions,
+  validerSourcesPositions,
+} from "../lib/acteurs";
+import { QUESTIONS, SOURCES_INFOBULLES } from "../data/questions";
+import { ACTEURS, CANDIDATURES } from "../data/acteurs";
+import { POSITIONS } from "../data/positions";
+import { SOURCES_POSITIONS } from "../data/sources-positions";
+import { projeter } from "../lib/projection";
+
+/*
+ * Validation au build, côté serveur uniquement. Elle est référentielle : une
+ * position rattachée à un acteur, une question ou une source qui n'existe pas
+ * arrête la construction, comme une candidature qui reprendrait la ligne d'un
+ * acteur inconnu.
+ */
+const questionsValidees = validerQuestions(QUESTIONS);
+validerSourcesInfobulles(SOURCES_INFOBULLES, questionsValidees);
+
+const acteurs = validerActeurs(ACTEURS);
+const candidatures = validerCandidatures(CANDIDATURES, acteurs);
+const sources = validerSourcesPositions(SOURCES_POSITIONS);
+const positions = validerPositions(POSITIONS, { acteurs, questions: questionsValidees, sources });
+
+/*
+ * Seuls les candidats sont classés. Les partis sont dans `ACTEURS` pour porter
+ * un nom et servir de ligne de repli ; les classer aujourd'hui ajouterait sept
+ * lignes à zéro position, ce qui n'informe personne. Le jour où des positions de
+ * parti existent, il faudra les passer ici aussi — sinon le moteur ne saura pas
+ * nommer l'acteur d'origine d'une position reprise.
+ */
+const candidats = acteurs.filter((acteur) => acteur.kind === "candidate");
+const servies = positionsPubliables(positions);
+
+const questions = projeter(QUESTIONS);
+---
+
+<BaseLayout
+  title="Votre résultat"
+  description="Résultat du test comparatif de Guide Isoloir, calculé dans votre navigateur."
+  noindex={true}
+>
+  <h1>Votre résultat</h1>
+
+  <p>
+    Ce résultat a été calculé dans votre navigateur, à partir des réponses conservées dans cet
+    onglet. Il n'a été ni envoyé, ni enregistré, ni associé à un identifiant.
+  </p>
+
+  {
+    servies.length === 0 ? (
+      <section class="cadre-lecture">
+        <h2>Aucune position n'est encore publiée</h2>
+        <p>
+          {positions.length} position{positions.length > 1 ? "s" : ""} sont codées et attendent leur
+          relecture. Aucune n'est servie tant qu'elle n'a pas été confrontée : un classement établi
+          sur des codages non relus ressemblerait trait pour trait à un classement fiable, et rien
+          ne l'en distinguerait à l'œil.
+        </p>
+        <p>
+          La <a href="/methodologie">méthodologie</a> décrit comment une position est établie, et le
+          dépôt public permet de lire chaque codage avec sa source avant qu'il soit publié.
+        </p>
+      </section>
+    ) : (
+      <Resultat
+        client:load
+        questions={questions}
+        acteurs={candidats}
+        positions={servies}
+        candidatures={candidatures}
+        avertissement=""
+      />
+    )
+  }
+
+  <noscript>
+    <p class="reserve">
+      Le calcul se fait dans votre navigateur, et il a besoin de JavaScript. Sans lui, il n'y a rien
+      à afficher ici : vos réponses ne sont stockées nulle part ailleurs, et aucun serveur ne peut
+      les calculer à votre place.
+    </p>
+  </noscript>
+
+  <p>
+    La <a href="/methodologie">méthodologie</a> explique comment les positions sont établies, ce que le
+    calcul fait, et ce qu'il ne fait pas.
+  </p>
+</BaseLayout>

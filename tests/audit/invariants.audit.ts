@@ -86,6 +86,7 @@ function position(
     confidence,
     sourceIds: ["source-audit"],
     citation: "",
+    adequation: "directe",
     rationale: "Audit.",
     reviewStatus: "draft",
     updatedAt: "2026-01-01",

@@ -21,6 +21,14 @@
  *
  * `scripts/verifier-pages-publiques.mjs --strict` refuse un build de production
  * qui sert encore ce fichier.
+ *
+ * CE JEU NE PASSERAIT PAS `validerPositions`, ET C'EST VOULU. Le schéma réel
+ * interdit à une inférence de porter ±2 : la valeur maximale est réservée à une
+ * citation qui répond exactement à l'affirmation. Or DELTA doit porter EXACTEMENT
+ * les mêmes valeurs qu'AUBE, inférences comprises, sinon l'invariant « la qualité
+ * des preuves ne déplace pas le score » devient invérifiable. Ne validez donc
+ * jamais ce fichier avec le schéma de publication : il sert le moteur, pas la
+ * production.
  */
 import type { PoliticalActor, Stance, StanceProvenance, StanceValue } from "../lib/modele";
 import { QUESTIONS_FACTICES } from "./questions-factices";
@@ -137,6 +145,7 @@ export const POSITIONS_FACTICES: readonly Stance[] = GABARITS.flatMap((gabarit) 
         confidence: gabarit.confidence,
         sourceIds: ["source-factice"],
         citation: "Rien n'a été déclaré : ce jeu ne cite personne.",
+        adequation: "directe",
         rationale: "Position d'exemple. Aucune déclaration réelle.",
         reviewStatus: "draft",
         updatedAt: "2026-09-14",

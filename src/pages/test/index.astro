@@ -1,0 +1,71 @@
+---
+/*
+ * Route du test comparatif.
+ *
+ * Elle tourne sur le QUESTIONNAIRE RÉEL : 24 affirmations, 6 thèmes de 4,
+ * infobulles toutes sourcées. Aucune donnée de `src/factice/` n'est importée
+ * ici — le garde-fou de publication refuserait le build.
+ *
+ * `noindex` reste en place : une page de test dont les positions ne sont pas
+ * encore relues n'a pas à être référencée. La page de résultat, elle, reste
+ * `noindex` pour toujours.
+ *
+ * Contrainte permanente : aucun script tiers, aucune police distante, aucun
+ * analytics sur cette route. Deux tests de bout en bout la gardent :
+ * `aucune-requete-tierce` et `aucune-fuite-de-reponse`.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Quiz from "../../components/Quiz.svelte";
+import { validerQuestions, validerSourcesInfobulles } from "../../lib/questions";
+import { QUESTIONS, SOURCES_INFOBULLES } from "../../data/questions";
+import { projeter } from "../../lib/projection";
+
+/*
+ * Validation au build. Ce frontmatter ne s'exécute QUE côté serveur : zod échoue
+ * le build sans partir dans le bundle. Une question mal formée, une infobulle
+ * sans source consultable, une source orpheline ou un identifiant en double
+ * arrêtent la construction ici.
+ */
+const questionsValidees = validerQuestions(QUESTIONS);
+validerSourcesInfobulles(SOURCES_INFOBULLES, questionsValidees);
+
+/*
+ * Projection : l'îlot ne reçoit que ce qui s'affiche. `direction` reste ici,
+ * côté serveur, et n'est ni rendu ni embarqué dans le bundle.
+ */
+const questions = projeter(QUESTIONS);
+---
+
+<BaseLayout
+  title="Test comparatif"
+  description="Vingt-quatre affirmations, six thèmes. Vos réponses restent dans votre navigateur et ne sont jamais envoyées."
+  noindex={true}
+>
+  <h1>Test comparatif</h1>
+
+  <p>
+    Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un identifiant.
+    Le calcul s'effectue exclusivement dans votre navigateur, et vos réponses disparaissent quand
+    vous fermez cet onglet.
+  </p>
+
+  <Quiz client:load questions={questions} />
+
+  <noscript>
+    <p class="reserve">
+      Le test a besoin de JavaScript pour fonctionner : c'est ce qui permet de calculer vos
+      résultats dans votre navigateur, sans jamais envoyer vos réponses. La première question
+      ci-dessus est lisible, mais vous ne pourrez ni y répondre ni passer à la suivante.
+    </p>
+    <p class="reserve">
+      La <a href="/methodologie">méthodologie</a> décrit la méthode de calcul, et la rubrique
+      <a href="/comprendre">Comprendre</a> ne demande aucun JavaScript.
+    </p>
+  </noscript>
+
+  <p>
+    La <a href="/methodologie">méthodologie</a> décrit comment les positions sont établies, et la&#32;<a
+      href="/charte-editoriale">charte éditoriale</a
+    > comment les candidats sont référencés.
+  </p>
+</BaseLayout>

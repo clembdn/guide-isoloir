@@ -48,6 +48,7 @@ function position(
     confidence,
     sourceIds: ["source-essai"],
     citation: "",
+    adequation: "directe",
     rationale: "Essai.",
     reviewStatus: "draft",
     updatedAt: "2026-01-01",
@@ -211,22 +212,54 @@ describe("normalisation par thème", () => {
 describe("ex æquo", () => {
   const questions = [question("q1", "T", 1)];
   const acteurs = [acteur("zeta", "Zeta"), acteur("alpha", "Alpha")];
-  const classement = calculer({
-    questions,
-    acteurs,
-    positions: [position("zeta", "q1", 1), position("alpha", "q1", 1)],
-    reponses: { q1: 1 },
-  });
+  const positions = [position("zeta", "q1", 1), position("alpha", "q1", 1)];
+  const classer = (reponses: Record<string, StanceValue>) =>
+    calculer({ questions, acteurs, positions, reponses });
 
   it("partagent le même rang", () => {
+    const classement = classer({ q1: 1 });
     expect(classement.acteurs.map((r) => r.rang)).toEqual([1, 1]);
+    expect(new Set(classement.acteurs.map((r) => r.rang)).size).toBe(1);
   });
 
-  it("sont présentés par ordre alphabétique, sans que cela hiérarchise", () => {
-    // Le départage alphabétique est une décision de PRÉSENTATION. Il ne doit
-    // jamais se traduire par un rang différent.
-    expect(classement.acteurs.map((r) => r.actorId)).toEqual(["alpha", "zeta"]);
-    expect(new Set(classement.acteurs.map((r) => r.rang)).size).toBe(1);
+  /*
+   * L'ordre de présentation des ex æquo vient de la graine, tirée des réponses.
+   * Il est donc stable pour un même électeur, et indifférent à l'ordre du
+   * tableau d'entrée.
+   */
+  it("sont présentés dans un ordre stable, indépendant de l'ordre d'entrée", () => {
+    const attendu = classer({ q1: 1 }).acteurs.map((r) => r.actorId);
+
+    expect(classer({ q1: 1 }).acteurs.map((r) => r.actorId)).toEqual(attendu);
+    expect(
+      calculer({
+        questions,
+        acteurs: [...acteurs].reverse(),
+        positions,
+        reponses: { q1: 1 },
+      }).acteurs.map((r) => r.actorId),
+    ).toEqual(attendu);
+  });
+
+  /*
+   * L'invariant qui justifie le changement : l'ordre ne suit PAS l'alphabet.
+   * Un départage alphabétique placerait « alpha » en tête pour tout le monde et
+   * à tous les scrutins. Sur les cinq réponses possibles, les deux ordres
+   * apparaissent.
+   */
+  it("ne place pas systématiquement le même acteur en tête", () => {
+    const tetes = new Set(
+      ([-2, -1, 0, 1, 2] as StanceValue[]).map(
+        (valeur) => classer({ q1: valeur }).acteurs[0]!.actorId,
+      ),
+    );
+
+    expect(tetes.size).toBe(2);
+  });
+
+  it("publie la graine, identique pour des réponses identiques", () => {
+    expect(classer({ q1: 1 }).graineAffichage).toBe(classer({ q1: 1 }).graineAffichage);
+    expect(classer({ q1: 1 }).graineAffichage).not.toBe(classer({ q1: 2 }).graineAffichage);
   });
 });
 

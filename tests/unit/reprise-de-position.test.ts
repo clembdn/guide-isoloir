@@ -55,6 +55,7 @@ function position(
     confidence,
     sourceIds: ["source-essai"],
     citation: "",
+    adequation: "directe",
     rationale: "Essai.",
     reviewStatus: "draft",
     updatedAt: "2026-01-01",

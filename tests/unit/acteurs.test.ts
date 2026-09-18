@@ -54,6 +54,7 @@ const POSITION = {
   confidence: "high",
   sourceIds: ["source-essai"],
   citation: "Nous demandons l'abrogation de ce texte.",
+  adequation: "directe",
   rationale: "Formulation reprise du programme adopté en congrès.",
   reviewStatus: "published",
   updatedAt: "2026-09-18",
@@ -190,6 +191,8 @@ describe("positions", () => {
       ...POSITION,
       provenance: "inference",
       citation: "",
+      adequation: "deduite",
+      value: 1,
       confidence: "low",
     };
 
@@ -211,6 +214,38 @@ describe("positions", () => {
 
   it("refuse deux positions au même identifiant", () => {
     expect(() => validerPositions([POSITION, POSITION], REFERENCE)).toThrow(/Position en double/);
+  });
+
+  /*
+   * LE PLAFOND DE VALEUR. C'est la contrainte la plus utile du schéma : hors
+   * adéquation directe, la valeur maximale est interdite. Sans elle, le codage le
+   * moins établi pèse sur le score autant que le mieux établi.
+   */
+  it("refuse ±2 quand l'adéquation n'est pas directe", () => {
+    for (const adequation of ["partielle", "deduite"] as const) {
+      expect(() => validerPositions([{ ...POSITION, adequation, value: 2 }], REFERENCE)).toThrow();
+      expect(() => validerPositions([{ ...POSITION, adequation, value: -2 }], REFERENCE)).toThrow();
+      expect(validerPositions([{ ...POSITION, adequation, value: 1 }], REFERENCE)).toHaveLength(1);
+    }
+  });
+
+  it("refuse une inférence dont l'adéquation ne serait pas déduite", () => {
+    expect(() =>
+      validerPositions(
+        [
+          {
+            ...POSITION,
+            provenance: "inference",
+            citation: "",
+            adequation: "partielle",
+            value: 1,
+            rationale:
+              "Raisonnement écrit en entier pour satisfaire la contrainte de longueur des inférences.",
+          },
+        ],
+        REFERENCE,
+      ),
+    ).toThrow(/adéquation `deduite`/);
   });
 });
 

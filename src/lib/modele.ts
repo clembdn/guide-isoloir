@@ -72,6 +72,31 @@ export type StanceProvenance =
   | "coalition-platform"
   | "inference";
 
+/**
+ * Adéquation entre la citation retenue et l'affirmation posée.
+ *
+ * TROISIÈME AXE, distinct de `provenance` et de `confidence`, et c'est celui qui
+ * manquait. Deux positions peuvent venir d'une déclaration directe à confiance
+ * haute et n'avoir rien de comparable : « lier l'âge de la retraite et
+ * l'espérance de vie » EST l'affirmation posée ; « 125 milliards d'euros
+ * d'économies » n'établit pas que la dette doive baisser par la dépense plutôt
+ * que par la recette. La qualité de la source ne dit rien de cet écart.
+ *
+ *   - `directe`   : la citation porte sur la mesure exactement posée par
+ *                   l'affirmation, dans un sens ou dans l'autre ;
+ *   - `partielle` : elle porte sur la mesure, mais sous condition, pour une
+ *                   partie seulement des personnes, ou avec un paramètre autre ;
+ *   - `deduite`   : aucune citation ne porte sur la mesure ; la valeur est tirée
+ *                   d'une autre position.
+ *
+ * C'est `adequation`, et non `provenance`, qui plafonne la valeur : hors
+ * `directe`, `|value|` ne peut pas dépasser 1. Sans ce plafond, le codage le
+ * moins établi pèse autant sur le score que le mieux établi — et c'est
+ * exactement ce qui s'était produit dans le premier jet de `src/data/positions.ts`,
+ * où les trois inférences portaient toutes la valeur maximale.
+ */
+export type StanceAdequation = "directe" | "partielle" | "deduite";
+
 export type Stance = {
   id: string;
   actorId: string;
@@ -90,6 +115,25 @@ export type Stance = {
    * contester un codage, et un codage incontestable est un codage non vérifié.
    */
   citation: string;
+  adequation: StanceAdequation;
+  /**
+   * Maillon d'origine quand la source citée en relaie un autre.
+   *
+   * Un lecteur qui clique sur `sourceIds` doit savoir s'il arrive sur la parole
+   * du candidat ou sur un média qui en cite un troisième. « LCP rapportant des
+   * déclarations faites à l'AFP » et « LCP rapportant un entretien sur France 2 »
+   * ne se vérifient pas de la même façon, et la promesse de vérifiabilité
+   * s'arrête un cran trop tôt si on ne l'écrit pas.
+   *
+   * Texte libre et daté, pas un identifiant : le média d'origine n'est pas
+   * toujours lisible ni citable, et l'inventer serait pire que de le décrire.
+   */
+  /*
+   * `| undefined` explicite : `exactOptionalPropertyTypes` est actif, et le type
+   * inféré par zod pour un champ optionnel porte `undefined`. Sans lui, la donnée
+   * validée ne serait pas assignable au modèle qu'elle est censée respecter.
+   */
+  sourcePrimaire?: string | undefined;
   rationale: string;
   reviewStatus: "draft" | "double-coded" | "reconciled" | "published";
   updatedAt: string;

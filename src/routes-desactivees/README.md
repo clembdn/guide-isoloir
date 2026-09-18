@@ -1,83 +1,58 @@
-# Routes désactivées
+# Routes désactivées — historique
 
-Astro construit uniquement ce qui se trouve dans `src/pages/`. Les fichiers de
-ce dossier n'y sont pas : ils ne produisent aucune page, aucune entrée de
-sitemap, aucune URL.
+**Ce dossier ne contient plus de route.** `/test` et `/resultat` sont revenues dans
+`src/pages/` le 18 septembre 2026 : elles tournent sur les données réelles de
+`src/data/`, et `npm run build:prod` sort en 0.
 
-## Pourquoi
+Le dossier et ce fichier restent pour que la raison du détour ne se perde pas.
 
-`/test` et `/resultat` tournaient sur des données factices
-(`src/factice/questions-factices.ts`, `src/factice/acteurs-factices.ts`) : trois
-questions d'exemple, des acteurs inventés, aucune source. Le garde-fou de
-publication (`scripts/verifier-pages-publiques.mjs`) refuse un build de
-production tant qu'une donnée factice est servie — à raison : publier un
-comparateur qui ne compare rien serait pire que ne pas le publier.
+## Pourquoi elles avaient été retirées
 
-Avec le domaine branché et `IS_PUBLISHABLE` passé à `true`
-(`src/lib/site.ts`), `npm run build:prod` échouait uniquement à cause de ces
-deux routes. La correction n'est pas d'affaiblir le garde-fou : c'est de ne
-pas construire ce qui n'est pas prêt.
+`/test` et `/resultat` tournaient sur des données factices — trois questions
+d'exemple, des acteurs inventés, aucune source. Le garde-fou
+(`scripts/verifier-pages-publiques.mjs`) refuse un build de production tant qu'une
+donnée factice est servie, à raison : publier un comparateur qui ne compare rien
+serait pire que ne pas le publier. La correction n'était pas d'affaiblir le
+garde-fou, c'était de ne pas construire ce qui n'était pas prêt.
 
-## Ce qui n'a pas bougé
+## Ce qui a permis leur retour
 
-- `src/components/Quiz.svelte`, `src/components/Resultat.svelte` : le rendu.
-- `src/lib/moteur/`, `src/lib/questions.ts`, `src/lib/projection.ts`,
-  `src/lib/session-test.ts` : le moteur et son transfert de session.
-- `src/lib/echelle.ts` : l'échelle de réponse, réelle et partagée par les deux
-  jeux de données.
-- `tests/unit/moteur.test.ts`, `tests/audit/invariants.audit.ts` : intacts,
-  toujours exécutés par `npm test` et `npm run audit`.
+1. **Le questionnaire réel** (`src/data/questions.ts`) : 24 affirmations,
+   6 thèmes de 4, 22 sources d'infobulles toutes ouvertes et vérifiées.
+2. **Les acteurs réels** (`src/data/acteurs.ts`) : 20 candidats et 20 partis, avec
+   la date et la source de chaque statut de candidature. Le critère d'entrée est un
+   acte public daté de la personne, ou une désignation formelle par son parti — pas
+   une liste d'invitation à un débat, ce qu'était le premier jet.
+3. **Les premières positions** (`src/data/positions.ts`), chacune avec sa source
+   datée et le verbatim qui la fonde.
+4. **La reprise de la ligne du parti** dans le moteur, pour qu'un candidat qui ne
+   s'est pas encore exprimé apparaisse sans qu'une position lui soit attribuée à
+   tort (`EntreesMoteur.candidatures`, `DetailPosition.heriteDe`).
 
-Rien de tout cela n'a été touché. Seule la route publique a disparu.
+## Ce qui reste de `src/factice/`
 
-## Où en est la condition n° 1
+`src/factice/questions-factices.ts` et `src/factice/acteurs-factices.ts` **ne sont
+plus servis par aucune route.** Ils restent parce que l'audit et les tests
+unitaires en ont besoin : le jeu factice a des thèmes de tailles différentes et
+des acteurs construits exprès pour exercer les invariants — deux acteurs aux mêmes
+positions mais documentées inégalement, deux acteurs ex æquo par construction, un
+acteur à couverture partielle. Un jeu réel ne garantit aucune de ces
+configurations.
 
-**Les questions réelles existent** : `src/data/questions.ts`, 24 affirmations,
-6 thèmes de 4, `DONNEES_FACTICES = false`. Elles passent le schéma, et l'audit
-vérifie leur couverture et leur équilibre de `direction` thème par thème, au même
-titre que le jeu factice.
+Le garde-fou continue de chercher leurs identifiants dans le JavaScript servi. Si
+l'un réapparaît dans `dist/`, le build de production s'arrête. C'est pour cela que
+`Quiz.svelte` reçoit désormais son avertissement en propriété au lieu de l'importer :
+tant qu'il l'importait, la chaîne partait dans le bundle de production.
 
-**Les vingt-deux sources d'infobulles sont complètes.** Chaque URL a été ouverte le
-18 septembre 2026, chacune a répondu 200, et chaque intitulé a été relevé sur la page
-elle-même. `validerSourcesInfobulles` passe. Aucune source de presse : une infobulle
-définit un terme, elle vient d'une publication de référence.
+## Ce qui reste à faire sur `/resultat`
 
-**Il ne manque donc plus qu'une chose, et elle bloque :** aucune position (`Stance`)
-réelle n'existe. `/resultat` compare des acteurs à des positions ; sans elles, il n'y
-a rien à comparer.
+Les douze positions du codage initial sont en `reviewStatus: "draft"` — 2,5 % des
+480 couples possibles, et 7 candidats sur 20 seulement en ont une :
+`positionsPubliables` les écarte de ce qui est servi, et la page explique qu'aucune
+position n'est encore publiée plutôt que d'afficher un classement de zéros. Quatre
+tests de bout en bout portant sur l'apparence du classement se suspendent
+d'eux-mêmes dans cet état et se réarment dès qu'une position passe en
+`reconciled`.
 
-Le moteur sait désormais reprendre la ligne d'un parti pour un candidat qui ne s'est
-pas encore exprimé, en nommant l'acteur d'origine — voir `EntreesMoteur.candidatures`
-et `DetailPosition.heriteDe`. Une position sourcée sur une déclaration datée dans un
-média suffit donc à faire vivre un candidat, sans attendre son programme.
-
-Autrement dit `/test` pourrait techniquement tourner sur les questions réelles, mais
-l'activer seul mènerait à un `/resultat` vide. Les deux routes se réactivent ensemble.
-
-## Réactivation
-
-1. Saisir de vrais acteurs, de vraies sources de positions et de vraies positions,
-   dans `src/data/`, à la place de `src/factice/acteurs-factices.ts`. Les schémas et
-   les validateurs sont dans `src/lib/acteurs.ts`.
-2. `git mv src/routes-desactivees/test src/pages/test` et
-   `git mv src/routes-desactivees/resultat.astro src/pages/resultat.astro`.
-3. Les deux fichiers importent encore `QUESTIONS_FACTICES` et
-   `ACTEURS_FACTICES` : remplacer ces imports par `QUESTIONS` de
-   `src/data/questions.ts` et par les acteurs réels. Retirer aussi
-   `AVERTISSEMENT_FACTICE` de `Quiz.svelte`, qui n'a plus d'objet.
-4. Appeler dans le frontmatter, côté serveur uniquement :
-
-   ```ts
-   const questions = validerQuestions(QUESTIONS);
-   validerSourcesInfobulles(SOURCES_INFOBULLES, questions);
-   ```
-
-   C'est le garde-fou des sources. Sans cet appel, une URL vide passerait.
-
-5. Retirer les `test.skip` / `describe.skip` posés dans `tests/e2e/` pour ces
-   deux routes (chaque skip renvoie ici).
-6. `npm run build:prod` doit sortir en 0 : c'est lui qui vérifie qu'aucune
-   trace de `src/factice/` ne subsiste dans `dist/`.
-
-Jusque-là, ce dossier reste hors de `src/pages`, et Cloudflare continue de
-construire avec `npm run build`.
+C'est la traduction technique de la règle de `CLAUDE.md` : aucun contenu factuel
+produit par une IA n'est publié sans vérification humaine.

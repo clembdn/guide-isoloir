@@ -22,7 +22,7 @@
 <script lang="ts">
   import { calculer, type Classement, type ResultatActeur } from "../lib/moteur";
   import { lireEtat, effacerEtat, type Reponse } from "../lib/session-test";
-  import type { PoliticalActor, Stance } from "../lib/modele";
+  import type { Candidate, PoliticalActor, Stance } from "../lib/modele";
   import type { QuestionAffichee } from "../lib/projection";
 
   /*
@@ -34,9 +34,16 @@
     questions: readonly QuestionAffichee[];
     acteurs: readonly PoliticalActor[];
     positions: readonly Stance[];
+    /**
+     * Candidatures, pour la reprise de la ligne du parti à défaut de position
+     * personnelle. Facultatif : sans elles, chaque acteur n'est comparé que sur
+     * ce qu'il documente lui-même.
+     */
+    candidatures?: readonly Candidate[];
+    /** Avertissement affiché au-dessus du classement, ou chaîne vide. */
     avertissement: string;
   };
-  const { questions, acteurs, positions, avertissement }: Proprietes = $props();
+  const { questions, acteurs, positions, candidatures = [], avertissement }: Proprietes = $props();
 
   let reponses = $state<Record<string, Reponse>>({});
   let charge = $state(false);
@@ -46,7 +53,9 @@
     charge = true;
   });
 
-  const classement = $derived<Classement>(calculer({ questions, acteurs, positions, reponses }));
+  const classement = $derived<Classement>(
+    calculer({ questions, acteurs, positions, candidatures, reponses }),
+  );
 
   const aRepondu = $derived(classement.questionsApplicables > 0);
   /** Rangs 1 à 3. Les ex æquo peuvent donc en faire plus de trois. */
@@ -111,7 +120,9 @@
     <p><a class="action" href="/test">Passer le test</a></p>
   </div>
 {:else if charge}
-  <p class="avertissement-factice">{avertissement}</p>
+  {#if avertissement}
+    <p class="avertissement-factice">{avertissement}</p>
+  {/if}
 
   <!--
     Le cadre de lecture vient AVANT le classement, au corps du texte. Le mettre

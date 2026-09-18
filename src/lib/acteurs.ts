@@ -49,6 +49,17 @@ export const SourcePositionSchema = z
     dateDeclaration: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
     /** Date de consultation, pour qu'un lien mort reste vérifiable. */
     consulteLe: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
+    /**
+     * Incohérence relevée DANS la source, documentée avant qu'un contradicteur
+     * ne la trouve.
+     *
+     * Une source publique se contredit parfois : une date d'article qui ne
+     * correspond pas à celle du corps du texte, un chiffre corrigé sans mention.
+     * Retenir la bonne valeur sans dire qu'on a tranché, c'est laisser croire que
+     * la source était claire. Champ facultatif, rempli seulement quand il y a
+     * quelque chose à signaler.
+     */
+    incoherenceRelevee: z.string().min(10).max(400).optional(),
   })
   .strict()
   .refine((source) => source.consulteLe >= source.dateDeclaration, {
@@ -107,6 +118,9 @@ export const StanceSchema = z
     /** Au moins une source. Une position sans source ne se publie pas. */
     sourceIds: z.array(IdentifiantSchema).min(1),
     citation: z.string().max(240),
+    adequation: z.enum(["directe", "partielle", "deduite"]),
+    /** Maillon d'origine quand la source citée en relaie un autre. */
+    sourcePrimaire: z.string().min(5).max(200).optional(),
     rationale: z.string().min(10),
     reviewStatus: z.enum(["draft", "double-coded", "reconciled", "published"]),
     updatedAt: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
@@ -123,6 +137,27 @@ export const StanceSchema = z
       "Une inférence n'a pas de verbatim : son raisonnement doit être écrit en entier " +
       "dans `rationale`, faute de quoi elle n'est pas vérifiable.",
     path: ["rationale"],
+  })
+  /*
+   * PLAFOND DE VALEUR. Hors adéquation directe, la position ne peut pas porter la
+   * valeur maximale. C'est la contrainte la plus utile du fichier : sans elle, le
+   * codage le moins établi pèse sur le score autant que le mieux établi, et rien
+   * dans l'écran ne les distingue. Deux lignes qui rendent toute une classe
+   * d'erreurs impossible.
+   */
+  .refine((stance) => stance.adequation === "directe" || Math.abs(stance.value) <= 1, {
+    message:
+      "Une position dont l'adéquation n'est pas directe ne peut pas porter ±2 : " +
+      "la valeur maximale est réservée à une citation qui répond exactement à l'affirmation.",
+    path: ["value"],
+  })
+  /*
+   * Une inférence n'a par construction aucune citation qui porte sur la mesure :
+   * son adéquation est donc `deduite`, et le plafond ci-dessus s'y applique.
+   */
+  .refine((stance) => stance.provenance !== "inference" || stance.adequation === "deduite", {
+    message: "Une inférence a nécessairement une adéquation `deduite`.",
+    path: ["adequation"],
   });
 
 /** Lève sur identifiant en double, ou sur slug en double. */

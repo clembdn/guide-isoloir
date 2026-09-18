@@ -77,7 +77,7 @@ async function violations(page: Page): Promise<Violation[]> {
 }
 
 for (const route of ROUTES_AVEC_ILOT) {
-  test.skip(`${route} est servie avec une CSP qui autorise les scripts hachés d'Astro`, async ({
+  test(`${route} est servie avec une CSP qui autorise les scripts hachés d'Astro`, async ({
     request,
   }) => {
     const reponse = await request.get(route);
@@ -107,7 +107,7 @@ for (const route of ROUTES_AVEC_ILOT) {
     expect(scriptSrc).not.toContain("unsafe-eval");
   });
 
-  test.skip(`${route} n'émet aucune violation de CSP`, async ({ page }) => {
+  test(`${route} n'émet aucune violation de CSP`, async ({ page }) => {
     await suivreViolations(page);
     await page.goto(route, { waitUntil: "networkidle" });
     await page.waitForTimeout(500);
@@ -122,7 +122,7 @@ for (const route of ROUTES_AVEC_ILOT) {
     ).toEqual([]);
   });
 
-  test.skip(`${route} hydrate son îlot et réagit à une interaction`, async ({ page }) => {
+  test(`${route} hydrate son îlot et réagit à une interaction`, async ({ page }) => {
     await suivreViolations(page);
     await page.goto(route, { waitUntil: "networkidle" });
 

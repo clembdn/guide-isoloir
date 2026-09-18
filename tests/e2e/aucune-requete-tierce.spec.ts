@@ -99,7 +99,7 @@ function ressourcesDistantes(html: string): string[] {
 }
 
 for (const route of ROUTES_PROTEGEES) {
-  test.skip(`${route} n'émet aucune requête vers un domaine tiers`, async ({ page }) => {
+  test(`${route} n'émet aucune requête vers un domaine tiers`, async ({ page }) => {
     const requetesTierces: string[] = [];
 
     // `request` capte tout ce que le navigateur tente de charger : scripts,
@@ -122,9 +122,7 @@ for (const route of ROUTES_PROTEGEES) {
     ).toEqual([]);
   });
 
-  test.skip(`${route} ne référence aucune ressource distante dans son HTML`, async ({
-    request,
-  }) => {
+  test(`${route} ne référence aucune ressource distante dans son HTML`, async ({ request }) => {
     // Deuxième filet : une ressource peut être déclarée sans être chargée
     // pendant le test (preconnect, dns-prefetch, preload conditionnel, iframe
     // différée). On inspecte donc aussi le HTML servi.
@@ -139,7 +137,7 @@ for (const route of ROUTES_PROTEGEES) {
     ).toEqual([]);
   });
 
-  test.skip(`${route} porte la directive noindex`, async ({ request }) => {
+  test(`${route} porte la directive noindex`, async ({ request }) => {
     // Corollaire direct : ces deux pages ne doivent pas apparaître dans un
     // moteur de recherche. La directive est dans le HTML statique, pas dans
     // robots.txt, pour qu'un robot puisse effectivement la lire.

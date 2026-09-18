@@ -14,18 +14,27 @@
  */
 import { test, expect, type Page } from "@playwright/test";
 import { CLE_SESSION } from "../../src/lib/session-test";
-import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
+import { QUESTIONS } from "../../src/data/questions";
+import { POSITIONS } from "../../src/data/positions";
+import { positionsPubliables } from "../../src/lib/acteurs";
 
 /*
- * TESTS EN SKIP : /resultat est retirée de `src/pages/` tant qu'elle tourne
- * sur src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste
- * écrit et à jour ; il se réactive de lui-même en retirant `.skip` une fois la
- * route remise en place avec de vraies données.
+ * TANT QU'AUCUNE POSITION N'EST RELUE, IL N'Y A PAS DE CLASSEMENT À TESTER.
+ *
+ * `/resultat` ne sert que les positions `reconciled` ou `published`. Le codage
+ * initial est en `draft` : la page affiche donc un état explicite plutôt qu'un
+ * classement de zéros. Les contrôles qui portent sur l'apparence du classement
+ * sont suspendus dans cet état, et se réarment d'eux-mêmes dès qu'une position
+ * est réconciliée. Ce qui ne dépend PAS des positions — URL sans identifiant,
+ * noindex, absence de pourcentage — reste vérifié dans tous les cas.
  */
+const SANS_CLASSEMENT = positionsPubliables(POSITIONS).length === 0;
+const RAISON_SANS_CLASSEMENT =
+  "aucune position réconciliée : /resultat n'affiche pas de classement, il explique pourquoi";
 
 /** Profil tranché, pour obtenir un classement exploitable et non « incertain ». */
 const PROFIL = Object.fromEntries(
-  QUESTIONS_FACTICES.map((question, index) => [question.id, index % 2 === 0 ? 2 : -2]),
+  QUESTIONS.map((question, index) => [question.id, index % 2 === 0 ? 2 : -2]),
 );
 
 async function avecReponses(page: Page) {
@@ -39,7 +48,7 @@ async function avecReponses(page: Page) {
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 }
 
-test.skip("aucun identifiant ne figure dans l'URL", async ({ page }) => {
+test("aucun identifiant ne figure dans l'URL", async ({ page }) => {
   await avecReponses(page);
 
   const url = new URL(page.url());
@@ -48,7 +57,7 @@ test.skip("aucun identifiant ne figure dans l'URL", async ({ page }) => {
   expect(url.hash, `Fragment dans l'URL de résultat : ${url.hash}`).toBe("");
 });
 
-test.skip("la page porte noindex et reste hors du sitemap", async ({ request }) => {
+test("la page porte noindex et reste hors du sitemap", async ({ request }) => {
   const page = await request.get("/resultat");
   expect(await page.text()).toMatch(/<meta\s+name="robots"\s+content="noindex, nofollow"\s*\/?>/i);
 
@@ -56,7 +65,7 @@ test.skip("la page porte noindex et reste hors du sitemap", async ({ request }) 
   expect(sitemap.includes("/resultat"), "/resultat figure dans le sitemap").toBe(false);
 });
 
-test.skip("aucun pourcentage n'est affiché", async ({ page }) => {
+test("aucun pourcentage n'est affiché", async ({ page }) => {
   await avecReponses(page);
   const texte = await page.locator("main").innerText();
 
@@ -66,7 +75,16 @@ test.skip("aucun pourcentage n'est affiché", async ({ page }) => {
   expect(pourcentages, `Pourcentage(s) affiché(s) : ${pourcentages.join(", ")}`).toEqual([]);
 });
 
-test.skip("les qualifications remplacent les chiffres", async ({ page }) => {
+test("l'absence de position relue est expliquée, pas masquée", async ({ page }) => {
+  test.skip(!SANS_CLASSEMENT, "des positions sont publiées : le classement s'affiche");
+  await avecReponses(page);
+
+  await expect(page.locator("main")).toContainText("Aucune position n'est encore publiée");
+  await expect(page.locator(".classement")).toHaveCount(0);
+});
+
+test("les qualifications remplacent les chiffres", async ({ page }) => {
+  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await avecReponses(page);
   const texte = await page.locator("main").innerText();
 
@@ -77,7 +95,8 @@ test.skip("les qualifications remplacent les chiffres", async ({ page }) => {
   ).toBe(true);
 });
 
-test.skip("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ page }) => {
+test("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ page }) => {
+  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await avecReponses(page);
 
   const acteurs = page.locator(".classement > li");
@@ -92,7 +111,8 @@ test.skip("plusieurs acteurs sont présentés, jamais un vainqueur unique", asyn
   expect(texte).toContain("Ce classement n'est pas une recommandation");
 });
 
-test.skip("toutes les barres partagent une teinte et une opacité", async ({ page }) => {
+test("toutes les barres partagent une teinte et une opacité", async ({ page }) => {
+  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await avecReponses(page);
 
   const remplissages = await page.locator(".barre-valeur").evaluateAll((barres) =>
@@ -115,7 +135,7 @@ test.skip("toutes les barres partagent une teinte et une opacité", async ({ pag
   expect(new Set(largeurs).size, "Toutes les barres ont la même longueur").toBeGreaterThan(1);
 });
 
-test.skip("la géométrie des barres passe par un attribut, pas par un style en ligne", async ({
+test("la géométrie des barres passe par un attribut, pas par un style en ligne", async ({
   request,
 }) => {
   // La CSP hachée bloquerait un `style=""`. Un `width` sur `<rect>` est un
@@ -124,7 +144,8 @@ test.skip("la géométrie des barres passe par un attribut, pas par un style en 
   expect(html).not.toMatch(/<rect[^>]*\sstyle=/i);
 });
 
-test.skip("l'état vide explique au lieu d'afficher un classement", async ({ page }) => {
+test("l'état vide explique au lieu d'afficher un classement", async ({ page }) => {
+  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await page.goto("/resultat", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 

@@ -17,7 +17,6 @@
 -->
 <script lang="ts">
   import { ECHELLE } from "../lib/echelle";
-  import { AVERTISSEMENT_FACTICE } from "../factice/questions-factices";
   import type { QuestionAffichee } from "../lib/projection";
   import {
     SANS_AVIS,
@@ -34,8 +33,20 @@
    * n'importe pas le module de données : `direction` ne doit se trouver ni dans
    * le HTML ni dans ce bundle.
    */
-  type Proprietes = { questions: readonly QuestionAffichee[] };
-  const { questions }: Proprietes = $props();
+  type Proprietes = {
+    questions: readonly QuestionAffichee[];
+    /**
+     * Avertissement affiché au-dessus de la question, ou `null` quand il n'y a
+     * rien à avertir.
+     *
+     * Passé en propriété et non importé : ce composant ne doit connaître ni
+     * `src/factice/` ni `src/data/`. Tant qu'il importait `AVERTISSEMENT_FACTICE`,
+     * la chaîne partait dans le bundle servi, et le garde-fou de publication la
+     * trouvait — à raison — dans le JavaScript de production.
+     */
+    avertissement?: string | null;
+  };
+  const { questions, avertissement = null }: Proprietes = $props();
 
   let indice = $state(0);
   let reponses = $state<Record<string, Reponse>>({});
@@ -125,7 +136,9 @@
 -->
 {#if question}
   <div class="quiz">
-    <p class="avertissement-factice">{AVERTISSEMENT_FACTICE}</p>
+    {#if avertissement}
+      <p class="avertissement-factice">{avertissement}</p>
+    {/if}
 
     <div class="progression">
       <p class="progression-texte" aria-live="polite">

@@ -137,4 +137,12 @@ export type Classement = {
   profilPeuMarque: boolean;
   /** Les meilleurs scores sont-ils trop resserrés pour être départagés ? */
   ecartsTenus: boolean;
+  /**
+   * Graine de l'ordre d'affichage des ex æquo, dérivée des réponses.
+   *
+   * Publiée avec le résultat pour qu'un tiers aux mêmes réponses retrouve le
+   * même écran. Elle ne dit rien des opinions : c'est une empreinte, pas les
+   * réponses, et elle ne quitte de toute façon jamais le navigateur.
+   */
+  graineAffichage: number;
 };

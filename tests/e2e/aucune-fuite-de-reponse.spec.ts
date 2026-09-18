@@ -28,7 +28,7 @@
  * affiche. Ce n'est pas une fuite, c'est le programme.
  */
 import { test, expect, type Page, type Request } from "@playwright/test";
-import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
+import { QUESTIONS } from "../../src/data/questions";
 import { CLE_SESSION } from "../../src/lib/session-test";
 
 /*
@@ -39,11 +39,11 @@ import { CLE_SESSION } from "../../src/lib/session-test";
  */
 
 /** Lu dans les données plutôt que codé en dur. */
-const TOTAL = QUESTIONS_FACTICES.length;
+const TOTAL = QUESTIONS.length;
 
 /** Fragments dont l'apparition dans une requête prouverait une fuite. */
 const SENTINELLES = [
-  ...QUESTIONS_FACTICES.map((question) => question.id),
+  ...QUESTIONS.map((question) => question.id),
   // Le préfixe seul : il attrape aussi une sérialisation partielle ou tronquée.
   "factice-sentinelle",
   CLE_SESSION,
@@ -141,9 +141,7 @@ function surveiller(page: Page): Emission[] {
   return emissions;
 }
 
-test.skip("aucune réponse ne sort du navigateur, même vers notre propre domaine", async ({
-  page,
-}) => {
+test("aucune réponse ne sort du navigateur, même vers notre propre domaine", async ({ page }) => {
   const emissions = surveiller(page);
   const tentatives = await suivreTentativesDeSortie(page);
 
@@ -194,11 +192,11 @@ test.skip("aucune réponse ne sort du navigateur, même vers notre propre domain
 
   const etat = JSON.parse(stocke ?? "{}") as { reponses: Record<string, unknown> };
   expect(Object.keys(etat.reponses)).toHaveLength(TOTAL);
-  expect(etat.reponses[QUESTIONS_FACTICES[0]!.id]).toBe(2);
+  expect(etat.reponses[QUESTIONS[0]!.id]).toBe(2);
   // La dernière question a reçu « sans avis », qui n'est pas un nombre.
-  expect(etat.reponses[QUESTIONS_FACTICES[TOTAL - 1]!.id]).toBe("sans-avis");
+  expect(etat.reponses[QUESTIONS[TOTAL - 1]!.id]).toBe("sans-avis");
   // La modification a remplacé la réponse de l'avant-dernière, pas ajouté une seconde.
-  expect(etat.reponses[QUESTIONS_FACTICES[TOTAL - 2]!.id]).toBe(1);
+  expect(etat.reponses[QUESTIONS[TOTAL - 2]!.id]).toBe(1);
 
   // L'URL de résultat ne porte ni paramètre ni fragment.
   const url = new URL(page.url());
@@ -223,7 +221,7 @@ test.skip("aucune réponse ne sort du navigateur, même vers notre propre domain
   ).toEqual([]);
 });
 
-test.skip("le bouton « Effacer mes réponses » vide réellement le stockage", async ({ page }) => {
+test("le bouton « Effacer mes réponses » vide réellement le stockage", async ({ page }) => {
   await page.goto("/test", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 
@@ -240,7 +238,7 @@ test.skip("le bouton « Effacer mes réponses » vide réellement le stockage", 
   await expect(page.locator('input[type="radio"]:checked')).toHaveCount(0);
 });
 
-test.skip("un test déjà terminé repart de zéro", async ({ page }) => {
+test("un test déjà terminé repart de zéro", async ({ page }) => {
   // « État vidé au démarrage d'un nouveau test » : revenir sur /test après avoir
   // vu ses résultats, c'est vouloir recommencer, pas relire la dernière question.
   await page.goto("/test", { waitUntil: "networkidle" });
@@ -250,7 +248,7 @@ test.skip("un test déjà terminé repart de zéro", async ({ page }) => {
         cle,
         JSON.stringify({ version: 1, reponses: Object.fromEntries(ids.map((id) => [id, 2])) }),
       ),
-    [CLE_SESSION, QUESTIONS_FACTICES.map((q) => q.id)] as const,
+    [CLE_SESSION, QUESTIONS.map((q) => q.id)] as const,
   );
 
   await page.reload({ waitUntil: "networkidle" });

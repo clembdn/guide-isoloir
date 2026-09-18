@@ -43,6 +43,47 @@ const EPSILON_RANG = 1e-9;
 
 const NIVEAU_PAR_CLE = new Map(NIVEAUX_RESOLUTION.map((niveau) => [niveau.cle, niveau]));
 
+/**
+ * Empreinte FNV-1a 32 bits, écrite en clair.
+ *
+ * Aucune dépendance, aucune cryptographie : on ne protège rien, on veut un
+ * nombre stable tiré d'une chaîne. `>>> 0` maintient l'entier non signé, sinon
+ * le décalage de JavaScript ramènerait des valeurs négatives et l'ordre
+ * dépendrait de la plateforme.
+ */
+function empreinte(texte: string): number {
+  let valeur = 0x811c9dc5;
+  for (let i = 0; i < texte.length; i += 1) {
+    valeur ^= texte.charCodeAt(i);
+    valeur = Math.imul(valeur, 0x01000193) >>> 0;
+  }
+  return valeur >>> 0;
+}
+
+/**
+ * Graine d'affichage, dérivée des réponses de l'électeur.
+ *
+ * POURQUOI PAS L'ORDRE ALPHABÉTIQUE. À score égal, l'alphabétique produit un
+ * biais systématique : le même acteur est toujours au-dessus, pour tout le monde,
+ * à tous les scrutins. Le Conseil constitutionnel arrête d'ailleurs la liste
+ * officielle des candidats par tirage au sort, précisément pour cette raison.
+ *
+ * POURQUOI PAS UN TIRAGE. Un aléa non reproductible rendrait un résultat
+ * incontestable : deux personnes aux mêmes réponses n'obtiendraient pas le même
+ * écran, et une carte partageable ne prouverait plus rien.
+ *
+ * La graine vient donc des réponses elles-mêmes. Mêmes réponses, même ordre,
+ * chez n'importe qui, sans serveur et sans aléa stocké. Elle est publiée avec le
+ * résultat pour qu'un tiers puisse refaire le calcul.
+ */
+function grainePourReponses(reponses: Readonly<Record<string, Reponse>>): number {
+  const canonique = Object.keys(reponses)
+    .sort()
+    .map((id) => `${id}=${reponses[id]}`)
+    .join(";");
+  return empreinte(canonique);
+}
+
 /** Accord entre deux positions, dans [0, 1]. Symétrique par construction. */
 function accord(reponse: StanceValue, position: StanceValue): number {
   return (AMPLITUDE - Math.abs(reponse - position)) / AMPLITUDE;
@@ -278,14 +319,23 @@ export function calculer({
 
   /*
    * RANG. Tri par score décroissant, ex æquo au même rang. Le départage
-   * alphabétique n'intervient QUE dans l'ordre de présentation : deux acteurs
-   * au même score portent le même rang, et leur ordre relatif n'est pas une
-   * information sur leur proximité.
+   * n'intervient QUE dans l'ordre de présentation : deux acteurs au même score
+   * portent le même rang, et leur ordre relatif n'est pas une information sur
+   * leur proximité.
+   *
+   * L'ordre de présentation des ex æquo est tiré de la graine, elle-même tirée
+   * des réponses. L'identifiant départage les empreintes identiques, pour que le
+   * tri reste total et déterministe.
    */
+  const graine = grainePourReponses(reponses);
+  const clesAffichage = new Map(
+    bruts.map((resultat) => [resultat.actorId, empreinte(`${graine}:${resultat.actorId}`)]),
+  );
+
   const ordonnes = [...bruts].sort(
     (a, b) =>
       b.score - a.score ||
-      a.sortName.localeCompare(b.sortName, "fr") ||
+      clesAffichage.get(a.actorId)! - clesAffichage.get(b.actorId)! ||
       a.actorId.localeCompare(b.actorId),
   );
 
@@ -322,6 +372,7 @@ export function calculer({
     acteurs: ordonnes,
     questionsApplicables: applicables.length,
     questionsPosees: questions.length,
+    graineAffichage: graine,
     profilPeuMarque,
     ecartsTenus,
   };
