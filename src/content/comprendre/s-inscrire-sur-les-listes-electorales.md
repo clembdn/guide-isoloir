@@ -85,7 +85,9 @@ Trois voies, au choix :
 L'inscription est possible toute l'année, mais pour voter à une élection donnée, il
 faut s'y prendre avant une date limite : **le sixième vendredi précédant le premier
 tour**. La même date vaut pour les trois voies, en ligne comme en mairie ou par
-courrier ; pour le courrier, c'est la réception par la mairie qui compte.
+courrier ; pour le courrier, c'est la réception par la mairie qui compte. C'est le
+décret n° 2026-493 du 12 juin 2026 qui a aligné ces dates : avant lui, l'inscription
+en ligne fermait deux jours plus tôt, le sixième mercredi.
 
 Le premier tour a lieu le dimanche 18 avril 2027. La date limite est donc le
 **vendredi 12 mars 2027**.
@@ -93,7 +95,8 @@ Le premier tour a lieu le dimanche 18 avril 2027. La date limite est donc le
 Deux points concernent surtout les primo-votants. **L'inscription en ligne suppose
 d'avoir déjà 18 ans** : avant votre anniversaire, la demande se fait en mairie ou par
 courrier. Et quatre situations reportent le délai au **dixième jour avant le premier
-tour**, sur une demande en mairie ou par courrier : vous n'êtes pas inscrit et vous
+tour**, sur une demande en mairie ou par courrier (code électoral, articles L. 30 à
+L. 32) : vous n'êtes pas inscrit et vous
 atteignez 18 ans après le 12 mars, vous avez déménagé récemment, vous avez acquis la
 nationalité française récemment, ou vous avez recouvré votre droit de vote récemment.
 

@@ -37,25 +37,28 @@ Rien de tout cela n'a été touché. Seule la route publique a disparu.
 vérifie leur couverture et leur équilibre de `direction` thème par thème, au même
 titre que le jeu factice.
 
-**Il manque deux choses, et elles bloquent toutes les deux :**
+**Les vingt-deux sources d'infobulles sont complètes.** Chaque URL a été ouverte le
+18 septembre 2026, chacune a répondu 200, et chaque intitulé a été relevé sur la page
+elle-même. `validerSourcesInfobulles` passe. Aucune source de presse : une infobulle
+définit un terme, elle vient d'une publication de référence.
 
-1. **Vingt-et-une URL de sources d'infobulles sont vides.**
-   `validerSourcesInfobulles` refuse ce jeu tant qu'elles le sont. Rien à
-   contourner : l'appeler dans le frontmatter est précisément ce qui empêche de
-   servir une définition non sourcée.
-2. **Aucune position (`Stance`) réelle n'existe.** `/resultat` compare des
-   acteurs à des positions ; sans elles, il n'y a rien à comparer. Les positions
-   des candidats ne seront documentables qu'entre janvier et mars 2027, quand les
-   programmes sortiront.
+**Il ne manque donc plus qu'une chose, et elle bloque :** aucune position (`Stance`)
+réelle n'existe. `/resultat` compare des acteurs à des positions ; sans elles, il n'y
+a rien à comparer.
 
-Autrement dit `/test` pourrait techniquement tourner sur les questions réelles,
-mais l'activer seul mènerait à un `/resultat` factice. Les deux routes se
-réactivent ensemble.
+Le moteur sait désormais reprendre la ligne d'un parti pour un candidat qui ne s'est
+pas encore exprimé, en nommant l'acteur d'origine — voir `EntreesMoteur.candidatures`
+et `DetailPosition.heriteDe`. Une position sourcée sur une déclaration datée dans un
+média suffit donc à faire vivre un candidat, sans attendre son programme.
+
+Autrement dit `/test` pourrait techniquement tourner sur les questions réelles, mais
+l'activer seul mènerait à un `/resultat` vide. Les deux routes se réactivent ensemble.
 
 ## Réactivation
 
-1. Compléter les vingt-et-une URL de `SOURCES_INFOBULLES`, et saisir de vraies
-   positions à la place de `src/factice/acteurs-factices.ts`.
+1. Saisir de vrais acteurs, de vraies sources de positions et de vraies positions,
+   dans `src/data/`, à la place de `src/factice/acteurs-factices.ts`. Les schémas et
+   les validateurs sont dans `src/lib/acteurs.ts`.
 2. `git mv src/routes-desactivees/test src/pages/test` et
    `git mv src/routes-desactivees/resultat.astro src/pages/resultat.astro`.
 3. Les deux fichiers importent encore `QUESTIONS_FACTICES` et

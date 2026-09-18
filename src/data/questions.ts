@@ -59,8 +59,8 @@ export const QUESTIONS = [
     texte: "La réforme des retraites de 2023 devrait être abrogée.",
     direction: 1,
     infobulle:
-      "La réforme adoptée en 2023 prévoit un relèvement progressif de l'âge légal de 62 à 64 ans. Son application est suspendue jusqu'en 2028.",
-    infobulleSourceId: "source-lcp-retraites-2026",
+      "La réforme de 2023 relève progressivement l'âge légal de 62 à 64 ans. Le calendrier a été décalé : l'âge reste à 62 ans et 9 mois pour les personnes nées entre 1963 et mars 1965, et n'atteint 64 ans qu'à partir de la génération 1969.",
+    infobulleSourceId: "source-service-public-age-legal",
     version: 1,
     ordre: 20,
   },
@@ -110,7 +110,7 @@ export const QUESTIONS = [
       "Les revenus du capital devraient être imposés selon le même barème que les revenus du travail.",
     direction: 1,
     infobulle:
-      "Les revenus du capital sont soumis depuis 2018 à un prélèvement forfaitaire unique de 30 %. Les revenus du travail suivent un barème progressif allant de 0 à 45 %.",
+      "Les revenus du capital sont soumis par défaut à un prélèvement forfaitaire unique, composé de l'impôt sur le revenu à 12,8 % et des prélèvements sociaux. Les revenus du travail suivent, eux, le barème progressif de l'impôt sur le revenu.",
     infobulleSourceId: "source-service-public-pfu",
     version: 1,
     ordre: 60,
@@ -185,7 +185,7 @@ export const QUESTIONS = [
       "Les étrangers résidant légalement en France devraient pouvoir voter aux élections municipales.",
     direction: 1,
     infobulle:
-      "Les ressortissants de l'Union européenne résidant en France votent déjà aux élections municipales et européennes. Les autres étrangers ne votent à aucune élection française.",
+      "Les ressortissants d'un autre État de l'Union européenne qui vivent en France peuvent voter aux élections municipales et européennes, à condition d'être inscrits sur une liste électorale complémentaire.",
     infobulleSourceId: "source-service-public-vote-etrangers",
     version: 1,
     ordre: 120,
@@ -228,7 +228,7 @@ export const QUESTIONS = [
       "Les zones à faibles émissions, qui restreignent la circulation des véhicules anciens en ville, devraient être supprimées.",
     direction: -1,
     infobulle:
-      "Une zone à faibles émissions interdit la circulation des véhicules les plus polluants dans certaines agglomérations, selon la vignette Crit'Air.",
+      "Une zone à faibles émissions mobilité restreint la circulation des véhicules les plus polluants dans certaines agglomérations. La vignette Crit'Air, obligatoire pour y circuler, classe les véhicules selon leurs émissions.",
     infobulleSourceId: "source-service-public-zfe",
     version: 1,
     ordre: 150,
@@ -358,119 +358,118 @@ export const QUESTIONS = [
  * statistique publique), jamais de la presse. Les positions des candidats,
  * elles, viendront de la presse et des programmes.
  *
- * ⚠️ VINGT-ET-UNE URL RESTENT VIDES. Elles n'ont pas été inventées : sur un
- * site dont la promesse est la vérifiabilité, une URL fabriquée qui renvoie une
- * 404 fait plus de dégâts qu'une case vide. Chaque entrée porte l'éditeur et
- * l'intitulé exact à chercher.
+ * TOUTES LES URL SONT RENSEIGNÉES ET ONT ÉTÉ OUVERTES. Chacune a répondu 200 le
+ * 18 septembre 2026, dans un navigateur piloté, et son titre a été relevé sur la
+ * page elle-même — aucun intitulé n'est deviné.
+ *
+ * AUCUNE SOURCE DE PRESSE ICI, et ce n'est pas une préférence de style : une
+ * infobulle définit un terme, donc elle vient d'une publication de référence.
+ * L'article de LCP qui documentait le clivage des retraites a été retiré de
+ * cette liste pour cette raison — il a sa place dans les sources de POSITIONS,
+ * pas dans celles des définitions.
  *
  * LE GARDE-FOU EST `validerSourcesInfobulles` : elle refuse une `url` vide, une
  * source orpheline et une infobulle qui pointe vers un identifiant inconnu. La
- * page qui servira ce questionnaire l'appelle dans son frontmatter, donc le
- * build échouera tant que ces vingt-et-une entrées ne sont pas remplies. C'est
- * voulu : ce questionnaire n'est pas publiable en l'état.
+ * page qui servira ce questionnaire l'appelle dans son frontmatter, donc toute
+ * régression fera échouer le build.
  */
 export const SOURCES_INFOBULLES = [
   {
     id: "source-service-public-age-legal",
-    titre: "Retraite : âge légal de départ",
+    titre: "À partir de quel âge un salarié peut-il partir en retraite ?",
     editeur: "Service Public (DILA)",
-    url: "",
-  },
-  {
-    id: "source-lcp-retraites-2026",
-    titre: "Présidentielle : que proposent les candidats à l'Élysée sur les retraites ?",
-    editeur: "LCP – Assemblée nationale",
-    url: "https://lcp.fr/actualites/presidentielle-que-proposent-les-candidats-a-l-elysee-sur-les-retraites-441751",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F14043",
   },
   {
     id: "source-drees-esperance-vie",
-    titre: "Espérance de vie en bonne santé",
+    titre:
+      "L'espérance de vie sans incapacité à 65 ans est de 12 ans pour les femmes et de 10,5 ans pour les hommes en 2023",
     editeur: "DREES",
-    url: "",
+    url: "https://www.drees.solidarites-sante.gouv.fr/publications-communique-de-presse/etudes-et-resultats/241231_ER_esperance-de-vie-sans-incapacite-65",
   },
   {
     id: "source-vie-publique-repartition",
-    titre: "Répartition et capitalisation : quelles différences ?",
+    titre: "Quelles sont les caractéristiques du système français de retraite ?",
     editeur: "Vie-publique.fr",
-    url: "",
+    url: "https://www.vie-publique.fr/fiches/37937-caracteristiques-principales-du-systeme-de-retraite-francais",
   },
   {
     id: "source-service-public-ifi",
-    titre: "Impôt sur la fortune immobilière (IFI)",
+    titre: "Impôt sur la fortune immobilière (IFI) : personnes et biens concernés",
     editeur: "Service Public (DILA)",
-    url: "",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F563",
   },
   {
     id: "source-service-public-pfu",
-    titre: "Prélèvement forfaitaire unique sur les revenus du capital",
+    titre: "Impôt sur le revenu — Revenus d'épargne et de placement",
     editeur: "Service Public (DILA)",
-    url: "",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F2613",
   },
   {
     id: "source-insee-dette-publique",
-    titre: "Dette publique trimestrielle au sens de Maastricht",
+    titre: "Dette des administrations publiques au sens de Maastricht",
     editeur: "Insee",
-    url: "",
+    url: "https://www.insee.fr/fr/statistiques/2830301",
   },
   {
     id: "source-service-public-are",
-    titre: "Allocation d'aide au retour à l'emploi : durée d'indemnisation",
+    titre: "Allocation chômage d'aide au retour à l'emploi (ARE) d'un salarié du secteur privé",
     editeur: "Service Public (DILA)",
-    url: "",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F38881",
   },
   {
     id: "source-service-public-nationalite",
-    titre: "Acquisition de la nationalité française par naissance et résidence en France",
+    titre: "Nationalité française d'un enfant né en France de parents étrangers",
     editeur: "Service Public (DILA)",
-    url: "",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F295",
   },
   {
     id: "source-interieur-titres-sejour",
-    titre: "Les chiffres de l'immigration : titres de séjour délivrés",
+    titre: "Les chiffres clés de l'immigration",
     editeur: "Ministère de l'Intérieur",
-    url: "",
+    url: "https://www.immigration.interieur.gouv.fr/chiffres-de-limmigration-en-france/chiffres-cles-de-limmigration",
   },
   {
     id: "source-service-public-admission-exceptionnelle",
-    titre: "Admission exceptionnelle au séjour",
+    titre: "Qu'est-ce que la régularisation d'un étranger par le travail ?",
     editeur: "Service Public (DILA)",
-    url: "",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F16053",
   },
   {
     id: "source-service-public-vote-etrangers",
-    titre: "Un étranger peut-il voter en France ?",
+    titre: "Élections : droit de vote d'un citoyen européen en France",
     editeur: "Service Public (DILA)",
-    url: "",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F1937",
   },
   {
     id: "source-commission-pac-conditionnalite",
-    titre: "Conditionnalité de la politique agricole commune",
+    titre: "Conditionnalité",
     editeur: "Commission européenne",
-    url: "",
+    url: "https://agriculture.ec.europa.eu/common-agricultural-policy/income-support/conditionality_fr",
   },
   {
     id: "source-rte-bilan-electrique",
-    titre: "Bilan électrique annuel",
+    titre: "Bilans électriques nationaux et régionaux",
     editeur: "RTE",
-    url: "",
+    url: "https://www.rte-france.com/donnees-publications/publications/bilans-electriques-nationaux-regionaux",
   },
   {
     id: "source-service-public-zfe",
-    titre: "Zone à faibles émissions mobilité (ZFE-m)",
+    titre: "Vignette ou pastille Crit'Air (certificat qualité de l'air)",
     editeur: "Service Public (DILA)",
-    url: "",
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F33371",
   },
   {
     id: "source-vie-publique-modes-scrutin",
     titre: "Quels sont les différents modes de scrutin ?",
     editeur: "Vie-publique.fr",
-    url: "",
+    url: "https://www.vie-publique.fr/fiches/23948-quels-sont-les-differents-modes-de-scrutin",
   },
   {
     id: "source-conseil-constitutionnel-rip",
-    titre: "Le référendum d'initiative partagée",
+    titre: "Référendum d'initiative partagée (RIP) : mode d'emploi",
     editeur: "Conseil constitutionnel",
-    url: "",
+    url: "https://www.conseil-constitutionnel.fr/referendum-d-initiative-partagee/referendum-d-initiative-partagee-rip-mode-d-emploi",
   },
   {
     id: "source-constitution-article-49",
@@ -492,20 +491,20 @@ export const SOURCES_INFOBULLES = [
   },
   {
     id: "source-conseil-ue-modes-vote",
-    titre: "Modes de vote au Conseil de l'Union européenne",
-    editeur: "Conseil de l'Union européenne",
-    url: "",
+    titre: "Comment est organisé le vote à la majorité qualifiée au sein du Conseil de l'UE ?",
+    editeur: "Vie-publique.fr",
+    url: "https://www.vie-publique.fr/fiches/20348-le-vote-la-majorite-qualifiee-au-sein-du-conseil-de-lue",
   },
   {
     id: "source-armees-soutien-ukraine",
-    titre: "Soutien de la France à l'Ukraine",
-    editeur: "Ministère des Armées",
-    url: "",
+    titre: "Guerre en Ukraine : le dossier",
+    editeur: "Ministère des Armées et des Anciens combattants",
+    url: "https://www.defense.gouv.fr/ministere/dossiers-evenementiels-thematiques/guerre-ukraine-dossier",
   },
   {
     id: "source-commission-schengen",
-    titre: "Espace Schengen : réintroduction temporaire des contrôles aux frontières intérieures",
+    titre: "Temporary Reintroduction of Border Control",
     editeur: "Commission européenne",
-    url: "",
+    url: "https://home-affairs.ec.europa.eu/policies/schengen/schengen-area/temporary-reintroduction-border-control_en",
   },
 ] as const;
