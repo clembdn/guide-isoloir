@@ -53,6 +53,17 @@ export type DetailPosition = {
   accord: number | null;
   niveauLibelle: string;
   confiance: Confiance | null;
+  /**
+   * Nom de l'acteur d'origine quand la position est reprise, `null` quand elle
+   * est celle de l'acteur comparé.
+   *
+   * C'est le champ qui interdit de faire passer une ligne de parti pour une
+   * déclaration de candidat. L'interface doit le rendre : « Ligne du parti —
+   * position de X, aucune déclaration personnelle trouvée ». Elyze affichait des
+   * propositions de 2017 comme des positions de 2022 précisément parce que rien
+   * dans ses données ne portait cette distinction.
+   */
+  heriteDe: string | null;
 };
 
 export type ResultatTheme = {
@@ -69,7 +80,24 @@ export type ResultatTheme = {
 export type Couverture = {
   applicables: number;
   documentees: number;
-  /** Positions documentées dont la confiance est `medium` ou `high`. */
+  /**
+   * Positions documentées PAR L'ACTEUR LUI-MÊME, reprises exclues.
+   *
+   * Un candidat dont toutes les positions viennent de son parti a une couverture
+   * complète et aucune position personnelle. Les deux chiffres doivent être
+   * lisibles séparément, sinon l'écran laisse croire qu'il s'est exprimé.
+   */
+  personnelles: number;
+  /**
+   * Positions documentées par l'acteur lui-même dont la confiance est `medium`
+   * ou `high`.
+   *
+   * Une position reprise du parti n'est pas une preuve solide SUR LE CANDIDAT,
+   * quelle que soit la qualité de la source côté parti : elle est solide sur le
+   * parti. Elle ne compte donc pas ici, et c'est ce qui fait monter
+   * l'incertitude d'un candidat qui ne s'est pas encore exprimé. Le score, lui,
+   * ne bouge pas d'un iota — voir les quatre grandeurs ci-dessus.
+   */
   solides: number;
   /** `documentees / applicables`, ou 0 si aucune question applicable. */
   taux: number;

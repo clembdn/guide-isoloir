@@ -7,6 +7,7 @@
  * `tests/unit/moteur.test.ts` et audité par `scripts/audit.mjs`.
  */
 export { calculer, type EntreesMoteur } from "./calcul";
+export { type CleNiveau, type Confiance } from "./types";
 export {
   NIVEAUX_RESOLUTION,
   type Classement,

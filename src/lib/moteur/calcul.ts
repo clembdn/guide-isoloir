@@ -10,6 +10,7 @@
  */
 import {
   trierParNomAlphabetique,
+  type Candidate,
   type PoliticalActor,
   type Stance,
   type StanceValue,
@@ -84,6 +85,19 @@ export type EntreesMoteur = {
   acteurs: readonly PoliticalActor[];
   positions: readonly Stance[];
   reponses: Readonly<Record<string, Reponse>>;
+  /**
+   * Candidatures, pour la reprise de position à défaut de position personnelle.
+   *
+   * Facultatif : sans candidature, chaque acteur n'est comparé que sur ce qu'il
+   * documente lui-même. C'est ce paramètre qui permet de présenter un candidat
+   * dès maintenant, avant qu'il ait un programme, sans rien inventer : il
+   * apparaît avec la ligne de son parti, et l'écran dit que c'est celle du
+   * parti.
+   *
+   * Les acteurs repris doivent figurer dans `acteurs` pour être nommés ;
+   * `validerCandidatures` le garantit côté données.
+   */
+  candidatures?: readonly Candidate[];
 };
 
 /**
@@ -93,7 +107,13 @@ export type EntreesMoteur = {
  * des tableaux d'entrée. Deux exécutions sur les mêmes données rendent le même
  * résultat.
  */
-export function calculer({ questions, acteurs, positions, reponses }: EntreesMoteur): Classement {
+export function calculer({
+  questions,
+  acteurs,
+  positions,
+  reponses,
+  candidatures = [],
+}: EntreesMoteur): Classement {
   // Tri canonique : c'est ce qui rend le résultat indépendant de l'ordre du JSON.
   const questionsTriees = [...questions].sort((a, b) => a.id.localeCompare(b.id));
 
@@ -122,10 +142,46 @@ export function calculer({ questions, acteurs, positions, reponses }: EntreesMot
     parActeur.set(position.actorId, parQuestion);
   }
 
+  /**
+   * Chaîne de reprise par acteur.
+   *
+   * L'ordre de `baselineActorIds` est une préférence éditoriale déclarée dans les
+   * données — coalition avant parti, par exemple — pas l'ordre incident d'un
+   * tableau. Il est donc respecté tel quel, et c'est la seule place du moteur où
+   * un ordre d'entrée compte.
+   */
+  const reprises = new Map(
+    candidatures.map((candidature) => [candidature.actorId, candidature.baselineActorIds]),
+  );
+  const nomParId = new Map(acteurs.map((acteur) => [acteur.id, acteur.name]));
+
+  /**
+   * Position retenue pour un couple acteur/question, et son origine.
+   *
+   * La position personnelle l'emporte toujours, même mal documentée : un candidat
+   * qui contredit son parti dit quelque chose, et l'écraser par la ligne du parti
+   * serait une falsification. À défaut seulement, on descend la chaîne de
+   * reprise.
+   */
+  function resoudre(
+    acteurId: string,
+    questionId: string,
+  ): { position: Stance; heriteDe: string | null } | null {
+    const propre = meilleurePosition(parActeur.get(acteurId)?.get(questionId) ?? []);
+    if (propre !== null) return { position: propre, heriteDe: null };
+
+    for (const repris of reprises.get(acteurId) ?? []) {
+      const position = meilleurePosition(parActeur.get(repris)?.get(questionId) ?? []);
+      if (position !== null) return { position, heriteDe: nomParId.get(repris) ?? repris };
+    }
+
+    return null;
+  }
+
   const bruts = trierParNomAlphabetique(acteurs).map((acteur) => {
-    const positionsActeur = parActeur.get(acteur.id) ?? new Map<string, Stance[]>();
     const resultatsThemes: ResultatTheme[] = [];
     let documentees = 0;
+    let personnelles = 0;
     let solides = 0;
 
     for (const theme of themes) {
@@ -135,9 +191,9 @@ export function calculer({ questions, acteurs, positions, reponses }: EntreesMot
 
       for (const question of questionsTheme) {
         const reponse = reponses[question.id] as StanceValue;
-        const position = meilleurePosition(positionsActeur.get(question.id) ?? []);
+        const resolue = resoudre(acteur.id, question.id);
 
-        if (position === null) {
+        if (resolue === null) {
           details.push({
             questionId: question.id,
             theme,
@@ -146,14 +202,19 @@ export function calculer({ questions, acteurs, positions, reponses }: EntreesMot
             accord: null,
             niveauLibelle: "Position inconnue",
             confiance: null,
+            heriteDe: null,
           });
           continue;
         }
 
+        const { position, heriteDe } = resolue;
         const valeur = accord(reponse, position.value);
         accords.push(valeur);
         documentees += 1;
-        if (position.confidence !== "low") solides += 1;
+        if (heriteDe === null) {
+          personnelles += 1;
+          if (position.confidence !== "low") solides += 1;
+        }
 
         details.push({
           questionId: question.id,
@@ -163,6 +224,7 @@ export function calculer({ questions, acteurs, positions, reponses }: EntreesMot
           accord: valeur,
           niveauLibelle: NIVEAU_PAR_CLE.get(position.provenance)?.libelle ?? "Origine inconnue",
           confiance: position.confidence as Confiance,
+          heriteDe,
         });
       }
 
@@ -196,6 +258,7 @@ export function calculer({ questions, acteurs, positions, reponses }: EntreesMot
     const couverture: Couverture = {
       applicables: applicables.length,
       documentees,
+      personnelles,
       solides,
       taux: applicables.length === 0 ? 0 : documentees / applicables.length,
       tauxSolide: applicables.length === 0 ? 0 : solides / applicables.length,

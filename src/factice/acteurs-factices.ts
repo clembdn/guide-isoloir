@@ -136,6 +136,7 @@ export const POSITIONS_FACTICES: readonly Stance[] = GABARITS.flatMap((gabarit) 
         provenance: gabarit.provenance,
         confidence: gabarit.confidence,
         sourceIds: ["source-factice"],
+        citation: "Rien n'a été déclaré : ce jeu ne cite personne.",
         rationale: "Position d'exemple. Aucune déclaration réelle.",
         reviewStatus: "draft",
         updatedAt: "2026-09-14",

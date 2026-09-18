@@ -1,0 +1,267 @@
+/**
+ * Schémas de la couche acteurs, validés au build.
+ *
+ * Miroir de `src/lib/questions.ts`, pour les quatre entités qui décrivent QUI
+ * est comparé et SUR QUOI : les acteurs politiques, les candidatures, les
+ * positions, et les sources de ces positions.
+ *
+ * CE MODULE NE PART JAMAIS AU NAVIGATEUR. Il importe zod, mesuré à 86 ko : un
+ * îlot qui l'importerait ferait à lui seul dépasser le budget de 40 ko sur
+ * `/test`. Les types vivent dans `src/lib/modele.ts`, qui reste sans code
+ * exécutable ; les schémas vivent ici et ne sont appelés que dans le frontmatter
+ * des pages `.astro`, dans les tests et dans l'audit.
+ *
+ * SOURCES DE POSITIONS ET SOURCES D'INFOBULLES SONT DEUX REGISTRES DISTINCTS.
+ * Une infobulle définit un terme et vient d'une publication de référence ; une
+ * position vient d'un programme, d'une déclaration, d'un vote. Les mélanger
+ * amènerait à sourcer une définition par un meeting, ou une position par une
+ * fiche administrative.
+ */
+import { z } from "zod";
+import type { Question } from "./questions";
+
+const ISO_JOUR = /^\d{4}-\d{2}-\d{2}$/;
+
+/** Identifiant technique : ce qui entre dans une URL ou une clé de session. */
+const IdentifiantSchema = z
+  .string()
+  .min(3)
+  .regex(/^[a-z0-9-]+$/, "minuscules, chiffres et tirets uniquement");
+
+/**
+ * Source d'une position.
+ *
+ * `dateDeclaration` n'est PAS `consulteLe`, et c'est la distinction qui a coulé
+ * Elyze : l'application présentait en 2022 des propositions de 2017 sans que la
+ * date apparaisse nulle part. Une position doit porter la date de ce qui a été
+ * dit, pas celle où on l'a lu.
+ */
+export const SourcePositionSchema = z
+  .object({
+    id: IdentifiantSchema,
+    /** Intitulé exact du document ou de l'article, pour le retrouver si le lien meurt. */
+    titre: z.string().min(3),
+    /** D'où ça vient : « LCP », « Programme officiel », « Journal officiel ». */
+    media: z.string().min(2),
+    /** URL directe vers le document, jamais une page d'accueil. */
+    url: z.string().url(),
+    /** Date de la déclaration ou du document. */
+    dateDeclaration: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
+    /** Date de consultation, pour qu'un lien mort reste vérifiable. */
+    consulteLe: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
+  })
+  .strict()
+  .refine((source) => source.consulteLe >= source.dateDeclaration, {
+    message: "consulteLe ne peut pas précéder dateDeclaration",
+    path: ["consulteLe"],
+  });
+
+export type SourcePosition = z.infer<typeof SourcePositionSchema>;
+
+export const PoliticalActorSchema = z
+  .object({
+    id: IdentifiantSchema,
+    kind: z.enum(["party", "candidate", "coalition", "campaign", "independent"]),
+    name: z.string().min(2),
+    /** Clé de tri, saisie à la main : jamais déduite de `name`. */
+    sortName: z.string().min(2),
+    slug: IdentifiantSchema,
+    status: z.enum(["active", "inactive", "withdrawn", "historical"]),
+  })
+  .strict();
+
+export const CandidateSchema = z
+  .object({
+    actorId: IdentifiantSchema,
+    status: z.enum([
+      "potential",
+      "declared",
+      "nominated",
+      "official",
+      "withdrawn",
+      "eliminated",
+      "finalist",
+    ]),
+    baselineActorIds: z.array(IdentifiantSchema),
+    statutDepuis: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
+    /** Un statut sans source n'est pas un fait, c'est une rumeur. */
+    statutSourceIds: z.array(IdentifiantSchema).min(1),
+  })
+  .strict();
+
+export const StanceSchema = z
+  .object({
+    id: z.string().min(3),
+    actorId: IdentifiantSchema,
+    questionId: IdentifiantSchema,
+    value: z.union([z.literal(-2), z.literal(-1), z.literal(0), z.literal(1), z.literal(2)]),
+    provenance: z.enum([
+      "official-program",
+      "direct-statement",
+      "parliamentary-vote",
+      "party-platform",
+      "coalition-platform",
+      "inference",
+    ]),
+    confidence: z.enum(["low", "medium", "high"]),
+    /** Au moins une source. Une position sans source ne se publie pas. */
+    sourceIds: z.array(IdentifiantSchema).min(1),
+    citation: z.string().max(240),
+    rationale: z.string().min(10),
+    reviewStatus: z.enum(["draft", "double-coded", "reconciled", "published"]),
+    updatedAt: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
+  })
+  .strict()
+  .refine((stance) => stance.provenance === "inference" || stance.citation.trim().length > 0, {
+    message:
+      "Une position autre qu'une inférence doit porter le verbatim qui la fonde. " +
+      "Sans citation, le codage n'est pas contestable, donc pas vérifiable.",
+    path: ["citation"],
+  })
+  .refine((stance) => stance.provenance !== "inference" || stance.rationale.length >= 40, {
+    message:
+      "Une inférence n'a pas de verbatim : son raisonnement doit être écrit en entier " +
+      "dans `rationale`, faute de quoi elle n'est pas vérifiable.",
+    path: ["rationale"],
+  });
+
+/** Lève sur identifiant en double, ou sur slug en double. */
+export function validerActeurs(brut: unknown) {
+  const acteurs = z.array(PoliticalActorSchema).min(1).parse(brut);
+
+  const ids = new Set<string>();
+  const slugs = new Set<string>();
+  for (const acteur of acteurs) {
+    if (ids.has(acteur.id)) throw new Error(`Acteur en double : ${acteur.id}`);
+    ids.add(acteur.id);
+    if (slugs.has(acteur.slug)) {
+      throw new Error(`Deux acteurs partagent le slug « ${acteur.slug} » : une URL serait écrasée`);
+    }
+    slugs.add(acteur.slug);
+  }
+
+  return acteurs;
+}
+
+/**
+ * Valide les candidatures contre les acteurs, ou lève.
+ *
+ * Trois contrôles qui n'ont rien de formel :
+ *
+ *   - une candidature porte sur un acteur de type `candidate`. Un parti ne se
+ *     présente pas à l'élection présidentielle ; une personne le fait ;
+ *   - un `baselineActorId` existe, et ce n'est pas le candidat lui-même. Se
+ *     référencer soi-même produirait une chaîne de résolution circulaire ;
+ *   - un acteur n'a qu'une candidature. Deux statuts pour la même personne
+ *     rendraient l'affichage dépendant de l'ordre du tableau.
+ */
+export function validerCandidatures(
+  brut: unknown,
+  acteurs: readonly { id: string; kind: string }[],
+) {
+  const candidatures = z.array(CandidateSchema).parse(brut);
+
+  const parId = new Map(acteurs.map((acteur) => [acteur.id, acteur]));
+  const vus = new Set<string>();
+
+  for (const candidature of candidatures) {
+    if (vus.has(candidature.actorId)) {
+      throw new Error(`Deux candidatures pour le même acteur : ${candidature.actorId}`);
+    }
+    vus.add(candidature.actorId);
+
+    const acteur = parId.get(candidature.actorId);
+    if (acteur === undefined) {
+      throw new Error(`Candidature rattachée à un acteur inconnu : ${candidature.actorId}`);
+    }
+    if (acteur.kind !== "candidate") {
+      throw new Error(
+        `Candidature rattachée à un acteur de type « ${acteur.kind} » : ${candidature.actorId}`,
+      );
+    }
+
+    for (const baseline of candidature.baselineActorIds) {
+      if (baseline === candidature.actorId) {
+        throw new Error(`Chaîne de résolution circulaire : ${candidature.actorId} se référence`);
+      }
+      if (!parId.has(baseline)) {
+        throw new Error(
+          `${candidature.actorId} reprend la position d'un acteur inconnu : ${baseline}`,
+        );
+      }
+    }
+  }
+
+  return candidatures;
+}
+
+/** Lève sur identifiant de source en double, ou sur URL invalide. */
+export function validerSourcesPositions(brut: unknown) {
+  const sources = z.array(SourcePositionSchema).parse(brut);
+
+  const vus = new Set<string>();
+  for (const source of sources) {
+    if (vus.has(source.id)) throw new Error(`Source de position en double : ${source.id}`);
+    vus.add(source.id);
+  }
+
+  return sources;
+}
+
+/**
+ * Valide les positions contre les acteurs, les questions et les sources, ou lève.
+ *
+ * L'intégrité référentielle est le cœur du dispositif : une position dont la
+ * source n'existe pas est une position inventée, et c'est exactement ce que
+ * `CLAUDE.md` interdit. Rien ici ne juge la valeur codée — ce jugement est
+ * humain, et c'est le double codage à l'aveugle qui le contrôle.
+ */
+export function validerPositions(
+  brut: unknown,
+  reference: {
+    acteurs: readonly { id: string }[];
+    questions: readonly Question[];
+    sources: readonly { id: string }[];
+  },
+) {
+  const positions = z.array(StanceSchema).parse(brut);
+
+  const acteursConnus = new Set(reference.acteurs.map((acteur) => acteur.id));
+  const questionsConnues = new Set(reference.questions.map((question) => question.id));
+  const sourcesConnues = new Set(reference.sources.map((source) => source.id));
+
+  const vus = new Set<string>();
+  for (const position of positions) {
+    if (vus.has(position.id)) throw new Error(`Position en double : ${position.id}`);
+    vus.add(position.id);
+
+    if (!acteursConnus.has(position.actorId)) {
+      throw new Error(`Position rattachée à un acteur inconnu : ${position.id}`);
+    }
+    if (!questionsConnues.has(position.questionId)) {
+      throw new Error(`Position rattachée à une question inconnue : ${position.id}`);
+    }
+    for (const sourceId of position.sourceIds) {
+      if (!sourcesConnues.has(sourceId)) {
+        throw new Error(`Position ${position.id} cite une source inconnue : ${sourceId}`);
+      }
+    }
+  }
+
+  return positions;
+}
+
+/**
+ * Positions prêtes à être publiées.
+ *
+ * `draft` et `double-coded` restent dans le dépôt sans être servies : un codage
+ * en cours de réconciliation n'a pas à figurer dans un classement public. C'est
+ * la même logique que `relecture: brouillon` pour les articles.
+ */
+export function positionsPubliables<T extends { reviewStatus: string }>(
+  positions: readonly T[],
+): T[] {
+  return positions.filter(
+    (position) => position.reviewStatus === "reconciled" || position.reviewStatus === "published",
+  );
+}

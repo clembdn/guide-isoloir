@@ -47,6 +47,7 @@ function position(
     provenance: confidence === "low" ? "inference" : "official-program",
     confidence,
     sourceIds: ["source-essai"],
+    citation: "",
     rationale: "Essai.",
     reviewStatus: "draft",
     updatedAt: "2026-01-01",

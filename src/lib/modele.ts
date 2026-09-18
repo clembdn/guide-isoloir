@@ -35,11 +35,31 @@ export type PoliticalActor = {
   status: "active" | "inactive" | "withdrawn" | "historical";
 };
 
+export type CandidateStatus =
+  "potential" | "declared" | "nominated" | "official" | "withdrawn" | "eliminated" | "finalist";
+
 export type Candidate = {
   actorId: string;
-  status:
-    "potential" | "declared" | "nominated" | "official" | "withdrawn" | "eliminated" | "finalist";
+  status: CandidateStatus;
+  /**
+   * Acteurs dont on reprend la position à défaut de position personnelle.
+   *
+   * Ordre de préférence décroissant : coalition avant parti, par exemple. Le
+   * moteur descend cette liste et s'arrête au premier acteur qui documente la
+   * question. Une position reprise n'est JAMAIS présentée comme une déclaration
+   * du candidat : le résultat porte le nom de l'acteur d'origine.
+   */
   baselineActorIds: string[];
+  /**
+   * Date à laquelle ce statut est devenu vrai, et ses sources.
+   *
+   * Un statut de candidature est un fait public et datable : une déclaration,
+   * une investiture, un retrait. Il s'affiche donc avec sa date, et il se
+   * vérifie. Sans source, pas de statut — c'est la même règle que pour une
+   * position.
+   */
+  statutDepuis: string;
+  statutSourceIds: string[];
 };
 
 export type StanceValue = -2 | -1 | 0 | 1 | 2;
@@ -60,6 +80,16 @@ export type Stance = {
   provenance: StanceProvenance;
   confidence: "low" | "medium" | "high";
   sourceIds: string[];
+  /**
+   * Verbatim court qui porte la position, tel qu'il a été prononcé ou écrit.
+   *
+   * C'est le champ qui distingue une position relevée d'une position rédigée.
+   * Obligatoire partout SAUF pour une `inference`, seul maillon où il n'existe
+   * aucune phrase à citer — et où `rationale` doit alors porter le raisonnement
+   * complet. Ce n'est pas une facilité : sans citation, personne ne peut
+   * contester un codage, et un codage incontestable est un codage non vérifié.
+   */
+  citation: string;
   rationale: string;
   reviewStatus: "draft" | "double-coded" | "reconciled" | "published";
   updatedAt: string;
