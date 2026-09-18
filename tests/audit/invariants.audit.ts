@@ -18,6 +18,7 @@ import { calculer } from "../../src/lib/moteur";
 import type { PoliticalActor, Stance, StanceValue } from "../../src/lib/modele";
 import type { Question } from "../../src/lib/questions";
 import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
+import { QUESTIONS } from "../../src/data/questions";
 import { ACTEURS_FACTICES, POSITIONS_FACTICES } from "../../src/factice/acteurs-factices";
 import { entier, generateur, melanger } from "./aleatoire";
 
@@ -31,6 +32,23 @@ const PROFILS = 2000;
 const TOLERANCE_STATISTIQUE = 0.01;
 
 const ECHELLE: readonly StanceValue[] = [-2, -1, 0, 1, 2];
+
+/**
+ * Jeux de questions soumis aux invariants de forme.
+ *
+ * Les deux y passent, pas seulement celui qui sera servi. Le jeu factice a des
+ * thèmes de tailles volontairement différentes : c'est lui qui rend l'invariant
+ * de couverture vérifiable, un jeu parfaitement équilibré ne prouverait rien.
+ * Le jeu réel doit y passer aussi, sinon l'audit ne dit rien de ce qui sera
+ * publié.
+ *
+ * Les invariants de CALCUL, eux, restent sur le jeu factice : ils ont besoin de
+ * positions, et le questionnaire réel n'en a aucune.
+ */
+const JEUX_DE_QUESTIONS: readonly { nom: string; questions: readonly Question[] }[] = [
+  { nom: "factice", questions: QUESTIONS_FACTICES },
+  { nom: "réel", questions: QUESTIONS },
+];
 
 const releves: string[] = [];
 function relever(ligne: string) {
@@ -165,66 +183,68 @@ describe("invariant : traitement des données manquantes", () => {
   });
 });
 
-describe("invariant : couverture comparable des thèmes", () => {
-  it("aucun thème n'est marginalisé par le nombre de questions", () => {
-    const parTheme = new Map<string, number>();
-    for (const question of QUESTIONS_FACTICES) {
-      parTheme.set(question.theme, (parTheme.get(question.theme) ?? 0) + 1);
-    }
+for (const { nom, questions: jeu } of JEUX_DE_QUESTIONS) {
+  describe(`invariant : couverture comparable des thèmes (jeu ${nom})`, () => {
+    it("aucun thème n'est marginalisé par le nombre de questions", () => {
+      const parTheme = new Map<string, number>();
+      for (const question of jeu) {
+        parTheme.set(question.theme, (parTheme.get(question.theme) ?? 0) + 1);
+      }
 
-    const comptes = [...parTheme.values()];
-    const rapport = Math.min(...comptes) / Math.max(...comptes);
+      const comptes = [...parTheme.values()];
+      const rapport = Math.min(...comptes) / Math.max(...comptes);
 
-    /*
-     * Seuil de 0,25 : un thème peut légitimement compter moins de questions
-     * qu'un autre, mais en dessous du quart il n'est plus interrogé, il est
-     * évoqué. La normalisation par thème le ferait alors peser autant qu'un
-     * thème quatre fois plus fourni, ce qui amplifierait une seule réponse.
-     */
-    expect(
-      rapport,
-      `écart mécanique non expliqué : couverture des thèmes déséquilibrée (${[...parTheme]
-        .map(([t, n]) => `${t}=${n}`)
-        .join(", ")})`,
-    ).toBeGreaterThanOrEqual(0.25);
-
-    relever(
-      `couverture des thèmes ................. ${[...parTheme].map(([t, n]) => `${t} ${n}`).join(", ")} — rapport ${rapport.toFixed(2)}`,
-    );
-  });
-});
-
-describe("invariant : équilibre des directions par thème", () => {
-  it("aucun thème ne pose toutes ses affirmations dans le même sens", () => {
-    const parTheme = new Map<string, { plus: number; moins: number }>();
-    for (const question of QUESTIONS_FACTICES) {
-      const compte = parTheme.get(question.theme) ?? { plus: 0, moins: 0 };
-      if (question.direction === 1) compte.plus += 1;
-      else compte.moins += 1;
-      parTheme.set(question.theme, compte);
-    }
-
-    for (const [theme, { plus, moins }] of parTheme) {
-      const total = plus + moins;
-      const desequilibre = Math.abs(plus - moins) / total;
       /*
-       * Un questionnaire dont toutes les affirmations vont dans le même sens
-       * produit un biais d'acquiescement : on répond « d'accord » par défaut.
-       * On tolère un écart d'un tiers, pas davantage.
+       * Seuil de 0,25 : un thème peut légitimement compter moins de questions
+       * qu'un autre, mais en dessous du quart il n'est plus interrogé, il est
+       * évoqué. La normalisation par thème le ferait alors peser autant qu'un
+       * thème quatre fois plus fourni, ce qui amplifierait une seule réponse.
        */
       expect(
-        desequilibre,
-        `écart mécanique non expliqué : directions déséquilibrées dans « ${theme} » (${plus} pour, ${moins} contre)`,
-      ).toBeLessThanOrEqual(1 / 3);
-    }
+        rapport,
+        `écart mécanique non expliqué : couverture des thèmes déséquilibrée (${[...parTheme]
+          .map(([t, n]) => `${t}=${n}`)
+          .join(", ")})`,
+      ).toBeGreaterThanOrEqual(0.25);
 
-    relever(
-      `équilibre des directions .............. ${[...parTheme]
-        .map(([t, c]) => `${t} ${c.plus}/${c.moins}`)
-        .join(", ")}`,
-    );
+      relever(
+        `couverture des thèmes (${nom}) ${[...parTheme].map(([t, n]) => `${t} ${n}`).join(", ")} — rapport ${rapport.toFixed(2)}`,
+      );
+    });
   });
-});
+
+  describe(`invariant : équilibre des directions par thème (jeu ${nom})`, () => {
+    it("aucun thème ne pose toutes ses affirmations dans le même sens", () => {
+      const parTheme = new Map<string, { plus: number; moins: number }>();
+      for (const question of jeu) {
+        const compte = parTheme.get(question.theme) ?? { plus: 0, moins: 0 };
+        if (question.direction === 1) compte.plus += 1;
+        else compte.moins += 1;
+        parTheme.set(question.theme, compte);
+      }
+
+      for (const [theme, { plus, moins }] of parTheme) {
+        const total = plus + moins;
+        const desequilibre = Math.abs(plus - moins) / total;
+        /*
+         * Un questionnaire dont toutes les affirmations vont dans le même sens
+         * produit un biais d'acquiescement : on répond « d'accord » par défaut.
+         * On tolère un écart d'un tiers, pas davantage.
+         */
+        expect(
+          desequilibre,
+          `écart mécanique non expliqué : directions déséquilibrées dans « ${theme} » (${plus} pour, ${moins} contre)`,
+        ).toBeLessThanOrEqual(1 / 3);
+      }
+
+      relever(
+        `équilibre des directions (${nom}) ${[...parTheme]
+          .map(([t, c]) => `${t} ${c.plus}/${c.moins}`)
+          .join(", ")}`,
+      );
+    });
+  });
+}
 
 describe("invariant : aucun avantage aux acteurs les mieux documentés", () => {
   it("la confiance dans les preuves n'a aucun effet sur le score", () => {

@@ -23,6 +23,9 @@
  * Les identifiants sont reconnaissables : le test de fuite s'en sert de
  * sentinelles. Voir tests/e2e/aucune-fuite-de-reponse.spec.ts.
  *
+ * L'ÉCHELLE DE RÉPONSE N'EST PLUS ICI. Elle est réelle, pas factice, et partagée
+ * avec le questionnaire réel : elle vit dans `src/lib/echelle.ts`.
+ *
  * LA VALIDATION ZOD N'EST PAS APPELÉE ICI, ET C'EST DÉLIBÉRÉ. Ce module est
  * importé par un îlot, donc envoyé au navigateur : y appeler le schéma
  * embarquait zod dans le bundle, mesuré à 86 ko pour une vérification qui n'a
@@ -30,7 +33,6 @@
  * frontmatter, qui ne s'exécute que côté serveur, et le build échoue là. Le type
  * `satisfies` ci-dessous garde la forme à la compilation.
  */
-import type { StanceValue } from "../lib/modele";
 import type { Question } from "../lib/questions";
 
 /** Marqueur lisible par un humain comme par le garde-fou de publication. */
@@ -108,22 +110,3 @@ export const QUESTIONS_FACTICES = [
     ordre: 60,
   },
 ] as const satisfies readonly Question[];
-
-/**
- * Échelle de réponse.
- *
- * Cinq positions symétriques autour de zéro, plus une sortie qui n'est PAS une
- * position : « je n'ai pas d'avis ». La distinction est structurelle, pas
- * seulement rédactionnelle — voir `src/lib/session-test.ts`.
- *
- * L'ordre va de l'accord au désaccord, et il est identique pour toutes les
- * questions : alterner le sens introduirait un effet d'ordre que l'audit doit
- * pouvoir exclure.
- */
-export const ECHELLE: readonly { valeur: StanceValue; libelle: string }[] = [
-  { valeur: 2, libelle: "Tout à fait d'accord" },
-  { valeur: 1, libelle: "Plutôt d'accord" },
-  { valeur: 0, libelle: "Ni d'accord, ni pas d'accord" },
-  { valeur: -1, libelle: "Plutôt pas d'accord" },
-  { valeur: -2, libelle: "Pas du tout d'accord" },
-];

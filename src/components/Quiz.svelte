@@ -16,7 +16,8 @@
       réponses au clavier perçoit toute animation comme de la latence.
 -->
 <script lang="ts">
-  import { ECHELLE, AVERTISSEMENT_FACTICE } from "../factice/questions-factices";
+  import { ECHELLE } from "../lib/echelle";
+  import { AVERTISSEMENT_FACTICE } from "../factice/questions-factices";
   import type { QuestionAffichee } from "../lib/projection";
   import {
     SANS_AVIS,

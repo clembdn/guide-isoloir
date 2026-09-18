@@ -68,3 +68,98 @@ export function validerQuestions(brut: unknown): Question[] {
 
   return questions;
 }
+
+/**
+ * Source d'une infobulle.
+ *
+ * Séparée des sources de POSITIONS, et pas par commodité : une infobulle définit
+ * un terme et doit venir d'une publication de référence — administration,
+ * institution, statistique publique. Les positions des candidats, elles,
+ * viendront de la presse et des programmes. Mélanger les deux reviendrait à
+ * sourcer une définition par un article d'opinion.
+ *
+ * `url` est obligatoire et doit être une URL. Une infobulle sans source
+ * consultable est une affirmation présentée comme une explication neutre.
+ */
+export const SourceInfobulleSchema = z
+  .object({
+    id: z.string().min(3),
+    /** Intitulé exact de la page, pour la retrouver si le lien meurt. */
+    titre: z.string().min(3),
+    /** Éditeur : « Service Public (DILA) », « Insee », « RTE ». */
+    editeur: z.string().min(2),
+    url: z.string().url(),
+  })
+  .strict();
+
+export type SourceInfobulle = z.infer<typeof SourceInfobulleSchema>;
+
+/** Même forme, `url` non contrainte : sert à faire l'inventaire de ce qui manque. */
+const SourceInfobulleBrouillonSchema = SourceInfobulleSchema.extend({ url: z.string() });
+
+/**
+ * Identifiants des sources dont l'`url` n'est pas encore une URL consultable.
+ *
+ * Renvoie une liste plutôt que de lever : c'est un inventaire, pas un contrôle.
+ * Le contrôle est `validerSourcesInfobulles`, qui refuse la publication.
+ */
+export function sourcesInfobullesIncompletes(brut: unknown): string[] {
+  const sources = z.array(SourceInfobulleBrouillonSchema).parse(brut);
+  return sources
+    .filter((source) => !z.string().url().safeParse(source.url).success)
+    .map((source) => source.id);
+}
+
+/**
+ * Valide les sources d'infobulles contre un questionnaire, ou lève.
+ *
+ * Lève plutôt que de rendre un résultat : appelée dans le frontmatter de la page
+ * qui sert le questionnaire, elle doit interrompre le build. Trois fautes sont
+ * distinguées, parce qu'elles ne se corrigent pas de la même façon :
+ *
+ *   - une infobulle pointe vers un identifiant inconnu : faute de frappe ou
+ *     source renommée ;
+ *   - une source n'est utilisée par aucune infobulle : reste d'un remaniement,
+ *     ou signe qu'un `infobulleSourceId` a été changé sans mettre à jour la
+ *     liste ;
+ *   - une `url` manque : la source existe sur le papier, pas en ligne.
+ *
+ * L'ordre des contrôles est délibéré. Les liens cassés sont signalés avant les
+ * URL manquantes : vingt-et-une URL vides masqueraient un identifiant erroné, et
+ * c'est l'identifiant erroné qui fait servir la mauvaise définition.
+ */
+export function validerSourcesInfobulles(
+  brut: unknown,
+  questions: readonly Question[],
+): SourceInfobulle[] {
+  const sources = z.array(SourceInfobulleBrouillonSchema).min(1).parse(brut);
+
+  const vus = new Set<string>();
+  for (const source of sources) {
+    if (vus.has(source.id)) {
+      throw new Error(`Source d'infobulle en double : ${source.id}`);
+    }
+    vus.add(source.id);
+  }
+
+  const utilises = new Set(questions.map((question) => question.infobulleSourceId));
+
+  const inconnus = [...utilises].filter((id) => !vus.has(id)).sort();
+  if (inconnus.length > 0) {
+    throw new Error(`Infobulle sans source correspondante : ${inconnus.join(", ")}`);
+  }
+
+  const orphelines = [...vus].filter((id) => !utilises.has(id)).sort();
+  if (orphelines.length > 0) {
+    throw new Error(`Source d'infobulle utilisée par aucune question : ${orphelines.join(", ")}`);
+  }
+
+  const sansUrl = sourcesInfobullesIncompletes(sources);
+  if (sansUrl.length > 0) {
+    throw new Error(
+      `${sansUrl.length} source(s) d'infobulle sans URL consultable : ${sansUrl.join(", ")}`,
+    );
+  }
+
+  return z.array(SourceInfobulleSchema).parse(sources);
+}
