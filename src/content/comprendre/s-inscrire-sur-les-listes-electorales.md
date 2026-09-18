@@ -3,7 +3,7 @@ titre: "S'inscrire sur les listes électorales avant 2027"
 description: "Qui doit s'inscrire, qui l'est déjà sans le savoir, où le faire et avant quelle date pour pouvoir voter à la présidentielle de 2027."
 question: "Faut-il faire une démarche pour voter en 2027 ? Beaucoup de gens sont déjà inscrits sans le savoir, et les autres ont une seule chose à faire."
 publieLe: "2026-09-14"
-misAJourLe: "2026-09-14"
+misAJourLe: "2026-09-18"
 relecture: brouillon
 ordre: 20
 voirAussi:
@@ -12,7 +12,15 @@ sources:
   - titre: "Listes électorales : en cas de première inscription"
     url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F1367"
     editeur: "Service Public (DILA)"
-    consulteLe: "2026-09-14"
+    consulteLe: "2026-09-18"
+  - titre: "Élections : peut-on s'inscrire sur la liste électorale d'une mairie et voter la même année ?"
+    url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F34240"
+    editeur: "Service Public (DILA)"
+    consulteLe: "2026-09-18"
+  - titre: "Comment voter à la présidentielle 2027 ?"
+    url: "https://www.info.gouv.fr/actualite/comment-voter-a-la-presidentielle-2027"
+    editeur: "Gouvernement"
+    consulteLe: "2026-09-18"
   - titre: "Élection présidentielle"
     url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F1940"
     editeur: "Service Public (DILA)"
@@ -73,13 +81,23 @@ Trois voies, au choix :
 ## La date limite
 
 L'inscription est possible toute l'année, mais pour voter à une élection donnée, il
-faut s'y prendre avant une date limite. **Pour une demande envoyée par courrier, la
-mairie doit l'avoir reçue au plus tard le sixième vendredi précédant le premier
-tour.**
+faut s'y prendre avant une date limite : **le sixième vendredi précédant le premier
+tour**. La même date vaut pour les trois voies, en ligne comme en mairie ou par
+courrier ; pour le courrier, c'est la réception par la mairie qui compte.
 
-Le premier tour a lieu le **18 avril 2027**. La date limite exacte sera fixée par le
-décret de convocation des électeurs, publié quelques semaines avant le scrutin. Cette
-page sera mise à jour à ce moment-là.
+Le premier tour a lieu le dimanche 18 avril 2027. La date limite est donc le
+**vendredi 12 mars 2027**.
+
+Deux points concernent surtout les primo-votants. **L'inscription en ligne suppose
+d'avoir déjà 18 ans** : avant votre anniversaire, la demande se fait en mairie ou par
+courrier. Et quatre situations reportent le délai au **dixième jour avant le premier
+tour**, sur une demande en mairie ou par courrier : vous n'êtes pas inscrit et vous
+atteignez 18 ans après le 12 mars, vous avez déménagé récemment, vous avez acquis la
+nationalité française récemment, ou vous avez recouvré votre droit de vote récemment.
+
+Votre anniversaire tombe pendant la campagne ? Si vous avez 18 ans entre le 13 mars et
+le 17 avril 2027, vous pourrez voter aux deux tours. Entre le 18 avril et le 1er mai,
+seulement au second. À partir du 2 mai, pas à cette élection.
 
 Ne visez pas la date limite. Une pièce manquante suffit à faire échouer une demande
 déposée la veille.

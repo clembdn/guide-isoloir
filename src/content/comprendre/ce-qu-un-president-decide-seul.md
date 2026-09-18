@@ -3,7 +3,7 @@ titre: "Ce qu'un président de la République décide seul"
 description: "Nomination du Premier ministre, dissolution, armées, grâce : ce qu'un président peut faire sans l'accord de personne, et tout ce qu'il ne peut pas faire seul."
 question: "Un président peut-il appliquer son programme tout seul ? Non, et la liste de ce qu'il décide sans personne est plus courte qu'on ne le croit."
 publieLe: "2026-09-14"
-misAJourLe: "2026-09-14"
+misAJourLe: "2026-09-18"
 relecture: brouillon
 ordre: 10
 voirAussi: []
@@ -15,7 +15,7 @@ sources:
   - titre: "La Constitution du 4 octobre 1958 en vigueur"
     url: "https://www.conseil-constitutionnel.fr/le-bloc-de-constitutionnalite/texte-integral-de-la-constitution-du-4-octobre-1958-en-vigueur"
     editeur: "Conseil constitutionnel"
-    consulteLe: "2026-09-14"
+    consulteLe: "2026-09-18"
 ---
 
 Une campagne présidentielle se joue sur des programmes. Une fois élu, un président
@@ -27,11 +27,16 @@ Savoir où passe cette ligne change la façon de lire un programme.
 
 ## Ce qu'il décide sans personne
 
-Ces pouvoirs sont dits « propres » : ils ne sont pas contresignés par le Premier
-ministre, donc le président les exerce de sa seule volonté.
+Ces pouvoirs sont dits « propres ». C'est l'article 19 qui les définit, et il le fait
+en creux : tous les actes du président sont contresignés par le Premier ministre,
+**sauf** ceux pris au titre des articles 8 (premier alinéa), 11, 12, 16, 18, 54, 56
+et 61. Ces huit références sont la liste complète de ce qu'il décide seul.
 
-- **Nommer le Premier ministre** (article 8). Il choisit qui il veut, mais ce
-  Premier ministre doit ensuite survivre à l'Assemblée nationale.
+- **Nommer le Premier ministre** (article 8, premier alinéa). Il choisit qui il
+  veut, mais ce Premier ministre doit ensuite survivre à l'Assemblée nationale. Et
+  **il ne peut pas le révoquer** : il met fin à ses fonctions « sur la présentation
+  par celui-ci de la démission du Gouvernement ». Un Premier ministre qui refuse de
+  démissionner ne peut pas être renvoyé.
 - **Dissoudre l'Assemblée nationale** (article 12), après avoir consulté le
   Premier ministre et les présidents des deux assemblées. Cette consultation ne
   le lie pas. Il ne peut pas recommencer dans l'année qui suit les élections qui
@@ -40,10 +45,16 @@ ministre, donc le président les exerce de sa seule volonté.
   proposition du gouvernement ou des deux assemblées. Il ne peut pas s'en saisir
   lui-même.
 - **Saisir le Conseil constitutionnel** avant la promulgation d'une loi
-  (article 61).
-- **Nommer trois des neuf membres du Conseil constitutionnel**, dont son
-  président (article 56). Un mandat de neuf ans : ces nominations survivent
-  largement au quinquennat.
+  (article 61), ou au sujet d'un engagement international avant sa ratification
+  (article 54). Dans ce second cas, si le Conseil juge le traité contraire à la
+  Constitution, il faut réviser la Constitution pour pouvoir le ratifier.
+- **Nommer trois des neuf membres du Conseil constitutionnel**, dont son président
+  (article 56). Le mandat dure neuf ans et n'est pas renouvelable : ces nominations
+  survivent largement au quinquennat. Les anciens présidents de la République siègent
+  en plus de ces neuf, de droit et à vie, sans nomination. C'est aussi le seul pouvoir
+  propre que le Parlement peut bloquer : les commissions compétentes des deux
+  assemblées rendent un avis public, et trois cinquièmes de votes négatifs interdisent
+  la nomination.
 - **Recourir aux pouvoirs exceptionnels** (article 16), dans des circonstances
   très encadrées.
 - **Adresser des messages au Parlement** (article 18).
@@ -60,8 +71,10 @@ contresigne. Sans ce contreseing, l'acte n'existe pas.
   (article 13).
 - **Négocier et ratifier les traités** (article 52) — la ratification de
   beaucoup d'entre eux exige une loi.
-- **Chef des armées** (article 15), mais l'engagement durable de forces à
-  l'étranger doit être soumis au Parlement.
+- **Chef des armées** (article 15). Mais la déclaration de guerre est autorisée par
+  le Parlement, le gouvernement doit l'informer d'une intervention à l'étranger au
+  plus tard trois jours après son début, et au-delà de quatre mois la prolongation
+  exige son autorisation (article 35).
 - **Droit de grâce** à titre individuel (article 17).
 
 ## Ce qu'il ne décide pas

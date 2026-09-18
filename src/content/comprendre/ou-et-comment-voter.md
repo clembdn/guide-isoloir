@@ -3,7 +3,7 @@ titre: "Où et comment voter le jour du scrutin"
 description: "Horaires, pièce d'identité acceptée, déroulement du vote dans le bureau : ce qu'il faut savoir avant d'y aller pour la première fois."
 question: "Que se passe-t-il concrètement dans un bureau de vote ? La procédure prend deux minutes, à condition d'arriver avec la bonne pièce."
 publieLe: "2026-09-14"
-misAJourLe: "2026-09-14"
+misAJourLe: "2026-09-18"
 relecture: brouillon
 ordre: 30
 voirAussi:
@@ -17,7 +17,7 @@ sources:
   - titre: "Élections : papiers d'identité à présenter pour voter"
     url: "https://www.service-public.gouv.fr/particuliers/vosdroits/F1361"
     editeur: "Service Public (DILA)"
-    consulteLe: "2026-09-14"
+    consulteLe: "2026-09-18"
 ---
 
 Le vote se fait dans un bureau précis, celui indiqué sur votre carte électorale. Vous
@@ -35,8 +35,10 @@ Dans une commune de **1 000 habitants et plus**, une pièce d'identité est
 - carte de mobilité inclusion, carte du combattant, carte d'identité de fonctionnaire
   de l'État, avec photographie.
 
-Deux pièges fréquents :
+Trois pièges fréquents :
 
+- **la tolérance des cinq ans ne vaut que pour la carte d'identité et le passeport.**
+  Un permis de conduire ou une carte de mobilité inclusion périmés sont refusés ;
 - **il faut l'original.** Une photo dans un téléphone ou une photocopie sont refusées ;
 - **la carte électorale n'est pas une pièce d'identité.** Elle n'est pas obligatoire
   pour voter.
