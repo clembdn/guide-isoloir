@@ -4,7 +4,9 @@ description: "Comment charger quelqu'un de voter à votre place : la démarche e
 question: "Vous serez absent le jour du vote ? La démarche est gratuite et sans justificatif, mais votre identité doit être vérifiée, en personne ou en ligne."
 publieLe: "2026-09-14"
 misAJourLe: "2026-09-18"
-relecture: brouillon
+relecture: verifie
+verifiePar: "Clément Boudon"
+verifieLe: "2026-09-18"
 ordre: 50
 voirAussi:
   - ou-et-comment-voter

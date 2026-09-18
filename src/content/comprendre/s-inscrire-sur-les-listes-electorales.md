@@ -4,7 +4,9 @@ description: "Qui doit s'inscrire, qui l'est déjà sans le savoir, où le faire
 question: "Faut-il faire une démarche pour voter en 2027 ? Beaucoup de gens sont déjà inscrits sans le savoir, et les autres ont une seule chose à faire."
 publieLe: "2026-09-14"
 misAJourLe: "2026-09-18"
-relecture: brouillon
+relecture: verifie
+verifiePar: "Clément Boudon"
+verifieLe: "2026-09-18"
 ordre: 20
 voirAussi:
   - ou-et-comment-voter

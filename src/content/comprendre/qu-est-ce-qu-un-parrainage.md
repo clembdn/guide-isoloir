@@ -4,7 +4,9 @@ description: "500 signatures d'élus, 30 départements, publication de chaque no
 question: "Pourquoi certains candidats connus n'apparaissent-ils pas sur le bulletin ? Parce qu'une étape précède le vote, et elle est tenue par des élus."
 publieLe: "2026-09-14"
 misAJourLe: "2026-09-18"
-relecture: brouillon
+relecture: verifie
+verifiePar: "Clément Boudon"
+verifieLe: "2026-09-18"
 ordre: 40
 voirAussi:
   - ce-qu-un-president-decide-seul

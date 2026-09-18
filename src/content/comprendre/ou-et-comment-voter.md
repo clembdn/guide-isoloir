@@ -4,7 +4,9 @@ description: "Horaires, pièce d'identité acceptée, déroulement du vote dans 
 question: "Que se passe-t-il concrètement dans un bureau de vote ? La procédure prend deux minutes, à condition d'arriver avec la bonne pièce."
 publieLe: "2026-09-14"
 misAJourLe: "2026-09-18"
-relecture: brouillon
+relecture: verifie
+verifiePar: "Clément Boudon"
+verifieLe: "2026-09-18"
 ordre: 30
 voirAussi:
   - s-inscrire-sur-les-listes-electorales

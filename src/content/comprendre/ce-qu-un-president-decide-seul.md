@@ -4,7 +4,9 @@ description: "Nomination du Premier ministre, dissolution, armées, grâce : ce 
 question: "Un président peut-il appliquer son programme tout seul ? Non, et la liste de ce qu'il décide sans personne est plus courte qu'on ne le croit."
 publieLe: "2026-09-14"
 misAJourLe: "2026-09-18"
-relecture: brouillon
+relecture: verifie
+verifiePar: "Clément Boudon"
+verifieLe: "2026-09-18"
 ordre: 10
 voirAussi: []
 sources:
