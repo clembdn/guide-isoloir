@@ -497,3 +497,58 @@ hr {
     scroll-behavior: auto !important;
   }
 }
+
+/*
+ * SCORE ET COUVERTURE — styles de `src/components/ScoreEtCouverture.svelte`.
+ *
+ * POURQUOI ILS SONT ICI ET NON DANS LE COMPOSANT, alors que tout le reste du
+ * projet emploie des styles scopés.
+ *
+ * Astro n'émet la feuille scopée d'un composant Svelte ENFANT que si ce
+ * composant est effectivement rendu pendant la construction. `Resultat.svelte`
+ * ne rend rien côté serveur : tout son gabarit attend `charge`, qui n'est vrai
+ * qu'après hydratation. `ScoreEtCouverture` n'est donc jamais instancié au
+ * build, et son `<style>` disparaissait purement et simplement de `dist/` —
+ * sans erreur, sans avertissement. Le pourcentage s'affichait à la taille du
+ * texte courant et « Trop peu documenté » se collait à la phrase précédente.
+ *
+ * Deux contournements ont été essayés et écartés : importer le composant depuis
+ * la page `.astro` ne change rien (la collecte suit le rendu, pas les imports),
+ * et redéclarer les règles en `:global()` dans `Resultat.svelte` éloignerait les
+ * styles du composant tout en le cassant partout ailleurs.
+ *
+ * `base.css` est chargée par `BaseLayout` sur toutes les pages : ces règles sont
+ * donc présentes partout où le composant peut apparaître, ce qui est exactement
+ * la garantie qu'il lui faut. NE PAS les remettre dans le composant sans
+ * vérifier que `.chiffre` se retrouve dans un fichier de `dist/_astro/*.css`.
+ */
+
+.score-et-couverture {
+  margin: 0 0 var(--pas-2);
+  font-size: var(--t-petit);
+  color: var(--couleur-encre-faible);
+}
+
+/*
+ * Le chiffre est plus gros que sa couverture, jamais seul sur sa ligne : la
+ * couverture doit rester dans le même regard, pas sous un repli.
+ */
+.score-et-couverture .chiffre {
+  font-size: var(--t-corps);
+  font-variant-numeric: tabular-nums;
+  color: var(--couleur-encre);
+}
+
+/*
+ * L'espace est DANS le texte (`&nbsp;·&nbsp;`), pas dans le padding : Svelte
+ * supprime le nœud de texte entre deux éléments, et un `padding-inline` seul
+ * laissait « 100 %·documenté » collé à 375 px, où le point médian se lisait
+ * comme une ponctuation du chiffre.
+ */
+.score-et-couverture .separateur {
+  color: var(--couleur-trait);
+}
+
+.score-et-couverture .trop-peu {
+  display: block;
+}

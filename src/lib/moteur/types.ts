@@ -19,7 +19,7 @@
  * Mélanger 1 et 2 avantagerait structurellement les acteurs les mieux couverts,
  * ce que CLAUDE.md interdit explicitement.
  */
-import type { StanceValue } from "../modele";
+import type { StanceAdequation, StanceValue } from "../modele";
 
 /**
  * Maillon de la chaîne de résolution effectivement employé.
@@ -64,6 +64,30 @@ export type DetailPosition = {
    * dans ses données ne portait cette distinction.
    */
   heriteDe: string | null;
+  /**
+   * Identifiant de l'acteur d'origine quand la position est reprise.
+   *
+   * `heriteDe` porte le NOM, pour l'affichage. L'identifiant sert à lier vers
+   * la fiche de l'acteur d'origine sans avoir à retrouver un nom dans une
+   * liste, et à tester la reprise sans dépendre d'un libellé qui peut changer.
+   */
+  heriteDeId: string | null;
+  /**
+   * Verbatim qui porte la position, ou `null` si la position est inconnue.
+   *
+   * Remonté jusqu'ici parce que le détail du résultat doit pouvoir montrer la
+   * phrase elle-même, et pas seulement une valeur sur une échelle. Un codage
+   * qu'on ne peut pas confronter à sa citation est un codage qu'on ne peut pas
+   * contester. Vide — et non `null` — pour une inférence, seul maillon sans
+   * phrase à citer.
+   */
+  citation: string | null;
+  /** Sources de la position, pour afficher le lien et la date. */
+  sourceIds: readonly string[];
+  /** Adéquation de la citation à l'affirmation posée. `null` si inconnue. */
+  adequation: StanceAdequation | null;
+  /** Date de mise à jour du codage, `null` si la position est inconnue. */
+  updatedAt: string | null;
 };
 
 export type ResultatTheme = {

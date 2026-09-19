@@ -139,6 +139,18 @@ export type EntreesMoteur = {
    * `validerCandidatures` le garantit côté données.
    */
   candidatures?: readonly Candidate[];
+  /**
+   * Annuaire des acteurs, pour NOMMER l'origine d'une position reprise.
+   *
+   * Distinct de `acteurs`, qui est la liste de ceux qu'on CLASSE. Les deux ne
+   * coïncident pas : `/resultat` classe les candidats, mais les positions
+   * reprises viennent des partis, qui ne sont pas classés. Sans annuaire
+   * distinct, `heriteDe` retomberait sur l'identifiant brut et l'écran
+   * afficherait « parti-rassemblement-national » à la place du nom.
+   *
+   * Par défaut, `acteurs` : sans reprise, il n'y a rien d'autre à nommer.
+   */
+  annuaire?: readonly PoliticalActor[];
 };
 
 /**
@@ -154,6 +166,7 @@ export function calculer({
   positions,
   reponses,
   candidatures = [],
+  annuaire = acteurs,
 }: EntreesMoteur): Classement {
   // Tri canonique : c'est ce qui rend le résultat indépendant de l'ordre du JSON.
   const questionsTriees = [...questions].sort((a, b) => a.id.localeCompare(b.id));
@@ -194,7 +207,7 @@ export function calculer({
   const reprises = new Map(
     candidatures.map((candidature) => [candidature.actorId, candidature.baselineActorIds]),
   );
-  const nomParId = new Map(acteurs.map((acteur) => [acteur.id, acteur.name]));
+  const nomParId = new Map(annuaire.map((acteur) => [acteur.id, acteur.name]));
 
   /**
    * Position retenue pour un couple acteur/question, et son origine.
@@ -207,13 +220,15 @@ export function calculer({
   function resoudre(
     acteurId: string,
     questionId: string,
-  ): { position: Stance; heriteDe: string | null } | null {
+  ): { position: Stance; heriteDe: string | null; heriteDeId: string | null } | null {
     const propre = meilleurePosition(parActeur.get(acteurId)?.get(questionId) ?? []);
-    if (propre !== null) return { position: propre, heriteDe: null };
+    if (propre !== null) return { position: propre, heriteDe: null, heriteDeId: null };
 
     for (const repris of reprises.get(acteurId) ?? []) {
       const position = meilleurePosition(parActeur.get(repris)?.get(questionId) ?? []);
-      if (position !== null) return { position, heriteDe: nomParId.get(repris) ?? repris };
+      if (position !== null) {
+        return { position, heriteDe: nomParId.get(repris) ?? repris, heriteDeId: repris };
+      }
     }
 
     return null;
@@ -244,11 +259,16 @@ export function calculer({
             niveauLibelle: "Position inconnue",
             confiance: null,
             heriteDe: null,
+            heriteDeId: null,
+            citation: null,
+            sourceIds: [],
+            adequation: null,
+            updatedAt: null,
           });
           continue;
         }
 
-        const { position, heriteDe } = resolue;
+        const { position, heriteDe, heriteDeId } = resolue;
         const valeur = accord(reponse, position.value);
         accords.push(valeur);
         documentees += 1;
@@ -266,6 +286,11 @@ export function calculer({
           niveauLibelle: NIVEAU_PAR_CLE.get(position.provenance)?.libelle ?? "Origine inconnue",
           confiance: position.confidence as Confiance,
           heriteDe,
+          heriteDeId,
+          citation: position.citation,
+          sourceIds: position.sourceIds,
+          adequation: position.adequation,
+          updatedAt: position.updatedAt,
         });
       }
 

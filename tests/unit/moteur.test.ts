@@ -367,3 +367,77 @@ describe("garde-fous d'interprétation", () => {
     expect(resserre.ecartsTenus).toBe(true);
   });
 });
+
+/*
+ * DÉTERMINISME DE L'ORDRE À SCORE ÉGAL.
+ *
+ * L'invariant de stabilité de l'audit vérifie que deux exécutions rendent le
+ * même résultat. Il ne dit rien du cas qui compte ici : DEUX ACTEURS EX ÆQUO.
+ * Leur ordre relatif n'est pas une information sur leur proximité, mais il doit
+ * être le même chez tout le monde — sinon une carte partageable ne prouve rien,
+ * et deux personnes aux mêmes réponses se croient en désaccord.
+ *
+ * L'ordre vient de la graine, elle-même tirée des réponses. Pas d'aléa, pas
+ * d'horloge, pas d'alphabet : l'alphabet placerait systématiquement le même
+ * acteur au-dessus, pour tout le monde, à tous les scrutins.
+ */
+describe("l'ordre des ex æquo est déterminé par les réponses", () => {
+  const questions = [
+    question("d1", "Alpha", 1),
+    question("d2", "Alpha", 2),
+    question("d3", "Beta", 3),
+    question("d4", "Beta", 4),
+  ];
+
+  /** Quatre acteurs strictement identiques : tout ex æquo, rien pour départager. */
+  const acteurs = ["un", "deux", "trois", "quatre"].map((id) => acteur(id, `Acteur ${id}`));
+
+  const positions = acteurs.flatMap((a) => questions.map((q) => position(a.id, q.id, 2)));
+
+  const reponses = { d1: 2, d2: 1, d3: -1, d4: 2 } as const;
+
+  it("rend exactement le même ordre à deux exécutions", () => {
+    const premier = calculer({ questions, acteurs, positions, reponses });
+    const second = calculer({ questions, acteurs, positions, reponses });
+
+    expect(premier.acteurs.map((a) => a.actorId)).toEqual(second.acteurs.map((a) => a.actorId));
+    expect(premier.graineAffichage).toBe(second.graineAffichage);
+  });
+
+  it("place bien tous les acteurs au même rang", () => {
+    const classement = calculer({ questions, acteurs, positions, reponses });
+
+    expect(new Set(classement.acteurs.map((a) => a.rang))).toEqual(new Set([1]));
+  });
+
+  /*
+   * Le cœur du test : l'ordre ne doit dépendre QUE des réponses. Permuter le
+   * tableau d'entrée ne doit rien changer ; changer une réponse doit pouvoir
+   * changer l'ordre, sinon la graine ne sert à rien.
+   */
+  it("ne dépend pas de l'ordre du tableau d'acteurs", () => {
+    const direct = calculer({ questions, acteurs, positions, reponses });
+    const inverse = calculer({ questions, acteurs: [...acteurs].reverse(), positions, reponses });
+
+    expect(inverse.acteurs.map((a) => a.actorId)).toEqual(direct.acteurs.map((a) => a.actorId));
+  });
+
+  it("n'est pas l'ordre alphabétique, qui avantagerait toujours les mêmes", () => {
+    const classement = calculer({ questions, acteurs, positions, reponses });
+    const alphabetique = [...acteurs].map((a) => a.id).sort();
+
+    expect(classement.acteurs.map((a) => a.actorId)).not.toEqual(alphabetique);
+  });
+
+  it("change avec les réponses", () => {
+    const a = calculer({ questions, acteurs, positions, reponses });
+    const b = calculer({
+      questions,
+      acteurs,
+      positions,
+      reponses: { d1: -2, d2: -1, d3: 1, d4: -2 },
+    });
+
+    expect(b.graineAffichage).not.toBe(a.graineAffichage);
+  });
+});

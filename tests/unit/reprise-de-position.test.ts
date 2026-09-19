@@ -195,3 +195,109 @@ describe("la chaîne de reprise est parcourue dans l'ordre déclaré", () => {
     expect(positions.find((d) => d.questionId === "q2")!.heriteDe).toBe("Parti d'essai");
   });
 });
+
+/*
+ * L'ANNUAIRE : NOMMER UN ACTEUR QU'ON NE CLASSE PAS.
+ *
+ * `/resultat` classe les candidats et pas les partis — personne n'a demandé à
+ * comparer vingt partis à ses réponses. Mais les positions reprises viennent
+ * précisément de ces partis, et il faut pouvoir les nommer. Sans annuaire
+ * distinct, l'écran affichait « parti-rassemblement-national » sous chaque
+ * position héritée : un identifiant technique présenté à un électeur.
+ */
+describe("l'annuaire nomme les acteurs repris sans les classer", () => {
+  const entrees = {
+    questions: QUESTIONS,
+    acteurs: [CANDIDAT],
+    positions: [position("parti-essai", "q1", 2), position("parti-essai", "q2", -2)],
+    reponses: REPONSES,
+    candidatures: [CANDIDATURE],
+  };
+
+  it("nomme le parti sans l'ajouter au classement", () => {
+    const classement = calculer({ ...entrees, annuaire: [PARTI, CANDIDAT] });
+
+    expect(classement.acteurs.map((a) => a.actorId)).toEqual(["candidate-essai"]);
+    const candidat = classement.acteurs[0]!;
+    for (const detail of candidat.parTheme[0]!.positions) {
+      expect(detail.heriteDe).toBe("Parti d'essai");
+      expect(detail.heriteDeId).toBe("parti-essai");
+    }
+  });
+
+  /*
+   * Le repli sur l'identifiant reste, mais il ne doit jamais se produire en
+   * production : c'est un filet, pas un comportement attendu. Le test le fige
+   * pour qu'une régression se voie comme un identifiant à l'écran, et non
+   * comme une page vide.
+   */
+  it("retombe sur l'identifiant quand l'acteur repris est introuvable", () => {
+    const candidat = calculer(entrees).acteurs[0]!;
+
+    expect(candidat.parTheme[0]!.positions[0]!.heriteDe).toBe("parti-essai");
+  });
+
+  it("ne change pas le score selon que l'annuaire est fourni ou non", () => {
+    const sans = calculer(entrees).acteurs[0]!;
+    const avec = calculer({ ...entrees, annuaire: [PARTI, CANDIDAT] }).acteurs[0]!;
+
+    expect(avec.score).toBe(sans.score);
+    expect(avec.couverture).toEqual(sans.couverture);
+  });
+});
+
+/*
+ * LE DÉTAIL PORTE DE QUOI CONTESTER LE CODAGE.
+ *
+ * Le score est cliquable : il se déplie sur les affirmations qui l'ont produit,
+ * chacune avec son verbatim, sa source et sa date. Ces champs doivent donc
+ * remonter du `Stance` jusqu'au `DetailPosition`, sinon l'écran ne peut afficher
+ * qu'une valeur sur une échelle — un chiffre qu'il faut croire.
+ */
+describe("le détail d'une position porte sa citation, ses sources et sa date", () => {
+  const AVEC_CITATION: Stance = {
+    ...position("candidate-essai", "q1", 2, "direct-statement", "high"),
+    citation: "le retour le plus vite possible à la retraite à 60 ans",
+    adequation: "directe",
+    sourceIds: ["source-essai", "source-essai-2"],
+    updatedAt: "2026-09-19",
+  };
+
+  it("recopie citation, adéquation, sources et date depuis la position retenue", () => {
+    const classement = calculer({
+      questions: QUESTIONS,
+      acteurs: [CANDIDAT],
+      positions: [AVEC_CITATION],
+      reponses: REPONSES,
+    });
+
+    const q1 = classement.acteurs[0]!.parTheme[0]!.positions.find((d) => d.questionId === "q1")!;
+
+    expect(q1.citation).toBe("le retour le plus vite possible à la retraite à 60 ans");
+    expect(q1.adequation).toBe("directe");
+    expect(q1.sourceIds).toEqual(["source-essai", "source-essai-2"]);
+    expect(q1.updatedAt).toBe("2026-09-19");
+  });
+
+  /*
+   * Une position inconnue ne porte ni citation vide ni source vide « par
+   * défaut » : elle porte `null`, pour qu'un gabarit ne puisse pas rendre un
+   * blanc à la place d'une absence.
+   */
+  it("laisse tout à null quand la position est inconnue", () => {
+    const classement = calculer({
+      questions: QUESTIONS,
+      acteurs: [CANDIDAT],
+      positions: [],
+      reponses: REPONSES,
+    });
+
+    const q1 = classement.acteurs[0]!.parTheme[0]!.positions[0]!;
+
+    expect(q1.citation).toBeNull();
+    expect(q1.adequation).toBeNull();
+    expect(q1.updatedAt).toBeNull();
+    expect(q1.sourceIds).toEqual([]);
+    expect(q1.heriteDeId).toBeNull();
+  });
+});

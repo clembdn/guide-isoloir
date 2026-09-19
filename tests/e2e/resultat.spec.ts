@@ -8,29 +8,45 @@
  *   - aucun identifiant dans l'URL, jamais. Une adresse de résultat se retrouve
  *     dans un historique, dans un presse-papier, dans un `Referer` ;
  *   - `noindex` dans le HTML statique, et absence du sitemap ;
- *   - aucun pourcentage : un chiffre se lit comme une mesure ;
+ *   - aucun pourcentage SANS SA COUVERTURE : un chiffre nu se lit comme une
+ *     mesure, un chiffre suivi de « documenté sur 7 des 24 affirmations » se
+ *     désamorce tout seul ;
  *   - aucun vainqueur unique ;
  *   - une seule teinte pour toutes les barres, à opacité constante.
  */
 import { test, expect, type Page } from "@playwright/test";
 import { CLE_SESSION } from "../../src/lib/session-test";
 import { QUESTIONS } from "../../src/data/questions";
-import { POSITIONS } from "../../src/data/positions";
-import { positionsPubliables } from "../../src/lib/acteurs";
 
 /*
- * TANT QU'AUCUNE POSITION N'EST RELUE, IL N'Y A PAS DE CLASSEMENT À TESTER.
+ * TANT QU'IL N'Y A PAS DE CLASSEMENT À L'ÉCRAN, IL N'Y A PAS DE CLASSEMENT À
+ * TESTER — et c'est L'ÉCRAN qu'on interroge, pas les sources.
  *
- * `/resultat` ne sert que les positions `reconciled` ou `published`. Le codage
- * initial est en `draft` : la page affiche donc un état explicite plutôt qu'un
- * classement de zéros. Les contrôles qui portent sur l'apparence du classement
- * sont suspendus dans cet état, et se réarment d'eux-mêmes dès qu'une position
- * est réconciliée. Ce qui ne dépend PAS des positions — URL sans identifiant,
- * noindex, absence de pourcentage — reste vérifié dans tous les cas.
+ * `/resultat` ne sert que les positions `reconciled` ou `published`, sauf en
+ * prévisualisation ; et même servies, elles ne produisent un classement qu'une
+ * fois le seuil de publication franchi. Deux conditions, dont aucune ne se lit
+ * dans `positions.ts`.
+ *
+ * Une première version décidait depuis les sources. Elle suspendait donc les
+ * contrôles d'apparence du classement même quand un classement s'affichait :
+ * ils ne se sont jamais exécutés, dans aucun mode. Voir `sansClassement`.
+ *
+ * Ce qui ne dépend PAS du classement — URL sans identifiant, noindex,
+ * pourcentage jamais orphelin — reste vérifié dans tous les cas.
  */
-const SANS_CLASSEMENT = positionsPubliables(POSITIONS).length === 0;
 const RAISON_SANS_CLASSEMENT =
   "aucune position réconciliée : /resultat n'affiche pas de classement, il explique pourquoi";
+
+/**
+ * Y a-t-il un classement SUR LA PAGE SERVIE ?
+ *
+ * On demande à la page, et non aux données. Un classement absent parce que rien n'est relu et
+ * un classement absent parce que le seuil de publication n'est pas atteint se
+ * traitent pareil : il n'y a rien à vérifier.
+ */
+async function sansClassement(page: Page): Promise<boolean> {
+  return (await page.locator("li.acteur").count()) === 0;
+}
 
 /** Profil tranché, pour obtenir un classement exploitable et non « incertain ». */
 const PROFIL = Object.fromEntries(
@@ -65,27 +81,121 @@ test("la page porte noindex et reste hors du sitemap", async ({ request }) => {
   expect(sitemap.includes("/resultat"), "/resultat figure dans le sitemap").toBe(false);
 });
 
-test("aucun pourcentage n'est affiché", async ({ page }) => {
+test("aucun pourcentage n'est affiché sans sa couverture adjacente", async ({ page }) => {
   await avecReponses(page);
-  const texte = await page.locator("main").innerText();
 
-  // Un score en pourcentage se lirait comme une mesure, alors que c'est une
-  // moyenne d'accords sur un questionnaire que nous avons écrit nous-mêmes.
-  const pourcentages = texte.match(/\d+([.,]\d+)?\s*%/g) ?? [];
-  expect(pourcentages, `Pourcentage(s) affiché(s) : ${pourcentages.join(", ")}`).toEqual([]);
+  /*
+   * L'INTERDICTION DU POURCENTAGE A ÉTÉ LEVÉE, ET REMPLACÉE PAR PLUS FORT.
+   *
+   * Elle supprimait le chiffre, pas le malentendu : « Proximité forte » se lit
+   * tout aussi bien comme un verdict, et privait le lecteur de la seule
+   * information qui lui permettait de jauger la solidité du classement.
+   *
+   * La règle qui la remplace : un pourcentage n'apparaît JAMAIS seul. Il est
+   * rendu par `ScoreEtCouverture.svelte`, qui rend toujours la couverture avec
+   * lui — il n'existe aucun autre composant capable d'afficher un score, donc
+   * aucun moyen de contourner la règle par distraction.
+   *
+   * Ce test vérifie la conséquence observable : chaque pourcentage de la page
+   * se trouve dans un bloc qui porte aussi sa couverture. Un `72 %` ajouté
+   * ailleurs — un en-tête, un résumé, une carte partageable — échoue ici.
+   */
+  const blocs = await page.locator("main p, main li, main h1, main h2, main h3").all();
+
+  const orphelins: string[] = [];
+  for (const bloc of blocs) {
+    const texte = (await bloc.innerText()).replace(/\s+/g, " ");
+    if (!/\d+([.,]\d+)?\s*%/.test(texte)) continue;
+    // « documenté sur 18 des 24 affirmations » : la couverture, en toutes lettres.
+    if (/document[ée]\s+sur\s+\d+\s+(?:des?|de)\s+\d+\s+affirmations?/i.test(texte)) continue;
+    // Le seuil de publication s'énonce en pourcentage et n'est pas un score.
+    if (/seuil\s+retenu/i.test(texte)) continue;
+    orphelins.push(texte.slice(0, 160));
+  }
+
+  expect(orphelins, `Pourcentage(s) sans couverture : ${orphelins.join(" | ")}`).toEqual([]);
 });
 
-test("l'absence de position relue est expliquée, pas masquée", async ({ page }) => {
-  test.skip(!SANS_CLASSEMENT, "des positions sont publiées : le classement s'affiche");
+test("un score s'accompagne toujours du nombre d'affirmations documentées", async ({ page }) => {
   await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
 
-  await expect(page.locator("main")).toContainText("Aucune position n'est encore publiée");
+  // Au moins un acteur affiche sa couverture : sinon le composant n'est pas rendu
+  // et le test précédent passerait pour une page vide.
+  await expect(
+    page.getByText(/document[ée] sur \d+ (?:des?|de) \d+ affirmations?/i).first(),
+  ).toBeVisible();
+});
+
+test("une position héritée nomme toujours l'acteur d'origine", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  /*
+   * C'est la garantie qu'Elyze n'avait pas : ses propositions de 2017
+   * s'affichaient en 2022 sans que rien ne dise qu'elles n'étaient pas de la
+   * campagne en cours. Une ligne de parti reprise faute de déclaration doit
+   * porter le nom du parti, et le dire.
+   */
+  for (const repli of await page.locator(".heritage").all()) {
+    const texte = await repli.innerText();
+    expect(texte).toMatch(/Position de .+, reprise faute de déclaration personnelle/);
+    // Jamais un identifiant technique à la place du nom.
+    expect(texte).not.toMatch(/parti-[a-z-]+/);
+  }
+});
+
+test("la bascule d'héritage est présente et cochée par défaut", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  const bascule = page.getByRole("checkbox", { name: /positions héritées du parti/i });
+  await expect(bascule).toBeVisible();
+  await expect(bascule).toBeChecked();
+});
+
+test("la carte partageable porte la graine et l'état de la bascule", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  /*
+   * Sans ces deux paramètres, deux personnes aux mêmes réponses obtiennent des
+   * chiffres différents selon un réglage que la capture ne montre pas.
+   */
+  const carte = page.locator(".carte");
+  await expect(carte).toContainText(/Positions héritées\s*:\s*(incluses|exclues)/);
+  await expect(carte.locator(".graine")).toHaveText(/^[0-9a-f]{8}$/);
+});
+
+test("l'absence de classement est expliquée, pas masquée", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(
+    !(await sansClassement(page)),
+    "un classement s'affiche : il n'y a pas d'absence à expliquer",
+  );
+
+  /*
+   * DEUX RAISONS POSSIBLES, ET TOUTES DEUX DOIVENT SE DIRE.
+   *
+   *   - aucune position relue : `positionsPubliables` ne sert rien ;
+   *   - seuil de publication non atteint : des positions existent, mais trop
+   *     peu d'acteurs sont documentés pour qu'un ORDRE veuille dire quelque
+   *     chose.
+   *
+   * Le test n'a longtemps connu que la première, et il échouait dès qu'un build
+   * de prévisualisation produisait la seconde. Ce qui compte n'est pas laquelle
+   * s'affiche, c'est qu'une page sans classement dise pourquoi au lieu de
+   * paraître vide ou cassée.
+   */
+  await expect(page.locator("main")).toContainText(
+    /Aucune position n'est encore publiée|Le classement n'est pas encore publiable/,
+  );
   await expect(page.locator(".classement")).toHaveCount(0);
 });
 
 test("les qualifications remplacent les chiffres", async ({ page }) => {
-  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
   const texte = await page.locator("main").innerText();
 
   const attendues = ["Proximité forte", "Proximité modérée", "Résultat incertain"];
@@ -96,8 +206,8 @@ test("les qualifications remplacent les chiffres", async ({ page }) => {
 });
 
 test("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ page }) => {
-  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
 
   const acteurs = page.locator(".classement > li");
   await expect(acteurs).toHaveCount(3, { timeout: 5000 });
@@ -112,8 +222,8 @@ test("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ 
 });
 
 test("toutes les barres partagent une teinte et une opacité", async ({ page }) => {
-  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
 
   const remplissages = await page.locator(".barre-valeur").evaluateAll((barres) =>
     barres.map((barre) => {
@@ -145,8 +255,17 @@ test("la géométrie des barres passe par un attribut, pas par un style en ligne
 });
 
 test("l'état vide explique au lieu d'afficher un classement", async ({ page }) => {
-  test.skip(SANS_CLASSEMENT, RAISON_SANS_CLASSEMENT);
   await page.goto("/resultat", { waitUntil: "networkidle" });
+  /*
+   * Quand aucune position n'est servie, la page rend une explication STATIQUE et
+   * n'instancie pas l'îlot : il n'y a alors pas d'état vide à exercer, parce
+   * qu'il n'y a pas de composant. Le test porte sur l'îlot, il se suspend donc
+   * sur cette page-là — et sur elle seule.
+   */
+  test.skip(
+    (await page.locator("main").innerText()).includes("Aucune position n'est encore publiée"),
+    "aucune position servie : l'îlot n'est pas monté, il n'y a pas d'état vide à vérifier",
+  );
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });
 
   await expect(page.locator(".classement")).toHaveCount(0);

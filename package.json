@@ -8,7 +8,9 @@
   },
   "scripts": {
     "dev": "astro dev",
+    "dev:previsualisation": "GUIDE_ISOLOIR_PREVISUALISATION=1 astro dev",
     "build": "astro build",
+    "build:previsualisation": "GUIDE_ISOLOIR_PREVISUALISATION=1 astro build",
     "build:prod": "astro build && node scripts/verifier-pages-publiques.mjs --strict",
     "verify:pages": "node scripts/verifier-pages-publiques.mjs",
     "preview": "astro preview",

@@ -16,6 +16,14 @@
  * classement public. Tant qu'aucune position n'est réconciliée, la page le dit
  * au lieu d'afficher un classement de zéros.
  *
+ * UNE SEULE EXCEPTION, ET ELLE NE SE DÉPLOIE PAS. Le mode prévisualisation
+ * (`GUIDE_ISOLOIR_PREVISUALISATION=1` au build) sert aussi les brouillons, avec
+ * un bandeau permanent. Il existe parce qu'un codage qu'on ne peut pas afficher
+ * est un codage qu'on ne peut pas relire. `npm run build:prod` ne pose pas le
+ * drapeau, et le garde-fou de `dist/` refuse un build où une position `draft`
+ * apparaîtrait dans ce qui est servi : deux verrous indépendants, l'oubli d'un
+ * seul ne suffit pas à publier un brouillon.
+ *
  * Contrainte permanente : aucun script tiers, aucune police distante, aucun
  * analytics sur cette route.
  */
@@ -34,6 +42,12 @@ import { ACTEURS, CANDIDATURES } from "../data/acteurs";
 import { POSITIONS } from "../data/positions";
 import { SOURCES_POSITIONS } from "../data/sources-positions";
 import { projeter } from "../lib/projection";
+import {
+  BANDEAU_PREVISUALISATION,
+  PREVISUALISATION,
+  positionsServies,
+} from "../lib/previsualisation";
+import { SEUIL_PUBLICATION, seuilDepuisEnvironnement } from "../lib/seuils";
 
 /*
  * Validation au build, côté serveur uniquement. Elle est référentielle : une
@@ -50,16 +64,34 @@ const sources = validerSourcesPositions(SOURCES_POSITIONS);
 const positions = validerPositions(POSITIONS, { acteurs, questions: questionsValidees, sources });
 
 /*
- * Seuls les candidats sont classés. Les partis sont dans `ACTEURS` pour porter
- * un nom et servir de ligne de repli ; les classer aujourd'hui ajouterait sept
- * lignes à zéro position, ce qui n'informe personne. Le jour où des positions de
- * parti existent, il faudra les passer ici aussi — sinon le moteur ne saura pas
- * nommer l'acteur d'origine d'une position reprise.
+ * Seuls les candidats sont CLASSÉS. Les partis, eux, sont passés en `annuaire` :
+ * ils portent les positions reprises et doivent pouvoir être nommés, sans
+ * occuper pour autant une ligne du classement. Les classer ajouterait vingt
+ * lignes que personne n'a demandé à comparer ; ne pas les transmettre du tout
+ * ferait afficher « parti-rassemblement-national » à la place du nom sous
+ * chaque position héritée.
  */
 const candidats = acteurs.filter((acteur) => acteur.kind === "candidate");
-const servies = positionsPubliables(positions);
+const servies = positionsServies(positions);
+const nonRelues = positions.length - positionsPubliables(positions).length;
 
 const questions = projeter(QUESTIONS);
+
+/*
+ * Seuil de publication, résolu ICI et passé en propriété.
+ *
+ * Il se règle sans recompiler un composant, parce que c'est une décision
+ * éditoriale et pas une constante de code. La lecture se fait côté Node : les
+ * îlots reçoivent des nombres, jamais `process`.
+ */
+const seuilCouverture = seuilDepuisEnvironnement(
+  "GUIDE_ISOLOIR_SEUIL_COUVERTURE",
+  SEUIL_PUBLICATION.couverture,
+);
+const seuilActeursMin = seuilDepuisEnvironnement(
+  "GUIDE_ISOLOIR_SEUIL_ACTEURS",
+  SEUIL_PUBLICATION.acteursMin,
+);
 ---
 
 <BaseLayout
@@ -68,6 +100,16 @@ const questions = projeter(QUESTIONS);
   noindex={true}
 >
   <h1>Votre résultat</h1>
+
+  {
+    /*
+     * Le bandeau est rendu ICI, en HTML statique, et non seulement dans l'îlot :
+     * il doit être lu avant l'hydratation, et rester lisible si le JavaScript
+     * échoue. Un avertissement qui dépend du script qu'il avertit ne protège
+     * personne.
+     */
+    PREVISUALISATION && <p class="bandeau-previsualisation">{BANDEAU_PREVISUALISATION}</p>
+  }
 
   <p>
     Ce résultat a été calculé dans votre navigateur, à partir des réponses conservées dans cet
@@ -79,10 +121,10 @@ const questions = projeter(QUESTIONS);
       <section class="cadre-lecture">
         <h2>Aucune position n'est encore publiée</h2>
         <p>
-          {positions.length} position{positions.length > 1 ? "s" : ""} sont codées et attendent leur
-          relecture. Aucune n'est servie tant qu'elle n'a pas été confrontée : un classement établi
-          sur des codages non relus ressemblerait trait pour trait à un classement fiable, et rien
-          ne l'en distinguerait à l'œil.
+          {nonRelues} position{nonRelues > 1 ? "s" : ""} sont codées et attendent leur relecture.
+          Aucune n'est servie tant qu'elle n'a pas été confrontée : un classement établi sur des
+          codages non relus ressemblerait trait pour trait à un classement fiable, et rien ne l'en
+          distinguerait à l'œil.
         </p>
         <p>
           La <a href="/methodologie">méthodologie</a> décrit comment une position est établie, et le
@@ -90,12 +132,22 @@ const questions = projeter(QUESTIONS);
         </p>
       </section>
     ) : (
+      /*
+       * `avertissement=""` : le bandeau de prévisualisation est rendu en HTML
+       * statique plus haut, pas ici. Le passer AUSSI à l'îlot l'affichait deux
+       * fois. Le rendu statique est celui qu'on garde, parce qu'il se lit avant
+       * l'hydratation et survit à une panne de JavaScript.
+       */
       <Resultat
         client:load
         questions={questions}
         acteurs={candidats}
+        annuaire={acteurs}
         positions={servies}
         candidatures={candidatures}
+        sources={sources}
+        seuilCouverture={seuilCouverture}
+        seuilActeursMin={seuilActeursMin}
         avertissement=""
       />
     )
@@ -114,3 +166,13 @@ const questions = projeter(QUESTIONS);
     calcul fait, et ce qu'il ne fait pas.
   </p>
 </BaseLayout>
+
+<style>
+  .bandeau-previsualisation {
+    border: 2px solid var(--couleur-signature);
+    padding: var(--pas-3);
+    margin-bottom: var(--pas-4);
+    font-size: var(--t-petit);
+    font-weight: 600;
+  }
+</style>

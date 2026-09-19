@@ -241,10 +241,67 @@ const MOTIF_FACTICE = /factice-sentinelle|QUESTIONS_FACTICES|AVERTISSEMENT_FACTI
  */
 const MOTIF_MOT_COLLE = /[a-zàâçéèêëîïôûùüÿœ]{2,}<(?:a|strong|em|code|time)\b/gi;
 
+/*
+ * 7. Aucune position en brouillon dans ce qui est servi.
+ *
+ * `positionsPubliables` écarte déjà `draft` et `double-coded` côté source, et
+ * le mode prévisualisation (`GUIDE_ISOLOIR_PREVISUALISATION=1`) les réintroduit
+ * volontairement pour permettre la relecture. Ce contrôle est le SECOND VERROU,
+ * et il est indépendant du premier : il ne lit pas la configuration, il lit ce
+ * qui se trouve réellement dans `dist/`.
+ *
+ * Il attrape donc trois erreurs que le filtre côté source ne peut pas attraper :
+ * un build de prévisualisation déployé par mégarde, un appel direct à
+ * `POSITIONS` qui contournerait le filtre, et une future page qui oublierait de
+ * l'appeler.
+ *
+ * ON NORMALISE AVANT DE CHERCHER, et c'est le cœur du contrôle. La même donnée
+ * s'écrit d'au moins trois façons dans `dist/` :
+ *
+ *   - JSON nu dans un bundle .....  "reviewStatus":"draft"
+ *   - échappé en attribut HTML ...  &quot;reviewStatus&quot;:[0,&quot;draft&quot;]
+ *   - échappé dans une chaîne JS .  \"reviewStatus\":\"draft\"
+ *
+ * La forme du milieu est celle qu'Astro produit réellement pour les propriétés
+ * d'un îlot : il enveloppe chaque valeur dans `[type, valeur]`. Un premier jet
+ * de ce contrôle ne cherchait que les deux formes évidentes — il laissait donc
+ * passer exactement le cas qu'il devait bloquer, et un build de prévisualisation
+ * chargé de brouillons est sorti en 0.
+ *
+ * On ramène donc les guillemets à une seule écriture, et on accepte le tag de
+ * type optionnel d'Astro entre le deux-points et la valeur.
+ *
+ * La règle de `CLAUDE.md` qu'il défend : aucun contenu factuel produit par une
+ * IA n'est publié sans vérification humaine.
+ */
+const NON_RELUES = ["draft", "double-coded"];
+
+/** Ramène `&quot;` et `\"` à un guillemet ordinaire. */
+function guillemetsNormalises(contenu) {
+  return contenu.replaceAll("&quot;", '"').replaceAll('\\"', '"');
+}
+
+const MOTIFS_NON_RELUES = NON_RELUES.map((statut) => ({
+  statut,
+  // `[0,` : enveloppe de type des propriétés d'îlot Astro, facultative.
+  motif: new RegExp(`"reviewStatus"\\s*:\\s*(?:\\[\\s*\\d+\\s*,\\s*)?"${statut}"`),
+}));
+
 for (const fichier of [...presents].filter((f) => f.endsWith(".html") || f.endsWith(".js"))) {
   const contenu = await readFile(join(RACINE, fichier), "utf8");
   if (MOTIF_FACTICE.test(contenu)) {
     signaler(fichier, "données factices servies : le quiz tourne encore sur src/factice/");
+  }
+  const normalise = guillemetsNormalises(contenu);
+  for (const { motif, statut } of MOTIFS_NON_RELUES) {
+    if (motif.test(normalise)) {
+      signaler(
+        fichier,
+        `position en « ${statut} » servie : un codage non relu ne se publie pas. ` +
+          "Build de prévisualisation déployé par erreur, ou filtre `positionsServies` contourné ?",
+      );
+      break;
+    }
   }
 }
 
