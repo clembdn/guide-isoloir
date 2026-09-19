@@ -29,6 +29,11 @@ function question(id: string, theme: string, ordre: number): Question {
   };
 }
 
+/** Question d'essai dont l'`ordre` est dérivé de l'identifiant. */
+function q2(id: string, theme: string): Question {
+  return question(id, theme, Number(id.replace(/\D/g, "")) || 1);
+}
+
 function acteur(id: string, sortName: string): PoliticalActor {
   return { id, kind: "party", name: sortName, sortName, slug: id, status: "active" };
 }
@@ -439,5 +444,125 @@ describe("l'ordre des ex æquo est déterminé par les réponses", () => {
     });
 
     expect(b.graineAffichage).not.toBe(a.graineAffichage);
+  });
+});
+
+/*
+ * REJOUER UNE CARTE PARTAGÉE.
+ *
+ * La carte affichée sur `/resultat` porte trois choses : le vecteur de réponses
+ * (chez celui qui l'a produite), l'état de la bascule d'héritage, et la graine
+ * d'affichage. La promesse est qu'elles suffisent à refaire EXACTEMENT le même
+ * écran — mêmes scores, même ordre, même ordre à score égal — sans serveur et
+ * sans aléa stocké.
+ *
+ * Ce test rejoue une carte : il reconstruit un classement depuis ses seuls
+ * paramètres et exige l'égalité stricte avec l'original. Sans lui, la carte
+ * serait une capture d'écran qui ne prouve rien, et deux personnes aux mêmes
+ * réponses pourraient se croire en désaccord sur un réglage que l'image ne
+ * montre pas.
+ */
+describe("une carte partagée se rejoue à l'identique", () => {
+  const questions = [q2("c1", "Alpha"), q2("c2", "Alpha"), q2("c3", "Beta"), q2("c4", "Beta")];
+
+  const parti = acteur("parti-c", "Parti C");
+  const candidats = ["ana", "bo", "cy", "dee", "eli"].map((id) => ({
+    ...acteur(id, `Candidat ${id}`),
+    kind: "candidate" as const,
+  }));
+
+  const candidatures = candidats.map((c) => ({
+    actorId: c.id,
+    status: "declared" as const,
+    baselineActorIds: ["parti-c"],
+    statutDepuis: "2026-09-01",
+    statutSourceIds: ["source-essai"],
+  }));
+
+  /*
+   * Le parti documente tout ; deux candidats seulement se sont exprimés, et
+   * l'un contredit sa ligne. De quoi produire des ex æquo avec héritage et des
+   * scores différents sans lui.
+   */
+  const positions = [
+    ...questions.map((question) => position("parti-c", question.id, 2)),
+    position("ana", "c1", -2),
+    position("bo", "c1", 2),
+  ];
+
+  /** Le vecteur de réponses, tel qu'il serait relu depuis le stockage de session. */
+  const reponses = { c1: 2, c2: 1, c3: -2, c4: 2 } as const;
+
+  /** Ce que la carte imprime, et rien de plus. */
+  type Carte = { graine: number; heritageInclus: boolean };
+
+  function jouer(heritageInclus: boolean) {
+    return calculer({
+      questions,
+      acteurs: candidats,
+      annuaire: [parti, ...candidats],
+      positions,
+      candidatures: heritageInclus ? candidatures : [],
+      reponses,
+    });
+  }
+
+  for (const heritageInclus of [true, false]) {
+    const etat = heritageInclus ? "héritage inclus" : "héritage exclu";
+
+    it(`rend le même classement et le même ordre — ${etat}`, () => {
+      const original = jouer(heritageInclus);
+      const carte: Carte = {
+        graine: original.graineAffichage,
+        heritageInclus,
+      };
+
+      // Un tiers repart de la carte et de son propre vecteur de réponses.
+      const rejoue = jouer(carte.heritageInclus);
+
+      expect(rejoue.graineAffichage).toBe(carte.graine);
+      expect(rejoue.acteurs.map((a) => a.actorId)).toEqual(original.acteurs.map((a) => a.actorId));
+      expect(rejoue.acteurs.map((a) => a.score)).toEqual(original.acteurs.map((a) => a.score));
+      expect(rejoue.acteurs.map((a) => a.rang)).toEqual(original.acteurs.map((a) => a.rang));
+    });
+  }
+
+  /*
+   * LE POINT QUI JUSTIFIE QUE LA CARTE PORTE LA BASCULE.
+   *
+   * La graine ne dépend que des réponses : elle est donc IDENTIQUE dans les
+   * deux états. Si la carte ne portait qu'elle, deux personnes aux mêmes
+   * réponses mais aux bascules différentes verraient deux écrans différents
+   * assortis du même numéro, sans rien pour expliquer l'écart.
+   */
+  it("porte la même graine dans les deux états, et des couvertures différentes", () => {
+    const avec = jouer(true);
+    const sans = jouer(false);
+
+    expect(sans.graineAffichage).toBe(avec.graineAffichage);
+
+    const couvertureAvec = avec.acteurs.map((a) => a.couverture.documentees);
+    const couvertureSans = sans.acteurs.map((a) => a.couverture.documentees);
+    expect(couvertureSans).not.toEqual(couvertureAvec);
+  });
+
+  /*
+   * L'ordre des ex æquo doit tenir même quand le tableau d'entrée est permuté :
+   * c'est ce qui garantit que deux installations, deux navigateurs ou deux
+   * versions du JSON rendent le même écran.
+   */
+  it("tient quand l'ordre des acteurs et des positions change", () => {
+    const original = jouer(true);
+    const permute = calculer({
+      questions: [...questions].reverse(),
+      acteurs: [...candidats].reverse(),
+      annuaire: [...candidats, parti],
+      positions: [...positions].reverse(),
+      candidatures: [...candidatures].reverse(),
+      reponses,
+    });
+
+    expect(permute.acteurs.map((a) => a.actorId)).toEqual(original.acteurs.map((a) => a.actorId));
+    expect(permute.acteurs.map((a) => a.score)).toEqual(original.acteurs.map((a) => a.score));
   });
 });

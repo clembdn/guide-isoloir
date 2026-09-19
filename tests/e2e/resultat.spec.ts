@@ -154,6 +154,41 @@ test("la bascule d'héritage est présente et cochée par défaut", async ({ pag
   await expect(bascule).toBeChecked();
 });
 
+test("décocher l'héritage recalcule en direct, et la bascule reste accessible", async ({
+  page,
+}) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  const bascule = page.getByRole("checkbox", { name: /positions héritées du parti/i });
+  const carte = page.locator(".carte");
+  await expect(carte).toContainText(/Positions héritées\s*:\s*incluses/);
+
+  await bascule.uncheck();
+
+  /*
+   * DEUX ISSUES LÉGITIMES, et les deux doivent être sûres :
+   *
+   *   - le classement tient sans les positions de parti : la carte doit alors
+   *     dire « exclues », sinon une capture annoncerait un réglage qui n'est
+   *     pas celui du calcul ;
+   *   - le classement passe sous le seuil et disparaît : c'est le comportement
+   *     correct, MAIS la bascule doit rester à l'écran. Un réglage dont on ne
+   *     peut pas sortir est une impasse, pas un réglage.
+   */
+  if (await sansClassement(page)) {
+    await expect(bascule).toBeVisible();
+    await expect(bascule).not.toBeChecked();
+    await expect(page.locator("main")).toContainText(/Sans les positions de parti/i);
+  } else {
+    await expect(carte).toContainText(/Positions héritées\s*:\s*exclues/);
+  }
+
+  // Et l'on doit pouvoir revenir à l'état précédent.
+  await bascule.check();
+  await expect(page.locator(".carte")).toContainText(/Positions héritées\s*:\s*incluses/);
+});
+
 test("la carte partageable porte la graine et l'état de la bascule", async ({ page }) => {
   await avecReponses(page);
   test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);

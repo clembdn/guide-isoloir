@@ -128,23 +128,30 @@
   );
 
   /**
-   * Classement de référence pour la décision de publication, héritage TOUJOURS
-   * inclus.
+   * Acteurs atteignant le seuil DANS LE CLASSEMENT AFFICHÉ.
    *
-   * Le seuil porte sur l'état des données, pas sur le réglage du lecteur. Le
-   * calculer sur le classement affiché permettrait de faire disparaître le
-   * classement en décochant une case, ce qui laisserait croire que les données
-   * ont changé.
+   * Évalué sur `classement`, donc sur l'état réel de la bascule, et recalculé
+   * quand elle change. Décocher l'héritage peut donc faire disparaître le
+   * classement : c'est le comportement correct. Les positions de parti sont
+   * alors réellement retirées, et un ordre qui survivrait à leur retrait serait
+   * un ordre calculé sur autre chose que ce que le lecteur demande à voir.
    */
-  const classementReference = $derived<Classement>(
-    calculer({ questions, acteurs, positions, candidatures, annuaire, reponses }),
-  );
-
   const acteursAuSeuil = $derived(
-    classementReference.acteurs.filter((resultat) => resultat.couverture.taux >= seuilCouverture)
-      .length,
+    classement.acteurs.filter((resultat) => resultat.couverture.taux >= seuilCouverture).length,
   );
   const publiable = $derived(acteursAuSeuil >= seuilActeursMin);
+
+  /**
+   * Candidats qui documentent au moins une position PERSONNELLE.
+   *
+   * Sert au message affiché quand l'héritage est désactivé : dire « 3 acteurs
+   * atteignent le seuil » n'explique rien, alors que « 7 candidats sur 20 se
+   * sont exprimés personnellement » dit exactement ce que la bascule vient de
+   * retirer, et pourquoi.
+   */
+  const candidatsAvecPositionPropre = $derived(
+    classement.acteurs.filter((resultat) => resultat.couverture.personnelles > 0).length,
+  );
 
   const aRepondu = $derived(classement.questionsApplicables > 0);
   /** Rangs 1 à 3. Les ex æquo peuvent donc en faire plus de trois. */
@@ -197,6 +204,21 @@
     return resultat.score >= 0.72 ? "Proximité forte" : "Proximité modérée";
   }
 
+  /**
+   * « Combien atteignent le seuil », en français correct aux trois cardinalités.
+   *
+   * Écrit en fonction et non en ternaires imbriqués dans le gabarit : à zéro,
+   * un et plusieurs, ce ne sont pas les mêmes mots ni la même négation, et les
+   * empiler dans le HTML rendait la phrase illisible à la relecture — donc
+   * fausse sans que personne ne s'en aperçoive.
+   */
+  function phraseSeuil(atteignant: number, couverture: number, requis: number): string {
+    const seuil = `le seuil de ${Math.round(couverture * 100)} %, là où il en faut ${requis}`;
+    if (atteignant === 0) return `Aucun d'entre eux n'atteint ${seuil}.`;
+    if (atteignant === 1) return `Un seul d'entre eux atteint ${seuil}.`;
+    return `${atteignant} d'entre eux atteignent ${seuil}.`;
+  }
+
   /** Longueur de barre, dans le repère du viewBox. */
   function longueur(score: number): number {
     return Math.max(1, Math.round(score * 100));
@@ -246,6 +268,31 @@
   {/each}
 {/snippet}
 
+{#snippet reglageHeritage()}
+  <!--
+    LA BASCULE EST EN TÊTE, et elle est rendue DANS LES DEUX ÉTATS — avec
+    classement comme sans.
+
+    Décocher l'héritage peut faire passer le classement sous le seuil de
+    publication et le faire disparaître. Si la bascule disparaissait avec lui,
+    le lecteur serait enfermé dans l'état qu'il vient de choisir, sans aucun
+    moyen de revenir en arrière : un réglage dont on ne peut pas sortir n'est
+    pas un réglage, c'est une impasse.
+  -->
+  <section class="reglage">
+    <label class="bascule">
+      <input type="checkbox" bind:checked={inclureHeritage} />
+      <span>
+        Inclure les positions héritées du parti
+        <span class="explication">
+          Quand un candidat ne s'est pas exprimé sur une affirmation, utiliser la position de son
+          parti. Chaque position reprise reste identifiée comme telle dans le détail.
+        </span>
+      </span>
+    </label>
+  </section>
+{/snippet}
+
 {#if charge && !aRepondu}
   <div class="vide">
     <h2>Aucune réponse à comparer</h2>
@@ -258,26 +305,53 @@
   </div>
 {:else if charge && !publiable}
   <!--
-    SOUS LE SEUIL : L'ÉTAT D'AVANCEMENT, PAS UN CLASSEMENT DE ZÉROS.
-    Voir `SEUIL_PUBLICATION`. Ce n'est pas une page d'erreur : les données
-    existent, elles ne sont simplement pas encore assez nombreuses pour qu'un
-    ordre entre acteurs veuille dire quelque chose.
+    SOUS LE SEUIL : PAS DE CLASSEMENT DE ZÉROS.
+
+    Deux causes possibles, et elles ne se disent pas de la même façon :
+
+      - le lecteur a DÉCOCHÉ l'héritage. Le message nomme alors ce que ce
+        réglage vient de retirer — les candidats qui ne se sont pas exprimés
+        personnellement n'ont plus rien de documenté — plutôt que de servir un
+        état d'avancement générique qui n'expliquerait pas la disparition ;
+      - le codage n'est pas assez avancé, héritage compris. C'est l'état du
+        projet, et c'est ce qu'on dit.
   -->
+  {@render reglageHeritage()}
+
   <section class="cadre-lecture">
-    <h2>Le classement n'est pas encore publiable</h2>
-    <p>
-      Un classement suppose assez de matière pour que l'ordre entre les acteurs dise quelque chose.
-      Le seuil retenu est de {Math.round(seuilCouverture * 100)} % des affirmations documentées pour au
-      moins {seuilActeursMin} acteurs. Aujourd'hui,
-      {acteursAuSeuil}
-      {acteursAuSeuil > 1 ? "acteurs atteignent" : "acteur atteint"} ce seuil sur les {classement.questionsApplicables}
-      affirmations auxquelles vous avez répondu.
-    </p>
-    <p>
-      Afficher un ordre dans cet état reviendrait à classer des acteurs sur ce qui a été codé en
-      premier, pas sur ce qu'ils défendent. La <a href="/methodologie">méthodologie</a> décrit l'avancement
-      du codage et ce qui reste à documenter.
-    </p>
+    {#if !inclureHeritage}
+      <h2>Sans les positions de parti, il n'y a pas assez de matière</h2>
+      <p>
+        Vous avez exclu les positions héritées du parti. Il ne reste alors que ce que les candidats
+        ont dit ou écrit EUX-MÊMES, et
+        {candidatsAvecPositionPropre === 0
+          ? "aucun des candidats"
+          : `${candidatsAvecPositionPropre} candidat${candidatsAvecPositionPropre > 1 ? "s" : ""} sur ${classement.acteurs.length}`}
+        {candidatsAvecPositionPropre === 0 ? "ne documente" : "documentent"} une position personnelle
+        sur les {classement.questionsApplicables} affirmations auxquelles vous avez répondu.
+        {phraseSeuil(acteursAuSeuil, seuilCouverture, seuilActeursMin)}
+      </p>
+      <p>
+        C'est une information en soi : à sept mois du scrutin, la plupart des candidats ne se sont
+        pas encore exprimés affirmation par affirmation. Recochez la case ci-dessus pour utiliser la
+        ligne de leur parti — chaque position reprise reste signalée comme telle.
+      </p>
+    {:else}
+      <h2>Le classement n'est pas encore publiable</h2>
+      <p>
+        Un classement suppose assez de matière pour que l'ordre entre les acteurs dise quelque
+        chose. Le seuil retenu est de {Math.round(seuilCouverture * 100)} % des affirmations documentées
+        pour au moins {seuilActeursMin} acteurs. Aujourd'hui,
+        {acteursAuSeuil}
+        {acteursAuSeuil > 1 ? "acteurs atteignent" : "acteur atteint"} ce seuil sur les {classement.questionsApplicables}
+        affirmations auxquelles vous avez répondu.
+      </p>
+      <p>
+        Afficher un ordre dans cet état reviendrait à classer des acteurs sur ce qui a été codé en
+        premier, pas sur ce qu'ils défendent. La <a href="/methodologie">méthodologie</a> décrit l'avancement
+        du codage et ce qui reste à documenter.
+      </p>
+    {/if}
   </section>
 {:else if charge}
   {#if avertissement}
@@ -303,23 +377,7 @@
     </p>
   </section>
 
-  <!--
-    LA BASCULE EST EN TÊTE, pas dans un réglage. Elle change les chiffres
-    affichés : la cacher reviendrait à présenter un résultat dont le lecteur
-    ignore le mode de calcul.
-  -->
-  <section class="reglage">
-    <label class="bascule">
-      <input type="checkbox" bind:checked={inclureHeritage} />
-      <span>
-        Inclure les positions héritées du parti
-        <span class="explication">
-          Quand un candidat ne s'est pas exprimé sur une affirmation, utiliser la position de son
-          parti. Chaque position reprise reste identifiée comme telle dans le détail.
-        </span>
-      </span>
-    </label>
-  </section>
+  {@render reglageHeritage()}
 
   {#if classement.profilPeuMarque}
     <p class="reserve">

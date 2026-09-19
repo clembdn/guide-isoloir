@@ -519,11 +519,21 @@ hr {
  *
  * `base.css` est chargée par `BaseLayout` sur toutes les pages : ces règles sont
  * donc présentes partout où le composant peut apparaître, ce qui est exactement
- * la garantie qu'il lui faut. NE PAS les remettre dans le composant sans
- * vérifier que `.chiffre` se retrouve dans un fichier de `dist/_astro/*.css`.
+ * la garantie qu'il lui faut.
+ *
+ * SÉLECTEURS PRÉFIXÉS `resultat-score-`. Ces règles ne sont plus scopées par
+ * Svelte : `.chiffre` ou `.separateur` nus finiraient par entrer en collision
+ * avec une classe d'un autre composant, et la collision serait silencieuse. Le
+ * préfixe dit d'où elles viennent et à quoi elles servent.
+ *
+ * ET SURTOUT : un commentaire ne rattrape pas un bug silencieux.
+ * `scripts/verifier-pages-publiques.mjs` vérifie que `.resultat-score-chiffre`
+ * se trouve réellement dans le CSS servi, et refuse le build sinon. Si ces
+ * règles retournent un jour dans le composant, c'est ce contrôle qui le dira,
+ * pas une capture d'écran regardée de près.
  */
 
-.score-et-couverture {
+.resultat-score {
   margin: 0 0 var(--pas-2);
   font-size: var(--t-petit);
   color: var(--couleur-encre-faible);
@@ -533,7 +543,7 @@ hr {
  * Le chiffre est plus gros que sa couverture, jamais seul sur sa ligne : la
  * couverture doit rester dans le même regard, pas sous un repli.
  */
-.score-et-couverture .chiffre {
+.resultat-score-chiffre {
   font-size: var(--t-corps);
   font-variant-numeric: tabular-nums;
   color: var(--couleur-encre);
@@ -545,10 +555,10 @@ hr {
  * laissait « 100 %·documenté » collé à 375 px, où le point médian se lisait
  * comme une ponctuation du chiffre.
  */
-.score-et-couverture .separateur {
+.resultat-score-separateur {
   color: var(--couleur-trait);
 }
 
-.score-et-couverture .trop-peu {
+.resultat-score-trop-peu {
   display: block;
 }

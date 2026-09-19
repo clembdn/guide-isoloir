@@ -51,25 +51,23 @@
   const pourcentage = $derived(Math.round(resultat.score * 100));
 </script>
 
-<p class="score-et-couverture">
+<p class="resultat-score">
   {#if assezCouvert}
-    <strong class="chiffre">{pourcentage}&nbsp;%</strong>
-    <span class="separateur" aria-hidden="true">&nbsp;·&nbsp;</span>
+    <strong class="resultat-score-chiffre">{pourcentage}&nbsp;%</strong>
+    <span class="resultat-score-separateur" aria-hidden="true">&nbsp;·&nbsp;</span>
   {/if}
-  <span class="portee">
+  <span class="resultat-score-portee">
     documenté sur {couverture.documentees} des {couverture.applicables} affirmation{couverture.applicables >
     1
       ? "s"
       : ""}
     {#if heritees > 0}
-      <span class="separateur" aria-hidden="true">&nbsp;·&nbsp;</span> dont {heritees} héritée{heritees >
-      1
-        ? "s"
-        : ""}
+      <span class="resultat-score-separateur" aria-hidden="true">&nbsp;·&nbsp;</span> dont {heritees}
+      héritée{heritees > 1 ? "s" : ""}
     {/if}
   </span>
   {#if !assezCouvert}
-    <span class="trop-peu">
+    <span class="resultat-score-trop-peu">
       Trop peu documenté pour qu'un pourcentage veuille dire quelque chose.
     </span>
   {/if}
@@ -82,5 +80,9 @@
   build. `Resultat.svelte` ne rend rien côté serveur, donc ce composant n'était
   jamais instancié et son style disparaissait de `dist/` sans le moindre
   avertissement. Les règles vivent dans `src/styles/base.css`, sous
-  « SCORE ET COUVERTURE », qui explique le détour en entier.
+  « SCORE ET COUVERTURE », qui explique le détour en entier, et leurs sélecteurs
+  sont préfixés `resultat-score-` puisqu'ils ne sont plus scopés.
+
+  Le garde-fou de publication vérifie que ce CSS est bien servi : la disparition
+  ne peut plus passer inaperçue.
 -->

@@ -26,16 +26,42 @@ export const SEUIL_PUBLICATION = {
   acteursMin: 5,
 } as const;
 
+/*
+ * Ce seuil s'évalue sur LE CLASSEMENT AFFICHÉ, pas sur un calcul de référence.
+ *
+ * Premier jet : il était calculé héritage toujours inclus, pour qu'on ne puisse
+ * pas faire disparaître le classement en décochant une case. C'était l'erreur.
+ * Décocher l'héritage RETIRE réellement des positions : les candidats qui ne se
+ * sont pas exprimés personnellement n'ont alors plus rien de documenté. Si le
+ * classement n'est plus publiable dans cet état, il ne doit pas s'afficher —
+ * le faire tenir sur une couverture que le lecteur vient justement d'exclure
+ * reviendrait à lui montrer un ordre calculé sur autre chose que ce qu'il a
+ * demandé.
+ */
+
 /**
  * Couverture en dessous de laquelle un acteur n'affiche PAS de pourcentage.
  *
- * Le plancher par acteur est distinct du seuil de publication : le classement
- * peut être publiable dans son ensemble et contenir un acteur documenté sur
- * trois affirmations. Un « 91 % » calculé sur trois cases est un chiffre juste
- * et une information fausse. Sous le plancher, l'acteur affiche le nombre
- * d'affirmations documentées, et rien qui ressemble à une mesure.
+ * DEUX GRANDEURS DIFFÉRENTES, ET IL FAUT S'EN MÉFIER : ce plancher et
+ * `SEUIL_PUBLICATION.couverture` ont longtemps valu 0,4 tous les deux, ce qui
+ * les faisait passer pour un seul réglage. Ils ne le sont pas, et les régler
+ * ensemble par distraction produirait deux écrans faux :
+ *
+ *   - `SEUIL_PUBLICATION` répond « y a-t-il assez de matière pour qu'un ORDRE
+ *     entre acteurs veuille dire quelque chose ? ». Il porte sur le classement
+ *     entier et décide s'il s'affiche.
+ *   - `PLANCHER_POURCENTAGE` répond « ce CHIFFRE-CI informe-t-il ? ». Il porte
+ *     sur un acteur et décide de son seul pourcentage.
+ *
+ * Un classement peut être parfaitement publiable et contenir un acteur
+ * documenté sur trois affirmations : « 91 % » y serait un chiffre juste et une
+ * information fausse. Le plancher est donc plus exigeant que le seuil de
+ * publication, et il n'y a aucune raison qu'ils coïncident.
+ *
+ * Sous le plancher, l'acteur affiche le nombre d'affirmations documentées, et
+ * rien qui ressemble à une mesure.
  */
-export const PLANCHER_POURCENTAGE = 0.4;
+export const PLANCHER_POURCENTAGE = 0.5;
 
 /**
  * Accord à partir duquel une affirmation est comptée comme « d'accord ».

@@ -312,6 +312,47 @@ for (const fichier of PAGES_PUBLIQUES) {
   }
 }
 
+/*
+ * 8. Le CSS des composants non rendus au build est-il bien servi ?
+ *
+ * Astro n'émet la feuille scopée d'un composant Svelte ENFANT que si ce
+ * composant est effectivement rendu pendant la construction. `Resultat.svelte`
+ * ne rend rien côté serveur — tout son gabarit attend l'hydratation — donc
+ * `ScoreEtCouverture` n'était jamais instancié et son `<style>` disparaissait
+ * de `dist/` sans erreur ni avertissement. Le pourcentage s'affichait à la
+ * taille du texte courant et deux phrases se collaient l'une à l'autre.
+ *
+ * Les règles ont été déplacées dans `src/styles/base.css`, chargée partout. Ce
+ * contrôle vérifie qu'elles y sont RESTÉES et qu'elles arrivent réellement dans
+ * une feuille servie : un commentaire dans le CSS ne rattrape pas un bug
+ * silencieux, et quelqu'un finira par vouloir « remettre ça dans le composant,
+ * c'est plus propre ».
+ *
+ * On cherche un sélecteur, pas un nom de fichier : le fichier est haché et
+ * change à chaque build.
+ */
+const SELECTEURS_ATTENDUS = [
+  {
+    selecteur: ".resultat-score-chiffre",
+    origine: "src/styles/base.css, section « SCORE ET COUVERTURE »",
+  },
+];
+
+const feuilles = [...presents].filter((fichier) => fichier.endsWith(".css"));
+const cssServi = (
+  await Promise.all(feuilles.map((fichier) => readFile(join(RACINE, fichier), "utf8")))
+).join("\n");
+
+for (const { selecteur, origine } of SELECTEURS_ATTENDUS) {
+  if (!cssServi.includes(selecteur)) {
+    signaler(
+      "dist/*.css",
+      `sélecteur « ${selecteur} » absent du CSS servi (${feuilles.length} feuille(s) examinée(s)). ` +
+        `Il devrait venir de ${origine}. Un style de composant a-t-il été rescopé ?`,
+    );
+  }
+}
+
 // Rapport.
 if (fautes.length === 0) {
   console.log("Pages publiques : complètes, aucune mention manquante.");
