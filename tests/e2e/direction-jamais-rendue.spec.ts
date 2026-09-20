@@ -24,8 +24,30 @@ const ROUTES = ["/test", "/resultat"] as const;
  * `.skip` une fois les routes remises en place avec de vraies données.
  */
 
-/** Formes sous lesquelles le champ pourrait apparaître une fois sérialisé. */
-const EMPREINTES = ["direction", "&quot;direction&quot;", "\\u0022direction\\u0022"] as const;
+/**
+ * Formes sous lesquelles le CHAMP pourrait apparaître une fois sérialisé.
+ *
+ * ON CHERCHE UNE CLÉ, PAS UN MOT. La première version de ce test cherchait la
+ * sous-chaîne nue « direction », et elle s'est mise à échouer le jour où une
+ * citation exacte a contenu le mot : « Sur l'assurance chômage, ma direction
+ * c'est de faire comme l'Allemagne. » Édouard Philippe, débat du Medef,
+ * 27 août 2026.
+ *
+ * Le garde-fou avait alors le choix entre interdire un mot courant du français
+ * politique dans tous les verbatims du site, ou vérifier ce qu'il prétend
+ * vérifier. Les empreintes ci-dessous sont les formes d'une CLÉ sérialisée —
+ * JSON brut, JSON échappé dans un attribut HTML, chaîne JavaScript, littéral
+ * d'objet. Aucune prose française ne les produit par accident, et toute fuite
+ * réelle du champ en produit au moins une : le champ ne peut atteindre le
+ * navigateur qu'en étant sérialisé, et une sérialisation porte son nom de clé.
+ */
+const EMPREINTES = [
+  '"direction":',
+  "&quot;direction&quot;",
+  '\\"direction\\"',
+  "\\u0022direction\\u0022",
+  "direction:",
+] as const;
 
 for (const route of ROUTES) {
   test(`${route} ne rend jamais le champ direction dans son HTML`, async ({ request }) => {

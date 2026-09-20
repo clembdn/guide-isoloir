@@ -72,6 +72,7 @@ export const FOOTER_NAV: readonly NavEntry[] = [
   { href: "/corrections", label: "Corrections" },
   { href: "/financement", label: "Financement" },
   { href: "/mentions-legales", label: "Mentions légales" },
+  { href: "/credits-images", label: "Crédits des images" },
 ];
 
 /**

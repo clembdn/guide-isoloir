@@ -48,6 +48,7 @@ import {
   positionsServies,
 } from "../lib/previsualisation";
 import { SEUIL_PUBLICATION, seuilDepuisEnvironnement } from "../lib/seuils";
+import { media } from "../data/medias";
 
 /*
  * Validation au build, côté serveur uniquement. Elle est référentielle : une
@@ -76,6 +77,30 @@ const servies = positionsServies(positions);
 const nonRelues = positions.length - positionsPubliables(positions).length;
 
 const questions = projeter(QUESTIONS);
+
+/*
+ * Portraits et logos, résolus ICI et passés en propriété.
+ *
+ * `src/data/medias.ts` porte trente-cinq entrées avec leur auteur, leur licence
+ * et l'URL de cette licence : de quoi rendre `/credits-images` exact, et rien
+ * qui ait à voyager dans le bundle d'une route budgétée à 20 ko. L'îlot ne
+ * reçoit donc que trois chemins par candidat.
+ *
+ * Le parti d'un candidat est le premier acteur de sa chaîne de reprise. Ce
+ * n'est pas une donnée séparée à tenir à jour : si un candidat change de parti,
+ * c'est sa chaîne de reprise qui change, et le logo suit.
+ */
+const nomParActeur = new Map(acteurs.map((acteur) => [acteur.id, acteur.name]));
+
+const visuels = candidats.map((candidat) => {
+  const partiId = candidatures.find((c) => c.actorId === candidat.id)?.baselineActorIds[0] ?? null;
+  return {
+    actorId: candidat.id,
+    portrait: media("portrait", candidat.id)?.chemin ?? null,
+    logo: partiId === null ? null : (media("logo", partiId)?.chemin ?? null),
+    parti: partiId === null ? null : (nomParActeur.get(partiId) ?? null),
+  };
+});
 
 /*
  * Seuil de publication, résolu ICI et passé en propriété.
@@ -146,6 +171,7 @@ const seuilActeursMin = seuilDepuisEnvironnement(
         positions={servies}
         candidatures={candidatures}
         sources={sources}
+        visuels={visuels}
         seuilCouverture={seuilCouverture}
         seuilActeursMin={seuilActeursMin}
         avertissement=""

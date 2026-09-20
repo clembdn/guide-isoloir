@@ -21,10 +21,31 @@
  */
 export const SEUIL_PUBLICATION = {
   /** Part des affirmations applicables qu'un acteur doit documenter pour compter. */
-  couverture: 0.4,
+  couverture: 0.25,
   /** Nombre d'acteurs devant atteindre cette couverture. */
-  acteursMin: 5,
+  acteursMin: 3,
 } as const;
+
+/*
+ * DESSERRÉS LE 20 SEPTEMBRE 2026 : 0,4 et 5 au départ, 0,25 et 3 désormais.
+ *
+ * Décision éditoriale assumée. À sept mois du scrutin, un seul candidat a
+ * publié un programme, et exiger 40 % de couverture chez cinq acteurs revenait
+ * à ne rien afficher avant l'hiver. Un quart des affirmations chez trois
+ * acteurs reste une estimation grossière — l'écran le dit — mais c'en est une,
+ * et une estimation datée, sourcée et contestable vaut mieux qu'une page vide.
+ *
+ * CE QUI N'A PAS ÉTÉ FAIT, ET POURQUOI. Descendre à 0,1 aurait publié un
+ * classement immédiatement : deux affirmations documentées suffiraient à ranger
+ * un candidat devant un autre. Ce chiffre serait juste et l'information fausse,
+ * ce qui est exactement le défaut que ce seuil existe pour empêcher. Le verrou
+ * n'est pas ici, il est dans le volume de données — et il se lève en codant,
+ * pas en abaissant.
+ *
+ * Les deux valeurs restent surchargeables au build par
+ * `GUIDE_ISOLOIR_SEUIL_COUVERTURE` et `GUIDE_ISOLOIR_SEUIL_ACTEURS`, sans
+ * recompiler quoi que ce soit.
+ */
 
 /*
  * Ce seuil s'évalue sur LE CLASSEMENT AFFICHÉ, pas sur un calcul de référence.
@@ -61,7 +82,15 @@ export const SEUIL_PUBLICATION = {
  * Sous le plancher, l'acteur affiche le nombre d'affirmations documentées, et
  * rien qui ressemble à une mesure.
  */
-export const PLANCHER_POURCENTAGE = 0.5;
+export const PLANCHER_POURCENTAGE = 0.35;
+
+/*
+ * Abaissé de 0,5 à 0,35 en même temps que le seuil de publication, et TOUJOURS
+ * plus exigeant que lui : un classement peut s'afficher sans que chacun de ses
+ * acteurs ait droit à un pourcentage. L'écart entre 0,25 et 0,35 est la zone où
+ * un acteur figure au classement en affichant un nombre d'affirmations
+ * documentées plutôt qu'une mesure.
+ */
 
 /**
  * Accord à partir duquel une affirmation est comptée comme « d'accord ».

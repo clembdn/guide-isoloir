@@ -50,6 +50,15 @@
    * module de données : `direction` ne doit se trouver ni dans le HTML ni dans
    * ce bundle.
    */
+  /** Visuels d'un candidat, tous facultatifs. */
+  type Visuel = {
+    actorId: string;
+    portrait: string | null;
+    logo: string | null;
+    /** Nom du parti, affiché à côté du logo — et à sa place quand il manque. */
+    parti: string | null;
+  };
+
   type Proprietes = {
     questions: readonly QuestionAffichee[];
     acteurs: readonly PoliticalActor[];
@@ -67,6 +76,19 @@
     candidatures?: readonly Candidate[];
     /** Sources des positions, pour afficher le lien et la date sous un verbatim. */
     sources?: readonly SourcePosition[];
+    /**
+     * Portraits et logos, résolus côté serveur.
+     *
+     * Passés en propriété et pas importés : `src/data/medias.ts` porte les
+     * licences de trente-cinq fichiers, et rien de tout cela n'a à partir dans
+     * le bundle d'une route dont le budget est de 20 ko. Le composant ne reçoit
+     * que des chemins.
+     *
+     * Chaque champ peut manquer : un candidat sans photo libre, un parti sans
+     * logo libre. L'interface affiche alors des initiales, elle ne va pas
+     * chercher l'image ailleurs.
+     */
+    visuels?: readonly Visuel[];
     /** Avertissement affiché au-dessus du classement, ou chaîne vide. */
     avertissement: string;
     /**
@@ -86,6 +108,7 @@
     annuaire = acteurs,
     candidatures = [],
     sources = [],
+    visuels = [],
     avertissement,
     seuilCouverture = SEUIL_PUBLICATION.couverture,
     seuilActeursMin = SEUIL_PUBLICATION.acteursMin,
@@ -184,6 +207,42 @@
     [-2]: "Pas du tout d'accord",
   };
 
+  const visuelParActeur = new Map(visuels.map((visuel) => [visuel.actorId, visuel]));
+
+  /**
+   * Initiales de repli, quand aucune photo sous licence libre n'existe.
+   *
+   * PAS DE SILHOUETTE GRISE. Une silhouette générique sur un site de
+   * comparaison politique ferait passer l'absence de photo libre pour une
+   * caractéristique du candidat : les initiales disent qu'il manque une image,
+   * la silhouette dit qu'il manque quelqu'un.
+   *
+   * Les particules sont écartées — « Le Pen » donne « LP » et non « LP » via
+   * « Le » — en ne gardant que les mots d'au moins deux lettres commençant par
+   * une majuscule, puis le premier et le dernier.
+   */
+  function initiales(nom: string): string {
+    const mots = nom
+      .split(/[\s-]+/)
+      .filter((mot) => mot.length > 1 && mot[0] === mot[0]?.toLocaleUpperCase("fr"));
+    const retenus = mots.length > 1 ? [mots[0], mots[mots.length - 1]] : mots;
+    return retenus.map((mot) => mot?.[0] ?? "").join("");
+  }
+
+  /**
+   * Confiance accordée à la source, en toutes lettres.
+   *
+   * Affichée parce qu'elle est le prix à payer pour avoir ouvert le codage à la
+   * presse : une position tirée d'un entretien vaut ce que vaut l'entretien, et
+   * le lecteur doit pouvoir le lire sans ouvrir le dépôt. Elle n'entre pas dans
+   * le calcul — une position mal documentée reste la position qu'elle est.
+   */
+  const LIBELLES_CONFIANCE: Record<string, string> = {
+    high: "Confiance dans la source : élevée.",
+    medium: "Confiance dans la source : moyenne.",
+    low: "Confiance dans la source : faible.",
+  };
+
   const LIBELLES_ADEQUATION: Record<string, string> = {
     directe: "La citation porte sur la mesure exactement posée.",
     partielle: "La citation recoupe l'affirmation sans la recouvrir.",
@@ -251,6 +310,9 @@
     {/if}
     {#if detail.adequation !== null}
       <span class="adequation">{LIBELLES_ADEQUATION[detail.adequation]}</span>
+    {/if}
+    {#if detail.confiance !== null}
+      <span class="confiance">{LIBELLES_CONFIANCE[detail.confiance]}</span>
     {/if}
   </p>
   {#if detail.citation}
@@ -409,7 +471,53 @@
       {@const accords = affirmationsDAccord(resultat)}
       <li class="acteur">
         <p class="rang">Rang {resultat.rang}</p>
-        <h3 class="nom">{resultat.nom}</h3>
+
+        <!--
+          IDENTITÉ : PORTRAIT, NOM, PARTI.
+
+          `alt=""` sur les deux images, et c'est délibéré : le nom du candidat
+          et celui de son parti sont écrits juste à côté, en texte. Un `alt`
+          qui les répéterait ferait entendre deux fois la même chose à un
+          lecteur d'écran.
+
+          `width` et `height` sont posés en attributs pour que la place soit
+          réservée avant le chargement : sans eux, chaque photo pousse le
+          classement vers le bas en arrivant.
+        -->
+        <div class="identite">
+          {#if visuelParActeur.get(resultat.actorId)?.portrait}
+            <img
+              class="portrait"
+              src={visuelParActeur.get(resultat.actorId)?.portrait}
+              alt=""
+              width="56"
+              height="56"
+              loading="lazy"
+              decoding="async"
+            />
+          {:else}
+            <p class="portrait portrait-absent" aria-hidden="true">{initiales(resultat.nom)}</p>
+          {/if}
+          <div class="identite-texte">
+            <h3 class="nom">{resultat.nom}</h3>
+            {#if visuelParActeur.get(resultat.actorId)?.parti}
+              <p class="parti">
+                {#if visuelParActeur.get(resultat.actorId)?.logo}
+                  <img
+                    class="logo"
+                    src={visuelParActeur.get(resultat.actorId)?.logo}
+                    alt=""
+                    height="18"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                {/if}
+                <span>{visuelParActeur.get(resultat.actorId)?.parti}</span>
+              </p>
+            {/if}
+          </div>
+        </div>
+
         <p class="qualification">{qualifier(resultat)}</p>
 
         <!--
@@ -593,8 +701,76 @@
     margin: 0;
   }
 
+  .identite {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
+    margin: var(--pas-1) 0 var(--pas-2);
+  }
+
+  .identite-texte {
+    min-width: 0;
+  }
+
   .nom {
-    margin: var(--pas-1) 0 var(--pas-1);
+    margin: 0;
+  }
+
+  /*
+   * Portrait carré, sans arrondi et sans ombre.
+   *
+   * La pastille ronde à ombre douce est le réflexe par défaut, et la section 9
+   * du brief le refuse nommément. Le carré tient aussi mieux la promesse de
+   * neutralité : un cadre identique pour tous, une seule bordure, aucune
+   * différence de traitement d'un candidat à l'autre.
+   */
+  .portrait {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    object-fit: cover;
+    /* Les photos libres sont cadrées de vingt façons ; le haut est le plus sûr. */
+    object-position: top center;
+    border: 1px solid var(--couleur-trait);
+    background: var(--couleur-trait);
+  }
+
+  .portrait-absent {
+    display: grid;
+    place-items: center;
+    margin: 0;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--couleur-encre-faible);
+  }
+
+  .parti {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: var(--pas-1) 0 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * Logo sur plaque claire, dans les deux thèmes.
+   *
+   * La plupart de ces logos sont du texte sombre sur fond transparent : posés
+   * directement sur le fond sombre du thème nuit, ils disparaissent. La plaque
+   * n'est pas une carte décorative, c'est ce qui les rend lisibles — et elle
+   * est la même pour tous, ce que la neutralité exige.
+   */
+  .logo {
+    flex: none;
+    height: 18px;
+    width: auto;
+    max-width: 72px;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 2px 3px;
+    border: 1px solid var(--couleur-trait);
   }
 
   .qualification {
@@ -665,7 +841,8 @@
 
   .origine,
   .heritage,
-  .adequation {
+  .adequation,
+  .confiance {
     display: block;
   }
 

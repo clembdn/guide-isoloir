@@ -32,10 +32,12 @@ import type { StanceAdequation, StanceValue } from "../modele";
 export const NIVEAUX_RESOLUTION = [
   { rang: 1, cle: "official-program", libelle: "Programme du candidat" },
   { rang: 2, cle: "direct-statement", libelle: "Déclaration directe" },
-  { rang: 3, cle: "parliamentary-vote", libelle: "Vote au Parlement" },
-  { rang: 4, cle: "coalition-platform", libelle: "Plateforme de coalition" },
-  { rang: 5, cle: "party-platform", libelle: "Ligne du parti" },
-  { rang: 6, cle: "inference", libelle: "Inférence documentée" },
+  { rang: 3, cle: "press-interview", libelle: "Entretien accordé à un média" },
+  { rang: 4, cle: "parliamentary-vote", libelle: "Vote au Parlement" },
+  { rang: 5, cle: "press-report", libelle: "Déclaration rapportée par la presse" },
+  { rang: 6, cle: "coalition-platform", libelle: "Plateforme de coalition" },
+  { rang: 7, cle: "party-platform", libelle: "Ligne du parti" },
+  { rang: 8, cle: "inference", libelle: "Inférence documentée" },
 ] as const;
 
 export type CleNiveau = (typeof NIVEAUX_RESOLUTION)[number]["cle"];

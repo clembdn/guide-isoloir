@@ -46,13 +46,47 @@ tant qu'il l'importait, la chaîne partait dans le bundle de production.
 
 ## Ce qui reste à faire sur `/resultat`
 
-Les douze positions du codage initial sont en `reviewStatus: "draft"` — 2,5 % des
-480 couples possibles, et 7 candidats sur 20 seulement en ont une :
-`positionsPubliables` les écarte de ce qui est servi, et la page explique qu'aucune
-position n'est encore publiée plutôt que d'afficher un classement de zéros. Quatre
-tests de bout en bout portant sur l'apparence du classement se suspendent
-d'eux-mêmes dans cet état et se réarment dès qu'une position passe en
-`reconciled`.
+**Mis à jour le 20 septembre 2026.** La section précédente décrivait un état
+révolu : les douze positions du codage initial étaient en `reviewStatus: "draft"`
+et la page affichait « aucune position n'est encore publiée ».
 
-C'est la traduction technique de la règle de `CLAUDE.md` : aucun contenu factuel
-produit par une IA n'est publié sans vérification humaine.
+Depuis :
+
+- **30 positions, toutes en `reconciled`**, donc toutes servies. Le mot a changé
+  de sens et `src/data/positions.ts` le dit en tête : il signifie « publiable »,
+  pas « doublement codé ». Le double codage à l'aveugle n'a toujours pas eu lieu,
+  `/methodologie` l'écrit en clair.
+- **La presse est un maillon nommé** de la chaîne de résolution
+  (`press-interview`, `press-report`), avec sa confiance affichée sous chaque
+  position.
+- **Seuil de publication desserré** : 0,25 de couverture chez 3 acteurs, contre
+  0,4 chez 5.
+
+**Le classement ne s'affiche toujours pas, et ce n'est pas un réglage à changer.**
+Deux acteurs seulement franchissent 25 % de couverture : Marine Le Pen (13 des 24
+affirmations, dont 11 reprises de la ligne du RN) et Jean-Luc Mélenchon (6, toutes
+tirées de son programme). Viennent ensuite Glucksmann et Retailleau à 3, Philippe
+à 2. Il manque **un troisième acteur à 6 affirmations documentées**, pas un seuil
+plus bas.
+
+Ce qui le débloquera, par ordre de rendement :
+
+1. **Les plateformes de parti.** Le RN l'a prouvé : 11 cases codées sur le parti
+   ont porté Le Pen à 54 % de couverture, par la reprise. Les mêmes documents
+   existent pour Les Républicains, Les Écologistes, le Parti socialiste, le PCF,
+   Renaissance et Horizons.
+2. **Les programmes de candidats, à mesure qu'ils sortent.** Un seul existe au
+   20 septembre 2026, celui de Jean-Luc Mélenchon. C'est un fait sur l'état de la
+   campagne, pas un défaut d'effort : les autres ne sont pas publiés.
+3. **Les relevés thématiques de presse**, qui couvrent plusieurs candidats d'un
+   coup mais rarement l'affirmation exactement posée.
+
+`data/cases-non-couvertes.md` tient la trace de ce qui a été lu sans pouvoir être
+codé. Pour exercer l'écran de classement sans attendre :
+
+```
+GUIDE_ISOLOIR_SEUIL_COUVERTURE=0.05 GUIDE_ISOLOIR_SEUIL_ACTEURS=2 npm run test:e2e
+```
+
+Les tests d'apparence du classement se suspendent d'eux-mêmes tant qu'aucun
+classement ne s'affiche, et se réarment seuls.

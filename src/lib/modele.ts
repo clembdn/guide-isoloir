@@ -64,10 +64,38 @@ export type Candidate = {
 
 export type StanceValue = -2 | -1 | 0 | 1 | 2;
 
+/**
+ * D'où vient l'information, du maillon le plus fort au plus faible.
+ *
+ * LA PRESSE EST UN MAILLON NOMMÉ, et c'est un choix assumé pris le 20 septembre
+ * 2026. Tant qu'aucun programme présidentiel n'est publié — aucun ne l'est à
+ * sept mois du scrutin — un comparateur qui n'accepte que les programmes ne
+ * compare rien. Le concurrent le plus visible remplit ses cases avec des
+ * articles de 2022 : la date y disparaît, et une position abandonnée depuis
+ * quatre ans y pèse autant qu'une déclaration de la semaine. L'erreur n'est pas
+ * d'utiliser la presse, c'est de ne pas dire que c'en est, et de quand elle
+ * date.
+ *
+ * Deux maillons de presse, pas un, parce que les deux ne se vérifient pas de la
+ * même façon :
+ *
+ *   - `press-interview` : le candidat parle, un média publie ses mots. Le
+ *     verbatim est le sien. C'est aussi solide qu'une déclaration de meeting,
+ *     et ça se situe donc juste après.
+ *   - `press-report` : un journaliste rapporte la position au style indirect,
+ *     sans verbatim disponible. La citation retenue est alors la phrase du
+ *     journaliste, `rationale` doit le dire, et le maillon passe derrière le
+ *     vote au Parlement — un acte se constate, une paraphrase s'interprète.
+ *
+ * Ni l'un ni l'autre n'autorise à inventer : une position sans source ne se
+ * publie pas, et le schéma l'impose.
+ */
 export type StanceProvenance =
   | "official-program"
   | "direct-statement"
+  | "press-interview"
   | "parliamentary-vote"
+  | "press-report"
   | "party-platform"
   | "coalition-platform"
   | "inference";
@@ -103,12 +131,33 @@ export type Stance = {
   questionId: string;
   value: StanceValue;
   provenance: StanceProvenance;
+  /**
+   * Confiance accordée à la SOURCE, et affichée telle quelle au lecteur.
+   *
+   * QUATRIÈME GRANDEUR, à ne confondre ni avec la proximité politique, ni avec
+   * l'adéquation. Elle répond à « peut-on se fier à ce document ? », pas à
+   * « le candidat est-il pour ou contre ? » ni à « la citation répond-elle à
+   * l'affirmation ? ».
+   *
+   *   - `high`   : le candidat parle en son nom, le média publie ses mots, la
+   *                déclaration est datée et le média est identifiable.
+   *   - `medium` : position rapportée au style indirect, ou relayée par un
+   *                média qui en cite un autre sans que l'original soit lisible.
+   *   - `low`    : source unique, ancienne, ou dont la fiabilité est discutable.
+   *
+   * Elle ne pondère PAS le score : une position mal documentée ne doit pas
+   * tirer mécaniquement vers le centre, cela avantagerait structurellement les
+   * candidats les mieux couverts. Elle se lit, elle ne se calcule pas.
+   */
   confidence: "low" | "medium" | "high";
   sourceIds: string[];
   /**
    * Verbatim court qui porte la position, tel qu'il a été prononcé ou écrit.
    *
    * C'est le champ qui distingue une position relevée d'une position rédigée.
+   * Pour un `press-report`, c'est la phrase du journaliste, faute de verbatim
+   * disponible, et `rationale` doit le signaler.
+   *
    * Obligatoire partout SAUF pour une `inference`, seul maillon où il n'existe
    * aucune phrase à citer — et où `rationale` doit alors porter le raisonnement
    * complet. Ce n'est pas une facilité : sans citation, personne ne peut

@@ -1,0 +1,205 @@
+---
+/*
+ * Crédits des portraits et des logos.
+ *
+ * CETTE PAGE N'EST PAS UNE POLITESSE, C'EST LA CONDITION D'USAGE. Les licences
+ * CC BY et CC BY-SA imposent de citer l'auteur, de nommer la licence et de
+ * pointer vers son texte. Une image libre dont on tait l'auteur est une image
+ * utilisée sans droit, et un site dont l'argument principal est la
+ * vérifiabilité ne peut pas se permettre d'emprunter sans créditer.
+ *
+ * Elle est GÉNÉRÉE À PARTIR DU MANIFESTE, jamais tenue à la main : une liste
+ * recopiée diverge du jour où un fichier est remplacé, et c'est précisément le
+ * jour où le crédit devient faux.
+ *
+ * ELLE DIT AUSSI CE QUI MANQUE. Quatre partis et un candidat n'ont aucun média
+ * sous licence libre. Le taire donnerait à croire à un oubli ; l'écrire dit que
+ * la recherche a eu lieu et que la réponse est non.
+ */
+import BaseLayout from "../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
+import { MEDIAS, MEDIAS_RELEVES_LE } from "../data/medias";
+import { ACTEURS } from "../data/acteurs";
+import { formatDateFr } from "../lib/date";
+import { trierParNomAlphabetique } from "../lib/modele";
+
+const UPDATED = MEDIAS_RELEVES_LE;
+
+/*
+ * `Map<string, string>` explicite : `ACTEURS` est déclaré `as const`, et sans
+ * cette annotation la clé serait l'union des quarante identifiants littéraux.
+ * On l'interroge ici avec l'`actorId` d'un média, qui est une chaîne ordinaire.
+ */
+const nomParActeur = new Map<string, string>(ACTEURS.map((acteur) => [acteur.id, acteur.name]));
+
+/*
+ * LE TRI PASSE PAR `sortName`, PAS PAR `name`.
+ *
+ * Le premier jet triait sur le nom affiché et rangeait donc « Bruno Retailleau »
+ * avant « Clara Egger » : un ordre par prénom, qui a l'air d'un ordre
+ * alphabétique sans en être un. `sortName` est saisi à la main pour exactement
+ * cette raison — `src/lib/modele.ts` l'explique — et il n'y a aucune raison de
+ * le contourner ici. Sur une page qui existe pour être vérifiée, un ordre
+ * inexplicable est un ordre suspect.
+ */
+const triParActeur = new Map<string, string>(ACTEURS.map((acteur) => [acteur.id, acteur.sortName]));
+const trierParActeur = <T extends { actorId: string }>(medias: readonly T[]) =>
+  trierParNomAlphabetique(
+    medias.map((media) => ({
+      ...media,
+      id: media.actorId,
+      sortName: triParActeur.get(media.actorId) ?? media.actorId,
+    })),
+  );
+
+const portraits = trierParActeur(MEDIAS.filter((media) => media.genre === "portrait"));
+const logos = trierParActeur(MEDIAS.filter((media) => media.genre === "logo"));
+
+/** Acteurs sans média, nommés plutôt que passés sous silence. */
+const avecMedia = new Set(MEDIAS.map((media) => `${media.genre}:${media.actorId}`));
+const sansPortrait = ACTEURS.filter(
+  (acteur) => acteur.kind === "candidate" && !avecMedia.has(`portrait:${acteur.id}`),
+);
+const sansLogo = ACTEURS.filter(
+  (acteur) => acteur.kind === "party" && !avecMedia.has(`logo:${acteur.id}`),
+);
+const nommer = (acteurs: readonly { id: string; name: string; sortName: string }[]) =>
+  trierParNomAlphabetique(acteurs)
+    .map((acteur) => acteur.name)
+    .join(", ");
+---
+
+<BaseLayout
+  title="Crédits des images"
+  description="Auteur, licence et provenance de chaque portrait de candidat et de chaque logo de parti affichés sur Guide Isoloir."
+  updated={UPDATED}
+>
+  <h1>Crédits des images</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p>
+    Chaque portrait et chaque logo affichés sur ce site viennent de Wikimedia Commons, sous une
+    licence qui en autorise la réutilisation. Les fichiers sont copiés sur le serveur de ce site :
+    votre navigateur n'envoie aucune requête à Wikimedia en consultant ces pages.
+  </p>
+
+  <p>
+    Les licences relevées le {formatDateFr(MEDIAS_RELEVES_LE)} imposent de citer l'auteur et de nommer
+    la licence. C'est ce que fait cette page. Elle est produite à partir du même fichier que les images
+    elles-mêmes, de sorte qu'un crédit ne peut pas rester en arrière d'un remplacement.
+  </p>
+
+  <h2>Ce que ces images ne signifient pas</h2>
+
+  <p>
+    Un logo de parti sert ici à <strong>désigner</strong> ce parti, comme le ferait son nom écrit. Il
+    n'indique ni accord, ni partenariat, ni approbation. Les logos restent la propriété de leurs titulaires,
+    et la plupart sont des marques déposées : leur présence sur cette page ne vaut aucune cession.
+  </p>
+
+  <p>
+    Aucun candidat, aucun parti n'a fourni d'image à ce site, n'en a validé le choix, ni n'a été
+    consulté. Un portrait plus flatteur qu'un autre ne dit rien d'autre que l'état de ce qui est
+    disponible sous licence libre.
+  </p>
+
+  <h2>Portraits des candidats</h2>
+
+  <ul class="credits">
+    {
+      portraits.map((media) => (
+        <li>
+          <strong>{nomParActeur.get(media.actorId) ?? media.actorId}</strong> —
+          <a href={media.pageCommons} rel="noreferrer">
+            {media.fichierCommons}
+          </a>
+          , par {media.auteur}, sous{" "}
+          {media.licenceUrl ? (
+            <a href={media.licenceUrl} rel="noreferrer license">
+              {media.licence}
+            </a>
+          ) : (
+            media.licence
+          )}
+          .{media.reserve && <span class="reserve-media">{media.reserve}</span>}
+        </li>
+      ))
+    }
+  </ul>
+
+  {
+    sansPortrait.length > 0 && (
+      <p class="absent">
+        Sans portrait sous licence libre au {formatDateFr(MEDIAS_RELEVES_LE)} :{" "}
+        {nommer(sansPortrait)}. Le classement affiche alors des initiales. Une photo prise sur un
+        site de campagne ne serait pas réutilisable, et n'en tiendra pas lieu.
+      </p>
+    )
+  }
+
+  <h2>Logos des partis</h2>
+
+  <ul class="credits">
+    {
+      logos.map((media) => (
+        <li>
+          <strong>{nomParActeur.get(media.actorId) ?? media.actorId}</strong> —
+          <a href={media.pageCommons} rel="noreferrer">
+            {media.fichierCommons}
+          </a>
+          , par {media.auteur}, sous{" "}
+          {media.licenceUrl ? (
+            <a href={media.licenceUrl} rel="noreferrer license">
+              {media.licence}
+            </a>
+          ) : (
+            media.licence
+          )}
+          .{media.reserve && <span class="reserve-media">{media.reserve}</span>}
+        </li>
+      ))
+    }
+  </ul>
+
+  {
+    sansLogo.length > 0 && (
+      <p class="absent">
+        Sans logo sous licence libre au {formatDateFr(MEDIAS_RELEVES_LE)} : {nommer(sansLogo)}.
+        Leurs fichiers sur Wikipédia y figurent au titre du <i>fair use</i> américain, qui n'existe
+        pas en droit français et ne se transmet à personne. Le nom du parti s'affiche donc seul.
+      </p>
+    )
+  }
+
+  <h2>Signaler une erreur ou demander un retrait</h2>
+
+  <p>
+    Si vous êtes l'auteur d'une de ces images et que le crédit est inexact, ou si vous estimez
+    qu'une image ne devrait pas figurer ici, écrivez-nous : la correction ou le retrait sera fait,
+    et consigné sur la page <a href="/corrections">Corrections</a>.
+  </p>
+</BaseLayout>
+
+<style>
+  .credits {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--pas-4);
+    font-size: var(--t-petit);
+  }
+
+  .credits li {
+    padding-block: var(--pas-1);
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  .reserve-media {
+    display: block;
+    color: var(--couleur-encre-faible);
+  }
+
+  .absent {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+</style>

@@ -31,6 +31,7 @@ const PAGES_FIXES: readonly SitemapEntry[] = [
   { path: "/corrections", lastmod: "2026-09-14" },
   { path: "/financement", lastmod: "2026-09-14" },
   { path: "/mentions-legales", lastmod: "2026-09-14" },
+  { path: "/credits-images", lastmod: "2026-09-20" },
 ];
 
 export const GET: APIRoute = async () => {

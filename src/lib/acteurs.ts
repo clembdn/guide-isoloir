@@ -109,7 +109,9 @@ export const StanceSchema = z
     provenance: z.enum([
       "official-program",
       "direct-statement",
+      "press-interview",
       "parliamentary-vote",
+      "press-report",
       "party-platform",
       "coalition-platform",
       "inference",

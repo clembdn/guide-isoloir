@@ -52,6 +52,46 @@ d'employer les noms réservés pour une version modifiée.
 La police est auto-hébergée, pas appelée à distance : `font-src 'self'` l'impose,
 et un test Playwright vérifie qu'aucune requête ne sort vers un domaine tiers.
 
+## Portraits et logos — licences libres, une par fichier
+
+Répertoire : [`public/medias/`](public/medias/) — manifeste :
+[`src/data/medias.ts`](src/data/medias.ts) — page publique :
+[`/credits-images`](src/pages/credits-images.astro).
+
+Ces fichiers **ne sont pas couverts par les deux licences ci-dessus** : ils ne
+sont ni du code de ce dépôt, ni des données produites par ce dépôt. Chacun porte
+la sienne, relevée sur Wikimedia Commons en même temps que le téléchargement par
+`scripts/recuperer-medias.mjs`, et republiée telle quelle sur `/credits-images`.
+
+Licences rencontrées au 20 septembre 2026 : CC0, domaine public (logos composés
+de texte, sous le seuil d'originalité), CC BY 3.0, CC BY 4.0, CC BY-SA 3.0,
+CC BY-SA 4.0, et la licence de réutilisation du Parlement européen. CC BY et
+CC BY-SA imposent de citer l'auteur et de nommer la licence : c'est la raison
+d'être de `/credits-images`, et c'est pourquoi cette page est générée à partir
+du manifeste et non tenue à la main.
+
+**Trois règles qui ne se négocient pas.**
+
+1. **Commons uniquement.** Un fichier présent sur `fr.wikipedia.org` mais absent
+   de Commons y est au titre du _fair use_ américain, qui n'existe pas en droit
+   français et ne se transmet à personne. Le script s'arrête si un fichier de sa
+   table n'est pas sur Commons.
+2. **Jamais depuis un site de parti ou de campagne.** Une image y est protégée
+   par défaut, et l'absence de mention n'est pas une autorisation.
+3. **Une case vide plutôt qu'une image non libre.** Quatre partis — France
+   Libre, Génération écologie, Les Patriotes, Place publique — et un candidat —
+   Antoine Mikolajczak — n'ont aucun média réutilisable. Ils n'en ont donc pas :
+   l'interface affiche des initiales, et `/credits-images` dit pourquoi.
+
+**Droit d'auteur et droit des marques sont deux choses distinctes.** La plupart
+de ces logos sont libres de droit d'auteur — trop simples pour constituer une
+œuvre — tout en restant des marques déposées. Ils servent ici à **désigner** un
+parti, exactement comme son nom écrit le ferait ; cet usage référentiel ne vaut
+ni cession, ni partenariat, ni approbation, et `/credits-images` l'écrit.
+
+Une demande de retrait émanant d'un auteur ou d'un titulaire est honorée, et
+consignée sur `/corrections`.
+
 ## Ni l'un ni l'autre
 
 - `CLAUDE.md`, `DESIGN_SYSTEM.md` et le contenu de `docs/` sont des documents de
