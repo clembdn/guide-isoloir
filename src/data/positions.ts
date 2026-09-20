@@ -1406,4 +1406,264 @@ export const POSITIONS = [
     reviewStatus: "reconciled",
     updatedAt: "2026-09-20",
   },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // PROGRAMME DE DAVID LISNARD — 31 juillet 2026.
+  //
+  // Onze cases, et elles sont en `official-program` : c'est le programme du
+  // candidat lui-même, deuxième du dossier après celui de Mélenchon. Rien n'est
+  // repris d'un parti, rien n'est hérité — David Lisnard passe de zéro à onze
+  // affirmations documentées EN PROPRE.
+  //
+  // TREIZE CASES VIDES. Le programme ne dit rien de l'abrogation de la réforme
+  // de 2023, de l'indexation de l'âge sur l'espérance de vie, de l'impôt sur la
+  // fortune, du barème du capital, de la durée d'indemnisation du chômage, du
+  // vote des étrangers, des ZFE, de la proportionnelle, du référendum
+  // d'initiative citoyenne, du 49.3, du vote à la majorité qualifiée, de
+  // l'Ukraine ni des contrôles aux frontières Schengen — « le meilleur contrôle
+  // effectif des frontières » y figure, mais sans nommer Schengen ni le
+  // caractère permanent des contrôles.
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: "david-lisnard--retraites-age-legal-60",
+    actorId: "david-lisnard",
+    questionId: "retraites-age-legal-60",
+    value: -2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-ambition"],
+    citation: "la norme de l'âge légal de 65 ans est un impératif national urgent",
+    adequation: "directe",
+    rationale:
+      "Non seulement aucun abaissement, mais un âge légal porté à 65 ans, qualifié d'impératif urgent et présenté comme un préalable à toute autre réforme. La citation porte sur la mesure posée, en sens inverse et sans réserve.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--retraites-part-capitalisation",
+    actorId: "david-lisnard",
+    questionId: "retraites-part-capitalisation",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-ambition"],
+    citation: "une combinaison de la répartition avec la capitalisation",
+    adequation: "directe",
+    rationale:
+      "Le programme fait de la combinaison répartition-capitalisation sa « réforme d'ensemble », après le relèvement de l'âge. C'est exactement l'ajout d'une part de capitalisation au système par répartition que pose l'affirmation.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--budget-reduction-dette-par-depenses",
+    actorId: "david-lisnard",
+    questionId: "budget-reduction-dette-par-depenses",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-destin"],
+    citation:
+      "il est possible de les réduire de 8 points de PIB en 10 ans et de les maintenir en-deçà de 50%",
+    adequation: "directe",
+    rationale:
+      "La citation porte sur les dépenses publiques, dans un chapitre intitulé « l'impératif absolu de la maîtrise des déficits publics et de la dette ». Le programme y écrit que « l'action directe sur les différentes dépenses par fonctions et par natures sera tout aussi déterminante » et écarte explicitement l'annulation de la dette. La dépense est bien le levier premier.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--immigration-plafond-titres-sejour",
+    actorId: "david-lisnard",
+    questionId: "immigration-plafond-titres-sejour",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-immigration"],
+    citation: "Diviser par huit la délivrance de titres de séjour",
+    adequation: "directe",
+    rationale:
+      "Un facteur chiffré appliqué au nombre de titres de séjour délivrés : c'est un plafond, et c'est la mesure exactement posée par l'affirmation. Le programme y ajoute des quotas de main-d'oeuvre qualifiée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--nationalite-suppression-droit-du-sol",
+    actorId: "david-lisnard",
+    questionId: "nationalite-suppression-droit-du-sol",
+    value: 1,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-immigration"],
+    citation: "Mettre fin à l'automaticité du droit du sol",
+    adequation: "partielle",
+    rationale:
+      "Mettre fin à l'automaticité n'est pas supprimer le droit du sol : l'acquisition resterait possible, sur manifestation de volonté. Même direction, degré moindre — comme Les Républicains sur une formulation voisine. Adéquation partielle, valeur plafonnée à 1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--immigration-regularisation-par-le-travail",
+    actorId: "david-lisnard",
+    questionId: "immigration-regularisation-par-le-travail",
+    value: -2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-ambition"],
+    citation:
+      "supprimer toute possibilité d'être régularisé après être entré clandestinement sur le territoire",
+    adequation: "directe",
+    rationale:
+      "Le mot « toute » exclut le cas posé par l'affirmation, celui du travailleur employé depuis plusieurs années. Le chapitre migratoire du programme rétablit par ailleurs le délit de séjour irrégulier.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--energie-nouveaux-reacteurs-nucleaires",
+    actorId: "david-lisnard",
+    questionId: "energie-nouveaux-reacteurs-nucleaires",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-civique"],
+    citation: "construction d'EPR de nouvelle génération, déploiement de mini-réacteurs nucléaires",
+    adequation: "directe",
+    rationale:
+      "Le seul codage nucléaire du dossier à mériter l'adéquation directe : le programme n'écrit pas « soutenir la filière » mais « construction », et nomme deux types de réacteurs. Les Républicains, Debout la France et Les Patriotes restent à 1 faute d'un engagement de construction aussi explicite.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--energie-nouveaux-parcs-eoliens",
+    actorId: "david-lisnard",
+    questionId: "energie-nouveaux-parcs-eoliens",
+    value: -1,
+    provenance: "official-program",
+    confidence: "medium",
+    sourceIds: ["lisnard-civique"],
+    citation:
+      "Il faut mettre un terme à cette gabegie en faisant rentrer ces projets dans le droit commun",
+    adequation: "partielle",
+    rationale:
+      "La citation vise les projets d'énergies renouvelables « dérogatoires aux prix du marché et aux règles d'urbanisme », et propose de réinvestir les économies dans le nucléaire. L'éolien n'est pas nommé, et la mesure porte sur le régime dérogatoire, pas sur l'installation de nouveaux parcs. Adéquation partielle, valeur plafonnée à 1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--agriculture-renforcement-normes-environnementales",
+    actorId: "david-lisnard",
+    questionId: "agriculture-renforcement-normes-environnementales",
+    value: -2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["lisnard-agriculture"],
+    citation: "La PAC doit cesser d'être une politique environnementale hors-sol",
+    adequation: "directe",
+    rationale:
+      "Le refus porte sur la nature même de la contrainte environnementale en agriculture, pas sur sa lourdeur administrative. Le chapitre demande aussi d'« en finir avec les surtranspositions françaises » et refuse « toute logique malthusienne qui affaiblit la compétitivité sans bénéfice environnemental démontré ». C'est le refus explicite de la mesure posée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--europe-opposition-parlementaire-traite",
+    actorId: "david-lisnard",
+    questionId: "europe-opposition-parlementaire-traite",
+    value: 1,
+    provenance: "official-program",
+    confidence: "medium",
+    sourceIds: ["lisnard-immigration"],
+    citation: "Inscrire la primauté du droit national en matière migratoire dans la Constitution",
+    adequation: "partielle",
+    rationale:
+      "L'objectif est bien d'écarter l'application de règles européennes, et le programme précise « afin de rendre inapplicables les décisions de la CJUE et de la CEDH contraires à l'intérêt national ». Mais le véhicule est une révision constitutionnelle et l'objet des décisions de juges, non une opposition du Parlement à un traité ratifié. Deux paramètres autres : adéquation partielle.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "david-lisnard--institutions-elargissement-champ-referendum",
+    actorId: "david-lisnard",
+    questionId: "institutions-elargissement-champ-referendum",
+    value: 1,
+    provenance: "official-program",
+    confidence: "medium",
+    sourceIds: ["lisnard-ambition"],
+    citation:
+      "Cela peut passer par une révision constitutionnelle, par des renégociations de traités internationaux, voire par d'autres dispositifs juridiques à imaginer. Un référendum sera nécessaire",
+    adequation: "partielle",
+    rationale:
+      "La phrase clôt le chapitre consacré aux frontières et à l'immigration : le référendum y est bien envisagé sur la politique migratoire. Mais le programme ne demande pas d'élargir le champ de l'article 11 ; il énumère plusieurs véhicules juridiques dont le référendum est le dernier. Adéquation partielle.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // BLOC CENTRAL — presse, faute de programme.
+  //
+  // Trois cases seulement, et c'est le constat le plus net du dossier : les
+  // deux candidats donnés en tête des sondages du bloc central n'ont publié
+  // aucun texte programmatique. Ce qu'on peut coder d'eux tient dans deux
+  // articles.
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: "gabriel-attal--retraites-age-legal-60",
+    actorId: "gabriel-attal",
+    questionId: "retraites-age-legal-60",
+    value: -1,
+    provenance: "direct-statement",
+    confidence: "medium",
+    sourceIds: ["lcp-retraites-qui-propose-quoi-2026"],
+    citation: "Le sujet n'est plus de savoir si c'est 62, 63, 64 ans",
+    adequation: "partielle",
+    sourcePrimaire: "Déclarations rapportées par LCP dans sa synthèse du 19 juin 2026",
+    rationale:
+      "Gabriel Attal ne répond pas à l'affirmation, il en conteste la pertinence : il propose de supprimer l'âge légal et de tout faire reposer sur la durée de cotisation, avec « de vraies décotes et de vraies surcotes ». Un âge légal abaissé à 60 ans est incompatible avec la suppression de l'âge légal, d'où le signe ; mais la mesure posée n'est pas discutée, d'où l'adéquation partielle et le plafond à 1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "gabriel-attal--fiscalite-impot-fortune",
+    actorId: "gabriel-attal",
+    questionId: "fiscalite-impot-fortune",
+    value: -1,
+    provenance: "press-report",
+    confidence: "medium",
+    sourceIds: ["lcp-attal-arras-2025"],
+    citation: "refus de la taxe Zucman sur les ultrariches",
+    adequation: "partielle",
+    rationale:
+      "Phrase du journaliste, faute de verbatim. La taxe Zucman est un impôt plancher sur les très hauts patrimoines, donc une forme d'imposition de la fortune : la refuser va contre l'affirmation. Mais ce n'est pas le rétablissement d'un impôt sur la fortune au sens de l'ISF supprimé en 2018 que le candidat écarte, c'est un dispositif particulier. Adéquation partielle, valeur plafonnée à 1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+  {
+    id: "raphael-glucksmann--retraites-age-legal-60",
+    actorId: "raphael-glucksmann",
+    questionId: "retraites-age-legal-60",
+    value: -1,
+    provenance: "direct-statement",
+    confidence: "medium",
+    sourceIds: ["lcp-retraites-qui-propose-quoi-2026"],
+    citation: "le totem absolu",
+    adequation: "partielle",
+    sourcePrimaire: "Déclarations rapportées par LCP dans sa synthèse du 19 juin 2026",
+    rationale:
+      "Raphaël Glucksmann refuse de faire de l'âge légal « le totem absolu » et déplace la discussion vers « la durée de cotisation et la pénibilité du travail ». Il ne demande donc pas l'abaissement à 60 ans que pose l'affirmation, sans pour autant défendre un relèvement. Adéquation partielle, valeur plafonnée à 1. À noter que le même candidat s'est engagé à abroger la réforme de 2023, ce qui est codé séparément : les deux ne sont pas contradictoires.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
+
+  {
+    id: "parti-solution-democratique--institutions-referendum-initiative-citoyenne",
+    actorId: "parti-solution-democratique",
+    questionId: "institutions-referendum-initiative-citoyenne",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["sd-notre-solution"],
+    citation:
+      "instaurant deux outils simples mais puissants : l'initiative citoyenne constituante ; le référendum obligatoire pour modifier la Constitution",
+    adequation: "directe",
+    rationale:
+      "Le parti nomme la réunion de ces deux outils « référendum d'initiative citoyenne constituant (RICC) » et en fait l'intégralité de son programme présidentiel. C'est la mesure exactement posée par l'affirmation, portée sans condition ni réserve. Une seule case, et c'est tout ce que ce parti documente : les vingt-trois autres restent vides parce qu'il ne se prononce pas dessus, pas parce qu'on ne l'a pas cherché.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-20",
+  },
 ] as const satisfies readonly Stance[];

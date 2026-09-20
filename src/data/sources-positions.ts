@@ -332,4 +332,110 @@ export const SOURCES_POSITIONS = [
     incoherenceRelevee:
       "La couverture porte « édition 2026-2027 » sans date précise. La date retenue est celle de création du PDF, horodatée « Fri Sep 4 03:48 2026 AEST », soit le 3 septembre 2026 à Paris, cohérente avec son dépôt dans le répertoire de septembre 2026 du site.",
   },
+  /*
+   * PROGRAMME DE DAVID LISNARD — deuxième programme présidentiel publié.
+   *
+   * Après celui de Mélenchon, c'est le seul autre projet de candidat structuré
+   * et complet trouvé au 20 septembre 2026 : quarante-trois mesures réparties
+   * en huit thèmes, sur le site de son mouvement.
+   *
+   * LA DATE VIENT DU SITEMAP, ET IL FAUT LE DIRE. Aucune de ces pages ne porte
+   * de date, ni dans son texte ni dans ses métadonnées d'article. Le sitemap du
+   * site, lui, horodate chacune au 31 juillet 2026. C'est la meilleure date
+   * disponible, elle est vérifiable par quiconque ouvre
+   * `unenouvelleenergie.fr/pages-sitemap.xml`, et elle est postérieure au début
+   * de la campagne : aucun avertissement d'ancienneté ne s'y attache.
+   *
+   * Sans elle, il aurait fallu renoncer à coder un programme complet faute de
+   * pouvoir le dater — ce qui aurait laissé David Lisnard à zéro affirmation
+   * alors qu'il est l'un des candidats les mieux documentés du dossier.
+   */
+  {
+    id: "lisnard-destin",
+    titre: "Le programme de David Lisnard — Être maître de notre destin",
+    media: "David Lisnard, Nouvelle Énergie",
+    url: "https://www.unenouvelleenergie.fr/notre-programme/etre-maitre-de-notre-destin/",
+    dateDeclaration: "2026-07-31",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "lisnard-ambition",
+    titre: "Le programme de David Lisnard — Réussir une nouvelle ambition française",
+    media: "David Lisnard, Nouvelle Énergie",
+    url: "https://www.unenouvelleenergie.fr/notre-programme/reussir-une-nouvelle-ambition-francaise/",
+    dateDeclaration: "2026-07-31",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "lisnard-civique",
+    titre: "Le programme de David Lisnard — Générer un renouveau civique",
+    media: "David Lisnard, Nouvelle Énergie",
+    url: "https://www.unenouvelleenergie.fr/notre-programme/generer-un-renouveau-civique/",
+    dateDeclaration: "2026-07-31",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "lisnard-immigration",
+    titre: "Le programme de David Lisnard — Immigration",
+    media: "David Lisnard, Nouvelle Énergie",
+    url: "https://www.unenouvelleenergie.fr/notre-programme/immigration/",
+    dateDeclaration: "2026-07-31",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "lisnard-agriculture",
+    titre: "Le programme de David Lisnard — Agriculture",
+    media: "David Lisnard, Nouvelle Énergie",
+    url: "https://www.unenouvelleenergie.fr/notre-programme/agriculture/",
+    dateDeclaration: "2026-07-31",
+    consulteLe: "2026-09-20",
+  },
+  /*
+   * DEUX RELEVÉS DE PRESSE POUR LE BLOC CENTRAL.
+   *
+   * Gabriel Attal et Édouard Philippe n'ont publié aucun programme, et le
+   * projet « Besoin d'Europe » de 2024, qui couvrirait Renaissance et Horizons
+   * d'un coup, n'est plus accessible en ligne. La presse est donc le seul
+   * matériau, et c'est exactement le cas que la chaîne de résolution prévoit
+   * depuis qu'elle nomme ses maillons de presse.
+   *
+   * Le discours d'Arras date de septembre 2025, avant la campagne : les
+   * positions qui en découlent portent l'avertissement d'ancienneté.
+   */
+  {
+    id: "lcp-retraites-qui-propose-quoi-2026",
+    titre: "Présidentielle 2027 : qui propose quoi sur les retraites ?",
+    media: "LCP – Assemblée nationale",
+    url: "https://lcp.fr/actualites/presidentielle-2027-qui-propose-quoi-sur-les-retraites-437864",
+    dateDeclaration: "2026-06-19",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "lcp-attal-arras-2025",
+    titre:
+      "À Arras, Gabriel Attal prône « une nouvelle République » en vue de l'élection présidentielle de 2027",
+    media: "LCP – Assemblée nationale",
+    url: "https://lcp.fr/actualites/a-arras-gabriel-attal-prone-une-nouvelle-republique-en-vue-de-l-election-presidentielle",
+    dateDeclaration: "2025-09-21",
+    consulteLe: "2026-09-20",
+  },
+  /*
+   * SOLUTION DÉMOCRATIQUE — un parti, une mesure, une case.
+   *
+   * Le parti de Clara Egger a un programme tenant en une proposition : le
+   * référendum d'initiative citoyenne constituant. Une seule des vingt-quatre
+   * affirmations le concerne, et c'est un renseignement en soi — ne pas
+   * remplir les vingt-trois autres par déduction politique est ici la règle,
+   * pas une lacune.
+   */
+  {
+    id: "sd-notre-solution",
+    titre: "Notre solution — le référendum d'initiative citoyenne constituant",
+    media: "Solution démocratique",
+    url: "https://solutiondemocratique.fr/notre-solution/",
+    dateDeclaration: "2026-06-26",
+    consulteLe: "2026-09-20",
+    incoherenceRelevee:
+      "La page ne porte aucune date. Celle retenue est le lastmod publié pour cette URL dans le sitemap du site, vérifiable sur solutiondemocratique.fr/wp-sitemap-posts-page-1.xml.",
+  },
 ] as const satisfies readonly SourcePosition[];

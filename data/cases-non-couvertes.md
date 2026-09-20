@@ -127,23 +127,84 @@ produisait des citations qui n'existent pas dans le document. Les citations ont 
 une extraction en ordre de lecture, puis relues dans le PDF. Toujours vérifier une citation issue
 d'un PDF multicolonne.
 
+## David Lisnard (`david-lisnard`)
+
+Cinq chapitres du programme consultés le **20 septembre 2026** sur
+`unenouvelleenergie.fr/notre-programme/`. **11 cases codées sur 24, toutes en
+`official-program` et toutes en propre** : c'est le deuxième programme présidentiel
+structuré trouvé, après celui de Mélenchon, et le candidat le mieux documenté en son nom.
+
+**La date vient du sitemap, et il faut le dire.** Aucune de ces pages ne porte de date, ni
+dans son texte ni dans ses métadonnées d'article. Le sitemap les horodate toutes au
+31 juillet 2026. Sans lui, il aurait fallu renoncer à coder un programme complet faute de
+pouvoir le dater.
+
+Treize cases vides : le programme ne traite ni de l'abrogation de la réforme de 2023, ni de
+l'indexation sur l'espérance de vie, ni de l'ISF, ni du barème du capital, ni de la durée
+d'indemnisation du chômage, ni du vote des étrangers, ni des ZFE, ni de la proportionnelle, ni
+du RIC, ni du 49.3, ni de la majorité qualifiée, ni de l'Ukraine. Sur Schengen, « le meilleur
+contrôle effectif des frontières » y figure, mais sans nommer Schengen ni le caractère permanent
+des contrôles : **aborde sans répondre**.
+
+## Solution démocratique (`parti-solution-democratique`)
+
+Une case sur 24, et c'est le total honnête. Le parti de Clara Egger a un programme tenant en une
+proposition — le référendum d'initiative citoyenne constituant — et ne se prononce sur rien
+d'autre. Les vingt-trois cases vides le sont parce que le parti est muet, pas parce que la
+recherche a manqué.
+
+## Bloc central : Attal et Philippe (`gabriel-attal`, `edouard-philippe`)
+
+**Trois cases à eux deux, et c'est le constat le plus net du dossier.** Les deux candidats les
+mieux placés du bloc central n'ont publié aucun texte programmatique. Ce qui est codable d'eux
+tient dans deux articles de LCP.
+
+Gabriel Attal ne répond pas à la question des retraites, il en conteste la pertinence : il veut
+supprimer l'âge légal. Le codage retenu est −1 en adéquation partielle, avec le raisonnement
+écrit — un âge abaissé à 60 ans est incompatible avec la suppression de l'âge légal, mais la
+mesure posée n'est pas discutée.
+
+## Candidats sans aucune position documentée
+
+Huit sur vingt, au 20 septembre 2026, et pour des raisons différentes :
+
+| Candidat                | Ce qui a été cherché, et ce qui a été trouvé                                                                                                                                                                                                    |
+| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Éric Zemmour**        | `parti-reconquete.fr` ne renvoie que vers `leprogrammepourlafrance.fr`, plateforme de contributions citoyennes sans texte arrêté. L'article de LCP sur sa candidature du 17 septembre 2026 ne contient **aucune** proposition de fond, vérifié. |
+| **Xavier Bertrand**     | `nousfrance.fr` a des pages `/programme/<thème>/`, mais elles font 35 à 113 mots, sont des coquilles sans mesures, et le sitemap les date de **2021**. `xavierbertrand.fr` n'a aucune page de programme.                                        |
+| **Delphine Batho**      | Le « projet » de Génération écologie est un texte doctrinal sur la décroissance et l'écologie intégrale. Aucune mesure ne répond à l'une des 24 affirmations. Muet, pas absent.                                                                 |
+| **Nathalie Arthaud**    | `lutte-ouvriere.org` ne sert aucun lien exploitable au relevé — page rendue côté client.                                                                                                                                                        |
+| **François Asselineau** | `upr.fr/notre-programme` renvoie 60 mots : contenu entièrement rendu côté client.                                                                                                                                                               |
+| **Antoine Mikolajczak** | `equinoxe.fr` est un homonyme — un cabinet de conseil, pas le parti. Le site du mouvement n'a pas été identifié avec certitude, et il n'a donc pas été utilisé.                                                                                 |
+| **Francis Lalanne**     | Aucun site de France Libre identifié.                                                                                                                                                                                                           |
+| **Clara Egger**         | Une case codée depuis Solution démocratique (voir ci-dessus) : elle n'est donc plus à zéro.                                                                                                                                                     |
+
+## Un conflit de chaîne à trancher, non résolu
+
+LCP du 19 juin 2026 rapporte que le **Parti socialiste** veut « ramener l'âge légal à 62 ans ».
+Cette position n'a **pas** été codée, et c'est délibéré : le contrat du Nouveau Front populaire,
+de juin 2024, porte « l'objectif commun du droit à la retraite à 60 ans » pour le même candidat
+(Karim Bouamrane). Or `coalition-platform` prime sur `party-platform` dans la chaîne de
+résolution, et `updatedAt` est la date de CODAGE, pas celle de la déclaration : coder les deux
+ferait afficher la position de 2024 alors qu'une position de 2026 existe.
+
+Le corriger suppose une décision éditoriale — inverser l'ordre des deux maillons, ou faire
+départager par la date de déclaration — qui dépasse une mise à jour de données. À trancher avant
+la prochaine campagne de codage.
+
 ## Ce qui manque encore, par ordre de rendement
 
-État au 20 septembre 2026 : **78 positions, 23 sources, 11 candidats sur 20 documentés**, dont
-sept au-dessus du seuil de publication. Chacune des 24 affirmations est documentée pour au moins
-un candidat.
+État au 20 septembre 2026 : **93 positions, 31 sources, 12 candidats sur 20 documentés**, dont
+huit au-dessus du seuil de publication.
 
-1. **Éric Zemmour (Reconquête).** Aucun programme 2027 n'existe : `parti-reconquete.fr` ne renvoie
-   que vers `leprogrammepourlafrance.fr`, plateforme de contributions citoyennes sans texte
-   arrêté. Le programme de 2022 n'est plus hébergé par le parti. À reprendre dès publication.
-2. **Renaissance et Horizons** (Attal 1 case, Philippe 2). Le projet « Besoin d'Europe » de 2024
-   couvre les deux à la fois, mais son texte intégral n'est plus accessible : `besoindeurope.fr/projet`
-   n'en sert qu'un résumé en trois axes, et le raccourcisseur `bdeuro.pe` vers le PDF ne résout plus.
-   Obstacle technique, pas éditorial.
-3. **Lutte ouvrière, UPR, Nous France, Nouvelle Énergie, Génération écologie, Equinoxe, France
-   Libre, Solution démocratique.** Leurs candidats sont à zéro. Sites sans programme structuré
-   accessible au relevé, ou entièrement rendus côté client.
-4. **Place publique** (Glucksmann, 3 cases). Sa qualité de signataire du Nouveau Front populaire
+1. **Renaissance et Horizons.** Le projet « Besoin d'Europe » de 2024 couvre Attal et Philippe à
+   la fois, mais son texte intégral n'est plus accessible : `besoindeurope.fr/projet` n'en sert
+   qu'un résumé, et le raccourcisseur `bdeuro.pe` vers le PDF ne résout plus. Chercher une copie
+   archivée.
+2. **Les sites rendus côté client** — Lutte ouvrière, UPR, Reconquête. Leur contenu existe mais
+   n'est pas lisible par une simple requête HTTP.
+3. **Le conflit de chaîne ci-dessus**, qui débloquerait le codage des lignes de parti récentes
+   pour les quatre candidats que couvre encore le Nouveau Front populaire.
+4. **Place publique** (Glucksmann, 4 cases). Sa qualité de signataire du Nouveau Front populaire
    n'a pas pu être confirmée sur une source fiable : la reprise de la coalition ne lui est donc
-   **pas** appliquée, ni à Génération écologie. Une reprise attribuée à tort est pire qu'une case
-   vide.
+   pas appliquée, ni à Génération écologie. Une reprise attribuée à tort est pire qu'une case vide.
