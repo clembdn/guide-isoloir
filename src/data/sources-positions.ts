@@ -184,4 +184,152 @@ export const SOURCES_POSITIONS = [
     dateDeclaration: "2026-08-25",
     consulteLe: "2026-09-20",
   },
+  /*
+   * CONTRAT DE LÉGISLATURE DU NOUVEAU FRONT POPULAIRE.
+   *
+   * Le document le plus complet dont on dispose pour quatre candidats à la fois
+   * — Mélenchon, Bouamrane, Roussel, Tondelier — parce qu'il engage La France
+   * insoumise, le Parti socialiste, le Parti communiste et Les Écologistes par
+   * un texte unique. C'est ce qui en fait un `coalition-platform` et non quatre
+   * lignes de parti.
+   *
+   * IL DATE DE JUIN 2024, ET C'EST ÉCRIT À L'ÉCRAN. Deux ans et demi avant le
+   * scrutin, sous une autre coalition, pour un autre type d'élection, et la
+   * coalition s'est depuis défaite. Chaque position qui en découle porte donc
+   * l'avertissement d'ancienneté, et s'effacera dès qu'un candidat publiera son
+   * programme : le moteur retient toujours le maillon le plus haut.
+   *
+   * QUATRE PARTIS, PAS SIX. Le Parti socialiste, La France insoumise, Les
+   * Écologistes et le Parti communiste sont les signataires établis. Place
+   * publique et Génération écologie n'ont pas pu être confirmés sur une source
+   * fiable : la coalition n'est donc PAS reprise par Raphaël Glucksmann ni par
+   * Delphine Batho. Une reprise attribuée à tort est pire qu'une case vide.
+   */
+  {
+    id: "nfp-contrat-legislature-2024",
+    titre: "Nouveau Front Populaire — Contrat de législature",
+    media: "Nouveau Front populaire",
+    url: "https://melenchon2027.fr/wp-content/uploads/2026/04/PROGRAMME-FRONT-POPULAIRE.pdf",
+    dateDeclaration: "2024-06-27",
+    consulteLe: "2026-09-20",
+    incoherenceRelevee:
+      "Aucune date imprimée. La date retenue est celle de création du PDF, le 27 juin 2024 heure de Paris, cohérente avec le scrutin des 30 juin et 7 juillet annoncé en page 2. Le fichier est servi depuis le site de campagne de Jean-Luc Mélenchon, où il a été redéposé en avril 2026 : réhébergement, celui du Nouveau Front populaire n'étant plus en ligne.",
+  },
+  /*
+   * PROGRAMME EUROPÉEN DES RÉPUBLICAINS — mai 2024.
+   *
+   * POURQUOI UN PROGRAMME EUROPÉEN. Les Républicains n'ont publié AUCUN
+   * programme pour les législatives de 2024 : le parti était sans direction
+   * après le ralliement d'Éric Ciotti au Rassemblement national. Ce document de
+   * 58 pages est donc le dernier texte programmatique complet adopté par le
+   * parti, et il a été lu en entier.
+   *
+   * CE QU'UN PROGRAMME EUROPÉEN NE DIT PAS. Il ne traite ni de l'âge de la
+   * retraite, ni de l'impôt sur la fortune, ni du 49.3, ni de la
+   * proportionnelle, ni des ZFE : ces sujets ne relèvent pas du Parlement
+   * européen. Neuf cases sur vingt-quatre en sortent, et les quinze autres
+   * restent vides — elles ne sont pas remplies par déduction.
+   */
+  {
+    id: "lr-programme-europeennes-2024",
+    titre: "Maîtriser notre destin — programme, élections européennes du 9 juin 2024",
+    media: "Les Républicains",
+    url: "https://www.les-centristes.fr/sites/default/files/lescentristes-lesrepublicains-programme-elections-europeennes-programme.pdf",
+    dateDeclaration: "2024-05-14",
+    consulteLe: "2026-09-20",
+    incoherenceRelevee:
+      "Aucune date imprimée ; la date retenue est celle de création du PDF, le 14 mai 2024, cohérente avec la présentation du programme rapportée ce jour-là. Fichier servi depuis le site des Centristes, parti allié de la liste, faute de copie en ligne sur republicains.fr : réhébergement du programme de la liste Bellamy.",
+  },
+  /*
+   * PROJET DE DEBOUT LA FRANCE — une source PAR CHAPITRE, et c'est essentiel.
+   *
+   * Le projet est publié chapitre par chapitre sur le site du parti, et chaque
+   * page porte sa propre date de dernière modification dans ses métadonnées.
+   * Ces dates s'étalent de février 2024 à juin 2026 : le chapitre sur les
+   * automobilistes a été réécrit après la suppression des ZFE, celui sur les
+   * retraites raisonne encore sur la réforme de 2010 et parle de candidats
+   * proposant « 63/67 ans », langage de la campagne de 2022.
+   *
+   * UNE SEULE SOURCE POUR TOUT LE PROJET AURAIT MENTI. Elle aurait donné la
+   * même date à un texte de 2024 et à un texte de juin 2026, donc le même âge à
+   * l'écran. Six chapitres consultés, six sources, six dates : l'avertissement
+   * d'ancienneté se déclenche sur les deux plus anciens et pas sur les quatre
+   * autres, ce qui est exactement ce qu'un lecteur doit voir.
+   *
+   * Le site annonce lui-même que « nos équipes travaillent actuellement à
+   * l'actualisation de notre programme pour l'élection présidentielle de
+   * 2027 » : ces codages sont donc provisoires par construction.
+   */
+  {
+    id: "dlf-projet-retraites",
+    titre: "Notre projet — Retraites",
+    media: "Debout la France",
+    url: "https://www.debout-la-france.fr/projet/retraites/",
+    dateDeclaration: "2024-02-05",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "dlf-projet-energie",
+    titre: "Notre projet — Environnement et Énergie",
+    media: "Debout la France",
+    url: "https://www.debout-la-france.fr/projet/environnement-energie/",
+    dateDeclaration: "2025-10-29",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "dlf-projet-agriculture",
+    titre: "Notre projet — Agriculture",
+    media: "Debout la France",
+    url: "https://www.debout-la-france.fr/projet/agriculture/",
+    dateDeclaration: "2026-02-16",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "dlf-projet-transport",
+    titre: "Notre projet — Automobilistes et motards",
+    media: "Debout la France",
+    url: "https://www.debout-la-france.fr/projet/transport-automobilistes/",
+    dateDeclaration: "2026-02-16",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "dlf-projet-immigration",
+    titre: "Notre projet — Immigration et assimilation",
+    media: "Debout la France",
+    url: "https://www.debout-la-france.fr/projet/immigration-et-assimilation/",
+    dateDeclaration: "2026-03-03",
+    consulteLe: "2026-09-20",
+  },
+  {
+    id: "dlf-projet-democratie",
+    titre: "Notre projet — Refonder et moraliser notre démocratie",
+    media: "Debout la France",
+    url: "https://www.debout-la-france.fr/projet/refonder-et-moraliser-notre-democratie/",
+    dateDeclaration: "2026-06-09",
+    consulteLe: "2026-09-20",
+  },
+  /*
+   * PROJET DES PATRIOTES — septembre 2026, le document le plus récent du lot.
+   *
+   * Dix-neuf pages publiées trois semaines avant ce relevé : c'est, avec le
+   * programme de Mélenchon, le seul texte de ce dossier écrit POUR 2027 et non
+   * pour un scrutin antérieur. Aucun avertissement d'ancienneté ne s'y attache.
+   *
+   * Le PDF est composé en colonnes, et une extraction en mode « mise en page »
+   * recollait des phrases appartenant à des colonnes différentes. Les citations
+   * ci-dessous ont été relevées sur une extraction en ORDRE DE LECTURE, puis
+   * relues dans le PDF : une citation fabriquée par un outil d'extraction reste
+   * une citation fabriquée.
+   */
+  {
+    id: "lp-projet-patriote-2026",
+    titre:
+      "Grandes orientations pour un projet patriote + Le Frexit en 10 questions — édition 2026-2027",
+    media: "Les Patriotes",
+    url: "https://les-patriotes.fr/wp-content/uploads/2026/09/projet-pour-la-france-2026.pdf",
+    dateDeclaration: "2026-09-03",
+    consulteLe: "2026-09-20",
+    incoherenceRelevee:
+      "La couverture porte « édition 2026-2027 » sans date précise. La date retenue est celle de création du PDF, horodatée « Fri Sep 4 03:48 2026 AEST », soit le 3 septembre 2026 à Paris, cohérente avec son dépôt dans le répertoire de septembre 2026 du site.",
+  },
 ] as const satisfies readonly SourcePosition[];

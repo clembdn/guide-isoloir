@@ -137,8 +137,28 @@ test("une position héritée nomme toujours l'acteur d'origine", async ({ page }
    * campagne en cours. Une ligne de parti reprise faute de déclaration doit
    * porter le nom du parti, et le dire.
    */
-  for (const repli of await page.locator(".heritage").all()) {
-    const texte = await repli.innerText();
+  /*
+   * ON OUVRE LES REPLIS AVANT DE LIRE. Les mentions d'héritage vivent dans les
+   * `<details>` du détail par thème, et `innerText` renvoie une chaîne vide sur
+   * un élément masqué : le test lisait « » et passait, quoi qu'il y ait
+   * dedans. Il n'a été démasqué que le jour où un classement a réellement
+   * contenu des positions reprises — jusque-là, la boucle ne s'exécutait sur
+   * rien. Lire `textContent` suffirait à faire passer le test ; ouvrir les
+   * replis vérifie en plus que la mention est VISIBLE, ce qui est la garantie
+   * qu'on veut.
+   */
+  for (const repli of await page.locator("details").all()) {
+    await repli.evaluate((element) => element.setAttribute("open", ""));
+  }
+
+  const heritages = page.locator(".heritage");
+  expect(
+    await heritages.count(),
+    "Aucune position reprise à l'écran : le test ne vérifierait rien",
+  ).toBeGreaterThan(0);
+
+  for (const mention of await heritages.all()) {
+    const texte = await mention.innerText();
     expect(texte).toMatch(/Position de .+, reprise faute de déclaration personnelle/);
     // Jamais un identifiant technique à la place du nom.
     expect(texte).not.toMatch(/parti-[a-z-]+/);
@@ -244,12 +264,28 @@ test("plusieurs acteurs sont présentés, jamais un vainqueur unique", async ({ 
   await avecReponses(page);
   test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
 
+  /*
+   * PAS « EXACTEMENT TROIS » : LES EX ÆQUO PARTAGENT LEUR RANG.
+   *
+   * Le classement montre les acteurs de rang 1 à 3, et non les trois premiers
+   * de la liste. Quatre acteurs peuvent donc s'afficher — c'est exactement ce
+   * qui se produit depuis que quatre candidats reprennent la même plateforme de
+   * coalition et se retrouvent parfaitement à égalité pour tout profil. Exiger
+   * trois lignes faisait échouer le test sur un comportement correct, et aurait
+   * poussé à masquer un ex æquo réel plutôt qu'à l'afficher.
+   *
+   * Ce que le test défend est écrit dans son nom : jamais UN vainqueur unique,
+   * et jamais un rang au-delà de 3.
+   */
   const acteurs = page.locator(".classement > li");
-  await expect(acteurs).toHaveCount(3, { timeout: 5000 });
+  const combien = await acteurs.count();
+  expect(combien, "Un seul acteur affiché : c'est un vainqueur unique").toBeGreaterThan(1);
 
-  // Chacun porte un rang explicite : c'est ce qui rend les ex æquo lisibles.
-  for (let index = 0; index < 3; index += 1) {
-    await expect(acteurs.nth(index).locator(".rang")).toContainText("Rang");
+  for (let index = 0; index < combien; index += 1) {
+    const rang = acteurs.nth(index).locator(".rang");
+    await expect(rang).toContainText("Rang");
+    const numero = Number((await rang.innerText()).replace(/\D+/g, ""));
+    expect(numero, "Le classement ne montre que les rangs 1 à 3").toBeLessThanOrEqual(3);
   }
 
   const texte = await page.locator("main").innerText();

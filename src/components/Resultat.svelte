@@ -41,7 +41,11 @@
   import type { Candidate, PoliticalActor, Stance } from "../lib/modele";
   import type { QuestionAffichee } from "../lib/projection";
   import type { SourcePosition } from "../lib/acteurs";
-  import { SEUIL_ACCORD, SEUIL_PUBLICATION } from "../lib/seuils";
+  import {
+    SEUIL_ACCORD,
+    SEUIL_PUBLICATION,
+    SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT,
+  } from "../lib/seuils";
   import { formatDateFr } from "../lib/date";
   import ScoreEtCouverture from "./ScoreEtCouverture.svelte";
 
@@ -199,6 +203,34 @@
         0.6,
   );
 
+  /**
+   * Les acteurs en tête sont-ils documentés TRÈS INÉGALEMENT entre eux ?
+   *
+   * DISTINCT DE `couvertureFaible`, ET C'EST TOUT L'ENJEU DU MOMENT. La
+   * couverture faible dit « il y a peu de matière pour tout le monde ».
+   * Celle-ci dit « il y en a beaucoup pour l'un et presque rien pour l'autre »,
+   * ce qui est un problème d'une autre nature : à septembre 2026, un parti a
+   * publié une plateforme complète et le voisin n'a rien publié du tout.
+   *
+   * POURQUOI ÇA COMPTE POUR L'ORDRE, ET PAS POUR LE SCORE. Le score ne dépend
+   * pas du volume : le moteur normalise par thème, écarte les thèmes non
+   * documentés, et l'audit vérifie sur deux mille profils qu'une couverture
+   * partielle n'avantage ni ne désavantage EN MOYENNE. Mais sur UN profil, un
+   * acteur documenté sur trois affirmations qui se trouvent toutes tomber
+   * d'accord obtient un score plus haut qu'un acteur documenté sur dix-huit
+   * dont seize tombent d'accord. Le chiffre est exact, l'ordre est fragile, et
+   * seule la phrase ci-dessous le dit.
+   *
+   * Le seuil est un écart de trente points de couverture entre le mieux et le
+   * moins bien documenté du peloton de tête. En dessous, l'écart relève du
+   * bruit ; au-dessus, il change la lecture.
+   */
+  const couvertureInegale = $derived.by(() => {
+    if (tete.length < 2) return false;
+    const taux = tete.map((resultat) => resultat.couverture.taux);
+    return Math.max(...taux) - Math.min(...taux) > 0.3;
+  });
+
   const LIBELLES_REPONSE: Record<number, string> = {
     2: "Tout à fait d'accord",
     1: "Plutôt d'accord",
@@ -237,6 +269,28 @@
    * le lecteur doit pouvoir le lire sans ouvrir le dépôt. Elle n'entre pas dans
    * le calcul — une position mal documentée reste la position qu'elle est.
    */
+  /**
+   * La source la plus récente d'une position est-elle antérieure à la campagne ?
+   *
+   * ON REGARDE LA PLUS RÉCENTE, pas la plus ancienne. Une position appuyée sur
+   * un programme de 2024 ET sur une déclaration de 2026 n'est pas une position
+   * périmée : elle est confirmée. Prendre la plus ancienne ferait apparaître un
+   * avertissement sur les codages les MIEUX sourcés, ce qui est le contraire du
+   * but.
+   *
+   * Renvoie la date de cette source, ou `null` s'il n'y a rien à signaler.
+   */
+  function sourceAnterieureALaCampagne(detail: DetailPosition): string | null {
+    const dates = detail.sourceIds
+      .map((id) => sourceParId.get(id)?.dateDeclaration)
+      .filter((date): date is string => date !== undefined);
+    if (dates.length === 0) return null;
+
+    // Format ISO : la comparaison lexicographique est la comparaison chronologique.
+    const plusRecente = dates.reduce((a, b) => (a > b ? a : b));
+    return plusRecente < SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT ? plusRecente : null;
+  }
+
   const LIBELLES_CONFIANCE: Record<string, string> = {
     high: "Confiance dans la source : élevée.",
     medium: "Confiance dans la source : moyenne.",
@@ -317,6 +371,22 @@
   </p>
   {#if detail.citation}
     <blockquote class="citation">« {detail.citation} »</blockquote>
+  {/if}
+  <!--
+    AVERTISSEMENT D'ANCIENNETÉ, EN PLEINE ENCRE ET AVANT LES LIENS.
+
+    Il est rendu au-dessus des sources, et non en note après elles, parce qu'il
+    conditionne la lecture de ce qui précède : savoir qu'une position vient d'un
+    autre scrutin change ce qu'on fait du chiffre. Une mention qu'il faut
+    chercher n'avertit personne.
+  -->
+  {@const dateAncienne = sourceAnterieureALaCampagne(detail)}
+  {#if dateAncienne !== null}
+    <p class="ancienne">
+      Position tirée d'un document du {formatDateFr(dateAncienne)}, antérieur à la campagne de 2027.
+      Elle peut avoir changé depuis. Ce codage est provisoire : il sera remplacé dès la publication
+      du programme présidentiel de cet acteur.
+    </p>
   {/if}
   {#each detail.sourceIds as sourceId (sourceId)}
     {@const source = sourceParId.get(sourceId)}
@@ -454,6 +524,17 @@
       Les acteurs en tête sont peu documentés sur les questions auxquelles vous avez répondu, ou le
       sont par des inférences plutôt que par des déclarations. Le classement porte alors sur peu de
       matière : lisez le détail par thème avant d'en tirer quoi que ce soit.
+    </p>
+  {/if}
+
+  {#if couvertureInegale}
+    <p class="reserve">
+      Les acteurs en tête ne sont pas documentés dans les mêmes proportions. Certains partis ont
+      publié une plateforme complète, d'autres n'ont encore rien publié pour 2027 : le nombre
+      d'affirmations documentées, affiché sous chaque acteur, varie donc fortement de l'un à
+      l'autre. Un acteur documenté sur trois affirmations qui tombent d'accord avec vous passe
+      devant un acteur documenté sur dix-huit dont seize tombent d'accord. Le calcul ne récompense
+      pas le volume, mais l'ordre entre deux acteurs inégalement documentés reste fragile.
     </p>
   {/if}
 
@@ -844,6 +925,18 @@
   .adequation,
   .confiance {
     display: block;
+  }
+
+  /*
+   * En pleine encre et bordé, comme la mention d'héritage : ce n'est pas une
+   * réserve de bas de page, c'est ce qui empêche de prendre un programme de
+   * 2024 pour une position de 2027.
+   */
+  .ancienne {
+    margin: var(--pas-1) 0;
+    padding-left: var(--pas-2);
+    border-left: 2px solid var(--couleur-encre-faible);
+    color: var(--couleur-encre);
   }
 
   /*

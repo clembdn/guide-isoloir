@@ -93,6 +93,29 @@ export const PLANCHER_POURCENTAGE = 0.35;
  */
 
 /**
+ * Date avant laquelle une source est signalée comme antérieure à la campagne.
+ *
+ * POURQUOI CE SEUIL EXISTE. Tant qu'aucun programme présidentiel n'est publié,
+ * la seule matière disponible pour la plupart des acteurs est un document
+ * d'un autre scrutin : plateforme des législatives de 2024, programme de la
+ * présidentielle de 2022. Les utiliser est un choix assumé — une estimation
+ * grossière vaut mieux qu'une page vide — mais les servir sans dire qu'ils
+ * sont vieux, c'est exactement l'erreur d'Elyze, qui affichait en 2022 des
+ * propositions de 2017 sans que l'année apparaisse.
+ *
+ * POURQUOI LE 1er JANVIER 2026. La campagne de 2027 s'ouvre en 2026 : Mélenchon
+ * se déclare en mai, Le Pen en juillet, le premier débat a lieu en août. Une
+ * source de 2025 ou avant appartient donc à un autre cycle politique, quelle
+ * que soit sa qualité.
+ *
+ * CE QUE LE SEUIL NE FAIT PAS. Il ne touche NI au score, NI au classement. Une
+ * position ancienne reste la position qu'elle est : la dévaluer mécaniquement
+ * avantagerait les candidats dont les documents sont les plus récents, c'est-
+ * à-dire les mieux installés. Le seuil ne pilote qu'une phrase à l'écran.
+ */
+export const SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT = "2026-01-01";
+
+/**
  * Accord à partir duquel une affirmation est comptée comme « d'accord ».
  *
  * 0.75 correspond à un écart d'un cran au plus sur l'échelle de cinq

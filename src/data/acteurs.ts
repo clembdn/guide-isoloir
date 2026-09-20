@@ -64,6 +64,33 @@ import type { Candidate, PoliticalActor } from "../lib/modele";
 export const DONNEES_FACTICES = false;
 
 export const ACTEURS = [
+  /*
+   * ─── Coalitions ────────────────────────────────────────────────────────
+   *
+   * UNE COALITION EST UN ACTEUR À PART ENTIÈRE, et pas une étiquette collée sur
+   * ses partis. Le contrat de législature du Nouveau Front populaire engage
+   * quatre partis à la fois : l'attribuer à chacun d'eux ferait apparaître
+   * quatre fois « Ligne du parti » là où il n'y a qu'un seul texte, signé
+   * ensemble. Le modèle prévoit ce maillon — `coalition-platform` prime sur
+   * `party-platform` — et l'écran nomme l'origine réelle : « Position de
+   * Nouveau Front populaire, reprise faute de déclaration personnelle ».
+   *
+   * `status: "historical"` : la coalition n'est plus active en septembre 2026.
+   * Son texte reste une source datée et vérifiable, la plus complète dont on
+   * dispose pour quatre candidats, et l'écran affiche sa date de juin 2024 avec
+   * l'avertissement d'ancienneté. Le jour où un candidat publie son programme,
+   * la reprise s'efface d'elle-même : le moteur retient toujours le maillon le
+   * plus haut.
+   */
+  {
+    id: "coalition-nouveau-front-populaire",
+    kind: "coalition",
+    name: "Nouveau Front populaire",
+    sortName: "Nouveau Front populaire",
+    slug: "nouveau-front-populaire",
+    status: "historical",
+  },
+
   // ─── Partis et mouvements ────────────────────────────────────────────────
   {
     id: "parti-debout-la-france",
@@ -436,7 +463,7 @@ export const CANDIDATURES = [
   {
     actorId: "karim-bouamrane",
     status: "declared",
-    baselineActorIds: ["parti-parti-socialiste"],
+    baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-socialiste"],
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
@@ -487,7 +514,7 @@ export const CANDIDATURES = [
   {
     actorId: "jean-luc-melenchon",
     status: "declared",
-    baselineActorIds: ["parti-la-france-insoumise"],
+    baselineActorIds: ["coalition-nouveau-front-populaire", "parti-la-france-insoumise"],
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
@@ -524,7 +551,7 @@ export const CANDIDATURES = [
   {
     actorId: "fabien-roussel",
     status: "nominated",
-    baselineActorIds: ["parti-parti-communiste-francais"],
+    baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-communiste-francais"],
     statutDepuis: "2026-09-06",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
@@ -532,7 +559,7 @@ export const CANDIDATURES = [
   {
     actorId: "marine-tondelier",
     status: "nominated",
-    baselineActorIds: ["parti-les-ecologistes"],
+    baselineActorIds: ["coalition-nouveau-front-populaire", "parti-les-ecologistes"],
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
