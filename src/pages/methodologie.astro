@@ -3,8 +3,16 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import Signature from "../components/Signature.astro";
 import { CONTACT_EMAIL } from "../lib/site";
+import { SEUIL_PUBLICATION } from "../lib/seuils";
 
-const UPDATED = "2026-09-14";
+const UPDATED = "2026-09-21";
+
+/*
+ * Lu depuis la constante, jamais recopié à la main : un seuil qui bouge dans le
+ * code sans bouger sur cette page ferait de la méthodologie une description de
+ * ce que le site faisait la semaine dernière.
+ */
+const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
 ---
 
 <BaseLayout
@@ -17,9 +25,10 @@ const UPDATED = "2026-09-14";
 
   <div class="reserve">
     <p>
-      Le site est en construction. Aucune position de candidat n'est publiée à ce jour. Cette page
-      décrit la méthode avant qu'elle produise des résultats, pour qu'elle puisse être critiquée
-      avant, et pas seulement après.
+      Le site est en construction. Les premières positions sont publiées, le codage est loin d'être
+      complet, et le double codage à l'aveugle décrit plus bas n'a pas encore eu lieu. Cette page
+      décrit la méthode telle qu'elle est appliquée aujourd'hui, pour qu'elle puisse être critiquée
+      pendant, et pas seulement après.
     </p>
   </div>
 
@@ -119,10 +128,48 @@ const UPDATED = "2026-09-14";
     <li>Il ne pondère pas les candidats selon leurs chances d'être élus.</li>
     <li>
       Il ne pénalise ni ne favorise un candidat en fonction du nombre de positions documentées le
-      concernant.
+      concernant. Un candidat trop peu documenté n'est pas classé plus bas : il n'est pas classé du
+      tout, et nommé à part.
     </li>
     <li>Il ne mémorise rien entre deux visites.</li>
   </ul>
+
+  <h2>Pourquoi certains candidats ne sont pas classés</h2>
+
+  <p>
+    Le classement n'affiche que les candidats documentés sur au moins {SEUIL_PERCENT} % des affirmations
+    auxquelles vous avez répondu. Les autres sont nommés en dessous, avec leur couverture réelle, sans
+    rang et sans pourcentage.
+  </p>
+
+  <p>
+    Ce n'est pas une sélection éditoriale, c'est une correction de biais. Le calcul ne récompense
+    pas le volume : une affirmation sans position est écartée de la moyenne, jamais comptée comme un
+    désaccord, et un thème entièrement non documenté est écarté de la même façon. En moyenne, une
+    couverture partielle n'avantage donc personne — et l'audit le vérifie.
+  </p>
+
+  <p>
+    Mais un classement n'est pas une moyenne : c'est un maximum. Moins un candidat documente de
+    positions, plus son score varie d'un profil de réponses à l'autre, et plus il lui arrive
+    d'arriver en tête par accident. Mesuré sur nos données en septembre 2026 : un candidat documenté
+    sur une affirmation sur vingt-quatre arrivait premier une fois sur trois, contre une fois sur
+    cent pour un candidat documenté sur dix-huit — alors que leurs scores moyens étaient presque
+    identiques. Aucun chiffre n'était faux, et l'ordre trompait.
+  </p>
+
+  <p>
+    Nous ne corrigeons pas cela en pondérant les scores. Rapprocher du centre une position mal
+    documentée installerait le biais inverse : les candidats les mieux couverts par leur parti ou
+    par la presse remonteraient mécaniquement. Nous préférons refuser de ranger ce que nous ne
+    pouvons pas ranger, et le dire.
+  </p>
+
+  <p>
+    Ce seuil ne supprime pas l'effet, il le borne. Au minimum de couverture admis, un candidat reste
+    environ deux fois et demie plus susceptible d'occuper le premier rang qu'un candidat documenté
+    sur tout. Ce rapport est mesuré à chaque publication, et l'audit échoue s'il dérive.
+  </p>
 
   <h2>Double codage à l'aveugle</h2>
 
@@ -179,7 +226,10 @@ const UPDATED = "2026-09-14";
     <li>l'ordre des acteurs dans les fichiers de données n'a aucun effet sur le résultat ;</li>
     <li>les données manquantes sont traitées de façon identique pour tous les acteurs ;</li>
     <li>la couverture des thèmes reste comparable d'un acteur à l'autre ;</li>
-    <li>aucun avantage systématique ne bénéficie aux acteurs les mieux documentés ;</li>
+    <li>
+      aucun avantage systématique ne bénéficie aux acteurs les mieux documentés : ni sur le score
+      moyen, ni sur la fréquence du premier rang ;
+    </li>
     <li>les échelles de réponse sont symétriques ;</li>
     <li>
       le résultat est stable : une même série de réponses produit toujours le même classement.
