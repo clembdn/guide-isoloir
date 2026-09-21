@@ -1,11 +1,11 @@
 ---
 /*
- * Gabarit provisoire de la phase 0.
+ * Gabarit commun à toutes les pages.
  *
- * Aucune direction visuelle n'est arrêtée : typographie système, une seule
- * teinte neutre, aucune décoration. Les tokens définitifs seront figés dans
- * DESIGN_SYSTEM.md à l'issue de la phase de design, puis reportés dans
- * src/styles/base.css. Voir l'en-tête de ce fichier.
+ * La direction visuelle est arrêtée : « Signal », figée dans DESIGN_SYSTEM.md
+ * le 14 septembre 2026 et implémentée par src/styles/base.css. Ce fichier
+ * n'invente aucune valeur — toute couleur, tout espacement, toute durée passe
+ * par un token. Une valeur en dur ici serait une décision prise en douce.
  *
  * Aucun script tiers, aucune police distante, aucun analytics : la politique
  * de sécurité de public/_headers l'interdit et un test Playwright le vérifie.

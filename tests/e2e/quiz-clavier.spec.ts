@@ -18,13 +18,6 @@ import { QUESTIONS } from "../../src/data/questions";
  *  premier ajout de question, sans que le quiz soit pour autant cassé. */
 const TOTAL = QUESTIONS.length;
 
-/*
- * TESTS EN SKIP : /test est retirée de `src/pages/` tant qu'elle tourne sur
- * src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste écrit
- * et à jour ; il se réactive de lui-même en retirant `.skip` une fois la route
- * remise en place avec de vraies questions.
- */
-
 test("le quiz se parcourt entièrement au clavier", async ({ page }) => {
   await page.goto("/test", { waitUntil: "networkidle" });
   await expect(page.locator("astro-island[ssr]")).toHaveCount(0, { timeout: 5000 });

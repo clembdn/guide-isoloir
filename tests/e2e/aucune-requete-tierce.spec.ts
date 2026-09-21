@@ -17,16 +17,6 @@ import { test, expect } from "@playwright/test";
 /** Routes soumises à l'interdiction absolue. */
 const ROUTES_PROTEGEES = ["/test", "/resultat"] as const;
 
-/*
- * TESTS EN SKIP CI-DESSOUS : les deux routes de ROUTES_PROTEGEES sont retirées
- * de `src/pages/` tant qu'elles tournent sur src/factice/ (voir
- * src/routes-desactivees/README.md). Les trois tests générés par la boucle
- * restent écrits et à jour ; ils se réactivent d'eux-mêmes en retirant `.skip`
- * une fois les routes remises en place avec de vraies données. Le test
- * robots.txt plus bas ne dépend d'aucune des deux routes : il continue de
- * s'exécuter.
- */
-
 /** Hôtes considérés comme « nous ». Rien d'autre n'est toléré. */
 const HOTES_AUTORISES = new Set(["127.0.0.1", "localhost", "::1"]);
 

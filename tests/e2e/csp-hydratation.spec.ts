@@ -38,13 +38,6 @@ import { test, expect, type Page } from "@playwright/test";
 /** Routes portant un îlot hydraté. À compléter quand il y en aura d'autres. */
 const ROUTES_AVEC_ILOT = ["/test"] as const;
 
-/*
- * TESTS EN SKIP : /test est retirée de `src/pages/` tant qu'elle tourne sur
- * src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste écrit
- * et à jour ; il se réactive de lui-même en retirant `.skip` une fois la route
- * remise en place avec de vraies questions.
- */
-
 type Violation = { directive: string; bloque: string };
 
 declare global {

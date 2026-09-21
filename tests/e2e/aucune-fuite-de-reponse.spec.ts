@@ -31,13 +31,6 @@ import { test, expect, type Page, type Request } from "@playwright/test";
 import { QUESTIONS } from "../../src/data/questions";
 import { CLE_SESSION } from "../../src/lib/session-test";
 
-/*
- * TESTS EN SKIP : /test est retirée de `src/pages/` tant qu'elle tourne sur
- * src/factice/ (voir src/routes-desactivees/README.md). Ce fichier reste écrit
- * et à jour ; il se réactive de lui-même en retirant `.skip` une fois la route
- * remise en place avec de vraies questions.
- */
-
 /** Lu dans les données plutôt que codé en dur. */
 const TOTAL = QUESTIONS.length;
 

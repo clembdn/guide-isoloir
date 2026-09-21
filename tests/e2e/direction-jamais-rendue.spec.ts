@@ -17,13 +17,6 @@ import { test, expect } from "@playwright/test";
 
 const ROUTES = ["/test", "/resultat"] as const;
 
-/*
- * TESTS EN SKIP : les deux routes ci-dessus sont retirées de `src/pages/` tant
- * qu'elles tournent sur src/factice/ (voir src/routes-desactivees/README.md).
- * Ce fichier reste écrit et à jour ; il se réactive de lui-même en retirant
- * `.skip` une fois les routes remises en place avec de vraies données.
- */
-
 /**
  * Formes sous lesquelles le CHAMP pourrait apparaître une fois sérialisé.
  *

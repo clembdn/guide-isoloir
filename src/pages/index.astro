@@ -4,8 +4,9 @@ import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME, ELECTION } from "../lib/site";
 import { articlesPublies } from "../lib/comprendre";
 import { formatDateFr } from "../lib/date";
+import { QUESTIONS } from "../data/questions";
 
-const UPDATED = "2026-09-14";
+const UPDATED = "2026-09-21";
 const articles = await articlesPublies();
 
 const websiteLd = {
@@ -36,6 +37,24 @@ const websiteLd = {
   <p class="question">
     Guide Isoloir répond à trois questions dans l'ordre : comment se déroule l'élection, ce qu'un
     président peut réellement décider, et de quels candidats vos idées sont les plus proches.
+  </p>
+
+  <h2>Le test comparatif</h2>
+
+  <p>{QUESTIONS.length} affirmations, une par écran.</p>
+
+  <p><a class="action" href="/test">Commencer le test</a></p>
+
+  <p>
+    À la fin, vous voyez de quels candidats vos réponses sont les plus proches, avec la source de
+    chaque position, sa date, et le nombre d'affirmations sur lesquelles le candidat est réellement
+    documenté.
+  </p>
+
+  <p>
+    Il ne vous dira pas pour qui voter. Un classement n'est pas une recommandation : c'est un point
+    de départ pour aller lire. La <a href="/methodologie">méthodologie</a> explique comment les positions
+    sont établies, ce que le calcul ne fait pas, et pourquoi certains candidats ne sont pas encore classés.
   </p>
 
   <p>
@@ -86,20 +105,6 @@ const websiteLd = {
       </>
     )
   }
-
-  <h2>Le test comparatif</h2>
-
-  <p>
-    Il n'est pas encore disponible. Il posera une dizaine d'affirmations et vous montrera de quels
-    candidats vos réponses sont les plus proches, avec les sources de chaque position et le niveau
-    de certitude.
-  </p>
-
-  <p>
-    Il ne vous dira pas pour qui voter. Un classement n'est pas une recommandation : c'est un point
-    de départ pour aller lire. La <a href="/methodologie">méthodologie</a> explique comment les positions
-    sont établies, et ce que le calcul ne fait pas.
-  </p>
 
   <h2>Pourquoi vous pouvez vérifier ce site</h2>
 

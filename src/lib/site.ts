@@ -65,6 +65,7 @@ type NavEntry = {
 
 /** Sections atteignables depuis le pied de page, dans l'ordre. */
 export const FOOTER_NAV: readonly NavEntry[] = [
+  { href: "/test", label: "Le test" },
   { href: "/comprendre", label: "Comprendre" },
   { href: "/a-propos", label: "À propos" },
   { href: "/methodologie", label: "Méthodologie" },
