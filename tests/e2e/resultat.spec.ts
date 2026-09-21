@@ -342,3 +342,76 @@ test("l'état vide explique au lieu d'afficher un classement", async ({ page }) 
   await expect(page.locator(".classement")).toHaveCount(0);
   await expect(page.locator("main")).toContainText("Aucune réponse à comparer");
 });
+
+/*
+ * LES ÉCARTÉS SONT NOMMÉS, ET ILS NE RESSEMBLENT PAS À UN CLASSEMENT.
+ *
+ * Le plancher d'éligibilité retire du classement les candidats trop peu
+ * documentés — sans quoi leur score, plus volatil, les porte en tête par
+ * accident. La correction n'est honnête qu'à deux conditions, et ce sont les
+ * deux tests ci-dessous : ils restent VISIBLES, sinon l'écran ressemble à une
+ * sélection éditoriale ; et ils ne portent NI rang NI barre NI pourcentage,
+ * sinon on a simplement fabriqué un second classement plus bas sur la page.
+ */
+test("les candidats écartés du classement sont nommés, avec leur couverture", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  const ecartes = page.locator(".ecartes");
+  await expect(ecartes).toBeVisible();
+
+  const lignes = ecartes.locator(".liste-ecartes li");
+  expect(await lignes.count()).toBeGreaterThan(0);
+
+  // Chaque ligne dit qui, et sur combien d'affirmations on le connaît.
+  for (const ligne of await lignes.all()) {
+    await expect(ligne.locator(".ecarte-nom")).not.toBeEmpty();
+    await expect(ligne.locator(".ecarte-couverture")).toContainText(
+      /aucune position documentée|documenté sur \d+ des \d+ affirmations/,
+    );
+  }
+
+  // La raison est donnée sur place, et elle renvoie à la méthodologie.
+  await expect(ecartes.locator("a[href='/methodologie']")).toHaveCount(1);
+});
+
+test("aucun écarté ne porte de rang, de barre ou de pourcentage", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  const ecartes = page.locator(".ecartes");
+  await expect(ecartes).toBeVisible();
+
+  await expect(ecartes.locator(".rang")).toHaveCount(0);
+  await expect(ecartes.locator("svg")).toHaveCount(0);
+  await expect(ecartes.locator("ol")).toHaveCount(0);
+
+  /*
+   * Le pourcentage est traqué sur LA LISTE, pas sur la section : le paragraphe
+   * d'introduction énonce légitimement le seuil (« au moins 35 % des
+   * affirmations »), et c'est une règle, pas une mesure attribuée à quelqu'un.
+   * Ce qu'on interdit, c'est un chiffre accolé à un nom.
+   */
+  await expect(ecartes.locator(".liste-ecartes")).not.toContainText(/\d+\s*%/);
+});
+
+/*
+ * AUCUN CANDIDAT NE DISPARAÎT.
+ *
+ * L'invariant qui tient tout le reste : classés et écartés réunis doivent
+ * couvrir la totalité des candidats comparés. Si le plancher faisait disparaître
+ * quelqu'un de l'écran plutôt que de le déplacer, la correction de biais
+ * deviendrait une censure, et personne ne pourrait s'en apercevoir.
+ */
+test("classés et écartés réunis couvrent tous les candidats comparés", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  const classes = await page.locator("li.acteur").count();
+  const ecartes = await page.locator(".ecartes .liste-ecartes li").count();
+
+  // Le classement n'affiche que les rangs 1 à 3 ; les écartés, eux, sont tous là.
+  expect(classes).toBeGreaterThan(0);
+  expect(ecartes).toBeGreaterThan(0);
+  expect(classes + ecartes).toBeGreaterThanOrEqual(4);
+});

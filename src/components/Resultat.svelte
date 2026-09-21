@@ -151,11 +151,16 @@
       candidatures: inclureHeritage ? candidatures : [],
       annuaire,
       reponses,
+      seuilClassement: seuilCouverture,
     }),
   );
 
   /**
    * Acteurs atteignant le seuil DANS LE CLASSEMENT AFFICHÉ.
+   *
+   * Plus de filtre ici : le moteur a reçu le seuil et n'a rangé que les acteurs
+   * qui le franchissent. Le compter une seconde fois dans le composant ouvrirait
+   * la porte à deux réponses différentes à la même question.
    *
    * Évalué sur `classement`, donc sur l'état réel de la bascule, et recalculé
    * quand elle change. Décocher l'héritage peut donc faire disparaître le
@@ -163,10 +168,11 @@
    * alors réellement retirées, et un ordre qui survivrait à leur retrait serait
    * un ordre calculé sur autre chose que ce que le lecteur demande à voir.
    */
-  const acteursAuSeuil = $derived(
-    classement.acteurs.filter((resultat) => resultat.couverture.taux >= seuilCouverture).length,
-  );
+  const acteursAuSeuil = $derived(classement.classes.length);
   const publiable = $derived(acteursAuSeuil >= seuilActeursMin);
+
+  /** Tous les acteurs comparés, classés ou non. Pour les décomptes. */
+  const tousLesActeurs = $derived([...classement.classes, ...classement.nonClasses]);
 
   /**
    * Candidats qui documentent au moins une position PERSONNELLE.
@@ -177,12 +183,12 @@
    * retirer, et pourquoi.
    */
   const candidatsAvecPositionPropre = $derived(
-    classement.acteurs.filter((resultat) => resultat.couverture.personnelles > 0).length,
+    tousLesActeurs.filter((resultat) => resultat.couverture.personnelles > 0).length,
   );
 
   const aRepondu = $derived(classement.questionsApplicables > 0);
   /** Rangs 1 à 3. Les ex æquo peuvent donc en faire plus de trois. */
-  const tete = $derived(classement.acteurs.filter((resultat) => resultat.rang <= 3));
+  const tete = $derived(classement.classes.filter((resultat) => resultat.rang! <= 3));
 
   const textesQuestions = new Map(questions.map((q) => [q.id, q.texte]));
   const sourceParId = new Map(sources.map((source) => [source.id, source]));
@@ -458,7 +464,7 @@
         ont dit ou écrit EUX-MÊMES, et
         {candidatsAvecPositionPropre === 0
           ? "aucun des candidats"
-          : `${candidatsAvecPositionPropre} candidat${candidatsAvecPositionPropre > 1 ? "s" : ""} sur ${classement.acteurs.length}`}
+          : `${candidatsAvecPositionPropre} candidat${candidatsAvecPositionPropre > 1 ? "s" : ""} sur ${tousLesActeurs.length}`}
         {candidatsAvecPositionPropre === 0 ? "ne documente" : "documentent"} une position personnelle
         sur les {classement.questionsApplicables} affirmations auxquelles vous avez répondu.
         {phraseSeuil(acteursAuSeuil, seuilCouverture, seuilActeursMin)}
@@ -679,6 +685,50 @@
       </li>
     {/each}
   </ol>
+
+  <!--
+    LES ÉCARTÉS, NOMMÉS.
+
+    Un classement qui affiche huit candidats sur vingt sans dire où sont passés
+    les douze autres se lit comme une sélection éditoriale. Ils sont donc tous
+    nommés, avec leur couverture réelle, et la raison est écrite.
+
+    CE QUI EST DÉLIBÉRÉMENT ABSENT : aucun rang, aucune barre, aucun
+    pourcentage, et l'ordre est alphabétique. Le moindre ordre se lit comme un
+    classement, et c'est exactement ce qu'on vient de refuser de faire pour eux.
+    La couverture est écrite en toutes lettres — « documenté sur 3 des 24 » —
+    parce que c'est la seule information qu'on possède réellement sur eux.
+  -->
+  {#if classement.nonClasses.length > 0}
+    <section class="ecartes">
+      <h2>Pas encore assez documentés pour être classés</h2>
+      <p>
+        Ces {classement.nonClasses.length} candidats sont comparés sur trop peu d'affirmations pour qu'un
+        rang veuille dire quelque chose. Les classer quand même les avantagerait : moins un candidat documente
+        de positions, plus son score est instable, et plus il arrive en tête par accident. Le seuil retenu
+        est de {Math.round(seuilCouverture * 100)} % des affirmations que vous avez renseignées. La
+        <a href="/methodologie">méthodologie</a> explique la mesure.
+      </p>
+      <ul class="liste-ecartes">
+        {#each classement.nonClasses as resultat (resultat.actorId)}
+          <li>
+            <span class="ecarte-nom">{resultat.nom}</span>
+            <span class="ecarte-couverture">
+              {resultat.couverture.documentees === 0
+                ? "aucune position documentée"
+                : `documenté sur ${resultat.couverture.documentees} des ${resultat.couverture.applicables} affirmations`}
+            </span>
+          </li>
+        {/each}
+      </ul>
+      {#if !inclureHeritage}
+        <p class="reserve">
+          Vous avez exclu les positions héritées du parti. Recocher la case ci-dessus ferait revenir
+          au classement les candidats dont le parti a publié une ligne.
+        </p>
+      {/if}
+    </section>
+  {/if}
 
   <!--
     CARTE PARTAGEABLE.
@@ -956,6 +1006,48 @@
 
   .source {
     margin: 0;
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * LES ÉCARTÉS.
+   *
+   * Même filet, même retrait que la carte : c'est une section de bas de page,
+   * pas un second classement. Aucun aplat, aucune bordure de bloc, aucun
+   * numéro — le traitement typographique doit dire « liste » là où le
+   * classement au-dessus dit « ordre ».
+   */
+  .ecartes {
+    border-top: 1px solid var(--couleur-trait);
+    padding-top: var(--pas-3);
+    margin-top: var(--pas-5);
+  }
+
+  .liste-ecartes {
+    list-style: none;
+    margin: var(--pas-3) 0 0;
+    padding: 0;
+  }
+
+  .liste-ecartes li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--pas-1);
+    align-items: baseline;
+    padding: var(--pas-1) 0;
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  .ecarte-nom {
+    font-weight: 600;
+  }
+
+  /*
+   * La couverture passe à la ligne sous le nom à 375 px, et se range à sa suite
+   * dès qu'il y a la place : `flex-wrap` suffit, aucune requête de média.
+   */
+  .ecarte-couverture {
+    font-size: var(--t-petit);
     color: var(--couleur-encre-faible);
   }
 
