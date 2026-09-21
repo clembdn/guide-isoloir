@@ -20,25 +20,61 @@
  * classement dit surtout qui a été codé en premier.
  */
 export const SEUIL_PUBLICATION = {
-  /** Part des affirmations applicables qu'un acteur doit documenter pour compter. */
-  couverture: 0.25,
+  /**
+   * Part des affirmations applicables qu'un acteur doit documenter pour être
+   * CLASSÉ. En dessous, il est nommé à part, avec sa couverture, sans rang.
+   */
+  couverture: 0.35,
   /** Nombre d'acteurs devant atteindre cette couverture. */
   acteursMin: 3,
 } as const;
 
 /*
- * DESSERRÉS LE 20 SEPTEMBRE 2026 : 0,4 et 5 au départ, 0,25 et 3 désormais.
+ * DESSERRÉS LE 20 SEPTEMBRE 2026 : 0,4 et 5 au départ, 0,25 et 3 ensuite.
  *
  * Décision éditoriale assumée. À sept mois du scrutin, un seul candidat a
  * publié un programme, et exiger 40 % de couverture chez cinq acteurs revenait
- * à ne rien afficher avant l'hiver. Un quart des affirmations chez trois
- * acteurs reste une estimation grossière — l'écran le dit — mais c'en est une,
- * et une estimation datée, sourcée et contestable vaut mieux qu'une page vide.
+ * à ne rien afficher avant l'hiver.
  *
- * CE QUI N'A PAS ÉTÉ FAIT, ET POURQUOI. Descendre à 0,1 aurait publié un
- * classement immédiatement : deux affirmations documentées suffiraient à ranger
- * un candidat devant un autre. Ce chiffre serait juste et l'information fausse,
- * ce qui est exactement le défaut que ce seuil existe pour empêcher. Le verrou
+ * REMONTÉ À 0,35 LE 21 SEPTEMBRE 2026, ET LE SEUIL A CHANGÉ DE NATURE.
+ *
+ * Il ne décidait jusque-là que de l'AFFICHAGE du classement : les acteurs sous
+ * le seuil étaient comptés à part, puis rangés avec les autres. C'était l'erreur.
+ * Le score ne dépend pas du volume — le moteur normalise par thème et écarte les
+ * thèmes non documentés, et l'audit vérifie qu'une couverture partielle
+ * n'avantage ni ne désavantage EN MOYENNE. Mais un classement n'est pas une
+ * moyenne, c'est un MAXIMUM, et le maximum est sensible à la VARIANCE. Moins un
+ * acteur documente de positions, plus son score est dispersé, donc plus il
+ * occupe souvent le premier rang. Mesuré sur les données du 20 septembre : un
+ * candidat documenté sur UNE affirmation sur vingt-quatre arrivait premier dans
+ * 30 % des profils, contre 1 % pour un candidat documenté sur dix-huit — avec
+ * des scores moyens à cinq centièmes l'un de l'autre. Aucun chiffre n'était
+ * faux, et l'ordre était trompeur.
+ *
+ * POURQUOI UN SEUIL ET PAS UNE PONDÉRATION. Amortir un score mal documenté vers
+ * le centre corrigerait le symptôme en installant le biais inverse : les acteurs
+ * les mieux couverts remonteraient mécaniquement, ce que CLAUDE.md interdit au
+ * même titre. La seule réponse qui ne mélange pas proximité politique et
+ * confiance documentaire est de refuser de ranger ce qu'on ne peut pas ranger,
+ * et de NOMMER les écartés plutôt que de les faire disparaître.
+ *
+ * CE QUE LE SEUIL NE FAIT PAS. Il ne supprime pas le différentiel de variance,
+ * il le BORNE. À couverture minimale, un acteur reste environ deux fois et demie
+ * plus souvent premier qu'un acteur complet. L'audit mesure ce rapport à chaque
+ * exécution et échoue s'il dérive ; la méthodologie le publie.
+ *
+ * POURQUOI 0,35 ET PAS AUTRE CHOSE. La mesure donne un rapport résiduel de 2,7
+ * à 0,25, de 2,55 à 0,35, de 1,7 à 0,50. Entre 0,22 et 0,46, les données réelles
+ * ne changent pas d'un candidat — huit classés dans les deux cas — si bien que
+ * 0,35 ne coûte rien aujourd'hui quand 0,25 laisse du biais sur la table. Monter
+ * à 0,50 exclurait David Lisnard, qui documente pourtant onze positions
+ * PERSONNELLES, le record du jeu : le seuil punirait le candidat le mieux
+ * documenté en propre parce que son parti n'a rien publié. Le gain sur le
+ * rapport ne paie pas ce contresens.
+ *
+ * CE QUI N'A PAS ÉTÉ FAIT, ET POURQUOI. Descendre à 0,1 publierait un classement
+ * immédiatement : deux affirmations documentées suffiraient à ranger un candidat
+ * devant un autre. Ce chiffre serait juste et l'information fausse. Le verrou
  * n'est pas ici, il est dans le volume de données — et il se lève en codant,
  * pas en abaissant.
  *
@@ -63,34 +99,20 @@ export const SEUIL_PUBLICATION = {
 /**
  * Couverture en dessous de laquelle un acteur n'affiche PAS de pourcentage.
  *
- * DEUX GRANDEURS DIFFÉRENTES, ET IL FAUT S'EN MÉFIER : ce plancher et
- * `SEUIL_PUBLICATION.couverture` ont longtemps valu 0,4 tous les deux, ce qui
- * les faisait passer pour un seul réglage. Ils ne le sont pas, et les régler
- * ensemble par distraction produirait deux écrans faux :
+ * DEUX QUESTIONS DISTINCTES, ET IL FAUT S'EN MÉFIER : ces seuils ont longtemps
+ * valu 0,4 tous les deux, ce qui les faisait passer pour un seul réglage. Ils
+ * répondent à des questions différentes :
  *
- *   - `SEUIL_PUBLICATION` répond « y a-t-il assez de matière pour qu'un ORDRE
- *     entre acteurs veuille dire quelque chose ? ». Il porte sur le classement
- *     entier et décide s'il s'affiche.
- *   - `PLANCHER_POURCENTAGE` répond « ce CHIFFRE-CI informe-t-il ? ». Il porte
+ *   - `SEUIL_PUBLICATION.couverture` répond « CET acteur-ci peut-il être
+ *     rangé ? », et `acteursMin` « y en a-t-il assez pour qu'un ORDRE veuille
+ *     dire quelque chose ? ».
+ *  - `PLANCHER_POURCENTAGE` répond « ce CHIFFRE-CI informe-t-il ? ». Il porte
  *     sur un acteur et décide de son seul pourcentage.
- *
- * Un classement peut être parfaitement publiable et contenir un acteur
- * documenté sur trois affirmations : « 91 % » y serait un chiffre juste et une
- * information fausse. Le plancher est donc plus exigeant que le seuil de
- * publication, et il n'y a aucune raison qu'ils coïncident.
  *
  * Sous le plancher, l'acteur affiche le nombre d'affirmations documentées, et
  * rien qui ressemble à une mesure.
  */
 export const PLANCHER_POURCENTAGE = 0.35;
-
-/*
- * Abaissé de 0,5 à 0,35 en même temps que le seuil de publication, et TOUJOURS
- * plus exigeant que lui : un classement peut s'afficher sans que chacun de ses
- * acteurs ait droit à un pourcentage. L'écart entre 0,25 et 0,35 est la zone où
- * un acteur figure au classement en affichant un nombre d'affirmations
- * documentées plutôt qu'une mesure.
- */
 
 /**
  * Date avant laquelle une source est signalée comme antérieure à la campagne.

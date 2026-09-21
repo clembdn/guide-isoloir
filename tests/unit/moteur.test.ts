@@ -9,12 +9,22 @@
  * avantager quelqu'un mécaniquement.
  */
 import { describe, expect, it } from "vitest";
-import { calculer } from "../../src/lib/moteur";
+import { calculer, type Classement } from "../../src/lib/moteur";
 import { SANS_AVIS } from "../../src/lib/session-test";
 import type { PoliticalActor, Stance, StanceValue } from "../../src/lib/modele";
 import type { Question } from "../../src/lib/questions";
 import { ACTEURS_FACTICES, POSITIONS_FACTICES } from "../../src/factice/acteurs-factices";
 import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
+
+/**
+ * Tous les acteurs, classés ou non.
+ *
+ * Pour les tests qui portent sur le CALCUL et pas sur l'ordre : ils doivent voir
+ * un acteur même quand sa couverture le tient hors du classement.
+ */
+function tous(classement: Classement) {
+  return [...classement.classes, ...classement.nonClasses];
+}
 
 function question(id: string, theme: string, ordre: number): Question {
   return {
@@ -73,7 +83,7 @@ describe("« sans avis » est exclu, jamais traité comme neutre", () => {
     });
 
     expect(classement.questionsApplicables).toBe(1);
-    expect(classement.acteurs[0]!.couverture.applicables).toBe(1);
+    expect(classement.classes[0]!.couverture.applicables).toBe(1);
   });
 
   it("ne donne pas le même résultat que si l'électeur avait répondu 0", () => {
@@ -89,9 +99,9 @@ describe("« sans avis » est exclu, jamais traité comme neutre", () => {
     // Traiter « sans avis » comme 0 rapprocherait l'électeur des positions
     // modérées et l'éloignerait des positions tranchées. Ce n'est pas la même
     // chose, et le moteur ne doit pas les confondre.
-    expect(avecSansAvis.acteurs[0]!.score).not.toBeCloseTo(avecNeutre.acteurs[0]!.score, 6);
-    expect(avecSansAvis.acteurs[0]!.score).toBe(1);
-    expect(avecNeutre.acteurs[0]!.score).toBe(0.75);
+    expect(avecSansAvis.classes[0]!.score!).not.toBeCloseTo(avecNeutre.classes[0]!.score!, 6);
+    expect(avecSansAvis.classes[0]!.score).toBe(1);
+    expect(avecNeutre.classes[0]!.score).toBe(0.75);
   });
 });
 
@@ -108,8 +118,8 @@ describe("la qualité des preuves ne déplace jamais le score", () => {
   ];
 
   const classement = calculer({ questions, acteurs, positions, reponses: { q1: 2, q2: -1 } });
-  const solide = classement.acteurs.find((r) => r.actorId === "solide")!;
-  const fragile = classement.acteurs.find((r) => r.actorId === "fragile")!;
+  const solide = classement.classes.find((r) => r.actorId === "solide")!;
+  const fragile = classement.classes.find((r) => r.actorId === "fragile")!;
 
   it("donne exactement le même score", () => {
     expect(fragile.score).toBe(solide.score);
@@ -156,7 +166,7 @@ describe("une position inconnue ne vaut pas un désaccord", () => {
   });
 
   it("écarte la question de la moyenne au lieu de la compter zéro", () => {
-    const partiel = classement.acteurs.find((r) => r.actorId === "partiel")!;
+    const partiel = classement.classes.find((r) => r.actorId === "partiel")!;
     // Compter q2 comme un désaccord total donnerait 0,5. L'écarter donne 1.
     expect(partiel.score).toBe(1);
     expect(partiel.couverture.documentees).toBe(1);
@@ -164,10 +174,108 @@ describe("une position inconnue ne vaut pas un désaccord", () => {
   });
 
   it("expose le maillon « position inconnue » dans le détail", () => {
-    const partiel = classement.acteurs.find((r) => r.actorId === "partiel")!;
+    const partiel = classement.classes.find((r) => r.actorId === "partiel")!;
     const inconnue = partiel.parTheme[0]!.positions.find((p) => p.questionId === "q2")!;
     expect(inconnue.positionActeur).toBeNull();
     expect(inconnue.niveauLibelle).toBe("Position inconnue");
+  });
+});
+
+/*
+ * LE PLANCHER D'ÉLIGIBILITÉ.
+ *
+ * Le score ne dépend pas du volume, et les tests ci-dessus le vérifient. Mais un
+ * classement n'est pas une moyenne, c'est un MAXIMUM : moins un acteur documente
+ * de positions, plus son score est volatil, donc plus il occupe souvent le
+ * premier rang. Aucun chiffre n'est faux et l'ordre est pourtant trompeur.
+ *
+ * La réponse n'est pas de pondérer — tirer un score mal documenté vers le centre
+ * avantagerait les acteurs les mieux couverts, soit le biais inverse — mais de
+ * refuser de ranger ce qu'on ne peut pas ranger. Ces tests fixent ce refus.
+ */
+describe("plancher d'éligibilité au classement", () => {
+  const questions = [
+    question("e1", "T", 1),
+    question("e2", "T", 2),
+    question("e3", "T", 3),
+    question("e4", "T", 4),
+  ];
+  const acteurs = [acteur("fourni", "Fourni"), acteur("maigre", "Maigre"), acteur("vide", "Vide")];
+
+  /*
+   * « maigre » documente une seule affirmation, et elle tombe en accord parfait.
+   * Sans plancher, il obtient 1 et passe devant « fourni », qui documente tout
+   * avec un désaccord. C'est exactement le cas mesuré sur les données réelles.
+   */
+  const positions = [
+    position("fourni", "e1", 2),
+    position("fourni", "e2", 2),
+    position("fourni", "e3", 2),
+    position("fourni", "e4", -2),
+    position("maigre", "e1", 2),
+  ];
+  const reponses = { e1: 2, e2: 2, e3: 2, e4: 2 } as const;
+
+  it("écarte du classement l'acteur sous le seuil, sans le faire disparaître", () => {
+    const classement = calculer({ questions, acteurs, positions, reponses, seuilClassement: 0.5 });
+
+    expect(classement.classes.map((r) => r.actorId)).toEqual(["fourni"]);
+    expect(classement.nonClasses.map((r) => r.actorId)).toEqual(["maigre", "vide"]);
+  });
+
+  it("l'écarté garde son score et sa couverture, mais n'a pas de rang", () => {
+    const classement = calculer({ questions, acteurs, positions, reponses, seuilClassement: 0.5 });
+    const maigre = classement.nonClasses.find((r) => r.actorId === "maigre")!;
+
+    // Le score n'est ni effacé ni amorti : il n'est simplement pas classé.
+    expect(maigre.score).toBe(1);
+    expect(maigre.couverture.taux).toBe(0.25);
+    expect(maigre.rang).toBeNull();
+  });
+
+  it("sans plancher, l'acteur à une seule position passe bien devant", () => {
+    // La démonstration que le plancher sert à quelque chose : à seuil nul,
+    // « maigre » prend le premier rang avec une affirmation sur quatre.
+    const classement = calculer({ questions, acteurs, positions, reponses, seuilClassement: 0 });
+
+    expect(classement.classes[0]!.actorId).toBe("maigre");
+    expect(classement.classes[0]!.score).toBe(1);
+  });
+
+  it("n'attribue pas le score du désaccord total à un acteur inconnu", () => {
+    const classement = calculer({ questions, acteurs, positions, reponses, seuilClassement: 0 });
+    const vide = tous(classement).find((r) => r.actorId === "vide")!;
+
+    /*
+     * `null` et non `0`. Zéro est la note du désaccord total : la donner à un
+     * acteur sur lequel on ne sait rien compterait l'ignorance comme une
+     * opposition, et le plaçait jusqu'ici au dernier rang d'un classement
+     * auquel il n'a rien à faire.
+     */
+    expect(vide.score).toBeNull();
+    expect(vide.rang).toBeNull();
+    expect(classement.classes.map((r) => r.actorId)).not.toContain("vide");
+  });
+
+  it("laisse les rangs continus sur les seuls classés", () => {
+    const classement = calculer({ questions, acteurs, positions, reponses, seuilClassement: 0.2 });
+
+    expect(classement.classes.map((r) => r.rang)).toEqual([1, 2]);
+  });
+
+  it("range les écartés par ordre alphabétique, jamais par score", () => {
+    const zoulou = acteur("zoulou", "Zoulou");
+    const classement = calculer({
+      questions,
+      acteurs: [...acteurs, zoulou],
+      // « zoulou » documente une position en désaccord : par score il serait
+      // dernier, par alphabet il est dernier aussi. On le teste par le nom.
+      positions: [...positions, position("zoulou", "e1", -2)],
+      reponses,
+      seuilClassement: 0.5,
+    });
+
+    expect(classement.nonClasses.map((r) => r.sortName)).toEqual(["Maigre", "Vide", "Zoulou"]);
   });
 });
 
@@ -198,7 +306,7 @@ describe("normalisation par thème", () => {
 
     // Sans normalisation : (1 + 1 + 1 + 0) / 4 = 0,75.
     // Avec normalisation : (1 + 0) / 2 = 0,5. Chaque thème pèse pareil.
-    expect(classement.acteurs[0]!.score).toBe(0.5);
+    expect(classement.classes[0]!.score).toBe(0.5);
   });
 
   it("écarte un thème entièrement non documenté au lieu de le compter zéro", () => {
@@ -209,8 +317,8 @@ describe("normalisation par thème", () => {
       reponses: { g1: 2, g2: 2, g3: 2, p1: 2 },
     });
 
-    expect(classement.acteurs[0]!.score).toBe(1);
-    expect(classement.acteurs[0]!.parTheme.find((t) => t.theme === "Petit")!.score).toBeNull();
+    expect(classement.classes[0]!.score).toBe(1);
+    expect(classement.classes[0]!.parTheme.find((t) => t.theme === "Petit")!.score).toBeNull();
   });
 });
 
@@ -223,8 +331,8 @@ describe("ex æquo", () => {
 
   it("partagent le même rang", () => {
     const classement = classer({ q1: 1 });
-    expect(classement.acteurs.map((r) => r.rang)).toEqual([1, 1]);
-    expect(new Set(classement.acteurs.map((r) => r.rang)).size).toBe(1);
+    expect(classement.classes.map((r) => r.rang)).toEqual([1, 1]);
+    expect(new Set(classement.classes.map((r) => r.rang)).size).toBe(1);
   });
 
   /*
@@ -233,16 +341,16 @@ describe("ex æquo", () => {
    * tableau d'entrée.
    */
   it("sont présentés dans un ordre stable, indépendant de l'ordre d'entrée", () => {
-    const attendu = classer({ q1: 1 }).acteurs.map((r) => r.actorId);
+    const attendu = classer({ q1: 1 }).classes.map((r) => r.actorId);
 
-    expect(classer({ q1: 1 }).acteurs.map((r) => r.actorId)).toEqual(attendu);
+    expect(classer({ q1: 1 }).classes.map((r) => r.actorId)).toEqual(attendu);
     expect(
       calculer({
         questions,
         acteurs: [...acteurs].reverse(),
         positions,
         reponses: { q1: 1 },
-      }).acteurs.map((r) => r.actorId),
+      }).classes.map((r) => r.actorId),
     ).toEqual(attendu);
   });
 
@@ -255,7 +363,7 @@ describe("ex æquo", () => {
   it("ne place pas systématiquement le même acteur en tête", () => {
     const tetes = new Set(
       ([-2, -1, 0, 1, 2] as StanceValue[]).map(
-        (valeur) => classer({ q1: valeur }).acteurs[0]!.actorId,
+        (valeur) => classer({ q1: valeur }).classes[0]!.actorId,
       ),
     );
 
@@ -313,7 +421,7 @@ describe("symétrie de l'échelle", () => {
       reponses: { q1: -1, q2: 2 },
     });
 
-    expect(miroir.acteurs.map((r) => r.score)).toEqual(droit.acteurs.map((r) => r.score));
+    expect(miroir.classes.map((r) => r.score)).toEqual(droit.classes.map((r) => r.score));
   });
 });
 
@@ -368,7 +476,7 @@ describe("garde-fous d'interprétation", () => {
       reponses,
     });
 
-    expect(resserre.acteurs.map((r) => r.score)).toEqual([1, 1, 0.96875]);
+    expect(resserre.classes.map((r) => r.score)).toEqual([1, 1, 0.96875]);
     expect(resserre.ecartsTenus).toBe(true);
   });
 });
@@ -405,14 +513,14 @@ describe("l'ordre des ex æquo est déterminé par les réponses", () => {
     const premier = calculer({ questions, acteurs, positions, reponses });
     const second = calculer({ questions, acteurs, positions, reponses });
 
-    expect(premier.acteurs.map((a) => a.actorId)).toEqual(second.acteurs.map((a) => a.actorId));
+    expect(premier.classes.map((a) => a.actorId)).toEqual(second.classes.map((a) => a.actorId));
     expect(premier.graineAffichage).toBe(second.graineAffichage);
   });
 
   it("place bien tous les acteurs au même rang", () => {
     const classement = calculer({ questions, acteurs, positions, reponses });
 
-    expect(new Set(classement.acteurs.map((a) => a.rang))).toEqual(new Set([1]));
+    expect(new Set(classement.classes.map((a) => a.rang))).toEqual(new Set([1]));
   });
 
   /*
@@ -424,14 +532,14 @@ describe("l'ordre des ex æquo est déterminé par les réponses", () => {
     const direct = calculer({ questions, acteurs, positions, reponses });
     const inverse = calculer({ questions, acteurs: [...acteurs].reverse(), positions, reponses });
 
-    expect(inverse.acteurs.map((a) => a.actorId)).toEqual(direct.acteurs.map((a) => a.actorId));
+    expect(inverse.classes.map((a) => a.actorId)).toEqual(direct.classes.map((a) => a.actorId));
   });
 
   it("n'est pas l'ordre alphabétique, qui avantagerait toujours les mêmes", () => {
     const classement = calculer({ questions, acteurs, positions, reponses });
     const alphabetique = [...acteurs].map((a) => a.id).sort();
 
-    expect(classement.acteurs.map((a) => a.actorId)).not.toEqual(alphabetique);
+    expect(classement.classes.map((a) => a.actorId)).not.toEqual(alphabetique);
   });
 
   it("change avec les réponses", () => {
@@ -521,9 +629,9 @@ describe("une carte partagée se rejoue à l'identique", () => {
       const rejoue = jouer(carte.heritageInclus);
 
       expect(rejoue.graineAffichage).toBe(carte.graine);
-      expect(rejoue.acteurs.map((a) => a.actorId)).toEqual(original.acteurs.map((a) => a.actorId));
-      expect(rejoue.acteurs.map((a) => a.score)).toEqual(original.acteurs.map((a) => a.score));
-      expect(rejoue.acteurs.map((a) => a.rang)).toEqual(original.acteurs.map((a) => a.rang));
+      expect(rejoue.classes.map((a) => a.actorId)).toEqual(original.classes.map((a) => a.actorId));
+      expect(rejoue.classes.map((a) => a.score)).toEqual(original.classes.map((a) => a.score));
+      expect(rejoue.classes.map((a) => a.rang)).toEqual(original.classes.map((a) => a.rang));
     });
   }
 
@@ -541,8 +649,14 @@ describe("une carte partagée se rejoue à l'identique", () => {
 
     expect(sans.graineAffichage).toBe(avec.graineAffichage);
 
-    const couvertureAvec = avec.acteurs.map((a) => a.couverture.documentees);
-    const couvertureSans = sans.acteurs.map((a) => a.couverture.documentees);
+    /*
+     * `tous` et non `classes` : sans héritage, trois des cinq candidats ne
+     * documentent plus rien et quittent le classement. Comparer les seuls
+     * classés comparerait deux listes de longueurs différentes, ce qui passerait
+     * le test sans rien prouver sur les couvertures.
+     */
+    const couvertureAvec = tous(avec).map((a) => a.couverture.documentees);
+    const couvertureSans = tous(sans).map((a) => a.couverture.documentees);
     expect(couvertureSans).not.toEqual(couvertureAvec);
   });
 
@@ -562,7 +676,7 @@ describe("une carte partagée se rejoue à l'identique", () => {
       reponses,
     });
 
-    expect(permute.acteurs.map((a) => a.actorId)).toEqual(original.acteurs.map((a) => a.actorId));
-    expect(permute.acteurs.map((a) => a.score)).toEqual(original.acteurs.map((a) => a.score));
+    expect(permute.classes.map((a) => a.actorId)).toEqual(original.classes.map((a) => a.actorId));
+    expect(permute.classes.map((a) => a.score)).toEqual(original.classes.map((a) => a.score));
   });
 });

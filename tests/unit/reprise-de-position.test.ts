@@ -18,9 +18,20 @@
  * n'étaient pas de la campagne en cours.
  */
 import { describe, expect, it } from "vitest";
-import { calculer } from "../../src/lib/moteur";
+import { calculer, type Classement } from "../../src/lib/moteur";
 import type { Candidate, PoliticalActor, Stance, StanceValue } from "../../src/lib/modele";
 import type { Question } from "../../src/lib/questions";
+
+/**
+ * Tous les acteurs, classés ou non.
+ *
+ * Plusieurs tests d'ici portent sur un acteur SANS AUCUNE POSITION : c'est tout
+ * leur objet. Un tel acteur n'a pas de score, donc pas de rang, donc pas de
+ * place dans le classement — il faut aller le chercher dans les écartés.
+ */
+function tous(classement: Classement) {
+  return [...classement.classes, ...classement.nonClasses];
+}
 
 function question(id: string, theme: string, ordre: number): Question {
   return {
@@ -86,8 +97,10 @@ describe("sans candidature déclarée, rien n'est repris", () => {
       reponses: REPONSES,
     });
 
-    const candidat = classement.acteurs[0]!;
+    const candidat = tous(classement)[0]!;
     expect(candidat.couverture.documentees).toBe(0);
+    // Rien de documenté, donc rien à ranger : il figure parmi les écartés.
+    expect(classement.classes).toEqual([]);
     expect(candidat.parTheme[0]!.positions[0]!.niveauLibelle).toBe("Position inconnue");
   });
 });
@@ -103,15 +116,15 @@ describe("avec candidature, la ligne du parti comble les trous", () => {
 
   it("donne au candidat le même score qu'à son parti", () => {
     const classement = calculer(entrees);
-    const parti = classement.acteurs.find((a) => a.actorId === "parti-essai")!;
-    const candidat = classement.acteurs.find((a) => a.actorId === "candidate-essai")!;
+    const parti = classement.classes.find((a) => a.actorId === "parti-essai")!;
+    const candidat = classement.classes.find((a) => a.actorId === "candidate-essai")!;
 
     expect(candidat.score).toBe(parti.score);
     expect(candidat.rang).toBe(parti.rang);
   });
 
   it("nomme l'acteur d'origine sur chaque position reprise", () => {
-    const candidat = calculer(entrees).acteurs.find((a) => a.actorId === "candidate-essai")!;
+    const candidat = calculer(entrees).classes.find((a) => a.actorId === "candidate-essai")!;
 
     for (const detail of candidat.parTheme[0]!.positions) {
       expect(detail.heriteDe).toBe("Parti d'essai");
@@ -120,8 +133,8 @@ describe("avec candidature, la ligne du parti comble les trous", () => {
 
   it("ne marque aucune position reprise comme personnelle ni comme solide", () => {
     const classement = calculer(entrees);
-    const parti = classement.acteurs.find((a) => a.actorId === "parti-essai")!;
-    const candidat = classement.acteurs.find((a) => a.actorId === "candidate-essai")!;
+    const parti = classement.classes.find((a) => a.actorId === "parti-essai")!;
+    const candidat = classement.classes.find((a) => a.actorId === "candidate-essai")!;
 
     expect(candidat.couverture.documentees).toBe(2);
     expect(candidat.couverture.personnelles).toBe(0);
@@ -138,8 +151,8 @@ describe("avec candidature, la ligne du parti comble les trous", () => {
    */
   it("laisse le candidat plus incertain que son parti, à score égal", () => {
     const classement = calculer(entrees);
-    const parti = classement.acteurs.find((a) => a.actorId === "parti-essai")!;
-    const candidat = classement.acteurs.find((a) => a.actorId === "candidate-essai")!;
+    const parti = classement.classes.find((a) => a.actorId === "parti-essai")!;
+    const candidat = classement.classes.find((a) => a.actorId === "candidate-essai")!;
 
     expect(candidat.score).toBe(parti.score);
     expect(parti.incertitude).toBe("faible");
@@ -161,7 +174,7 @@ describe("une position personnelle l'emporte sur celle du parti", () => {
       candidatures: [CANDIDATURE],
     });
 
-    const candidat = classement.acteurs.find((a) => a.actorId === "candidate-essai")!;
+    const candidat = classement.classes.find((a) => a.actorId === "candidate-essai")!;
     const q1 = candidat.parTheme[0]!.positions.find((d) => d.questionId === "q1")!;
 
     expect(q1.positionActeur).toBe(2);
@@ -186,7 +199,7 @@ describe("la chaîne de reprise est parcourue dans l'ordre déclaré", () => {
       candidatures: [{ ...CANDIDATURE, baselineActorIds: ["coalition-essai", "parti-essai"] }],
     });
 
-    const candidat = classement.acteurs.find((a) => a.actorId === "candidate-essai")!;
+    const candidat = classement.classes.find((a) => a.actorId === "candidate-essai")!;
     const positions = candidat.parTheme[0]!.positions;
 
     expect(positions.find((d) => d.questionId === "q1")!.heriteDe).toBe("Coalition d'essai");
@@ -217,8 +230,8 @@ describe("l'annuaire nomme les acteurs repris sans les classer", () => {
   it("nomme le parti sans l'ajouter au classement", () => {
     const classement = calculer({ ...entrees, annuaire: [PARTI, CANDIDAT] });
 
-    expect(classement.acteurs.map((a) => a.actorId)).toEqual(["candidate-essai"]);
-    const candidat = classement.acteurs[0]!;
+    expect(classement.classes.map((a) => a.actorId)).toEqual(["candidate-essai"]);
+    const candidat = classement.classes[0]!;
     for (const detail of candidat.parTheme[0]!.positions) {
       expect(detail.heriteDe).toBe("Parti d'essai");
       expect(detail.heriteDeId).toBe("parti-essai");
@@ -232,14 +245,14 @@ describe("l'annuaire nomme les acteurs repris sans les classer", () => {
    * comme une page vide.
    */
   it("retombe sur l'identifiant quand l'acteur repris est introuvable", () => {
-    const candidat = calculer(entrees).acteurs[0]!;
+    const candidat = calculer(entrees).classes[0]!;
 
     expect(candidat.parTheme[0]!.positions[0]!.heriteDe).toBe("parti-essai");
   });
 
   it("ne change pas le score selon que l'annuaire est fourni ou non", () => {
-    const sans = calculer(entrees).acteurs[0]!;
-    const avec = calculer({ ...entrees, annuaire: [PARTI, CANDIDAT] }).acteurs[0]!;
+    const sans = calculer(entrees).classes[0]!;
+    const avec = calculer({ ...entrees, annuaire: [PARTI, CANDIDAT] }).classes[0]!;
 
     expect(avec.score).toBe(sans.score);
     expect(avec.couverture).toEqual(sans.couverture);
@@ -271,7 +284,7 @@ describe("le détail d'une position porte sa citation, ses sources et sa date", 
       reponses: REPONSES,
     });
 
-    const q1 = classement.acteurs[0]!.parTheme[0]!.positions.find((d) => d.questionId === "q1")!;
+    const q1 = classement.classes[0]!.parTheme[0]!.positions.find((d) => d.questionId === "q1")!;
 
     expect(q1.citation).toBe("le retour le plus vite possible à la retraite à 60 ans");
     expect(q1.adequation).toBe("directe");
@@ -292,7 +305,7 @@ describe("le détail d'une position porte sa citation, ses sources et sa date", 
       reponses: REPONSES,
     });
 
-    const q1 = classement.acteurs[0]!.parTheme[0]!.positions[0]!;
+    const q1 = tous(classement)[0]!.parTheme[0]!.positions[0]!;
 
     expect(q1.citation).toBeNull();
     expect(q1.adequation).toBeNull();

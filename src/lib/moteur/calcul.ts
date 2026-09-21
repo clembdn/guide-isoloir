@@ -17,6 +17,7 @@ import {
 } from "../modele";
 import { SANS_AVIS, type Reponse } from "../session-test";
 import type { Question } from "../questions";
+import { SEUIL_PUBLICATION } from "../seuils";
 import {
   NIVEAUX_RESOLUTION,
   type Classement,
@@ -151,6 +152,15 @@ export type EntreesMoteur = {
    * Par défaut, `acteurs` : sans reprise, il n'y a rien d'autre à nommer.
    */
   annuaire?: readonly PoliticalActor[];
+  /**
+   * Couverture minimale pour FIGURER au classement.
+   *
+   * Par défaut `SEUIL_PUBLICATION.couverture`, qui porte l'argument et le chiffre. Le
+   * paramètre existe pour que les tests puissent exercer le calcul sur des jeux
+   * factices de deux ou trois questions, où toute couverture réaliste est hors
+   * d'atteinte, et pour que l'audit mesure ce que vaut le moteur SANS plancher.
+   */
+  seuilClassement?: number;
 };
 
 /**
@@ -167,6 +177,7 @@ export function calculer({
   reponses,
   candidatures = [],
   annuaire = acteurs,
+  seuilClassement = SEUIL_PUBLICATION.couverture,
 }: EntreesMoteur): Classement {
   // Tri canonique : c'est ce qui rend le résultat indépendant de l'ordre du JSON.
   const questionsTriees = [...questions].sort((a, b) => a.id.localeCompare(b.id));
@@ -234,7 +245,12 @@ export function calculer({
     return null;
   }
 
-  const bruts = trierParNomAlphabetique(acteurs).map((acteur) => {
+  /*
+   * Type de retour annoté, et non `satisfies` : sans lui, `rang: null` est
+   * inféré comme le type littéral `null` et l'attribution du rang plus bas
+   * devient une erreur. L'annotation élargit au type déclaré.
+   */
+  const bruts = trierParNomAlphabetique(acteurs).map((acteur): ResultatActeur => {
     const resultatsThemes: ResultatTheme[] = [];
     let documentees = 0;
     let personnelles = 0;
@@ -317,7 +333,15 @@ export function calculer({
       .map((resultat) => resultat.score)
       .filter((score): score is number => score !== null);
 
-    const score = moyenne(scoresThemes) ?? 0;
+    /*
+     * `null` et non `0` quand aucun thème n'est documenté. Zéro est la note du
+     * désaccord total : l'attribuer à un acteur sur lequel on ne sait rien
+     * reviendrait à compter l'ignorance comme une opposition, ce que les deux
+     * normalisations ci-dessus refusent précisément de faire à l'échelle de la
+     * question et du thème. Il n'y a aucune raison de le faire à l'échelle de
+     * l'acteur.
+     */
+    const score = moyenne(scoresThemes);
     const dispersion =
       scoresThemes.length > 1 ? Math.max(...scoresThemes) - Math.min(...scoresThemes) : 0;
 
@@ -335,12 +359,21 @@ export function calculer({
       nom: acteur.name,
       sortName: acteur.sortName,
       score,
-      rang: 0,
+      rang: null,
       couverture,
       incertitude: niveauIncertitude(couverture, dispersion),
       parTheme: resultatsThemes,
     } satisfies ResultatActeur;
   });
+
+  /*
+   * ÉLIGIBILITÉ. Deux conditions, et la seconde n'est pas redondante : avec un
+   * seuil à zéro — ce que font les tests sur des jeux factices — un acteur sans
+   * aucune position documentée franchirait le seuil tout en n'ayant pas de score
+   * à comparer. On exige donc explicitement un score.
+   */
+  const estClassable = (resultat: ResultatActeur): boolean =>
+    resultat.score !== null && resultat.couverture.taux >= seuilClassement;
 
   /*
    * RANG. Tri par score décroissant, ex æquo au même rang. Le départage
@@ -357,12 +390,20 @@ export function calculer({
     bruts.map((resultat) => [resultat.actorId, empreinte(`${graine}:${resultat.actorId}`)]),
   );
 
-  const ordonnes = [...bruts].sort(
+  const classes = bruts.filter(estClassable).sort(
     (a, b) =>
-      b.score - a.score ||
+      // `estClassable` a garanti les deux scores non nuls.
+      b.score! - a.score! ||
       clesAffichage.get(a.actorId)! - clesAffichage.get(b.actorId)! ||
       a.actorId.localeCompare(b.actorId),
   );
+
+  /*
+   * Les écartés restent dans l'ordre alphabétique où `bruts` les a laissés.
+   * Aucun tri par score : un ordre, même discret, se lit comme un classement,
+   * et c'est précisément ce qu'on vient de refuser de faire pour eux.
+   */
+  const nonClasses = bruts.filter((resultat) => !estClassable(resultat));
 
   let rangCourant = 0;
   /*
@@ -371,15 +412,15 @@ export function calculer({
    * itération n'attribuait aucun rang et tout le classement restait à zéro.
    */
   let scorePrecedent: number | null = null;
-  ordonnes.forEach((resultat, index) => {
-    if (scorePrecedent === null || Math.abs(resultat.score - scorePrecedent) > EPSILON_RANG) {
+  classes.forEach((resultat, index) => {
+    if (scorePrecedent === null || Math.abs(resultat.score! - scorePrecedent) > EPSILON_RANG) {
       rangCourant = index + 1;
       scorePrecedent = resultat.score;
     }
     resultat.rang = rangCourant;
   });
 
-  const meilleurs = ordonnes.slice(0, 3).map((resultat) => resultat.score);
+  const meilleurs = classes.slice(0, 3).map((resultat) => resultat.score!);
   const ecartsTenus =
     meilleurs.length > 1 && meilleurs[0]! - meilleurs[meilleurs.length - 1]! < 0.05;
 
@@ -394,7 +435,8 @@ export function calculer({
   const profilPeuMarque = applicables.length < 3 || intensiteMoyenne < 0.75;
 
   return {
-    acteurs: ordonnes,
+    classes,
+    nonClasses,
     questionsApplicables: applicables.length,
     questionsPosees: questions.length,
     graineAffichage: graine,
