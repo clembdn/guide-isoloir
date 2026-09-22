@@ -1,13 +1,121 @@
 ---
+/*
+ * Accueil — page d'entrée dans l'élection.
+ *
+ * Elle emploie le gabarit « libre » : le contenu n'est pas enfermé dans la
+ * colonne de lecture, chaque section choisit sa largeur. Les pages de texte
+ * gardent le gabarit « colonne », qui reste le défaut.
+ *
+ * TOUS LES CHIFFRES SONT LUS DES DONNÉES, JAMAIS ÉCRITS EN DUR. Un nombre
+ * recopié devient faux le jour où une position est ajoutée, et c'est
+ * exactement le jour où personne ne pense à le relire. Le seul endroit où un
+ * chiffre s'écrit, c'est dans le fichier de données.
+ *
+ * AUCUNE TEINTE DE RUBRIQUE N'APPROCHE UN CONTENU POLITIQUE. Les cinq couleurs
+ * ne servent qu'aux articles de /comprendre, qui expliquent comment on vote.
+ * Elles ne touchent ni candidat, ni position, ni score.
+ */
 import BaseLayout from "../layouts/BaseLayout.astro";
-import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME, ELECTION } from "../lib/site";
 import { articlesPublies } from "../lib/comprendre";
 import { formatDateFr } from "../lib/date";
 import { QUESTIONS } from "../data/questions";
+import { ACTEURS, CANDIDATURES } from "../data/acteurs";
+import { POSITIONS } from "../data/positions";
+import { SOURCES_POSITIONS } from "../data/sources-positions";
+import { illustration } from "../data/illustrations";
 
-const UPDATED = "2026-09-21";
+const UPDATED = "2026-09-22";
 const articles = await articlesPublies();
+
+const scene = illustration("bureau-de-vote");
+if (!scene) {
+  throw new Error(
+    "L'illustration « bureau-de-vote » est absente de src/data/illustrations.ts. " +
+      "L'accueil ne se construit pas sans elle plutôt que de servir une image manquante.",
+  );
+}
+
+/*
+ * Chiffres clés. `themes` se compte plutôt qu'il ne s'écrit : le questionnaire
+ * garantit quatre affirmations par thème, mais c'est un invariant d'audit, pas
+ * une constante à recopier ici.
+ */
+const themes = new Set(QUESTIONS.map((question) => question.theme)).size;
+const parTheme = QUESTIONS.length / themes;
+
+const CHIFFRES = [
+  {
+    valeur: String(QUESTIONS.length),
+    libelle: "affirmations",
+    precision: `${themes} thèmes de ${parTheme}`,
+  },
+  {
+    valeur: String(CANDIDATURES.length),
+    libelle: "candidats suivis",
+    precision: `${ACTEURS.length} acteurs politiques`,
+  },
+  {
+    valeur: String(POSITIONS.length),
+    libelle: "positions codées",
+    precision: `${SOURCES_POSITIONS.length} sources publiques`,
+  },
+  {
+    valeur: "0",
+    libelle: "script tiers",
+    precision: "aucune publicité, aucun analytics",
+  },
+];
+
+/** Première affirmation du questionnaire, servie telle quelle. */
+const apercu = QUESTIONS[0];
+
+/*
+ * L'échelle de réponse est réelle et partagée avec le quiz. Elle est recopiée
+ * ici plutôt qu'importée de `src/lib/echelle.ts` pour une seule raison : ce
+ * module part au navigateur pour le quiz, et l'accueil n'a pas besoin de le
+ * charger pour afficher six libellés statiques. Si l'échelle change, l'audit
+ * de symétrie le dit, et ce bloc se corrige.
+ */
+const ECHELLE_APERCU = [
+  "Tout à fait d'accord",
+  "Plutôt d'accord",
+  "Ni d'accord, ni pas d'accord",
+  "Plutôt pas d'accord",
+  "Pas du tout d'accord",
+];
+
+/** Cinq teintes de rubrique, dans l'ordre de parution des articles. */
+const TEINTES = ["t-violet", "t-indigo", "t-sarcelle", "t-cyan", "t-prune"] as const;
+
+const PREUVES = [
+  {
+    titre: "Un éditeur identifié",
+    texte: `${EDITOR_NAME ?? "L'éditeur"}, nom réel, responsable de chaque page, y compris juridiquement.`,
+    lien: "/a-propos",
+    libelle: "Qui écrit ce site",
+  },
+  {
+    titre: "Une méthode publiée avant ses résultats",
+    texte:
+      "Comment une position est établie, ce que le calcul ne fait pas, et pourquoi certains candidats ne sont pas encore classés.",
+    lien: "/methodologie",
+    libelle: "Lire la méthodologie",
+  },
+  {
+    titre: "Aucune publicité jusqu'après le second tour",
+    texte:
+      "Ni bandeau, ni programmatique, ni contenu sponsorisé. Décision assumée et publiée, pas une page qui se tait.",
+    lien: "/financement",
+    libelle: "Comment le site est financé",
+  },
+  {
+    titre: "Un registre public des corrections",
+    texte: "Rien n'est modifié en silence. Chaque correction est datée et motivée.",
+    lien: "/corrections",
+    libelle: "Voir le registre",
+  },
+];
 
 const websiteLd = {
   "@context": "https://schema.org",
@@ -30,104 +138,172 @@ const websiteLd = {
 };
 ---
 
-<BaseLayout title={SITE_NAME} description={SITE_TAGLINE} updated={UPDATED}>
-  <h1>Vous votez pour la première fois en 2027 ?</h1>
-  <DerniereMiseAJour date={UPDATED} />
+<BaseLayout
+  title={SITE_NAME}
+  description={SITE_TAGLINE}
+  updated={UPDATED}
+  gabarit="libre"
+  actionEntete={false}
+>
+  <section class="hero">
+    <div class="enveloppe-large">
+      <div class="hero-grille">
+        <div>
+          <h1>Quel candidat me correspond le mieux&nbsp;?</h1>
+          <p class="hero-sous">
+            {QUESTIONS.length} affirmations, une par écran. Vos réponses ne quittent jamais votre téléphone.
+          </p>
+          <p><a class="action action--grand" href="/test">Commencer le test</a></p>
+        </div>
 
-  <p class="question">
-    Guide Isoloir répond à trois questions dans l'ordre : comment se déroule l'élection, ce qu'un
-    président peut réellement décider, et de quels candidats vos idées sont les plus proches.
-  </p>
+        <div class="hero-media">
+          <picture>
+            <source media="(min-width: 62rem)" srcset={scene.cheminLarge} />
+            <img
+              src={scene.cheminEtroit}
+              alt={scene.alt}
+              width={scene.largeurEtroit}
+              height={scene.hauteurEtroit}
+              fetchpriority="high"
+              decoding="async"
+            />
+          </picture>
+          <p class="hero-credit">
+            <a href="/credits-images">{scene.auteur}, {scene.licence}</a>
+          </p>
+        </div>
+      </div>
 
-  <h2>Le test comparatif</h2>
+      <ul class="chiffres">
+        {
+          CHIFFRES.map((chiffre) => (
+            <li>
+              <p class="chiffre-valeur">{chiffre.valeur}</p>
+              <p class="chiffre-libelle">
+                {chiffre.libelle}
+                <span class="chiffre-precision">{chiffre.precision}</span>
+              </p>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
 
-  <p>{QUESTIONS.length} affirmations, une par écran.</p>
+  <section class="section">
+    <div class="enveloppe-large">
+      <div class="section-tete revele">
+        <h2>À quoi ressemble une question</h2>
+        <p class="section-chapo">Une affirmation, six réponses possibles, et le droit de passer.</p>
+      </div>
 
-  <p><a class="action" href="/test">Commencer le test</a></p>
-
-  <p>
-    À la fin, vous voyez de quels candidats vos réponses sont les plus proches, avec la source de
-    chaque position, sa date, et le nombre d'affirmations sur lesquelles le candidat est réellement
-    documenté.
-  </p>
-
-  <p>
-    Il ne vous dira pas pour qui voter. Un classement n'est pas une recommandation : c'est un point
-    de départ pour aller lire. La <a href="/methodologie">méthodologie</a> explique comment les positions
-    sont établies, ce que le calcul ne fait pas, et pourquoi certains candidats ne sont pas encore classés.
-  </p>
-
-  <p>
-    Le premier tour a lieu le {formatDateFr(ELECTION.round1)}, le second le {
-      formatDateFr(ELECTION.round2)
-    }. En Guadeloupe, en Martinique, en Guyane, à Saint-Pierre-et-Miquelon, en Polynésie française
-    et dans les Amériques, on vote la veille.
-  </p>
-
-  <h2>Vos réponses ne sortent pas de votre téléphone</h2>
-
-  <p>
-    Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un identifiant.
-    Le calcul s'effectue exclusivement dans votre navigateur. Il n'y a ni compte, ni inscription, ni
-    bandeau de consentement, parce qu'il n'y a rien à consentir.
-  </p>
-
-  <p>
-    Ce n'est pas qu'une promesse écrite : aucun script tiers n'est chargé, et un test automatique
-    échoue si une requête sort vers un autre domaine. Le détail est sur la page <a
-      href="/financement">financement</a
-    >.
-  </p>
-
-  <h2>Comprendre avant de comparer</h2>
+      <div class="apercu revele">
+        <p class="etiquette">{apercu.theme}</p>
+        <p class="apercu-affirmation">{apercu.texte}</p>
+        <ul class="echelle">
+          {
+            ECHELLE_APERCU.map((libelle) => (
+              <li>
+                <span class="puce" aria-hidden="true" />
+                {libelle}
+              </li>
+            ))
+          }
+          <li class="sans-avis">
+            <span class="puce" aria-hidden="true"></span>Je n'ai pas d'avis
+          </li>
+        </ul>
+        <p class="apercu-note">
+          Aperçu non interactif. Le test se répond une affirmation par écran.
+        </p>
+      </div>
+    </div>
+  </section>
 
   {
-    articles.length === 0 ? (
-      <p>
-        Les premières réponses sont en cours de rédaction : comment s'inscrire sur les listes, où et
-        comment voter, ce qu'est un parrainage, comment donner procuration, ce qu'un président
-        décide seul. Un article n'est mis en ligne qu'une fois ses faits vérifiés sur des sources
-        citées. <a href="/comprendre">Voir la rubrique</a>.
-      </p>
-    ) : (
-      <>
-        <p>Des réponses courtes et sourcées aux questions qu'on se pose avant un premier vote.</p>
-        <ul class="liste-articles">
-          {articles.slice(0, 5).map((article) => (
-            <li>
-              <a href={`/comprendre/${article.id}`}>{article.data.titre}</a>
-            </li>
-          ))}
-        </ul>
-        <p>
-          <a href="/comprendre">Toutes les réponses</a>
-        </p>
-      </>
+    articles.length > 0 && (
+      <section class="section">
+        <div class="enveloppe-large">
+          <div class="section-tete revele">
+            <h2>Comprendre avant de comparer</h2>
+            <p class="section-chapo">
+              Des réponses courtes et sourcées aux questions qu'on se pose avant un premier vote.
+            </p>
+          </div>
+
+          <ul class="cartes revele">
+            {articles.slice(0, 5).map((article, index) => (
+              <li>
+                <a
+                  class={`carte ${TEINTES[index % TEINTES.length]}`}
+                  href={`/comprendre/${article.id}`}
+                >
+                  <span class="carte-etiquette">Comprendre</span>
+                  <span class="carte-titre">{article.data.titre}</span>
+                  <span class="carte-resume">{article.data.description}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+
+          <p class="apercu-note">
+            <a href="/comprendre">Toutes les réponses</a>
+          </p>
+        </div>
+      </section>
     )
   }
 
-  <h2>Pourquoi vous pouvez vérifier ce site</h2>
+  <section class="section">
+    <div class="enveloppe-large">
+      <div class="section-tete revele">
+        <h2>Pourquoi vous pouvez vérifier ce site</h2>
+        <p class="section-chapo">
+          Un comparateur politique se juge sur ce qu'il accepte de montrer de lui-même.
+        </p>
+      </div>
 
-  <ul>
-    <li>
-      <a href="/a-propos">Un éditeur identifié par son nom</a>, responsable de chaque page, y
-      compris juridiquement.
-    </li>
-    <li>
-      <a href="/methodologie">Une méthode publiée avant ses résultats</a>, avec les désaccords
-      internes et les taux d'accord entre relecteurs.
-    </li>
-    <li>
-      <a href="/charte-editoriale">Des règles de référencement écrites à l'avance</a>, et un droit
-      de réponse ouvert aux équipes de campagne.
-    </li>
-    <li>
-      <a href="/corrections">Un registre public des corrections</a> : rien n'est modifié en silence.
-    </li>
-    <li>
-      <a href="/financement">Aucune publicité, aucun don, aucun analytics</a> jusqu'après le second tour.
-    </li>
-  </ul>
+      <ul class="preuves revele">
+        {
+          PREUVES.map((preuve, index) => (
+            <li class={TEINTES[index % TEINTES.length]}>
+              <span class="preuve-puce" aria-hidden="true">
+                {index + 1}
+              </span>
+              <h3>{preuve.titre}</h3>
+              <p>{preuve.texte}</p>
+              <a href={preuve.lien}>{preuve.libelle}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="enveloppe-large">
+      <div class="promesse revele">
+        <h2>Vos réponses ne sortent pas de votre téléphone</h2>
+        <p>
+          Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un
+          identifiant. Le calcul s'effectue exclusivement dans votre navigateur. Il n'y a ni compte,
+          ni inscription, ni bandeau de consentement, parce qu'il n'y a rien à consentir.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="enveloppe-large">
+      <h2>Prêt à voir où vous vous situez&nbsp;?</h2>
+      <p>
+        Le premier tour a lieu le {formatDateFr(ELECTION.round1)}, le second le {
+          formatDateFr(ELECTION.round2)
+        }. Aucune inscription, et vos réponses restent sur votre téléphone.
+      </p>
+      <p><a class="action action--grand" href="/test">Commencer le test</a></p>
+    </div>
+  </section>
 
   <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} is:inline />
 </BaseLayout>
