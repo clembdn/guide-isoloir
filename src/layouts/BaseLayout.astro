@@ -2,10 +2,15 @@
 /*
  * Gabarit commun à toutes les pages.
  *
- * La direction visuelle est arrêtée : « Signal », figée dans DESIGN_SYSTEM.md
- * le 14 septembre 2026 et implémentée par src/styles/base.css. Ce fichier
+ * La direction visuelle est arrêtée : « Clair », figée dans DESIGN_SYSTEM.md
+ * le 22 septembre 2026 et implémentée par src/styles/base.css. Ce fichier
  * n'invente aucune valeur — toute couleur, tout espacement, toute durée passe
- * par un token. Une valeur en dur ici serait une décision prise en douce.
+ * par un jeton. Une valeur en dur ici serait une décision prise en douce.
+ *
+ * Deux gabarits : « colonne », le défaut, qui enferme le contenu dans la
+ * colonne de lecture ; « libre », où la page compose ses propres sections.
+ * L'en-tête et le pied sont IDENTIQUES dans les deux — le garde-fou de build
+ * qui vérifie la présence du nom de l'éditeur en dépend.
  *
  * Aucun script tiers, aucune police distante, aucun analytics : la politique
  * de sécurité de public/_headers l'interdit et un test Playwright le vérifie.
@@ -25,9 +30,32 @@ type Props = {
   updated?: string;
   /** `/resultat` et `/test` ne doivent pas être indexés. */
   noindex?: boolean;
+  /**
+   * `"colonne"` enferme le contenu dans la colonne de lecture — c'est le cas
+   * de toutes les pages de texte, et c'est le défaut. `"libre"` rend le slot
+   * sans enveloppe : la page compose alors ses propres sections, chacune
+   * choisissant sa largeur et remettant `.enveloppe` autour de son texte long.
+   */
+  gabarit?: "colonne" | "libre";
+  /**
+   * Raccourci vers le test dans l'en-tête. Volontairement absent de `/test` et
+   * de `/resultat` : il y serait redondant, et chaque lien d'en-tête coûte une
+   * tabulation au parcours clavier, dont le budget jusqu'au premier radio du
+   * quiz est plafonné à 25 par `tests/e2e/quiz-clavier.spec.ts`.
+   */
+  actionEntete?: boolean;
 };
 
-const { title, description, updated, noindex = false } = Astro.props;
+const {
+  title,
+  description,
+  updated,
+  noindex = false,
+  gabarit = "colonne",
+  actionEntete = true,
+} = Astro.props;
+
+const libre = gabarit === "libre";
 
 /*
  * Tant que le site n'est pas publiable — domaine non acheté, éditeur non nommé —
@@ -98,27 +126,48 @@ const jsonLd = {
       <a class="evitement" href="#contenu">Aller au contenu</a>
 
       <header class="entete">
-        <div class="enveloppe">
-          <a href="/">{SITE_NAME}</a>
+        <div class={libre ? "enveloppe-large" : "enveloppe"}>
+          <a class="marque" href="/">{SITE_NAME}</a>
+          {
+            actionEntete && (
+              <a class="action entete-action" href="/test">
+                Commencer
+              </a>
+            )
+          }
         </div>
       </header>
 
-      <main class="contenu" id="contenu">
-        <div class="enveloppe">
-          {
-            !IS_PUBLISHABLE && !noindex && (
-              <p class="chantier">
-                Site en préparation. Les pages sont mises en ligne au fur et à mesure de leur
-                rédaction, et aucune n'est référencée par les moteurs de recherche.
-              </p>
-            )
-          }
-          <slot />
-        </div>
+      <main class={libre ? "contenu contenu--libre" : "contenu"} id="contenu">
+        {
+          libre ? (
+            <>
+              {!IS_PUBLISHABLE && !noindex && (
+                <div class="enveloppe-large">
+                  <p class="chantier">
+                    Site en préparation. Les pages sont mises en ligne au fur et à mesure de leur
+                    rédaction, et aucune n'est référencée par les moteurs de recherche.
+                  </p>
+                </div>
+              )}
+              <slot />
+            </>
+          ) : (
+            <div class="enveloppe">
+              {!IS_PUBLISHABLE && !noindex && (
+                <p class="chantier">
+                  Site en préparation. Les pages sont mises en ligne au fur et à mesure de leur
+                  rédaction, et aucune n'est référencée par les moteurs de recherche.
+                </p>
+              )}
+              <slot />
+            </div>
+          )
+        }
       </main>
 
       <footer class="pied">
-        <div class="enveloppe">
+        <div class={libre ? "enveloppe-large" : "enveloppe"}>
           <nav aria-label="Pages d'information">
             <ul>
               {
