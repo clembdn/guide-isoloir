@@ -19,6 +19,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import { MEDIAS, MEDIAS_RELEVES_LE } from "../data/medias";
+import { ILLUSTRATIONS, ILLUSTRATIONS_RELEVEES_LE } from "../data/illustrations";
 import { ACTEURS } from "../data/acteurs";
 import { formatDateFr } from "../lib/date";
 import { trierParNomAlphabetique } from "../lib/modele";
@@ -102,6 +103,37 @@ const nommer = (acteurs: readonly { id: string; name: string; sortName: string }
     consulté. Un portrait plus flatteur qu'un autre ne dit rien d'autre que l'état de ce qui est
     disponible sous licence libre.
   </p>
+
+  <h2>Photographies de scène</h2>
+
+  <p>
+    Les photographies qui illustrent les pages ne représentent aucun candidat et aucun parti. Elles
+    montrent le déroulement matériel d'un scrutin. Une photographie qui laissait voir des affiches
+    de campagne nommant des candidats a été écartée pour cette raison, et le palais de l'Élysée n'a
+    pas été retenu pour l'accueil : ce site ne doit pas pouvoir être pris pour un site d'État.
+  </p>
+
+  <ul class="credits">
+    {
+      ILLUSTRATIONS.map((item) => (
+        <li>
+          <a href={item.pageCommons} rel="noreferrer">
+            {item.fichierCommons}
+          </a>
+          , par {item.auteur}, sous{" "}
+          {item.licenceUrl ? (
+            <a href={item.licenceUrl} rel="noreferrer license">
+              {item.licence}
+            </a>
+          ) : (
+            item.licence
+          )}
+          . Licence relevée le {formatDateFr(ILLUSTRATIONS_RELEVEES_LE)}.{" "}
+          <span class="reserve-media">Image {item.retouches}.</span>
+        </li>
+      ))
+    }
+  </ul>
 
   <h2>Portraits des candidats</h2>
 
