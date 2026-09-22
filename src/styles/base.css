@@ -1,41 +1,58 @@
 /*
- * Feuille de base — direction « Signal ».
+ * Feuille de base — direction « Clair », arrêtée le 22 septembre 2026.
  *
- * La direction visuelle est arrêtée. La référence est DESIGN_SYSTEM.md : ce
- * fichier l'implémente, il ne la définit pas. Toute valeur ajoutée ici sans
- * exister là-bas est une décision prise en douce.
+ * La référence est DESIGN_SYSTEM.md : ce fichier l'implémente, il ne le
+ * définit pas. Toute valeur ajoutée ici sans exister là-bas est une décision
+ * prise en douce.
  *
- * Trois règles portent la direction, et rien ne doit les contredire :
+ * CE QUI A REMPLACÉ LA DIRECTION « SIGNAL ». Signal tenait sur trois règles :
+ * un accent unique sous 2 % de couverture, une hiérarchie portée uniquement
+ * par l'échelle et l'espace, et le rayon 0 partout sauf sur l'actionnable.
+ * Elles ont produit exactement ce qu'on leur reprochait : une colonne étroite,
+ * grise, sans surface ni relief, qu'un primo-votant arrivant de TikTok quitte
+ * avant d'avoir lu la première phrase. Le brief le disait pourtant lui-même :
+ * « l'utilisateur juge la fiabilité sur ce qu'il voit ».
  *
- *   1. UN ACCENT UNIQUE, À MOINS DE 2 % DE COUVERTURE. Le bronze ne sert qu'aux
- *      liens, à l'action principale et à l'anneau de focus. Il n'entre jamais en
- *      contact avec un contenu politique : il dit où l'on peut agir, rien de
- *      plus. Aucun candidat, aucune position, aucun score ne sera jamais teinté.
- *   2. LA HIÉRARCHIE TIENT À L'ÉCHELLE ET À L'ESPACE, jamais à un trait ni à une
- *      couleur. Un filet doit signifier quelque chose, sinon il ne s'écrit pas.
- *   3. LE RAYON DIT « CECI SE CLIQUE ». Zéro sur les blocs, 4 px sur les seuls
- *      éléments actionnables. Pas d'exception.
+ * Les trois règles sont donc remplacées, pas simplement levées :
  *
- * Aucune requête distante : la police est auto-hébergée dans src/polices/, ce
- * que `font-src 'self'` impose et qu'un test Playwright vérifie.
+ *   1. PLUSIEURS TEINTES, MAIS JAMAIS SUR DU POLITIQUE. Cinq teintes portent
+ *      les rubriques pédagogiques. Aucune n'approche un candidat, une position
+ *      ou un score : sur /resultat, toutes les barres gardent une seule
+ *      couleur et une seule opacité, et ne diffèrent que par la longueur.
+ *      Bleu, rouge, rose, vert et orange restent exclus du site entier — ce
+ *      sont les familles occupées par un parti français.
+ *   2. LA HIÉRARCHIE TIENT À L'ÉCHELLE, À L'ESPACE ET À LA SURFACE. Une carte
+ *      groupe ce qui va ensemble. Elle ne décore pas, elle délimite.
+ *   3. LE RAYON EST UN SYSTÈME, PAS UN SIGNAL. Trois valeurs seulement, et le
+ *      bouton est une pilule pleine pour être reconnu d'un coup d'œil.
+ *
+ * CE QUI N'A PAS BOUGÉ, ET NE BOUGERA PAS : aucune couleur de parti sur un
+ * contenu politique, aucune apparence officielle, AA réel dans les deux
+ * schémas, focus clavier visible, prefers-reduced-motion respecté, aucune
+ * requête distante — la police est auto-hébergée, ce que `font-src 'self'`
+ * impose et qu'un test Playwright vérifie.
+ *
+ * LES NOMS DE JETONS SONT INCHANGÉS À DESSEIN. `Quiz.svelte` et
+ * `Resultat.svelte` consomment seize d'entre eux. Renommer aurait imposé de
+ * réécrire deux composants de plusieurs centaines de lignes pour un simple
+ * changement de palette ; changer les valeurs les fait suivre sans y toucher.
  */
 
 /*
  * Instrument Sans, OFL 1.1. Voir src/polices/OFL.txt.
  *
  * C'est une police VARIABLE : un seul fichier par plage Unicode couvre toute
- * l'étendue des graisses. D'où `font-weight: 400 600` plutôt que deux règles —
- * le navigateur interpole, et il ne télécharge qu'un fichier.
+ * l'étendue des graisses. D'où `font-weight: 400 700` plutôt que trois règles —
+ * le navigateur interpole, et il ne télécharge qu'un fichier. La graisse monte
+ * à 700 : les titres de la nouvelle direction sont plus affirmés qu'en 600.
  *
- * Seule la plage `latin` se charge sur une page en français : é è à ç ù œ y
- * sont tous. `latin-ext` n'arrive que si un caractère la déclenche.
- * Coût réel d'une page : 29 ko.
+ * Seule la plage `latin` se charge sur une page en français.
  */
 
 @font-face {
   font-family: "Instrument Sans";
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 400 700;
   font-display: swap;
   src: url("../polices/instrument-sans-latin.woff2") format("woff2");
   unicode-range:
@@ -46,7 +63,7 @@
 @font-face {
   font-family: "Instrument Sans";
   font-style: normal;
-  font-weight: 400 600;
+  font-weight: 400 700;
   font-display: swap;
   src: url("../polices/instrument-sans-latin-ext.woff2") format("woff2");
   unicode-range:
@@ -55,77 +72,115 @@
     U+A720-A7FF;
 }
 
-/* Tokens. Contrastes mesurés, pas estimés — voir DESIGN_SYSTEM.md. */
+/* Jetons. Contrastes MESURÉS par scripts/capturer.mjs, pas estimés. */
 
 :root {
   color-scheme: light dark;
 
-  /* Neutres. Un gris à peine chaud, jamais un fond crème. */
-  --couleur-fond: #f3f3f1;
-  --couleur-encre: #151618; /* 16,3:1 */
-  --couleur-encre-faible: #55565a; /* 6,6:1 */
-  --couleur-trait: #c5c5c1; /* 1,6:1, plancher de lisibilité */
+  /* Base claire. Un blanc très légèrement violacé, jamais un gris ni un crème. */
+  --couleur-fond: #fbfaff;
+  --couleur-surface: #ffffff;
+  --couleur-surface-2: #f3f0fd;
+  --couleur-encre: #171426; /* 17,4:1 */
+  --couleur-encre-faible: #5b5772; /* 6,6:1 */
+  --couleur-trait: #cec8e2; /* 1,6:1 sur le fond, 1,6:1 sur la surface */
 
-  /* Accent bronze. `aplat` porte l'action, `sur-aplat` ce qui s'écrit dessus. */
-  --couleur-signature: #8a5a10; /* 5,3:1 */
-  --couleur-aplat: #8a5a10;
-  --couleur-sur-aplat: #ffffff; /* 5,9:1 sur l'aplat */
+  /* Violet encre. Aucune famille politique française ne l'occupe. */
+  --couleur-signature: #5321d6; /* 7,9:1 */
+  --couleur-aplat: #5321d6;
+  --couleur-sur-aplat: #ffffff; /* 8,2:1 sur l'aplat */
+
+  /*
+   * Cinq teintes de rubrique : un vif pour l'étiquette, un pastel pour le fond.
+   * Elles ne servent QUE aux contenus pédagogiques de /comprendre.
+   */
+  --vif-violet: #7c3aed;
+  --pastel-violet: #efe7fe;
+  --vif-indigo: #4338ca;
+  --pastel-indigo: #e5e8fd;
+  --vif-sarcelle: #0d6d64;
+  --pastel-sarcelle: #d8f2ee;
+  --vif-cyan: #0e7490;
+  --pastel-cyan: #dcf0f6;
+  --vif-prune: #a21caf;
+  --pastel-prune: #fae4f7;
 
   --police-texte: "Instrument Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
-  /* Échelle typographique, ratio 1,25. */
-  --t-petit: 0.9375rem;
-  --t-corps: clamp(1.0625rem, 1rem + 0.27vw, 1.1875rem);
-  --t-h3: 1.1875rem;
-  --t-h2: clamp(1.375rem, 1.25rem + 0.5vw, 1.625rem);
-  --t-h1: clamp(2rem, 1.55rem + 1.9vw, 3rem);
+  /* Échelle typographique. */
+  --t-petit: 0.875rem;
+  --t-corps: clamp(1.0625rem, 1rem + 0.27vw, 1.125rem);
+  --t-h3: 1.125rem;
+  --t-h2: clamp(1.5rem, 1.2rem + 1.5vw, 2.25rem);
+  --t-h1: clamp(2.25rem, 1.5rem + 3.4vw, 4.25rem);
 
   --interligne-corps: 1.6;
-  --interligne-titre: 1.15;
+  --interligne-titre: 1.1;
 
   /* Espacement. */
   --pas-1: 0.375rem; /* 6 px */
   --pas-2: 0.75rem; /* 12 px */
   --pas-3: 1.25rem; /* 20 px */
   --pas-4: 2rem; /* 32 px */
-  --pas-5: 3.5rem; /* 56 px */
-  --pas-6: 5.5rem; /* 88 px */
+  --pas-5: 3rem; /* 48 px */
+  --pas-6: 4.5rem; /* 72 px */
 
-  /* Rayons. Le rayon signale l'action, il ne décore pas. */
+  /* Rayons. Trois valeurs, et une pilule pour l'actionnable. */
   --rayon: 0;
-  --rayon-actionnable: 4px;
+  --rayon-carte: 18px;
+  --rayon-carte-l: 26px;
+  --rayon-actionnable: 999px;
 
-  /* Gabarit. */
-  --mesure: 32rem;
+  /*
+   * Ombres TEINTÉES DE VIOLET, jamais du noir pur : une ombre neutre sur un
+   * fond coloré grise la couleur et fait sale.
+   */
+  --ombre-1: 0 1px 2px rgb(23 20 38 / 0.05), 0 6px 16px -10px rgb(83 33 214 / 0.28);
+  --ombre-2: 0 2px 4px rgb(23 20 38 / 0.05), 0 18px 40px -18px rgb(83 33 214 / 0.34);
+
+  /* Gabarit. `--mesure` reste la colonne de lecture, `--large` la page. */
+  --mesure: 34rem;
+  --large: 74rem;
   --gouttiere: 1.25rem;
 
   /* Mouvement : une courbe, une durée. */
-  --sortie: cubic-bezier(0.23, 1, 0.32, 1);
-  --duree: 140ms;
+  --sortie: cubic-bezier(0.22, 1, 0.36, 1);
+  --duree: 180ms;
 }
 
-/*
- * À partir de 1024 px la colonne s'élargit. 32 rem est juste pour le corps mais
- * étrangle le titre : à 48 px il partait sur trois lignes, ce qui annule l'effet
- * d'échelle. 36 rem tient le titre en deux lignes, corps à environ 68 signes.
- */
 @media (min-width: 64rem) {
   :root {
-    --mesure: 36rem;
+    --mesure: 38rem;
   }
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --couleur-fond: #131416;
-    --couleur-encre: #eaeae8; /* 15,3:1 */
-    --couleur-encre-faible: #9c9d9f; /* 6,8:1 */
-    --couleur-trait: #34353a; /* 1,5:1 */
+    --couleur-fond: #12101c;
+    --couleur-surface: #1b1830;
+    --couleur-surface-2: #211d39;
+    --couleur-encre: #eceaf7; /* 15,8:1 */
+    --couleur-encre-faible: #a7a2bd; /* 7,7:1 */
+    --couleur-trait: #413a64; /* 1,8:1 sur le fond, 1,7:1 sur la carte */
 
-    --couleur-signature: #d9a441; /* 8,2:1 */
-    --couleur-aplat: #d9a441;
-    /* Sur un bronze éclairci, seul un texte sombre passe AA. Inversion voulue. */
-    --couleur-sur-aplat: #17130a; /* 8,2:1 sur l'aplat */
+    --couleur-signature: #b49cf5; /* 8,1:1 */
+    --couleur-aplat: #b49cf5;
+    /* Sur un violet éclairci, seul un texte sombre passe AA. Inversion voulue. */
+    --couleur-sur-aplat: #17122b;
+
+    --vif-violet: #c4b5fd;
+    --pastel-violet: #271f45;
+    --vif-indigo: #a5b4fc;
+    --pastel-indigo: #1f2245;
+    --vif-sarcelle: #5eead4;
+    --pastel-sarcelle: #10302e;
+    --vif-cyan: #7dd3fc;
+    --pastel-cyan: #122934;
+    --vif-prune: #f0abfc;
+    --pastel-prune: #33163a;
+
+    --ombre-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --ombre-2: 0 18px 40px -18px rgb(0 0 0 / 0.7);
   }
 }
 
@@ -166,27 +221,79 @@ body {
   padding-inline: var(--gouttiere);
 }
 
+/*
+ * Largeur de page, pour le gabarit « libre ». `.enveloppe` reste la colonne de
+ * LECTURE : un paragraphe à 74 rem ne se lit pas. Les deux coexistent, et une
+ * section large remet `.enveloppe` autour de son texte long.
+ */
+.enveloppe-large {
+  width: 100%;
+  max-width: var(--large);
+  margin-inline: auto;
+  padding-inline: var(--gouttiere);
+}
+
 .contenu {
   flex: 1;
   padding-block: var(--pas-5) var(--pas-6);
 }
 
+/* En gabarit libre, chaque section porte sa propre respiration. */
+.contenu--libre {
+  padding-block: 0;
+}
+
+/*
+ * En-tête collant. `backdrop-filter` sur un fond semi-opaque : le contenu
+ * défile dessous sans que le titre devienne illisible. Le repli est un fond
+ * plein, pas une transparence, pour les navigateurs sans la propriété.
+ */
 .entete {
-  padding-block: var(--pas-3);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--couleur-fond);
   border-bottom: 1px solid var(--couleur-trait);
 }
 
-.entete a {
-  color: inherit;
-  font-weight: 600;
-  text-decoration: none;
-  letter-spacing: -0.015em;
+@supports (backdrop-filter: blur(12px)) {
+  .entete {
+    background: color-mix(in srgb, var(--couleur-fond) 84%, transparent);
+    backdrop-filter: blur(12px);
+  }
 }
 
-.entete a:hover,
-.entete a:focus-visible {
+.entete .enveloppe,
+.entete .enveloppe-large {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--pas-3);
+  min-height: 60px;
+}
+
+.marque {
+  color: inherit;
+  font-weight: 700;
+  text-decoration: none;
+  letter-spacing: -0.02em;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.marque:hover,
+.marque:focus-visible {
   text-decoration: underline;
   text-underline-offset: 0.22em;
+}
+
+/* Raccourci vers le test dans l'en-tête. Absent de /test et de /resultat :
+   il y serait redondant, et il coûterait une tabulation au parcours clavier. */
+.entete-action {
+  padding: 0.5rem 1.1rem;
+  min-height: 40px;
+  font-size: var(--t-petit);
 }
 
 .pied {
@@ -220,9 +327,9 @@ h2,
 h3 {
   line-height: var(--interligne-titre);
   text-wrap: balance;
-  font-weight: 600;
+  font-weight: 700;
   margin: 0 0 var(--pas-3);
-  letter-spacing: -0.022em;
+  letter-spacing: -0.03em;
 }
 
 h1 {
@@ -313,23 +420,67 @@ a {
  */
 
 .action {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
   background: var(--couleur-aplat);
   color: var(--couleur-sur-aplat);
   text-decoration: none;
-  font-weight: 600;
-  padding: var(--pas-2) var(--pas-4);
+  font-weight: 700;
+  font-size: var(--t-corps);
+  letter-spacing: -0.01em;
+  padding: 0.9rem 1.9rem;
+  border: 0;
   border-radius: var(--rayon-actionnable);
-  transition: transform var(--duree) var(--sortie);
+  box-shadow: var(--ombre-1);
+  transition:
+    transform var(--duree) var(--sortie),
+    box-shadow var(--duree) var(--sortie);
 }
 
-.action:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+/*
+ * Le survol est derrière `hover: hover` : sur un écran tactile, un appui
+ * déclenche le survol et laisse le bouton soulevé après le relâchement.
+ */
+@media (hover: hover) and (pointer: fine) {
+  .action:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ombre-2);
+  }
 }
 
 .action:active {
-  transform: scale(0.98);
+  transform: translateY(0) scale(0.985);
+}
+
+/* Grand format : pleine largeur sur téléphone, où la cible doit être évidente. */
+.action--grand {
+  min-height: 56px;
+  padding: 1.05rem 2.4rem;
+  font-size: calc(var(--t-corps) * 1.06);
+  width: 100%;
+}
+
+@media (min-width: 30rem) {
+  .action--grand {
+    width: auto;
+  }
+}
+
+/* Action réelle mais secondaire. Bordée, jamais un second aplat. */
+.action--secondaire {
+  background: transparent;
+  color: var(--couleur-signature);
+  border: 2px solid var(--couleur-trait);
+  box-shadow: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .action--secondaire:hover {
+    border-color: var(--couleur-signature);
+    box-shadow: none;
+  }
 }
 
 /* Lien d'évitement. */
@@ -496,6 +647,512 @@ hr {
       color, background-color, border-color, text-decoration-color, outline-color !important;
     scroll-behavior: auto !important;
   }
+}
+
+/*
+ * ─────────────────────────────────────────────────────────────────────────
+ * COMPOSANTS DE PAGE — gabarit « libre »
+ *
+ * Employés par l'accueil, qui compose ses propres sections au lieu d'être
+ * enfermé dans la colonne de lecture. Toute page peut les reprendre.
+ * ─────────────────────────────────────────────────────────────────────────
+ */
+
+.section {
+  padding-block: var(--pas-6);
+}
+
+.section-tete {
+  max-width: 34rem;
+  margin-bottom: var(--pas-5);
+}
+
+.section-tete h2 {
+  margin-bottom: var(--pas-2);
+  margin-top: 0;
+}
+
+.section-chapo {
+  color: var(--couleur-encre-faible);
+  margin: 0;
+}
+
+/*
+ * RÉVÉLATION AU DÉFILEMENT, EN CSS PUR.
+ *
+ * `animation-timeline: view()` pilote l'animation par la position de l'élément
+ * dans la fenêtre. Aucun JavaScript, aucun IntersectionObserver, aucun
+ * écouteur de défilement : zéro octet livré, et rien à nettoyer.
+ *
+ * Seules `opacity` et `transform` bougent, jamais une propriété de mise en
+ * page : la hauteur du document est identique avec et sans.
+ *
+ * LE PLANCHER D'OPACITÉ À 0,3 N'EST PAS UN RÉGLAGE ESTHÉTIQUE. À zéro, tout le
+ * contenu sous la ligne de flottaison reste invisible tant que personne n'a
+ * défilé — mesuré, et une capture de la page entière sortait blanche. Sur un
+ * site YMYL dont CLAUDE.md exige que le contenu essentiel soit lisible en HTML
+ * statique, rendre le corps de la page invisible à un moteur qui ne défile pas
+ * est un risque réel. Le plancher garde le mouvement sans jamais rendre un mot
+ * illisible.
+ *
+ * Trois filets : `no-preference` (personne n'a d'animation s'il a demandé de
+ * s'en abstenir), `@supports` (un navigateur sans la propriété affiche le
+ * contenu, il ne le cache pas), et l'état par défaut VISIBLE.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    .revele {
+      animation: revelation linear both;
+      animation-timeline: view();
+      animation-range: entry 5% entry 42%;
+    }
+
+    @keyframes revelation {
+      from {
+        opacity: 0.3;
+        transform: translateY(1.25rem);
+      }
+
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+  }
+}
+
+/* Accroche. */
+
+.hero {
+  position: relative;
+  isolation: isolate;
+  padding-block: var(--pas-5) var(--pas-6);
+  overflow: hidden;
+}
+
+/*
+ * Halo de couleur. Il remplace le voile sombre posé sur la photographie : ici
+ * la lumière vient du fond, le texte reste sur du clair, et le contraste ne
+ * dépend plus d'un rideau. Aucune de ces teintes n'est une couleur de parti.
+ */
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: -30% -20% auto -20%;
+  height: 130%;
+  z-index: -1;
+  background:
+    radial-gradient(48% 42% at 18% 18%, rgb(124 58 237 / 0.2), transparent 70%),
+    radial-gradient(42% 38% at 82% 8%, rgb(14 116 144 / 0.16), transparent 70%),
+    radial-gradient(40% 40% at 60% 60%, rgb(162 28 175 / 0.12), transparent 72%);
+}
+
+.hero-grille {
+  display: grid;
+  gap: var(--pas-4);
+  align-items: center;
+}
+
+@media (min-width: 62rem) {
+  .hero-grille {
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: var(--pas-6);
+  }
+}
+
+.hero h1 {
+  font-size: var(--t-h1);
+  line-height: 1.02;
+  letter-spacing: -0.038em;
+  max-width: 15ch;
+  margin-bottom: var(--pas-3);
+}
+
+.hero-sous {
+  font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+  line-height: 1.5;
+  color: var(--couleur-encre-faible);
+  max-width: 38ch;
+  margin-bottom: var(--pas-4);
+}
+
+/* La photographie est un objet posé, pas un fond qu'on assombrit. */
+.hero-media {
+  position: relative;
+  border-radius: var(--rayon-carte-l);
+  overflow: hidden;
+  box-shadow: var(--ombre-2);
+  aspect-ratio: 16 / 11;
+}
+
+@media (min-width: 62rem) {
+  .hero-media {
+    aspect-ratio: 4 / 3.1;
+  }
+}
+
+.hero-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 42% 50%;
+  display: block;
+}
+
+.hero-credit {
+  position: absolute;
+  right: 0.6rem;
+  bottom: 0.5rem;
+  margin: 0;
+  font-size: 0.6875rem;
+  color: #ffffff;
+  background: rgb(23 20 38 / 0.62);
+  padding: 0.15rem 0.55rem;
+  border-radius: var(--rayon-actionnable);
+}
+
+.hero-credit a {
+  color: inherit;
+}
+
+/* Chiffres clés. Lus des données, jamais écrits en dur. */
+
+.chiffres {
+  list-style: none;
+  padding: 0;
+  margin: var(--pas-5) 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--pas-2);
+}
+
+@media (min-width: 48rem) {
+  .chiffres {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--pas-3);
+  }
+}
+
+.chiffres li {
+  margin: 0;
+  background: var(--couleur-surface);
+  border: 1px solid var(--couleur-trait);
+  border-radius: var(--rayon-carte);
+  padding: var(--pas-3);
+}
+
+.chiffre-valeur {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.75rem, 1.4rem + 1.6vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  color: var(--couleur-signature);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.chiffre-libelle {
+  margin: 0;
+  font-size: var(--t-petit);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.chiffre-precision {
+  display: block;
+  font-weight: 400;
+  color: var(--couleur-encre-faible);
+}
+
+/* Aperçu d'une affirmation. Statique, non interactif. */
+
+.apercu {
+  background: var(--couleur-surface);
+  border: 1px solid var(--couleur-trait);
+  border-radius: var(--rayon-carte-l);
+  box-shadow: var(--ombre-1);
+  padding: var(--pas-4) var(--pas-3);
+  max-width: 46rem;
+}
+
+@media (min-width: 48rem) {
+  .apercu {
+    padding: var(--pas-5);
+  }
+}
+
+.etiquette {
+  display: inline-flex;
+  align-items: center;
+  margin: 0 0 var(--pas-3);
+  padding: 0.3rem 0.85rem;
+  border-radius: var(--rayon-actionnable);
+  background: var(--pastel-violet);
+  color: var(--vif-violet);
+  font-size: var(--t-petit);
+  font-weight: 700;
+}
+
+.apercu-affirmation {
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.026em;
+  text-wrap: pretty;
+  margin-bottom: var(--pas-4);
+}
+
+.echelle {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.echelle li {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0;
+  min-height: 48px;
+  padding: 0.5rem 1rem;
+  border: 1.5px solid var(--couleur-trait);
+  border-radius: var(--rayon-actionnable);
+}
+
+.echelle .puce {
+  flex: none;
+  width: 1.05rem;
+  height: 1.05rem;
+  border: 2px solid var(--couleur-encre-faible);
+  border-radius: 50%;
+}
+
+.echelle .sans-avis {
+  color: var(--couleur-encre-faible);
+  border-style: dashed;
+}
+
+.apercu-note {
+  margin: var(--pas-3) 0 0;
+  font-size: var(--t-petit);
+  color: var(--couleur-encre-faible);
+}
+
+/*
+ * CARTES DE RUBRIQUE — /comprendre.
+ *
+ * Cinq teintes, une par article. Elles ne touchent aucun contenu politique :
+ * ce sont des repères de navigation dans une rubrique pédagogique, pas un
+ * jugement sur un acteur. Aucune n'entre sur /resultat.
+ *
+ * Sur téléphone la carte est HORIZONTALE : empilées avec une illustration
+ * pleine largeur, cinq cartes ajoutaient près de 2 000 px à la page.
+ */
+
+.cartes {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--pas-2);
+}
+
+@media (min-width: 46rem) {
+  .cartes {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pas-3);
+  }
+}
+
+@media (min-width: 66rem) {
+  .cartes {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.cartes li {
+  margin: 0;
+}
+
+.carte {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  height: 100%;
+  padding: var(--pas-3);
+  background: var(--pastel, var(--couleur-surface));
+  border-radius: var(--rayon-carte);
+  color: var(--couleur-encre);
+  text-decoration: none;
+  transition:
+    transform var(--duree) var(--sortie),
+    box-shadow var(--duree) var(--sortie);
+}
+
+.carte-etiquette {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--vif, var(--couleur-signature));
+}
+
+.carte-titre {
+  font-size: var(--t-h3);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.018em;
+}
+
+.carte-resume {
+  font-size: var(--t-petit);
+  line-height: 1.45;
+  color: var(--couleur-encre-faible);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .carte:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--ombre-2);
+  }
+
+  .carte:hover .carte-titre {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+}
+
+/* Les cinq teintes. Aucune n'appartient à une famille politique française. */
+.t-violet {
+  --pastel: var(--pastel-violet);
+  --vif: var(--vif-violet);
+}
+
+.t-indigo {
+  --pastel: var(--pastel-indigo);
+  --vif: var(--vif-indigo);
+}
+
+.t-sarcelle {
+  --pastel: var(--pastel-sarcelle);
+  --vif: var(--vif-sarcelle);
+}
+
+.t-cyan {
+  --pastel: var(--pastel-cyan);
+  --vif: var(--vif-cyan);
+}
+
+.t-prune {
+  --pastel: var(--pastel-prune);
+  --vif: var(--vif-prune);
+}
+
+/* Preuves de confiance. */
+
+.preuves {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--pas-2);
+}
+
+@media (min-width: 46rem) {
+  .preuves {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pas-3);
+  }
+}
+
+.preuves li {
+  margin: 0;
+  background: var(--couleur-surface);
+  border: 1px solid var(--couleur-trait);
+  border-radius: var(--rayon-carte);
+  padding: var(--pas-3);
+}
+
+.preuve-puce {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  margin-bottom: var(--pas-2);
+  border-radius: var(--rayon-actionnable);
+  background: var(--pastel, var(--pastel-violet));
+  color: var(--vif, var(--vif-violet));
+  font-weight: 700;
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.preuves h3 {
+  margin: 0 0 0.4rem;
+  font-size: var(--t-h3);
+}
+
+.preuves p {
+  margin: 0;
+  color: var(--couleur-encre-faible);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+/* Zone de confort tactile : la cible grandit, la mise en page ne bouge pas. */
+.preuves a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-block: -0.4rem;
+  padding-block: 0.4rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+/* Promesse de confidentialité. */
+
+.promesse {
+  background: var(--couleur-surface-2);
+  border-radius: var(--rayon-carte-l);
+  padding: var(--pas-5) var(--pas-3);
+}
+
+@media (min-width: 48rem) {
+  .promesse {
+    padding: var(--pas-6) var(--pas-5);
+  }
+}
+
+.promesse h2 {
+  margin-top: 0;
+  max-width: 24ch;
+}
+
+.promesse p {
+  margin: 0;
+  color: var(--couleur-encre-faible);
+  max-width: 54ch;
+}
+
+/* Appel final. */
+
+.final {
+  text-align: center;
+  padding-block: var(--pas-6);
+}
+
+.final h2 {
+  margin-top: 0;
+  margin-inline: auto;
+  max-width: 20ch;
+}
+
+.final p {
+  margin: 0 auto var(--pas-4);
+  max-width: 40ch;
+  color: var(--couleur-encre-faible);
 }
 
 /*
