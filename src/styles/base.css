@@ -71,7 +71,7 @@
   font-family: "Bricolage Grotesque";
   font-style: normal;
   font-weight: 400 700;
-  font-display: swap;
+  font-display: optional;
   src: url("../polices/bricolage-grotesque-latin.woff2") format("woff2");
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
@@ -82,12 +82,58 @@
   font-family: "Bricolage Grotesque";
   font-style: normal;
   font-weight: 400 700;
-  font-display: swap;
+  font-display: optional;
   src: url("../polices/bricolage-grotesque-latin-ext.woff2") format("woff2");
   unicode-range:
     U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
     U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
     U+A720-A7FF;
+}
+
+/*
+ * POURQUOI `optional` ET NON `swap` — la secousse au changement de page.
+ *
+ * Avec `swap`, le navigateur peignait chaque page en police de secours, puis
+ * la repeignait en Bricolage une trentaine de millisecondes plus tard, même
+ * cache chaud. Les lignes se recoupaient autrement : mesuré à 1280 px sur
+ * /candidats, le titre changeait de nombre de lignes et tout le contenu
+ * descendait de 74 px. C'est la « secousse » visible à chaque navigation.
+ *
+ * Avec `optional`, le navigateur attend la police une centaine de
+ * millisecondes. Préchargée dans le `<head>` (voir BaseLayout.astro) et mise en
+ * cache après la première page, elle est presque toujours là : la page est
+ * peinte une seule fois, directement dans sa police. Si elle arrive trop tard,
+ * sur une première visite très lente, la page garde la police de secours
+ * jusqu'au bout — sans jamais repeindre.
+ *
+ * LA POLICE DE SECOURS EST AJUSTÉE AUX PROPORTIONS DE BRICOLAGE, pour que ce
+ * cas rare ressemble au rendu final. Valeurs mesurées avec fontTools sur un
+ * échantillon de texte du site : Bricolage 400 est 3 % plus large qu'Arial,
+ * Bricolage 700 0,5 % plus large qu'Arial gras ; ascendante 930 et
+ * descendante 270 pour 1000 unités, sans interligne, divisées par le même
+ * facteur.
+ */
+
+@font-face {
+  font-family: "Bricolage repli";
+  font-weight: 400;
+  src: local("Arial"), local("Helvetica Neue"), local("Liberation Sans"), local("Arimo");
+  size-adjust: 103%;
+  ascent-override: 90.3%;
+  descent-override: 26.2%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Bricolage repli";
+  font-weight: 700;
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Helvetica Neue Bold"),
+    local("Liberation Sans Bold"), local("Arimo Bold");
+  size-adjust: 100.5%;
+  ascent-override: 92.5%;
+  descent-override: 26.9%;
+  line-gap-override: 0%;
 }
 
 /* Jetons. Contrastes MESURÉS par scripts/capturer.mjs, pas estimés. */
@@ -123,7 +169,8 @@
   --vif-prune: #a21caf;
   --pastel-prune: #fae4f7;
 
-  --police-texte: "Bricolage Grotesque", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --police-texte:
+    "Bricolage Grotesque", "Bricolage repli", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
   /* Échelle typographique. */
   --t-petit: 0.875rem;

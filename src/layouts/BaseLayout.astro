@@ -22,6 +22,11 @@
  */
 import "../styles/base.css";
 import Navigation from "../components/Navigation.astro";
+/*
+ * URL servie du fichier de police, hachée par le build : la même que celle que
+ * base.css référence, puisque Vite ne produit qu'un fichier par contenu.
+ */
+import policeLatin from "../polices/bricolage-grotesque-latin.woff2?url";
 import {
   SITE_NAME,
   SITE_URL,
@@ -112,6 +117,16 @@ const jsonLd = {
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {
+      /*
+       * Préchargée avant tout le reste : c'est ce qui permet à `font-display:
+       * optional` (voir base.css) de trouver la police prête à la première
+       * peinture, et d'éviter la repeinture qui faisait sauter le texte. Seule
+       * la plage latine : c'est elle que toutes les pages en français emploient.
+       * `crossorigin` est exigé pour une police, même servie par le même site.
+       */
+    }
+    <link rel="preload" href={policeLatin} as="font" type="font/woff2" crossorigin />
     {
       /*
        * Trois icônes, pas une. Le SVG détaille un cadre et deux pans de

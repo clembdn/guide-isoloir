@@ -179,6 +179,15 @@ Instrument Sans.
 Deux graisses employées, et pas une de plus : **400** pour le corps, **700** pour les titres,
 l'action et les termes en gras. Pas d'italique pour l'instant.
 
+### Chargement : une seule peinture (23 septembre 2026)
+
+La police est **préchargée** dans le `<head>` et déclarée en **`font-display: optional`**, avec
+une police de secours « Bricolage repli » (Arial local) ajustée à ses proportions — `size-adjust`
+103 % en 400 et 100,5 % en 700, mesurés avec fontTools. Avec `swap`, chaque page était peinte deux
+fois, et le contenu descendait jusqu'à 74 px à l'arrivée de la police : la « secousse » au
+changement de page. Mesuré après correction : **aucun décalage de mise en page**, cache vide,
+cache chaud et 3G lent simulé.
+
 ### L'axe de taille optique est figé à 28
 
 Bricolage porte un axe `opsz`, qui laisse le navigateur choisir seul une coupe serrée pour les
@@ -491,9 +500,6 @@ les PNG sont des pixels figés.
 - **Illustrations de rubrique** : les cartes de `/comprendre` portent aujourd'hui la couleur et la
   typographie seules. Les photographies libres essayées ont été jugées amateur par l'éditeur et
   retirées. Une piste graphique reste à trancher.
-- **Préchargement de la police** : `<link rel="preload">` sur le fichier latin réduirait le
-  clignotement au premier rendu. Le fichier est passé de 29 à 38 ko avec Bricolage : l'arbitrage
-  mérite d'être mesuré, pas supposé.
 - **Lighthouse** : à relancer sur `/`, `/test`, `/resultat` et un article après cette refonte.
 - **Écran de résultat** : il suit la palette par les jetons, mais sa densité n'a pas été
   retravaillée pour la nouvelle direction.
