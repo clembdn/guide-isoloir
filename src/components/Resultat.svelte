@@ -41,12 +41,10 @@
   import type { Candidate, PoliticalActor, Stance } from "../lib/modele";
   import type { QuestionAffichee } from "../lib/projection";
   import type { SourcePosition } from "../lib/acteurs";
-  import {
-    SEUIL_ACCORD,
-    SEUIL_PUBLICATION,
-    SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT,
-  } from "../lib/seuils";
+  import { SEUIL_ACCORD, SEUIL_PUBLICATION, dateAnterieureALaCampagne } from "../lib/seuils";
   import { formatDateFr } from "../lib/date";
+  import { LIBELLES_ADEQUATION, LIBELLES_CONFIANCE } from "../lib/libelles";
+  import { initiales } from "../lib/initiales";
   import ScoreEtCouverture from "./ScoreEtCouverture.svelte";
 
   /*
@@ -247,67 +245,14 @@
 
   const visuelParActeur = new Map(visuels.map((visuel) => [visuel.actorId, visuel]));
 
-  /**
-   * Initiales de repli, quand aucune photo sous licence libre n'existe.
-   *
-   * PAS DE SILHOUETTE GRISE. Une silhouette générique sur un site de
-   * comparaison politique ferait passer l'absence de photo libre pour une
-   * caractéristique du candidat : les initiales disent qu'il manque une image,
-   * la silhouette dit qu'il manque quelqu'un.
-   *
-   * Les particules sont écartées — « Le Pen » donne « LP » et non « LP » via
-   * « Le » — en ne gardant que les mots d'au moins deux lettres commençant par
-   * une majuscule, puis le premier et le dernier.
-   */
-  function initiales(nom: string): string {
-    const mots = nom
-      .split(/[\s-]+/)
-      .filter((mot) => mot.length > 1 && mot[0] === mot[0]?.toLocaleUpperCase("fr"));
-    const retenus = mots.length > 1 ? [mots[0], mots[mots.length - 1]] : mots;
-    return retenus.map((mot) => mot?.[0] ?? "").join("");
-  }
-
-  /**
-   * Confiance accordée à la source, en toutes lettres.
-   *
-   * Affichée parce qu'elle est le prix à payer pour avoir ouvert le codage à la
-   * presse : une position tirée d'un entretien vaut ce que vaut l'entretien, et
-   * le lecteur doit pouvoir le lire sans ouvrir le dépôt. Elle n'entre pas dans
-   * le calcul — une position mal documentée reste la position qu'elle est.
-   */
-  /**
-   * La source la plus récente d'une position est-elle antérieure à la campagne ?
-   *
-   * ON REGARDE LA PLUS RÉCENTE, pas la plus ancienne. Une position appuyée sur
-   * un programme de 2024 ET sur une déclaration de 2026 n'est pas une position
-   * périmée : elle est confirmée. Prendre la plus ancienne ferait apparaître un
-   * avertissement sur les codages les MIEUX sourcés, ce qui est le contraire du
-   * but.
-   *
-   * Renvoie la date de cette source, ou `null` s'il n'y a rien à signaler.
-   */
+  /** Date à signaler sous une position dont toutes les sources précèdent la campagne. */
   function sourceAnterieureALaCampagne(detail: DetailPosition): string | null {
-    const dates = detail.sourceIds
-      .map((id) => sourceParId.get(id)?.dateDeclaration)
-      .filter((date): date is string => date !== undefined);
-    if (dates.length === 0) return null;
-
-    // Format ISO : la comparaison lexicographique est la comparaison chronologique.
-    const plusRecente = dates.reduce((a, b) => (a > b ? a : b));
-    return plusRecente < SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT ? plusRecente : null;
+    return dateAnterieureALaCampagne(
+      detail.sourceIds
+        .map((id) => sourceParId.get(id)?.dateDeclaration)
+        .filter((date): date is string => date !== undefined),
+    );
   }
-
-  const LIBELLES_CONFIANCE: Record<string, string> = {
-    high: "Confiance dans la source : élevée.",
-    medium: "Confiance dans la source : moyenne.",
-    low: "Confiance dans la source : faible.",
-  };
-
-  const LIBELLES_ADEQUATION: Record<string, string> = {
-    directe: "La citation porte sur la mesure exactement posée.",
-    partielle: "La citation recoupe l'affirmation sans la recouvrir.",
-    deduite: "Aucune citation ne porte sur la mesure : valeur déduite.",
-  };
 
   /**
    * Trois qualifications, à côté du chiffre et non à sa place.
@@ -873,6 +818,11 @@
     font-size: var(--t-petit);
     font-weight: 600;
     letter-spacing: 0.04em;
+    /*
+     * Fond de surface, pas la teinte des filets : sur `--couleur-trait`, les
+     * initiales en encre faible tombaient à 4,2:1, mesuré par capturer.mjs.
+     */
+    background: var(--couleur-surface);
     color: var(--couleur-encre-faible);
   }
 

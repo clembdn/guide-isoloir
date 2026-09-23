@@ -1,0 +1,444 @@
+---
+/*
+ * Fiche candidat : ce que le candidat a dit sur chacune des affirmations du
+ * test, avec la citation, la source et sa date.
+ *
+ * UNE PAGE PAR CANDIDAT SUIVI, DOCUMENTÉ OU NON. Ne publier que les fiches
+ * remplies donnerait une présence en ligne aux seuls candidats les mieux
+ * couverts par la presse — le biais que `CLAUDE.md` interdit ailleurs. Une
+ * fiche vide dit, datée et sourcée, que le candidat est en lice et qu'on ne
+ * sait encore rien de ses positions. C'est une information.
+ *
+ * HTML STATIQUE, SANS ÎLOT. Beaucoup de robots d'IA n'exécutent pas de
+ * JavaScript : une position qui ne se lit qu'après hydratation n'existe pas
+ * pour eux, et c'est précisément ce qu'on leur demande de citer.
+ *
+ * LA POSITION AFFICHÉE EST CELLE DU MOTEUR, choisie par le même résolveur que
+ * le test (voir `src/lib/fiches.ts`). Une reprise de parti est nommée comme
+ * telle, jamais présentée comme une déclaration du candidat.
+ *
+ * `direction` n'est jamais lu ici : les questions arrivent projetées.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import { fiches, NOMBRE_AFFIRMATIONS, type Fiche } from "../../lib/fiches";
+import { ECHELLE } from "../../lib/echelle";
+import {
+  LIBELLES_ADEQUATION,
+  LIBELLES_CONFIANCE,
+  LIBELLES_STATUT_CANDIDATURE,
+} from "../../lib/libelles";
+import { initiales } from "../../lib/initiales";
+import { formatDateFr } from "../../lib/date";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
+
+export function getStaticPaths() {
+  return fiches().map((fiche) => ({ params: { slug: fiche.acteur.slug }, props: { fiche } }));
+}
+
+type Props = { fiche: Fiche };
+const { fiche } = Astro.props;
+const { acteur, candidature } = fiche;
+const nom = acteur.name;
+
+const LIBELLE_VALEUR = new Map(ECHELLE.map((cran) => [cran.valeur, cran.libelle]));
+
+/** « 1 affirmation », « 2 affirmations ». Zéro prend le singulier en français. */
+function accorder(nombre: number, singulier: string, pluriel: string): string {
+  return `${nombre} ${nombre > 1 ? pluriel : singulier}`;
+}
+
+/*
+ * Décompte des positions, construit ici plutôt que dans le gabarit : la
+ * ponctuation dépend de la ligne qui se trouve être la dernière, et trois
+ * conditions imbriquées dans le HTML rendaient la phrase fausse sans que
+ * personne ne le voie à la relecture.
+ */
+const decompte = [
+  ...(fiche.personnelles > 0
+    ? [
+        `${accorder(fiche.personnelles, "issue", "issues")} de déclarations ou de documents de ${nom}`,
+      ]
+    : []),
+  ...fiche.reprises.map(
+    (reprise) =>
+      `${accorder(reprise.nombre, "reprise", "reprises")} de la position de ${reprise.nom}, faute de déclaration personnelle`,
+  ),
+  ...(fiche.inconnues.length > 0 ? [`${fiche.inconnues.length} sans position connue`] : []),
+];
+
+const url = new URL(`/candidats/${acteur.slug}`, SITE_URL).href;
+
+const description =
+  fiche.documentees === 0
+    ? `${nom}, candidature à l'élection présidentielle de 2027 : statut daté et sourcé. Aucune position n'est encore documentée sur les ${NOMBRE_AFFIRMATIONS} affirmations du test.`
+    : `Ce que ${nom} a déclaré sur les affirmations du test de ${SITE_NAME} : citation exacte, source et date. Position documentée sur ${fiche.documentees} des ${NOMBRE_AFFIRMATIONS}.`;
+
+const filAriane = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Candidats",
+      item: new URL("/candidats", SITE_URL).href,
+    },
+    { "@type": "ListItem", position: 3, name: nom, item: url },
+  ],
+};
+
+/*
+ * `Person` et rien de plus. Aucune propriété n'est déduite : pas de date de
+ * naissance, pas de fonction, rien qui ne soit déjà une donnée sourcée du
+ * dépôt. `memberOf` vient de la chaîne de reprise, comme le logo affiché.
+ */
+const personne = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: nom,
+  url,
+  ...(fiche.portrait ? { image: new URL(fiche.portrait, SITE_URL).href } : {}),
+  ...(fiche.parti ? { memberOf: { "@type": "Organization", name: fiche.parti.nom } } : {}),
+};
+---
+
+<BaseLayout
+  title={`${nom} : ses positions pour la présidentielle 2027`}
+  description={description}
+  updated={fiche.misAJour}
+>
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <a href="/">{SITE_NAME}</a>
+    <span aria-hidden="true">/</span>
+    <a href="/candidats">Candidats</a>
+  </nav>
+
+  {
+    /*
+     * Même cadre carré, même bordure, même taille pour tous : la règle de
+     * neutralité des portraits vaut sur la fiche comme au résultat. Les
+     * dimensions sont en attributs, pour que la place soit réservée avant le
+     * chargement.
+     */
+  }
+  <div class="identite">
+    {
+      fiche.portrait ? (
+        <img class="portrait" src={fiche.portrait} alt="" width="88" height="88" />
+      ) : (
+        <p class="portrait portrait-absent" aria-hidden="true">
+          {initiales(nom)}
+        </p>
+      )
+    }
+    <div>
+      <h1>{nom}</h1>
+      {
+        fiche.parti && (
+          <p class="parti">
+            {fiche.parti.logo && <img class="logo" src={fiche.parti.logo} alt="" height="22" />}
+            <span>{fiche.parti.nom}</span>
+          </p>
+        )
+      }
+    </div>
+  </div>
+
+  <DerniereMiseAJour date={fiche.misAJour} />
+
+  <p class="statut">
+    {LIBELLES_STATUT_CANDIDATURE[candidature.status]}, attestée le{" "}
+    <time datetime={candidature.statutDepuis}>{formatDateFr(candidature.statutDepuis)}</time>
+    {
+      fiche.statutSources.map((source) => (
+        <>
+          {" "}
+          par{" "}
+          <a href={source.url} rel="noreferrer">
+            {source.titre}
+          </a>{" "}
+          ({source.media})
+        </>
+      ))
+    }.
+  </p>
+
+  {
+    fiche.documentees === 0 ? (
+      <p class="question">
+        Aucune position de {nom} n'est documentée à ce jour sur les {NOMBRE_AFFIRMATIONS}{" "}
+        affirmations du test. Rien n'est attribué sans source publique : cette fiche se remplira
+        quand des déclarations, un programme ou la plateforme d'un parti permettront de coder une
+        position.
+      </p>
+    ) : (
+      <>
+        <p class="question">
+          Position documentée sur {fiche.documentees} des {NOMBRE_AFFIRMATIONS} affirmations du
+          test.
+        </p>
+        <ul class="decompte">
+          {decompte.map((ligne, index) => (
+            <li>{`${ligne}${index === decompte.length - 1 ? "." : " ;"}`}</li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  <p>
+    Pour comparer ces positions aux vôtres, <a href="/test">faites le test</a> : {
+      NOMBRE_AFFIRMATIONS
+    } affirmations, et un calcul qui reste dans votre navigateur.
+  </p>
+
+  {
+    fiche.parTheme.map((groupe) => (
+      <section aria-labelledby={`theme-${groupe.entrees[0]!.question.id}`}>
+        <h2 id={`theme-${groupe.entrees[0]!.question.id}`}>{groupe.theme}</h2>
+        {groupe.entrees.map((entree) => {
+          const { position, heriteDe } = entree.resolue!;
+          return (
+            <article class="position" id={entree.question.id}>
+              <h3>{entree.question.texte}</h3>
+              <p class="valeur">
+                Position retenue : <strong>{LIBELLE_VALEUR.get(position.value)}</strong>
+              </p>
+              {/*
+               * Les espaces explicites entre les lignes ne se voient pas à
+               * l'écran, où chacune est un bloc. Ils comptent pour le texte
+               * brut : sans eux, un robot ou un mode lecture lit
+               * « Déclaration directe.La citation… ».
+               */}
+              <p class="ligne">
+                <span>Origine : {entree.origine}.</span>{" "}
+                {heriteDe !== null && (
+                  <>
+                    <span class="heritage">
+                      Position de {heriteDe}, reprise faute de déclaration personnelle de {nom}.
+                    </span>{" "}
+                  </>
+                )}
+                <span>{LIBELLES_ADEQUATION[position.adequation]}</span>{" "}
+                <span>{LIBELLES_CONFIANCE[position.confidence]}</span>
+              </p>
+              {position.citation && (
+                <blockquote class="citation">« {position.citation} »</blockquote>
+              )}
+              {/*
+               * Une inférence n'a pas de verbatim : son raisonnement est la
+               * seule chose qui la rende contestable, et le schéma l'exige
+               * complet. Il est donc publié, et seulement pour elle.
+               */}
+              {position.provenance === "inference" && (
+                <p class="raisonnement">Raisonnement de l'éditeur : {position.rationale}</p>
+              )}
+              {position.sourcePrimaire && (
+                <p class="ligne">Propos d'origine : {position.sourcePrimaire}.</p>
+              )}
+              {entree.dateAncienne !== null && (
+                <p class="ancienne">
+                  Position tirée d'un document du {formatDateFr(entree.dateAncienne)}, antérieur à
+                  la campagne de 2027. Elle peut avoir changé depuis. Ce codage est provisoire : il
+                  sera remplacé dès la publication du programme présidentiel de cet acteur.
+                </p>
+              )}
+              <ul class="sources">
+                {entree.sources.map((source) => (
+                  <li>
+                    <a href={source.url} rel="noreferrer">
+                      {source.titre}
+                    </a>{" "}
+                    — {source.media},{" "}
+                    <time datetime={source.dateDeclaration}>
+                      {formatDateFr(source.dateDeclaration)}
+                    </time>
+                  </li>
+                ))}
+              </ul>
+              <p class="mise-a-jour">
+                Codage mis à jour le{" "}
+                <time datetime={position.updatedAt}>{formatDateFr(position.updatedAt)}</time>
+              </p>
+            </article>
+          );
+        })}
+      </section>
+    ))
+  }
+
+  {
+    fiche.inconnues.length > 0 && (
+      <section aria-labelledby="sans-position">
+        <h2 id="sans-position">Sans position documentée</h2>
+        <p>
+          Aucune source publique lue ne permet, à ce jour, de coder la position de {nom} sur{" "}
+          {fiche.inconnues.length > 1 ? "ces affirmations" : "cette affirmation"}. Dans le test,
+          elles sont écartées du calcul, pas comptées comme un désaccord.
+        </p>
+        <ul class="inconnues">
+          {fiche.inconnues.map((question) => (
+            <li id={question.id}>{question.texte}</li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <p class="signature">
+    La <a href="/methodologie">méthodologie</a> explique comment une position est établie et ce que signifient
+    l'origine, l'adéquation et la confiance. Une erreur ? La procédure de signalement est décrite dans
+    la <a href="/charte-editoriale">charte éditoriale</a>, et les corrections déjà publiées dans le <a
+      href="/corrections">registre</a
+    >.
+  </p>
+
+  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+  <script type="application/ld+json" set:html={JSON.stringify(personne)} is:inline />
+</BaseLayout>
+
+<style>
+  .identite {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-3);
+    margin-bottom: var(--pas-3);
+  }
+
+  .identite h1 {
+    margin: 0;
+  }
+
+  /*
+   * Cadre carré, bordure unique, haut de la photo privilégié : le même
+   * traitement qu'au résultat, à une autre échelle.
+   */
+  .portrait {
+    flex: none;
+    width: 88px;
+    height: 88px;
+    margin: 0;
+    object-fit: cover;
+    object-position: top center;
+    border: 1px solid var(--couleur-trait);
+    background: var(--couleur-trait);
+  }
+
+  .portrait-absent {
+    display: grid;
+    place-items: center;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    /*
+     * Fond de surface, pas la teinte des filets : sur `--couleur-trait`, les
+     * initiales en encre faible tombaient à 4,2:1, mesuré par capturer.mjs.
+     */
+    background: var(--couleur-surface);
+    color: var(--couleur-encre-faible);
+  }
+
+  .parti {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: var(--pas-1) 0 0;
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * Plaque claire, dans les deux thèmes, pour la même raison qu'au résultat :
+   * la plupart des logos sont du texte sombre sur fond transparent, et
+   * disparaissent sur le fond du thème nuit. C'est la seule couleur en dur de
+   * la page, et c'est la même que celle, justifiée, de `.logo` dans
+   * `Resultat.svelte`.
+   */
+  .logo {
+    flex: none;
+    height: 22px;
+    width: auto;
+    max-width: 88px;
+    object-fit: contain;
+    background: #ffffff;
+    padding: 2px 3px;
+    border: 1px solid var(--couleur-trait);
+  }
+
+  .statut {
+    font-size: var(--t-petit);
+  }
+
+  .decompte {
+    padding-left: var(--pas-3);
+    margin-top: calc(-1 * var(--pas-2));
+  }
+
+  /* Un filet par affirmation : il sépare deux positions, il ne décore pas. */
+  .position {
+    padding-top: var(--pas-3);
+    margin-top: var(--pas-4);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .position h3 {
+    margin-top: 0;
+  }
+
+  .valeur {
+    margin: 0 0 var(--pas-1);
+  }
+
+  .ligne {
+    color: var(--couleur-encre-faible);
+    margin: 0 0 var(--pas-1);
+  }
+
+  .ligne span {
+    display: block;
+  }
+
+  /*
+   * L'héritage est en pleine encre, pas en gris : c'est l'information qui
+   * empêche de prendre une ligne de parti pour une déclaration de candidat.
+   */
+  .ligne .heritage {
+    color: var(--couleur-encre);
+  }
+
+  .citation {
+    margin: var(--pas-2) 0;
+    padding-left: var(--pas-3);
+    border-left: 2px solid var(--couleur-trait);
+  }
+
+  /*
+   * Le raisonnement d'une inférence n'a PAS le filet d'une citation : c'est le
+   * texte de l'éditeur, pas une parole du candidat, et rien dans sa forme ne
+   * doit permettre de confondre les deux.
+   */
+  .raisonnement {
+    margin: var(--pas-2) 0;
+    color: var(--couleur-encre-faible);
+  }
+
+  /* En pleine encre et bordé : c'est ce qui empêche de prendre 2024 pour 2027. */
+  .ancienne {
+    margin: var(--pas-2) 0;
+    padding-left: var(--pas-2);
+    border-left: 2px solid var(--couleur-encre-faible);
+  }
+
+  .position .sources {
+    padding-left: var(--pas-3);
+    margin: var(--pas-2) 0 var(--pas-1);
+  }
+
+  .position .sources li {
+    margin-bottom: var(--pas-1);
+  }
+
+  .inconnues li {
+    margin-bottom: var(--pas-2);
+  }
+</style>

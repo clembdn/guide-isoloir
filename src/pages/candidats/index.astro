@@ -1,0 +1,192 @@
+---
+/*
+ * Liste des candidats suivis.
+ *
+ * ORDRE ALPHABÉTIQUE PAR `sortName`, jamais par couverture ni par notoriété :
+ * c'est la règle publiée sur `/charte-editoriale`. Trier par nombre de positions
+ * documentées mettrait en tête les candidats les mieux couverts par la presse,
+ * et une liste en tête de laquelle figure toujours le même nom se lit comme un
+ * classement.
+ *
+ * Chaque entrée reçoit exactement le même traitement : même cadre, même taille,
+ * mêmes lignes. La couverture est affichée pour tous, zéro compris.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import { fiches, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
+import { LIBELLES_STATUT_CANDIDATURE } from "../../lib/libelles";
+import { initiales } from "../../lib/initiales";
+import { SITE_NAME, SITE_URL, ELECTION } from "../../lib/site";
+import { formatDateFr } from "../../lib/date";
+
+const toutes = fiches();
+
+/*
+ * Un candidat retiré garde sa fiche et reste listé, mais à part : le mêler aux
+ * candidatures en cours laisserait croire qu'il est toujours en lice.
+ */
+const RETRAITS = new Set(["withdrawn", "eliminated"]);
+const enLice = toutes.filter((fiche) => !RETRAITS.has(fiche.candidature.status));
+const retirees = toutes.filter((fiche) => RETRAITS.has(fiche.candidature.status));
+
+/** La liste change quand une fiche change : sa date est celle de la plus récente. */
+const UPDATED = toutes.map((fiche) => fiche.misAJour).reduce((a, b) => (a > b ? a : b));
+
+function couverture(documentees: number): string {
+  return documentees === 0
+    ? "Aucune position documentée à ce jour"
+    : `Position documentée sur ${documentees} des ${NOMBRE_AFFIRMATIONS} affirmations`;
+}
+
+const filAriane = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Candidats",
+      item: new URL("/candidats", SITE_URL).href,
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title="Candidats à l'élection présidentielle 2027"
+  description={`Les ${enLice.length} candidats suivis pour l'élection présidentielle de 2027, par ordre alphabétique. Pour chacun : statut de candidature daté et sourcé, et ses positions sur les ${NOMBRE_AFFIRMATIONS} affirmations du test.`}
+  updated={UPDATED}
+>
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <a href="/">{SITE_NAME}</a>
+  </nav>
+
+  <h1>Candidats à l'élection présidentielle 2027</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p class="question">
+    {enLice.length} candidats suivis pour les scrutins du {formatDateFr(ELECTION.round1)} et du{" "}
+    {formatDateFr(ELECTION.round2)}, par ordre alphabétique. L'ordre n'exprime aucune préférence.
+  </p>
+
+  <ul class="candidats">
+    {
+      enLice.map((fiche) => (
+        <li>
+          {fiche.portrait ? (
+            <img
+              class="portrait"
+              src={fiche.portrait}
+              alt=""
+              width="56"
+              height="56"
+              loading="lazy"
+              decoding="async"
+            />
+          ) : (
+            <p class="portrait portrait-absent" aria-hidden="true">
+              {initiales(fiche.acteur.name)}
+            </p>
+          )}
+          <div>
+            <h2>
+              <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a>
+            </h2>
+            {fiche.parti && <p>{fiche.parti.nom}</p>}
+            <p>{LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status]}</p>
+            <p>{couverture(fiche.documentees)}</p>
+          </div>
+        </li>
+      ))
+    }
+  </ul>
+
+  {
+    retirees.length > 0 && (
+      <section aria-labelledby="retraits">
+        <h2 id="retraits">Candidatures retirées ou éliminées</h2>
+        <p>Leurs fiches restent en ligne, avec leur statut et l'historique de leurs positions.</p>
+        <ul class="retraits">
+          {retirees.map((fiche) => (
+            <li>
+              <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a> —{" "}
+              {LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status]}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <p>
+    Un candidat entre dans cette liste sur un acte public et daté : une déclaration de candidature,
+    ou une désignation par son parti. Ni un sondage ni une rumeur de presse ne suffisent. Les règles
+    sont décrites dans la <a href="/charte-editoriale">charte éditoriale</a>.
+  </p>
+
+  <p class="signature">
+    Pour comparer ces positions aux vôtres, <a href="/test">faites le test</a>. La{" "}
+    <a href="/methodologie">méthodologie</a> explique comment une position est établie, et pourquoi certains
+    candidats ne sont pas encore classés.
+  </p>
+
+  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+</BaseLayout>
+
+<style>
+  .candidats {
+    list-style: none;
+    padding: 0;
+    margin: var(--pas-5) 0 0;
+  }
+
+  .candidats > li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-3);
+    padding-block: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .candidats h2 {
+    font-size: var(--t-h3);
+    margin: 0 0 var(--pas-1);
+  }
+
+  .candidats p:not(.portrait) {
+    margin: 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  /* Même cadre que le résultat et la fiche : un carré, une bordure. */
+  .portrait {
+    flex: none;
+    width: 56px;
+    height: 56px;
+    margin: 0;
+    object-fit: cover;
+    object-position: top center;
+    border: 1px solid var(--couleur-trait);
+    background: var(--couleur-trait);
+  }
+
+  .portrait-absent {
+    display: grid;
+    place-items: center;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    /*
+     * Fond de surface, pas la teinte des filets : sur `--couleur-trait`, les
+     * initiales en encre faible tombaient à 4,2:1, mesuré par capturer.mjs.
+     */
+    background: var(--couleur-surface);
+    color: var(--couleur-encre-faible);
+  }
+
+  .retraits li {
+    margin-bottom: var(--pas-2);
+  }
+</style>

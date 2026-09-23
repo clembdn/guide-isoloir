@@ -31,6 +31,7 @@ const STRICT = process.argv.includes("--strict");
 const PAGES_FIXES = [
   "index.html",
   "comprendre.html",
+  "candidats.html",
   "a-propos.html",
   "methodologie.html",
   "charte-editoriale.html",
@@ -40,11 +41,11 @@ const PAGES_FIXES = [
 ];
 
 /**
- * Les articles de /comprendre sont générés depuis la collection : leur nombre
- * n'est pas connu d'avance. Ils sont ramassés par ce motif, et soumis aux mêmes
- * contrôles que les pages fixes.
+ * Les articles de /comprendre et les fiches de /candidats sont générés depuis
+ * les données : leur nombre n'est pas connu d'avance. Ils sont ramassés par ce
+ * motif, et soumis aux mêmes contrôles que les pages fixes.
  */
-const MOTIF_ARTICLES = /^comprendre\/.+\.html$/;
+const MOTIF_ARTICLES = /^(?:comprendre|candidats)\/.+\.html$/;
 
 /** Fichiers servis qui ne sont pas des pages mais ne doivent pas fuiter de domaine. */
 const AUTRES_FICHIERS_SERVIS = ["robots.txt", "llms.txt", "sitemap.xml"];

@@ -65,6 +65,9 @@ const ROUTES = [
   { chemin: "/resultat", nom: "Résultat" },
   { chemin: "/methodologie", nom: "Méthodologie" },
   { chemin: "/comprendre", nom: "Comprendre" },
+  { chemin: "/candidats", nom: "Candidats" },
+  /* La fiche la plus fournie : citations, reprises, avertissement d'ancienneté. */
+  { chemin: "/candidats/marine-le-pen", nom: "Fiche candidat" },
   { chemin: "/a-propos", nom: "À propos" },
   { chemin: "/financement", nom: "Financement" },
 ];

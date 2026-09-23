@@ -49,6 +49,7 @@ import {
 } from "../lib/previsualisation";
 import { SEUIL_PUBLICATION, seuilDepuisEnvironnement } from "../lib/seuils";
 import { media } from "../data/medias";
+import { partiDe } from "../lib/fiches";
 
 /*
  * Validation au build, côté serveur uniquement. Elle est référentielle : une
@@ -86,25 +87,16 @@ const questions = projeter(QUESTIONS);
  * qui ait à voyager dans le bundle d'une route budgétée à 20 ko. L'îlot ne
  * reçoit donc que trois chemins par candidat.
  *
- * Le parti d'un candidat est LE PREMIER ACTEUR DE TYPE `party` de sa chaîne de
- * reprise, et non le premier tout court. La nuance est apparue le jour où une
- * coalition est entrée dans la chaîne : `baselineActorIds[0]` valait alors
- * « Nouveau Front populaire », et l'écran affichait cette coalition dissoute à
- * la place du parti sous le nom de quatre candidats. Une coalition n'est pas
- * une appartenance ; elle explique d'où vient une POSITION, pas qui est le
- * candidat.
- *
- * Ce n'est pas une donnée séparée à tenir à jour : si un candidat change de
- * parti, c'est sa chaîne de reprise qui change, et le logo suit.
+ * Le parti d'un candidat est le premier acteur de type `party` de sa chaîne de
+ * reprise : voir `partiDe`, partagé avec les fiches candidat.
  */
 const nomParActeur = new Map(acteurs.map((acteur) => [acteur.id, acteur.name]));
-const estUnParti = new Set(
-  acteurs.filter((acteur) => acteur.kind === "party").map((acteur) => acteur.id),
-);
 
 const visuels = candidats.map((candidat) => {
-  const reprise = candidatures.find((c) => c.actorId === candidat.id)?.baselineActorIds ?? [];
-  const partiId = reprise.find((id) => estUnParti.has(id)) ?? null;
+  const partiId = partiDe(
+    candidatures.find((c) => c.actorId === candidat.id),
+    acteurs,
+  );
   return {
     actorId: candidat.id,
     portrait: media("portrait", candidat.id)?.chemin ?? null,

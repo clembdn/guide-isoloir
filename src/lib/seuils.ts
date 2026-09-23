@@ -138,6 +138,26 @@ export const PLANCHER_POURCENTAGE = 0.35;
 export const SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT = "2026-01-01";
 
 /**
+ * Date à signaler si les sources d'une position sont TOUTES antérieures à la
+ * campagne, sinon `null`.
+ *
+ * ON REGARDE LA PLUS RÉCENTE, pas la plus ancienne. Une position appuyée sur
+ * un programme de 2024 ET sur une déclaration de 2026 n'est pas une position
+ * périmée : elle est confirmée. Prendre la plus ancienne ferait apparaître un
+ * avertissement sur les codages les MIEUX sourcés, ce qui est le contraire du
+ * but.
+ *
+ * Partagée par l'écran de résultat et les fiches candidat, pour qu'une même
+ * position ne soit pas signalée ancienne sur l'un et pas sur l'autre.
+ */
+export function dateAnterieureALaCampagne(datesDeclaration: readonly string[]): string | null {
+  if (datesDeclaration.length === 0) return null;
+  // Format ISO : la comparaison lexicographique est la comparaison chronologique.
+  const plusRecente = datesDeclaration.reduce((a, b) => (a > b ? a : b));
+  return plusRecente < SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT ? plusRecente : null;
+}
+
+/**
  * Accord à partir duquel une affirmation est comptée comme « d'accord ».
  *
  * 0.75 correspond à un écart d'un cran au plus sur l'échelle de cinq
