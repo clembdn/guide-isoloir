@@ -196,8 +196,11 @@ const personne = {
 
   {
     fiche.parTheme.map((groupe) => (
-      <section aria-labelledby={`theme-${groupe.entrees[0]!.question.id}`}>
-        <h2 id={`theme-${groupe.entrees[0]!.question.id}`}>{groupe.theme}</h2>
+      <section aria-labelledby={groupe.theme.slug}>
+        <h2 id={groupe.theme.slug}>{groupe.theme.nom}</h2>
+        <p class="vers-theme">
+          <a href={`/themes/${groupe.theme.slug}`}>Tous les candidats sur ce thème</a>
+        </p>
         {groupe.entrees.map((entree) => {
           const { position, heriteDe } = entree.resolue!;
           return (
@@ -367,6 +370,11 @@ const personne = {
 
   .statut {
     font-size: var(--t-petit);
+  }
+
+  .vers-theme {
+    font-size: var(--t-petit);
+    margin-top: calc(-1 * var(--pas-2));
   }
 
   .decompte {

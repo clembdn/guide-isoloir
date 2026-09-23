@@ -32,6 +32,8 @@ const PAGES_FIXES = [
   "index.html",
   "comprendre.html",
   "candidats.html",
+  "themes.html",
+  "donnees.html",
   "a-propos.html",
   "methodologie.html",
   "charte-editoriale.html",
@@ -41,14 +43,21 @@ const PAGES_FIXES = [
 ];
 
 /**
- * Les articles de /comprendre et les fiches de /candidats sont générés depuis
- * les données : leur nombre n'est pas connu d'avance. Ils sont ramassés par ce
+ * Les articles de /comprendre et les fiches de /candidats et /themes sont
+ * générés depuis les données : leur nombre n'est pas connu d'avance. Ils sont ramassés par ce
  * motif, et soumis aux mêmes contrôles que les pages fixes.
  */
-const MOTIF_ARTICLES = /^(?:comprendre|candidats)\/.+\.html$/;
+const MOTIF_ARTICLES = /^(?:comprendre|candidats|themes)\/.+\.html$/;
 
 /** Fichiers servis qui ne sont pas des pages mais ne doivent pas fuiter de domaine. */
-const AUTRES_FICHIERS_SERVIS = ["robots.txt", "llms.txt", "sitemap.xml"];
+const AUTRES_FICHIERS_SERVIS = [
+  "robots.txt",
+  "llms.txt",
+  "sitemap.xml",
+  "donnees/guide-isoloir-2027.json",
+  "donnees/positions.csv",
+  "donnees/positions-retenues.csv",
+];
 
 /**
  * Marqueurs d'espace réservé. Un seul suffit à refuser la publication.
@@ -110,6 +119,24 @@ function texteVisible(html) {
     .trim();
 }
 
+/**
+ * Texte lisible d'un JSON : ses chaînes, clés comprises, pas sa syntaxe.
+ *
+ * Dans une page, « null » trahit une valeur absente rendue à l'écran. Dans un
+ * export JSON, `null` EST la bonne écriture de « pas de reprise » : le
+ * chercher dans la syntaxe refuserait tout export honnête. On cherche donc dans
+ * les chaînes seulement — une chaîne `"null"` resterait une faute.
+ */
+function chainesJson(contenu) {
+  const chaines = [];
+  JSON.parse(contenu, (cle, valeur) => {
+    chaines.push(cle);
+    if (typeof valeur === "string") chaines.push(valeur);
+    return valeur;
+  });
+  return chaines.join(" ");
+}
+
 /** Sans accents ni casse : « à compléter » et « A COMPLETER » sont la même faute. */
 function normaliser(texte) {
   return texte.normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -167,7 +194,13 @@ for (const fichier of aExaminer) {
 
   const corpus = {
     brut: normaliser(contenu),
-    visible: normaliser(estHtml ? texteVisible(contenu) : contenu),
+    visible: normaliser(
+      estHtml
+        ? texteVisible(contenu)
+        : extname(fichier) === ".json"
+          ? chainesJson(contenu)
+          : contenu,
+    ),
   };
 
   for (const { motif, nom, portee } of MARQUEURS) {

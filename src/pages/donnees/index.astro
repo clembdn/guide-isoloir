@@ -1,0 +1,229 @@
+---
+/*
+ * Données ouvertes : ce qui est téléchargeable, sous quelle licence, et ce
+ * qu'il faut savoir avant de le réutiliser.
+ *
+ * Les avertissements de cette page sont les MÊMES que ceux du fichier JSON,
+ * et pour la même raison : un export se lit sans la page qui le présente. Ce
+ * qui compte pour le lire — une reprise n'est pas une déclaration, une case
+ * absente n'est pas un zéro — doit voyager avec lui.
+ *
+ * Balisage `Dataset` : c'est lui qui rend le jeu trouvable par Google Dataset
+ * Search et lisible par les assistants qui cherchent une source structurée.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import {
+  DONNEES_MISES_A_JOUR,
+  DONNEES_OUVERTES,
+  NOMBRE_AFFIRMATIONS,
+  positionsRetenues,
+} from "../../lib/fiches";
+import { ECHELLE } from "../../lib/echelle";
+import { NIVEAUX_RESOLUTION } from "../../lib/moteur";
+import {
+  EDITOR_NAME,
+  LICENCE_DONNEES,
+  REPOSITORY_URL,
+  SITE_NAME,
+  SITE_URL,
+  ELECTION,
+} from "../../lib/site";
+
+const UPDATED = DONNEES_MISES_A_JOUR;
+const retenues = positionsRetenues();
+const candidats = DONNEES_OUVERTES.candidatures.length;
+
+/** Période couverte : de la plus ancienne déclaration citée au second tour. */
+const PREMIERE_DECLARATION = DONNEES_OUVERTES.sourcesPositions
+  .map((source) => source.dateDeclaration)
+  .reduce((a, b) => (a < b ? a : b));
+
+const FICHIERS = [
+  {
+    chemin: "/donnees/positions-retenues.csv",
+    format: "CSV",
+    type: "text/csv",
+    titre: "Positions retenues",
+    description: `Une ligne par couple candidat et affirmation documenté : la position que le test compte, son origine, et l'acteur dont elle est reprise le cas échéant. ${retenues.length} lignes.`,
+  },
+  {
+    chemin: "/donnees/positions.csv",
+    format: "CSV",
+    type: "text/csv",
+    titre: "Positions codées",
+    description: `Une ligne par position codée, partis compris, avec la citation, la justification du codage et les sources. ${DONNEES_OUVERTES.positions.length} lignes.`,
+  },
+  {
+    chemin: "/donnees/guide-isoloir-2027.json",
+    format: "JSON",
+    type: "application/json",
+    titre: "Export complet",
+    description:
+      "Affirmations, échelle, chaîne de résolution, acteurs, candidatures, positions, sources et positions retenues : de quoi refaire le calcul.",
+  },
+] as const;
+
+const AVERTISSEMENTS = [
+  "Une position reprise d'un parti ou d'une coalition n'est pas une déclaration du candidat. Elle est signalée dans les colonnes reprise_de.",
+  "Un couple candidat et affirmation absent des positions retenues est une position inconnue, pas une position neutre. Le test l'écarte du calcul.",
+  "Le statut de relecture « reconciled » signifie « publiable ». Le double codage à l'aveugle n'a pas encore eu lieu.",
+  "Les citations restent la propriété de leurs auteurs et sont reproduites au titre du droit de courte citation. La licence couvre le codage, pas les verbatims.",
+];
+
+const dataset = {
+  "@context": "https://schema.org",
+  "@type": "Dataset",
+  name: `${SITE_NAME} — positions des candidats à l'élection présidentielle de 2027`,
+  description: `Positions de ${candidats} candidats à l'élection présidentielle française de 2027 sur ${NOMBRE_AFFIRMATIONS} affirmations, codées sur une échelle de cinq crans, chacune avec sa citation, sa source datée, son origine, son niveau de confiance et son adéquation à l'affirmation. Les positions reprises d'un parti sont distinguées des déclarations personnelles.`,
+  url: new URL("/donnees", SITE_URL).href,
+  license: LICENCE_DONNEES.url,
+  isAccessibleForFree: true,
+  inLanguage: "fr-FR",
+  dateModified: UPDATED,
+  temporalCoverage: `${PREMIERE_DECLARATION}/${ELECTION.round2}`,
+  spatialCoverage: { "@type": "Place", name: "France" },
+  keywords: [
+    "élection présidentielle 2027",
+    "positions des candidats",
+    "programmes politiques",
+    "France",
+  ],
+  ...(EDITOR_NAME
+    ? {
+        creator: {
+          "@type": "Person",
+          name: EDITOR_NAME,
+          url: new URL("/a-propos", SITE_URL).href,
+        },
+      }
+    : {}),
+  distribution: FICHIERS.map((fichier) => ({
+    "@type": "DataDownload",
+    name: fichier.titre,
+    encodingFormat: fichier.type,
+    contentUrl: new URL(fichier.chemin, SITE_URL).href,
+  })),
+};
+---
+
+<BaseLayout
+  title="Données ouvertes : positions des candidats 2027"
+  description={`Téléchargez en CSV et JSON les positions des candidats à l'élection présidentielle de 2027 codées par ${SITE_NAME}, avec leurs sources. Licence ${LICENCE_DONNEES.nom}.`}
+  updated={UPDATED}
+>
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <a href="/">{SITE_NAME}</a>
+  </nav>
+
+  <h1>Données ouvertes</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p class="question">
+    Toutes les positions publiées sur ce site, avec leurs citations et leurs sources, en
+    téléchargement libre. Rien n'est réservé au site : ce que le test compte se trouve ici.
+  </p>
+
+  <h2>Fichiers</h2>
+
+  <dl class="fichiers">
+    {
+      FICHIERS.map((fichier) => (
+        <>
+          <dt>
+            <a href={fichier.chemin} download>
+              {fichier.titre}
+            </a>{" "}
+            <span class="format">{fichier.format}</span>
+          </dt>
+          <dd>{fichier.description}</dd>
+        </>
+      ))
+    }
+  </dl>
+
+  <p>
+    Les adresses de ces fichiers ne changent pas. Ils sont mis à jour à chaque modification des
+    données, et chaque modification est tracée dans l'historique du{" "}
+    {REPOSITORY_URL ? <a href={REPOSITORY_URL}>dépôt public</a> : "dépôt public"}.
+  </p>
+
+  <h2>Avant de réutiliser</h2>
+
+  <ul>
+    {AVERTISSEMENTS.map((avertissement) => <li>{avertissement}</li>)}
+  </ul>
+
+  <h2>Licence</h2>
+
+  <p>
+    Les données sont publiées sous licence{" "}
+    <a href={LICENCE_DONNEES.url} rel="license noreferrer">{LICENCE_DONNEES.nom}</a>. Leur
+    réutilisation est libre, y compris commerciale, à condition de citer la source et de publier
+    sous la même licence ce que vous en tirez. Mention suggérée : « Source : {SITE_NAME}, {
+      new URL(SITE_URL).host
+    }, licence {LICENCE_DONNEES.nom} ». Le détail est dans les{" "}
+    <a href="/mentions-legales">mentions légales</a>.
+  </p>
+
+  <h2>Lire les colonnes</h2>
+
+  <h3>valeur</h3>
+  <p>La position sur l'affirmation, de 2 à −2 :</p>
+  <ul>
+    {
+      ECHELLE.map((cran) => (
+        <li>
+          {cran.valeur} : {cran.libelle}
+        </li>
+      ))
+    }
+  </ul>
+
+  <h3>provenance et origine</h3>
+  <p>
+    D'où vient la position, du maillon le plus fort au plus faible. Quand plusieurs existent, le
+    test retient le plus fort.
+  </p>
+  <ol>
+    {
+      NIVEAUX_RESOLUTION.map((niveau) => (
+        <li>
+          <code>{niveau.cle}</code> : {niveau.libelle}
+        </li>
+      ))
+    }
+  </ol>
+
+  <h3>confiance et adequation</h3>
+  <p>
+    <code>confiance</code> dit ce que vaut la source : <code>high</code>, <code>medium</code> ou{
+      " "
+    }
+    <code>low</code>. <code>adequation</code> dit si la citation porte sur la mesure exactement posée
+    (<code>directe</code>), sur une partie seulement (<code>partielle</code>), ou si la valeur est
+    déduite d'une autre position (<code>deduite</code>). Hors adéquation directe, la valeur ne
+    dépasse jamais 1 en valeur absolue. Aucune des deux n'entre dans le score : elles se lisent,
+    elles ne se calculent pas. La <a href="/methodologie">méthodologie</a> en donne le détail.
+  </p>
+
+  <script type="application/ld+json" set:html={JSON.stringify(dataset)} is:inline />
+</BaseLayout>
+
+<style>
+  .fichiers dt {
+    font-weight: 600;
+    margin-top: var(--pas-3);
+  }
+
+  .fichiers dd {
+    margin: var(--pas-1) 0 0;
+    color: var(--couleur-encre-faible);
+  }
+
+  .format {
+    font-weight: 400;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+</style>

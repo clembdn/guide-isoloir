@@ -1,0 +1,88 @@
+---
+/*
+ * Liste des thèmes, dans l'ordre où le test les pose.
+ *
+ * Chaque thème liste ses affirmations en clair : c'est ce qui permet de savoir,
+ * avant de cliquer, sur quoi exactement les candidats sont comparés. Un titre
+ * de thème seul ne dit pas si « retraites » veut dire l'âge légal, la durée de
+ * cotisation ou la capitalisation.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import { pagesThemes, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
+
+const themes = pagesThemes();
+const UPDATED = themes.map((theme) => theme.misAJour).reduce((a, b) => (a > b ? a : b));
+
+const filAriane = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
+    { "@type": "ListItem", position: 2, name: "Thèmes", item: new URL("/themes", SITE_URL).href },
+  ],
+};
+---
+
+<BaseLayout
+  title="Les thèmes de l'élection présidentielle 2027"
+  description={`Les ${themes.length} thèmes et ${NOMBRE_AFFIRMATIONS} affirmations sur lesquels ${SITE_NAME} compare les candidats à l'élection présidentielle de 2027, avec la position de chacun.`}
+  updated={UPDATED}
+>
+  <nav class="fil-ariane" aria-label="Fil d'Ariane">
+    <a href="/">{SITE_NAME}</a>
+  </nav>
+
+  <h1>Les thèmes de l'élection présidentielle 2027</h1>
+  <DerniereMiseAJour date={UPDATED} />
+
+  <p class="question">
+    {themes.length} thèmes, {NOMBRE_AFFIRMATIONS} affirmations. Pour chacune, la position de chaque candidat
+    en lice, et le lien vers sa source.
+  </p>
+
+  <p>
+    Les affirmations portent sur des décisions qui relèvent du président ou de la majorité qu'il
+    cherche à former. Les règles de sélection sont décrites dans la{" "}
+    <a href="/charte-editoriale">charte éditoriale</a>.
+  </p>
+
+  {
+    themes.map((theme) => (
+      <section class="theme" aria-labelledby={theme.slug}>
+        <h2 id={theme.slug}>
+          <a href={`/themes/${theme.slug}`}>{theme.nom}</a>
+        </h2>
+        <ul>
+          {theme.affirmations.map((affirmation) => (
+            <li>
+              <a href={`/themes/${theme.slug}#${affirmation.question.id}`}>
+                {affirmation.question.texte}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+
+  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+</BaseLayout>
+
+<style>
+  .theme {
+    margin-top: var(--pas-5);
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .theme h2 {
+    font-size: var(--t-h3);
+    margin-top: 0;
+  }
+
+  .theme li {
+    margin-bottom: var(--pas-2);
+  }
+</style>

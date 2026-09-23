@@ -49,6 +49,16 @@ export const CONTACT_EMAIL: string | null = "contact@guide-isoloir.fr";
  */
 export const REPOSITORY_URL: string | null = "https://github.com/clembdn/guide-isoloir";
 
+/**
+ * Licence des données, telle que `LICENSES.md` et les mentions légales la
+ * déclarent. Reprise dans les exports de `/donnees` et dans leur balisage
+ * `Dataset` : les trois doivent dire la même chose.
+ */
+export const LICENCE_DONNEES = {
+  nom: "CC BY-SA 4.0",
+  url: "https://creativecommons.org/licenses/by-sa/4.0/deed.fr",
+} as const;
+
 /** Dates du scrutin (métropole). */
 export const ELECTION = {
   round1: "2027-04-18",
@@ -67,6 +77,8 @@ type NavEntry = {
 export const FOOTER_NAV: readonly NavEntry[] = [
   { href: "/test", label: "Le test" },
   { href: "/candidats", label: "Candidats" },
+  { href: "/themes", label: "Thèmes" },
+  { href: "/donnees", label: "Données ouvertes" },
   { href: "/comprendre", label: "Comprendre" },
   { href: "/a-propos", label: "À propos" },
   { href: "/methodologie", label: "Méthodologie" },
