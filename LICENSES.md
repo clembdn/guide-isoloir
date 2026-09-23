@@ -39,15 +39,25 @@ Fichier : [`src/polices/OFL.txt`](src/polices/OFL.txt)
 
 Relèvent de l'OFL 1.1 :
 
-- `src/polices/instrument-sans-latin.woff2` ;
-- `src/polices/instrument-sans-latin-ext.woff2`.
+- `src/polices/bricolage-grotesque-latin.woff2` ;
+- `src/polices/bricolage-grotesque-latin-ext.woff2`.
 
-**Instrument Sans**, par Rodrigo Fuenzalida et Jordan Egstad
-(`github.com/Instrument/instrument-sans`), copyright 2022 The Instrument Sans
-Project Authors. L'OFL autorise l'usage commercial, la modification et
-l'auto-hébergement sans redevance, et impose de conserver le texte de licence,
-ce que fait `src/polices/OFL.txt`. Elle interdit de vendre la police seule et
-d'employer les noms réservés pour une version modifiée.
+**Bricolage Grotesque**, par Mathieu Triay (`github.com/ateliertriay/bricolage`),
+copyright 2022 The Bricolage Grotesque Project Authors. L'OFL autorise l'usage
+commercial, la modification et l'auto-hébergement sans redevance, et impose de
+conserver le texte de licence, ce que fait `src/polices/OFL.txt`. Elle interdit
+de vendre la police seule et d'employer les noms réservés pour une version
+modifiée.
+
+**Les deux fichiers sont des versions modifiées** : l'axe de taille optique y est
+figé à 28 et l'axe de graisse borné à 400-700, par instanciation avec fontTools.
+L'OFL l'autorise explicitement. Le nom « Bricolage Grotesque » n'est pas un nom
+réservé au sens de la licence — la police n'en déclare aucun — donc le conserver
+est licite ; la modification est signalée ici et dans `src/styles/base.css` pour
+qu'elle ne soit pas prise pour l'original.
+
+Instrument Sans, employée jusqu'au 22 septembre 2026, a été retirée du dépôt avec
+sa licence. L'historique git la conserve.
 
 La police est auto-hébergée, pas appelée à distance : `font-src 'self'` l'impose,
 et un test Playwright vérifie qu'aucune requête ne sort vers un domaine tiers.
@@ -91,6 +101,26 @@ ni cession, ni partenariat, ni approbation, et `/credits-images` l'écrit.
 
 Une demande de retrait émanant d'un auteur ou d'un titulaire est honorée, et
 consignée sur `/corrections`.
+
+## Marque — tous droits réservés
+
+La marque est une œuvre de l'éditeur, et **elle n'est couverte par aucune des deux
+licences ci-dessus.** L'AGPL couvre le code qui l'affiche, pas le dessin.
+
+Relèvent de ce régime :
+
+- `src/marque/guide-isoloir.svg` et `src/marque/isoloir.svg`, les fichiers maîtres ;
+- `src/marque/guide-isoloir-source.png`, le dessin d'origine ;
+- `public/favicon.svg`, `public/apple-touch-icon.png` et
+  `public/medias/marque/partage.png`, qui en dérivent.
+
+Réutiliser le code de ce dépôt est libre ; s'en servir pour publier un site sous
+le nom ou le signe **Guide Isoloir** ne l'est pas. C'est la contrepartie directe
+du positionnement : un site dont l'argument est un éditeur identifié ne peut pas
+laisser sa marque se porter par n'importe qui.
+
+Le script qui produit les déclinaisons, `scripts/generer-marque.mjs`, est du
+code : il relève de l'AGPL comme le reste de `scripts/`.
 
 ## Ni l'un ni l'autre
 

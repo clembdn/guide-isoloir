@@ -21,7 +21,36 @@
  * état, pas la page qui s'en excuse.
  */
 import "../styles/base.css";
-import { SITE_NAME, SITE_URL, FOOTER_NAV, EDITOR_NAME, IS_PUBLISHABLE } from "../lib/site";
+import {
+  SITE_NAME,
+  SITE_URL,
+  SITE_TAGLINE,
+  FOOTER_NAV,
+  EDITOR_NAME,
+  IS_PUBLISHABLE,
+} from "../lib/site";
+
+/*
+ * Le bloc-marque est CHARGÉ COMME IMAGE, pas inséré dans le HTML.
+ *
+ * Le SVG en ligne était tentant : il se serait coloré par `currentColor`, sans
+ * qu'aucune valeur ne soit recopiée. Mesuré, il coûtait 3,2 ko gzip PAR PAGE,
+ * sur une page qui en pèse 3,7 — des courbes de Bézier ne se compressent pas.
+ * Un fichier externe est téléchargé une fois pour les dix-sept pages.
+ *
+ * Le prix de ce choix est que le fichier servi porte ses deux teintes en dur,
+ * puisqu'une image n'hérite d'aucune variable CSS. Il est donc GÉNÉRÉ depuis le
+ * maître par `scripts/generer-marque.mjs`, qui recopie la variable une fois
+ * pour toutes. Ne pas le modifier à la main.
+ *
+ * Les dimensions sont portées en attributs : sans elles, l'en-tête saute au
+ * chargement, et le saut de mise en page est ce que Lighthouse punit le plus.
+ */
+const MARQUE = {
+  src: "/medias/marque/guide-isoloir.svg",
+  largeur: 205,
+  hauteur: 40,
+} as const;
 
 type Props = {
   title: string;
@@ -104,7 +133,25 @@ const jsonLd = {
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
+    {
+      /*
+       * Trois icônes, pas une. Le SVG détaille un cadre et deux pans de
+       * rideau : à la taille d'un onglet (16-32 px), le filet qui les sépare
+       * se perd dans l'anticrénelage et le dessin devient un bloc violet
+       * flou. Les PNG reprennent le même signe sur un fond plein, à une
+       * échelle pensée pour rester lisible en petit — c'est le traitement de
+       * l'icône Apple, étendu aux tailles d'onglet. Voir
+       * scripts/generer-marque.mjs.
+       *
+       * Le SVG reste déclaré en premier pour les agents qui savent en tirer
+       * parti (barre d'adresse, favoris) ; les PNG sizés qui suivent sont ce
+       * que Chrome et Edge choisissent pour l'onglet lui-même.
+       */
+    }
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon-32.png" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/favicon-48.png" type="image/png" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     {horsIndex && <meta name="robots" content="noindex, nofollow" />}
 
     <meta property="og:type" content="website" />
@@ -113,6 +160,23 @@ const jsonLd = {
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
     <meta property="og:locale" content="fr_FR" />
+
+    {
+      /*
+       * Carte de partage. Une seule pour tout le site : elle porte la marque et
+       * la promesse, rien qui dépende de la page. Une carte par page supposerait
+       * un rendu au build, donc une image générée pour /resultat — c'est-à-dire
+       * une image des réponses de quelqu'un. On s'en tient à une carte fixe.
+       *
+       * `og:image:alt` n'est pas décoratif : plusieurs lecteurs de flux le lisent
+       * à la place de l'image.
+       */
+    }
+    <meta property="og:image" content={new URL("/medias/marque/partage.png", SITE_URL).href} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={`${SITE_NAME} — ${SITE_TAGLINE}`} />
+    <meta name="twitter:card" content="summary_large_image" />
 
     {
       !horsIndex && (
@@ -127,7 +191,15 @@ const jsonLd = {
 
       <header class="entete">
         <div class={libre ? "enveloppe-large" : "enveloppe"}>
-          <a class="marque" href="/">{SITE_NAME}</a>
+          <a class="marque" href="/">
+            <img
+              class="marque-bloc"
+              src={MARQUE.src}
+              width={MARQUE.largeur}
+              height={MARQUE.hauteur}
+              alt={`${SITE_NAME}, retour à l'accueil`}
+            />
+          </a>
           {
             actionEntete && (
               <a class="action entete-action" href="/test">

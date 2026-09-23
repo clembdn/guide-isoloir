@@ -156,16 +156,51 @@ exactement ce pour quoi il existe.
 
 ## 3. Typographie
 
-**Instrument Sans**, SIL Open Font License 1.1, auto-hébergée dans `src/polices/`, licence dans
-`src/polices/OFL.txt`.
+**Bricolage Grotesque**, de Mathieu Triay, SIL Open Font License 1.1, auto-hébergée dans
+`src/polices/`, licence dans `src/polices/OFL.txt`.
+
+**Elle a remplacé Instrument Sans le 22 septembre 2026.** Quatre familles ont été rendues sur le
+contenu réel — le titre d'accueil, la première affirmation du questionnaire, un extrait de
+classement mesuré, les glyphes français — aux deux largeurs, toutes autres valeurs égales. Le
+spécimen est conservé dans `docs/maquettes/polices.html`.
+
+Le motif du changement n'est pas un défaut d'Instrument Sans : c'était une grotesque d'interface
+irréprochable, et c'est précisément le problème. On la reconnaît sur n'importe quel produit
+logiciel, et le site a besoin d'une voix. Les deux autres candidates ont été écartées pour une
+raison chacune : **Archivo** est solide mais très employée depuis 2023 ; **Schibsted Grotesk** est
+dessinée pour la presse, donc excellente, mais plus consensuelle. Bricolage vient de l'édition
+indépendante : ni administrative, ni logicielle. C'est l'écart cherché.
 
 C'est une **police variable** : un seul fichier par plage Unicode couvre toute l'étendue des
 graisses, déclaré `font-weight: 400 700`. Sur une page en français, seule la plage `latin` se
-charge — les caractères accentués français y sont tous. **Coût réel : 29 ko.**
+charge — les caractères accentués français y sont tous. **Coût réel : 38 ko**, contre 29 pour
+Instrument Sans.
 
 Deux graisses employées, et pas une de plus : **400** pour le corps, **700** pour les titres,
-l'action et les termes en gras. La graisse des titres est montée de 600 à 700 : « Signal » les
-voulait discrets, « Clair » les veut affirmés. Pas d'italique pour l'instant.
+l'action et les termes en gras. Pas d'italique pour l'instant.
+
+### L'axe de taille optique est figé à 28
+
+Bricolage porte un axe `opsz`, qui laisse le navigateur choisir seul une coupe serrée pour les
+titres et une coupe aérée pour le corps. **Il a été mesuré, puis figé.**
+
+| Rendu        | Poids `latin` | Ce qu'on voit                                                      |
+| ------------ | ------------- | ------------------------------------------------------------------ |
+| Axe conservé | 71 ko         | Titre au maximum de son caractère, corps au maximum de son confort |
+| Figé à 28    | 38 ko         | Titre presque aussi serré, corps confortable                       |
+| Figé à 14    | 38 ko         | Titre nettement plus lâche                                         |
+| Figé à 96    | 38 ko         | Corps visiblement à l'étroit                                       |
+
+Les quatre ont été comparés côte à côte sur le titre d'accueil à 60 px et le corps à 17 px.
+**33 ko pour le reste du chemin n'ont pas été jugés dus** sur un site dont la promesse inclut la
+vitesse. Restaurer l'axe est un changement d'une ligne dans la commande d'instanciation.
+
+Les fichiers sont produits depuis la version servie par Google Fonts, dont le sous-ensemble latin
+est déjà découpé, puis instanciés avec fontTools :
+
+```python
+instantiateVariableFont(f, {"opsz": 28, "wght": (400, 400, 700)})
+```
 
 ### Échelle
 
@@ -356,16 +391,81 @@ système :
 - `prefers-reduced-motion` actif : aucune mise en page ne bouge ;
 - aucune requête vers un domaine tiers.
 
-## 10. Ce qui reste à faire
+## 10. Marque
 
-- **Logo** : le rideau d'isoloir, dans ses déclinaisons (brief §4). Rien n'existe.
-- **Favicon** : `public/favicon.svg` est encore un carré provisoire.
-- **Carte partageable** : 1080 × 1350 et 1080 × 1920, générée côté client.
+Le logo est dessiné par l'éditeur. Il tient en deux formes, un signe et un mot, et se décline en
+cinq fichiers — pas un de plus.
+
+### Le signe
+
+Un isoloir vu de face : un cadre ouvert par le bas, et deux rideaux écartés. Il dit à la fois le
+nom du site et son sujet, sans emprunter à l'État. **Aucune Marianne, aucun bleu-blanc-rouge**,
+conformément au brief §3 : le risque est juridique autant qu'esthétique.
+
+Le mot porte une boussole dans le « o » d'Isoloir. C'est la seule licence prise avec la lisibilité,
+et elle tient jusqu'à 120 px de large, mesuré.
+
+### Les fichiers
+
+| Fichier                               | Rôle                                              |
+| ------------------------------------- | ------------------------------------------------- |
+| `src/marque/guide-isoloir.svg`        | Bloc complet, signe + mot. Maître.                |
+| `src/marque/isoloir.svg`              | Signe seul. Maître.                               |
+| `src/marque/guide-isoloir-source.png` | Le dessin d'origine, conservé pour la provenance. |
+| `public/favicon.svg`                  | Le signe détaillé, sur fond transparent.          |
+| `public/favicon-32.png`               | 32 × 32, fond plein. Onglet Chrome et Edge.       |
+| `public/favicon-48.png`               | 48 × 48, fond plein. Windows haute densité.       |
+| `public/apple-touch-icon.png`         | 180 × 180, fond plein. iOS n'accepte que du PNG.  |
+| `public/medias/marque/partage.png`    | 1200 × 630, aperçu de lien.                       |
+
+Les quatre PNG se régénèrent par `node scripts/generer-marque.mjs`, qui compose les SVG maîtres et
+les photographie avec le Chromium de Playwright. **Aucune dépendance ajoutée.** Le jour où la
+police change, la carte de partage est périmée : la refaire coûte une commande.
+
+**Pourquoi le favicon d'onglet n'est pas le SVG.** Le SVG détaille un cadre et deux pans de rideau
+séparés par un filet blanc. Redimensionné à la taille d'un onglet, 16 à 32 px, ce filet se perd
+dans l'anticrénelage et le dessin devient un bloc violet flou — c'est le défaut observé, décrit
+comme « un carré moche ». Les PNG de petite taille reprennent le traitement de l'icône Apple —
+fond plein, signe seul, échelle pensée pour rester lisible en petit — plutôt que de redimensionner
+le dessin détaillé. Le SVG reste déclaré en premier dans l'en-tête pour les agents qui savent en
+tirer parti ; les PNG qui suivent sont ce que Chrome et Edge choisissent pour l'onglet.
+
+### Une seule couleur, et elle vient du dehors
+
+Les SVG maîtres n'écrivent aucune valeur : ils emploient `currentColor`. L'en-tête leur donne la
+teinte de signature, la carte de partage leur donne du blanc sur aplat violet. **Aucun violet du
+logo ne peut donc diverger de celui du système** — c'est la raison du choix, pas une élégance.
+
+Le dessin d'origine est en `#42279d`, un violet plus sombre que la signature `#5321d6`. Le logo a
+été **aligné sur le jeton**, pas l'inverse : la signature porte des contrastes mesurés dans les
+deux schémas, une seconde teinte proche les rendrait faux sans que rien ne le signale. Si l'éditeur
+préfère `#42279d`, c'est le jeton qui change, et les contrastes se remesurent.
+
+Deux exceptions inévitables, toutes deux documentées dans les fichiers : le favicon, chargé comme
+image hors du document, n'hérite d'aucune variable CSS et recopie donc les deux valeurs à la main ;
+les PNG sont des pixels figés.
+
+### Ce que le logo ne fait pas
+
+- **Il ne porte pas de couleur de parti**, ni n'approche un contenu politique.
+- **Il ne remplace pas le nom de l'éditeur.** Celui-ci reste dans le texte visible du pied de
+  chaque page publique, et un garde-fou de build le vérifie.
+- **Il n'est pas un texte.** Le lien de l'en-tête porte donc `aria-label`, et le SVG
+  `aria-hidden` : un lecteur d'écran annonce « Guide Isoloir, retour à l'accueil ».
+
+---
+
+## 11. Ce qui reste à faire
+
+- **Carte partageable de résultat** : 1080 × 1350 et 1080 × 1920, générée côté client. À ne pas
+  confondre avec `public/medias/marque/partage.png`, qui est l'aperçu de lien du site et ne dépend
+  d'aucune réponse.
 - **Illustrations de rubrique** : les cartes de `/comprendre` portent aujourd'hui la couleur et la
   typographie seules. Les photographies libres essayées ont été jugées amateur par l'éditeur et
   retirées. Une piste graphique reste à trancher.
 - **Préchargement de la police** : `<link rel="preload">` sur le fichier latin réduirait le
-  clignotement au premier rendu. À mesurer avant d'ajouter, pas à supposer.
+  clignotement au premier rendu. Le fichier est passé de 29 à 38 ko avec Bricolage : l'arbitrage
+  mérite d'être mesuré, pas supposé.
 - **Lighthouse** : à relancer sur `/`, `/test`, `/resultat` et un article après cette refonte.
 - **Écran de résultat** : il suit la palette par les jetons, mais sa densité n'a pas été
   retravaillée pour la nouvelle direction.
