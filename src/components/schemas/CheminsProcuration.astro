@@ -1,0 +1,239 @@
+---
+/*
+ * Schéma : les trois chemins pour établir une procuration, en embranchement.
+ *
+ * Un tronc, trois branches coudées — comme un aiguillage ferroviaire ou le
+ * graphe d'un historique. Pas de cartes : la structure est portée par les
+ * traits et la typographie. Chaque branche dit son titre, ses étapes dans
+ * l'ordre, et, à droite, ce qu'elle coûte en déplacement.
+ *
+ * Trois colonnes pastel identiques ont été essayées le 23 septembre 2026 ;
+ * l'éditeur les a jugées « trop IA ». Le skill taste refuse d'ailleurs les
+ * rangées de trois cartes égales.
+ *
+ * CE QUE LE DÉPLACEMENT DIT, ET NE DIT PAS. Le chemin entièrement en ligne
+ * évite le commissariat, mais demande une identité certifiée, obtenue AVANT
+ * sur rendez-vous en mairie (article, paragraphe suivant le schéma) : la
+ * colonne de droite le dit, pour ne pas le vendre comme « zéro démarche ».
+ *
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+import Icone from "../Icone.astro";
+
+type Branche = {
+  teinte: string;
+  titre: string;
+  precision: string;
+  etapes: readonly string[];
+  deplacement: string;
+};
+
+const BRANCHES: readonly Branche[] = [
+  {
+    teinte: "t-indigo",
+    titre: "En deux temps",
+    precision: "sans identité numérique",
+    etapes: [
+      "En ligne sur Maprocuration, avec FranceConnect : adresse électronique et mandataire, puis une référence reçue par courriel",
+      "En personne, dans n'importe quel commissariat ou gendarmerie, où que ce soit en France, avec une pièce d'identité et la référence",
+      "Récépissé, puis courriel : la procuration est effective",
+    ],
+    deplacement: "Un passage au commissariat ou à la gendarmerie",
+  },
+  {
+    teinte: "t-sarcelle",
+    titre: "Entièrement en ligne",
+    precision: "avec une identité numérique certifiée France Identité",
+    etapes: ["Toute la démarche sur Maprocuration ; l'identité s'atteste depuis l'application"],
+    deplacement:
+      "Aucun passage au commissariat, à la gendarmerie ou au consulat. Mais un rendez-vous en mairie, avant, pour certifier l'identité",
+  },
+  {
+    teinte: "t-prune",
+    titre: "Sur formulaire papier",
+    precision: "tout sur place",
+    etapes: [
+      "Au commissariat, à la gendarmerie, au tribunal judiciaire de votre domicile ou de votre lieu de travail, ou dans un lieu accueillant du public désigné par le préfet",
+    ],
+    deplacement: "Un passage sur place",
+  },
+];
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Trois chemins, un seul à suivre</figcaption>
+  <div class="arbre">
+    <p class="tronc">Votre procuration</p>
+    <ol class="branches">
+      {
+        BRANCHES.map((branche) => (
+          <li class:list={["branche", branche.teinte]}>
+            <span class="point" aria-hidden="true" />
+            <div class="branche-titre">
+              <strong>{branche.titre}</strong>
+              <span>{branche.precision}</span>
+            </div>
+            <ol class="etapes">
+              {branche.etapes.map((etape, index) => (
+                <li>
+                  {index > 0 && <Icone nom="arrow-right" graisse="bold" class="fleche" />}
+                  <span>{etape}</span>
+                </li>
+              ))}
+            </ol>
+            <p class="deplacement">{branche.deplacement}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</figure>
+
+<style>
+  /*
+   * LE TRONC ET LES COUDES. Le tronc est un trait vertical à gauche ; chaque
+   * branche s'y raccroche par un coude arrondi, dans sa teinte, qui descend du
+   * haut de sa ligne jusqu'à son point. Derrière chaque branche sauf la
+   * dernière, un segment neutre prolonge le tronc vers la suivante.
+   */
+  .arbre {
+    --coude: 3.25rem;
+    --tronc: 0.75rem;
+    --y-point: calc(var(--pas-3) + 0.7rem);
+  }
+
+  .tronc {
+    display: inline-block;
+    margin: 0 0 var(--pas-2);
+    padding: 4px 12px;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-encre);
+    color: var(--couleur-fond);
+    font-size: var(--t-petit);
+    font-weight: 700;
+  }
+
+  .branches {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .branche {
+    position: relative;
+    display: grid;
+    gap: var(--pas-1) var(--pas-4);
+    margin: 0;
+    padding: var(--pas-3) 0 var(--pas-3) var(--coude);
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  .branche:last-child {
+    border-bottom: 0;
+  }
+
+  /* Le coude : du haut de la ligne (du tronc, pour la première) jusqu'au point. */
+  .branche::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--tronc);
+    width: calc(var(--coude) - var(--tronc) - 26px);
+    height: var(--y-point);
+    border-left: 3px solid var(--vif);
+    border-bottom: 3px solid var(--vif);
+    border-bottom-left-radius: 14px;
+    /* Devant le segment neutre du tronc, qui le masquait. */
+    z-index: 1;
+  }
+
+  .branche:first-child::before {
+    top: calc(-1 * var(--pas-2));
+    height: calc(var(--y-point) + var(--pas-2));
+  }
+
+  /* Le tronc continue derrière la branche, vers la suivante. */
+  .branche:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--tronc);
+    width: 3px;
+    background: var(--couleur-trait);
+  }
+
+  .branche:first-child:not(:last-child)::after {
+    top: calc(-1 * var(--pas-2));
+  }
+
+  .point {
+    position: absolute;
+    top: calc(var(--y-point) - 6px);
+    left: calc(var(--coude) - 30px);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--vif);
+  }
+
+  .branche-titre {
+    display: grid;
+    align-content: start;
+  }
+
+  .branche-titre strong {
+    font-size: 1.125rem;
+    color: var(--vif);
+  }
+
+  .branche-titre span {
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  .etapes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-1);
+    font-size: var(--t-petit);
+    line-height: 1.45;
+  }
+
+  .etapes li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-1);
+    margin: 0;
+  }
+
+  .etapes :global(.fleche) {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.2rem;
+    color: var(--vif);
+  }
+
+  .deplacement {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  /* Grand écran : titre, étapes, déplacement sur une même ligne, en trois colonnes. */
+  @media (min-width: 56rem) {
+    .branche {
+      grid-template-columns: 13rem minmax(0, 1fr) 11rem;
+      align-items: start;
+    }
+
+    .deplacement {
+      padding-left: var(--pas-2);
+      border-left: 3px solid var(--vif);
+    }
+  }
+</style>

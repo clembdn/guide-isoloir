@@ -1,0 +1,184 @@
+---
+/*
+ * Schéma : la chaîne de résolution des sources, en escalier descendant.
+ *
+ * Neuf marches, du maillon le plus fort au plus faible ; la première
+ * disponible l'emporte. Chaque marche descend d'un cran vers la droite : la
+ * forme dit l'ordre avant qu'on lise les mots. Les marches sont groupées par
+ * ce qu'elles rapportent — ce que le candidat a dit ou fait, ce que dit son
+ * camp, une déduction, rien.
+ *
+ * LES LIBELLÉS VIENNENT DU MOTEUR (`NIVEAUX_RESOLUTION`), pas d'une copie : ce
+ * sont les mêmes mots que la ligne « Origine » sous chaque position des fiches
+ * et du résultat. Ils ne peuvent donc pas diverger.
+ */
+import { NIVEAUX_RESOLUTION } from "../../lib/moteur";
+
+type Groupe = { titre: string; teinte: string; cles: readonly string[] };
+
+const GROUPES: readonly Groupe[] = [
+  {
+    titre: "Ce que le candidat a dit ou fait",
+    teinte: "t-violet",
+    cles: [
+      "official-program",
+      "direct-statement",
+      "press-interview",
+      "parliamentary-vote",
+      "press-report",
+    ],
+  },
+  {
+    titre: "Ce que dit son camp",
+    teinte: "t-indigo",
+    cles: ["coalition-platform", "party-platform"],
+  },
+  { titre: "Une déduction", teinte: "t-prune", cles: ["inference"] },
+];
+
+const marches = NIVEAUX_RESOLUTION.map((niveau) => {
+  const groupe = GROUPES.find((g) => g.cles.includes(niveau.cle));
+  return {
+    rang: niveau.rang,
+    libelle: niveau.libelle,
+    teinte: groupe?.teinte ?? "t-violet",
+    groupe: groupe?.cles[0] === niveau.cle ? groupe.titre : null,
+  };
+});
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">La première source disponible l'emporte</figcaption>
+  <ol class="escalier">
+    {
+      marches.map((marche) => (
+        <li class:list={["marche", `marche--${marche.rang}`, marche.teinte]}>
+          {marche.groupe && <span class="groupe">{marche.groupe}</span>}
+          <span class="palier">
+            <span class="rang">{marche.rang}</span>
+            <span class="libelle">{marche.libelle}</span>
+          </span>
+        </li>
+      ))
+    }
+    <li class="marche marche--9 marche--inconnue">
+      <span class="groupe">Rien</span>
+      <span class="palier">
+        <span class="rang">9</span>
+        <span class="libelle">Position inconnue</span>
+      </span>
+    </li>
+  </ol>
+</figure>
+
+<style>
+  .escalier {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 6px;
+  }
+
+  .marche {
+    margin: 0;
+  }
+
+  /*
+   * L'ESCALIER : chaque marche décale son palier d'un cran vers la droite.
+   * Sur téléphone, le cran est plus petit, pour que la dernière reste lisible.
+   */
+  .marche--2 {
+    --cran: 1;
+  }
+  .marche--3 {
+    --cran: 2;
+  }
+  .marche--4 {
+    --cran: 3;
+  }
+  .marche--5 {
+    --cran: 4;
+  }
+  .marche--6 {
+    --cran: 5;
+  }
+  .marche--7 {
+    --cran: 6;
+  }
+  .marche--8 {
+    --cran: 7;
+  }
+  .marche--9 {
+    --cran: 8;
+  }
+
+  .palier {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
+    margin-left: calc(var(--cran, 0) * 0.9rem);
+    padding: 0.6rem var(--pas-2);
+    border-radius: 10px;
+    background: var(--pastel);
+    border-left: 5px solid var(--vif);
+  }
+
+  @media (min-width: 48rem) {
+    .palier {
+      margin-left: calc(var(--cran, 0) * 2.25rem);
+    }
+  }
+
+  .rang {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--vif);
+    color: var(--couleur-fond);
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  .libelle {
+    font-size: var(--t-petit);
+    font-weight: 600;
+  }
+
+  .groupe {
+    display: block;
+    margin: var(--pas-2) 0 4px calc(var(--cran, 0) * 0.9rem);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--vif);
+  }
+
+  @media (min-width: 48rem) {
+    .groupe {
+      margin-left: calc(var(--cran, 0) * 2.25rem);
+    }
+  }
+
+  .marche:first-child .groupe {
+    margin-top: 0;
+  }
+
+  /* Rien : la marche est vide, tiretée. */
+  .marche--inconnue .palier {
+    background: transparent;
+    border: 2px dashed var(--couleur-trait);
+    border-left-width: 5px;
+  }
+
+  .marche--inconnue .rang {
+    background: var(--couleur-trait);
+    color: var(--couleur-encre);
+  }
+
+  .marche--inconnue .groupe {
+    color: var(--couleur-encre-faible);
+  }
+</style>

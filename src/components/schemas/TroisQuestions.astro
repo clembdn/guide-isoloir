@@ -1,0 +1,104 @@
+---
+/*
+ * Schéma : les trois questions auxquelles le site répond, et où.
+ *
+ * Trois lignes, pas trois cartes : une question en grand, sa réponse en une
+ * phrase, et le lien vers la page qui y répond. Un trait épais dans la teinte
+ * de chaque question les sépare. C'est le plan du site, dit du point de vue de
+ * celui qui arrive.
+ */
+import Icone from "../Icone.astro";
+
+const QUESTIONS = [
+  {
+    teinte: "t-violet",
+    question: "Pour qui voter ?",
+    reponse: "Le test compare vos idées aux positions des candidats, sources à l'appui.",
+    lien: "/test",
+    libelle: "Faire le test",
+  },
+  {
+    teinte: "t-sarcelle",
+    question: "Comment voter ?",
+    reponse: "Inscription, procuration, bureau de vote : des réponses courtes et sourcées.",
+    lien: "/comprendre",
+    libelle: "Comprendre le scrutin",
+  },
+  {
+    teinte: "t-prune",
+    question: "Que peut décider un président ?",
+    reponse: "Ce qu'il décide seul, avec un gouvernement, ou pas du tout.",
+    lien: "/comprendre/ce-qu-un-president-decide-seul",
+    libelle: "Lire l'article",
+  },
+] as const;
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Trois questions, trois réponses</figcaption>
+  <ol class="questions">
+    {
+      QUESTIONS.map((q) => (
+        <li class:list={["ligne", q.teinte]}>
+          <p class="question-grande">{q.question}</p>
+          <div class="reponse">
+            <p>{q.reponse}</p>
+            <a href={q.lien}>
+              {q.libelle}
+              <Icone nom="arrow-right" graisse="bold" />
+            </a>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .questions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ligne {
+    display: grid;
+    gap: var(--pas-1) var(--pas-4);
+    margin: 0;
+    padding: var(--pas-3) 0;
+    border-top: 6px solid var(--vif);
+  }
+
+  @media (min-width: 48rem) {
+    .ligne {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+
+  .question-grande {
+    margin: 0;
+    font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    color: var(--vif);
+  }
+
+  .reponse p {
+    margin: 0 0 var(--pas-1);
+  }
+
+  .reponse a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-weight: 700;
+  }
+
+  .reponse a :global(.icone) {
+    width: 1rem;
+    height: 1rem;
+  }
+</style>

@@ -25,6 +25,9 @@ sources:
     consulteLe: "2026-09-18"
 ---
 
+import CheminsProcuration from "../../components/schemas/CheminsProcuration.astro";
+import DureeProcuration from "../../components/schemas/DureeProcuration.astro";
+
 Si vous êtes absent le jour du scrutin, vous pouvez charger un autre électeur de voter
 à votre place. C'est gratuit, et **vous n'avez aucun justificatif d'absence à
 fournir** : ni billet de train, ni attestation d'employeur, ni motif à expliquer.
@@ -65,25 +68,10 @@ Demandez-le-lui avant de commencer : la démarche s'interrompt sans cette inform
 
 ## La démarche
 
-Deux chemins. Le second supprime tout déplacement, mais il se prépare à l'avance.
+Deux chemins en ligne, et un sur papier. Le deuxième supprime tout déplacement, mais il
+se prépare à l'avance.
 
-### En deux temps, sans identité numérique
-
-1. **En ligne**, sur le téléservice Maprocuration, en vous connectant avec
-   FranceConnect. Vous indiquez une adresse électronique et les informations
-   concernant votre mandataire. Vous recevez une référence de demande par courriel.
-2. **En personne**, dans n'importe quel commissariat de police ou n'importe quelle
-   gendarmerie, où que ce soit en France. Vous y présentez une pièce d'identité et la
-   référence reçue.
-
-Vous recevez ensuite un récépissé, puis un courriel confirmant que la procuration est
-effective.
-
-### Entièrement en ligne, avec une identité numérique certifiée
-
-Si vous disposez d'une identité numérique certifiée France Identité, vous faites toute
-la démarche sur Maprocuration et vous attestez de votre identité depuis l'application.
-Aucun passage au commissariat, à la gendarmerie ou au consulat.
+<CheminsProcuration />
 
 Cette identité ne s'obtient pas dans la journée, et c'est là qu'est le piège. Il vous
 faut une carte d'identité au format carte bancaire, un compte FranceConnect,
@@ -94,12 +82,6 @@ quarante-huit heures suivant le rendez-vous.
 Vous devez disposer de l'identité certifiée **avant** de commencer votre procuration :
 cette étape ne se rattrape pas en cours de démarche.
 
-### Sur formulaire papier
-
-Il est aussi possible de tout faire sur le formulaire papier, en se présentant au
-commissariat, à la gendarmerie, au tribunal judiciaire dont dépend votre domicile ou
-votre lieu de travail, ou dans un lieu accueillant du public désigné par le préfet.
-
 ## Si vous ne pouvez pas vous déplacer
 
 Un handicap ou une maladie grave qui vous empêche de sortir vous donne droit à la
@@ -109,10 +91,7 @@ indiquant que vous êtes dans l'impossibilité de vous déplacer.
 
 ## Combien de temps ça dure
 
-Une procuration peut valoir pour une seule élection, ou pour une durée déterminée,
-avec un maximum d'**un an** si vous êtes inscrit sur une liste électorale communale et
-de **trois ans** si vous êtes inscrit sur une liste électorale consulaire. Rien n'oblige
-à prendre le maximum : trois ou six mois sont possibles.
+<DureeProcuration />
 
 Vous pouvez la résilier à tout moment, en ligne ou sur formulaire. Ce n'est pas
 nécessaire pour voter vous-même : si vous vous présentez au bureau, vous votez.

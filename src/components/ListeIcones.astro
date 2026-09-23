@@ -1,0 +1,78 @@
+---
+/*
+ * Liste marquée d'une icône plutôt que d'une puce : « ce que le calcul fait »
+ * (coche), « ce qu'il ne fait pas » (croix), « ce qui est vérifié » (sceau).
+ *
+ * L'icône double le sens de la liste, elle ne le porte pas seule : le titre qui
+ * précède dit déjà « fait » ou « ne fait pas ». Aucun vert, aucun rouge : la
+ * teinte de la page, et la forme de l'icône.
+ */
+import Icone from "./Icone.astro";
+
+type Props = {
+  /**
+   * Éléments de la liste. Ils peuvent contenir un lien : ce sont des chaînes
+   * écrites dans le code des pages, jamais une donnée venue d'ailleurs, d'où
+   * `set:html` sans risque d'injection.
+   */
+  elements: readonly string[];
+  /** Nom de l'icône Phosphor : `check`, `x`, `seal-check`… */
+  icone: string;
+  /** Liste « négative » : icône en encre faible plutôt qu'en teinte. */
+  negative?: boolean;
+};
+
+const { elements, icone, negative = false } = Astro.props;
+---
+
+<ul class:list={["liste-icones", { "liste-icones--negative": negative }]}>
+  {
+    elements.map((element) => (
+      <li>
+        <span class="marque" aria-hidden="true">
+          <Icone nom={icone} graisse="bold" />
+        </span>
+        <span set:html={element} />
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .liste-icones {
+    list-style: none;
+    margin: var(--pas-3) 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-2);
+  }
+
+  .liste-icones li {
+    display: grid;
+    grid-template-columns: 1.75rem 1fr;
+    gap: var(--pas-2);
+    align-items: start;
+    margin: 0;
+  }
+
+  .marque {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--pastel);
+    color: var(--vif);
+  }
+
+  .marque :global(.icone) {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .liste-icones--negative .marque {
+    background: transparent;
+    border: 2px solid var(--couleur-encre-faible);
+    color: var(--couleur-encre-faible);
+  }
+</style>

@@ -1,7 +1,12 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import PageLecture from "../layouts/PageLecture.astro";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import Signature from "../components/Signature.astro";
+import ListeIcones from "../components/ListeIcones.astro";
+import ChaineResolution from "../components/schemas/ChaineResolution.astro";
+import QuatreGrandeurs from "../components/schemas/QuatreGrandeurs.astro";
+import PremierRang from "../components/schemas/PremierRang.astro";
+import DoubleCodage from "../components/schemas/DoubleCodage.astro";
 import { CONTACT_EMAIL } from "../lib/site";
 import { SEUIL_PUBLICATION } from "../lib/seuils";
 
@@ -13,15 +18,62 @@ const UPDATED = "2026-09-21";
  * ce que le site faisait la semaine dernière.
  */
 const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
+
+/* Sections de la page, pour le sommaire : l'`id` de chaque titre et son texte. */
+const SOMMAIRE = [
+  { id: "comment-une-position-est-etablie", texte: "Comment une position est établie" },
+  { id: "ce-que-le-calcul-fait", texte: "Ce que le calcul fait" },
+  { id: "ce-que-le-calcul-ne-fait-pas", texte: "Ce que le calcul ne fait pas" },
+  { id: "candidats-non-classes", texte: "Pourquoi certains candidats ne sont pas classés" },
+  { id: "double-codage", texte: "Double codage à l'aveugle" },
+  { id: "invariants", texte: "Invariants vérifiés" },
+  { id: "separation", texte: "Séparation des modifications" },
+  { id: "limites", texte: "Limites connues" },
+  { id: "signaler", texte: "Signaler une erreur de méthode" },
+] as const;
+
+const FAIT = [
+  "Il compare vos réponses aux positions codées, question par question.",
+  "Il produit un classement de proximité, accompagné du détail par thème.",
+  "Il est déterministe : les mêmes réponses donnent toujours le même résultat.",
+  "Il s'exécute dans votre navigateur, sans qu'aucune réponse ne soit transmise.",
+  "Il signale les profils peu marqués, pour lesquels un classement a peu de sens.",
+];
+
+const NE_FAIT_PAS = [
+  "Il ne mesure pas ce que vous devriez voter. Il mesure une distance entre des réponses et des positions écrites, rien de plus.",
+  "Il ne tient pas compte de ce qui décide souvent un vote : la confiance dans une personne, l'histoire d'un mouvement, la stratégie du second tour, la crédibilité d'une promesse.",
+  "Il ne pondère pas les candidats selon leurs chances d'être élus.",
+  "Il ne pénalise ni ne favorise un candidat en fonction du nombre de positions documentées le concernant. Un candidat trop peu documenté n'est pas classé plus bas : il n'est pas classé du tout, et nommé à part.",
+  "Il ne mémorise rien entre deux visites.",
+];
+
+const INVARIANTS = [
+  "Permuter deux acteurs ne change aucun score.",
+  "L'ordre des acteurs dans les fichiers de données n'a aucun effet sur le résultat.",
+  "Les données manquantes sont traitées de façon identique pour tous les acteurs.",
+  "La couverture des thèmes reste comparable d'un acteur à l'autre.",
+  "Aucun avantage systématique ne bénéficie aux acteurs les mieux documentés : ni sur le score moyen, ni sur la fréquence du premier rang.",
+  "Les échelles de réponse sont symétriques.",
+  "Le résultat est stable : une même série de réponses produit toujours le même classement.",
+];
 ---
 
-<BaseLayout
+<PageLecture
   title="Méthodologie"
   description="Comment les positions des candidats sont établies, ce que le calcul fait et ne fait pas, les invariants vérifiés à chaque publication, et le protocole de double codage à l'aveugle."
   updated={UPDATED}
+  teinte="t-violet"
+  sommaire={SOMMAIRE}
 >
-  <h1>Méthodologie</h1>
-  <DerniereMiseAJour date={UPDATED} />
+  <Fragment slot="tete">
+    <h1>Méthodologie</h1>
+    <DerniereMiseAJour date={UPDATED} />
+    <p class="question">
+      Comment une position est établie, ce que le calcul fait et ne fait pas, et ce qui est vérifié
+      à chaque publication.
+    </p>
+  </Fragment>
 
   <div class="reserve">
     <p>
@@ -32,7 +84,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     </p>
   </div>
 
-  <h2>Comment une position est établie</h2>
+  <h2 id="comment-une-position-est-etablie">Comment une position est établie</h2>
 
   <p>
     Une position est une valeur sur une échelle à cinq degrés, d'un désaccord net à un accord net,
@@ -48,19 +100,9 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
 
   <h3>Chaîne de résolution</h3>
 
-  <p>Les sources sont consultées dans cet ordre, la première disponible l'emporte :</p>
+  <p>Les sources sont consultées dans cet ordre, du maillon le plus fort au plus faible.</p>
 
-  <ol>
-    <li>le programme du candidat ;</li>
-    <li>une déclaration directe et récente du candidat ;</li>
-    <li>un entretien accordé à un média ;</li>
-    <li>un vote au Parlement ;</li>
-    <li>une déclaration rapportée par la presse, sans verbatim disponible ;</li>
-    <li>la plateforme de campagne ou de coalition ;</li>
-    <li>la ligne du parti ;</li>
-    <li>une inférence documentée, explicitement présentée comme telle ;</li>
-    <li>à défaut, position inconnue.</li>
-  </ol>
+  <ChaineResolution />
 
   <p>
     Le niveau retenu est affiché avec la position. Vous verrez par exemple « position provisoire
@@ -97,6 +139,8 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     quatre choses différentes et restent séparées.
   </p>
 
+  <QuatreGrandeurs />
+
   <p>
     En particulier, une position mal documentée n'est pas ramenée vers le centre. Le faire
     avantagerait mécaniquement les candidats les mieux couverts par la presse, c'est-à-dire les
@@ -104,37 +148,15 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     en modération.
   </p>
 
-  <h2>Ce que le calcul fait</h2>
+  <h2 id="ce-que-le-calcul-fait">Ce que le calcul fait</h2>
 
-  <ul>
-    <li>Il compare vos réponses aux positions codées, question par question.</li>
-    <li>Il produit un classement de proximité, accompagné du détail par thème.</li>
-    <li>Il est déterministe : les mêmes réponses donnent toujours le même résultat.</li>
-    <li>Il s'exécute dans votre navigateur, sans qu'aucune réponse ne soit transmise.</li>
-    <li>Il signale les profils peu marqués, pour lesquels un classement a peu de sens.</li>
-  </ul>
+  <ListeIcones elements={FAIT} icone="check" />
 
-  <h2>Ce que le calcul ne fait pas</h2>
+  <h2 id="ce-que-le-calcul-ne-fait-pas">Ce que le calcul ne fait pas</h2>
 
-  <ul>
-    <li>
-      Il ne mesure pas ce que vous devriez voter. Il mesure une distance entre des réponses et des
-      positions écrites, rien de plus.
-    </li>
-    <li>
-      Il ne tient pas compte de ce qui décide souvent un vote : la confiance dans une personne,
-      l'histoire d'un mouvement, la stratégie du second tour, la crédibilité d'une promesse.
-    </li>
-    <li>Il ne pondère pas les candidats selon leurs chances d'être élus.</li>
-    <li>
-      Il ne pénalise ni ne favorise un candidat en fonction du nombre de positions documentées le
-      concernant. Un candidat trop peu documenté n'est pas classé plus bas : il n'est pas classé du
-      tout, et nommé à part.
-    </li>
-    <li>Il ne mémorise rien entre deux visites.</li>
-  </ul>
+  <ListeIcones elements={NE_FAIT_PAS} icone="x" negative />
 
-  <h2>Pourquoi certains candidats ne sont pas classés</h2>
+  <h2 id="candidats-non-classes">Pourquoi certains candidats ne sont pas classés</h2>
 
   <p>
     Le classement n'affiche que les candidats documentés sur au moins {SEUIL_PERCENT} % des affirmations
@@ -158,6 +180,8 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     identiques. Aucun chiffre n'était faux, et l'ordre trompait.
   </p>
 
+  <PremierRang />
+
   <p>
     Nous ne corrigeons pas cela en pondérant les scores. Rapprocher du centre une position mal
     documentée installerait le biais inverse : les candidats les mieux couverts par leur parti ou
@@ -171,7 +195,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     sur tout. Ce rapport est mesuré à chaque publication, et l'audit échoue s'il dérive.
   </p>
 
-  <h2>Double codage à l'aveugle</h2>
+  <h2 id="double-codage">Double codage à l'aveugle</h2>
 
   <div class="reserve">
     <p>
@@ -184,17 +208,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     </p>
   </div>
 
-  <p>
-    Le protocole est le suivant. Chaque position est codée deux fois, indépendamment, par deux
-    personnes de sensibilités politiques différentes. Les deux relevés sont verrouillés avant d'être
-    comparés : aucune des deux personnes ne voit le travail de l'autre avant la confrontation.
-  </p>
-
-  <p>
-    Les écarts sont ensuite examinés un par un. Un écart se résout en revenant à la source, jamais
-    par compromis. Lorsqu'aucune des deux lectures ne l'emporte, le désaccord est publié comme tel
-    et la position est marquée incertaine.
-  </p>
+  <DoubleCodage />
 
   <p>Après chaque campagne de codage, cette page publie :</p>
 
@@ -213,7 +227,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     </p>
   </div>
 
-  <h2>Invariants vérifiés automatiquement</h2>
+  <h2 id="invariants">Invariants vérifiés automatiquement</h2>
 
   <p>
     Une commande d'audit s'exécute à chaque modification du code ou des données. Elle ne certifie
@@ -221,20 +235,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     mécaniques, décidées et publiées à l'avance :
   </p>
 
-  <ul>
-    <li>permuter deux acteurs ne change aucun score ;</li>
-    <li>l'ordre des acteurs dans les fichiers de données n'a aucun effet sur le résultat ;</li>
-    <li>les données manquantes sont traitées de façon identique pour tous les acteurs ;</li>
-    <li>la couverture des thèmes reste comparable d'un acteur à l'autre ;</li>
-    <li>
-      aucun avantage systématique ne bénéficie aux acteurs les mieux documentés : ni sur le score
-      moyen, ni sur la fréquence du premier rang ;
-    </li>
-    <li>les échelles de réponse sont symétriques ;</li>
-    <li>
-      le résultat est stable : une même série de réponses produit toujours le même classement.
-    </li>
-  </ul>
+  <ListeIcones elements={INVARIANTS} icone="seal-check" />
 
   <p>
     Si l'un de ces contrôles échoue, la publication est bloquée. La formulation que ce site
@@ -242,7 +243,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     ». Jamais « aucun biais ».
   </p>
 
-  <h2>Séparation des modifications</h2>
+  <h2 id="separation">Séparation des modifications</h2>
 
   <p>
     Une modification du calcul et une modification des positions ne sont jamais publiées ensemble.
@@ -255,7 +256,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     complet est public.
   </p>
 
-  <h2>Limites connues</h2>
+  <h2 id="limites">Limites connues</h2>
 
   <ul>
     <li>
@@ -277,7 +278,7 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
     </li>
   </ul>
 
-  <h2>Signaler une erreur de méthode</h2>
+  <h2 id="signaler">Signaler une erreur de méthode</h2>
 
   <p>
     Si un contrôle vous paraît insuffisant, ou une position mal établie, la procédure de signalement
@@ -298,4 +299,4 @@ const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
   </p>
 
   <Signature />
-</BaseLayout>
+</PageLecture>

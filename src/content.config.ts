@@ -24,7 +24,7 @@ const source = z.object({
 });
 
 const comprendre = defineCollection({
-  loader: glob({ base: "./src/content/comprendre", pattern: "**/*.md" }),
+  loader: glob({ base: "./src/content/comprendre", pattern: "**/*.{md,mdx}" }),
   schema: z
     .object({
       /** Titre H1 et balise <title>. Une page = une intention de recherche. */

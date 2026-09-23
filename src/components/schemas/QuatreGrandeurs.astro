@@ -1,0 +1,122 @@
+---
+/*
+ * Schéma : les quatre grandeurs que le calcul garde séparées.
+ *
+ * Quatre compartiments d'un même casier, séparés par des cloisons pleines :
+ * la forme dit « à ne pas mélanger ». Seul le premier entre dans le score, et
+ * il est marqué comme tel.
+ *
+ * Chaque ligne décrit ce que fait réellement le moteur (`src/lib/moteur/`) :
+ * la valeur seule entre dans le score ; l'origine et la confiance ne le
+ * touchent jamais ; la couverture s'affiche à côté du score ; l'incertitude se
+ * déduit des trois autres.
+ */
+const GRANDEURS = [
+  {
+    teinte: "t-violet",
+    titre: "La position",
+    texte:
+      "De « pas du tout d'accord » à « tout à fait d'accord ». La seule qui entre dans le score.",
+    score: true,
+  },
+  {
+    teinte: "t-indigo",
+    titre: "La qualité des preuves",
+    texte:
+      "L'origine de la source et la confiance qu'on lui accorde. Elle ne touche jamais au score.",
+    score: false,
+  },
+  {
+    teinte: "t-sarcelle",
+    titre: "La couverture",
+    texte: "Combien d'affirmations sont documentées. Elle s'affiche à côté du score.",
+    score: false,
+  },
+  {
+    teinte: "t-cyan",
+    titre: "L'incertitude",
+    texte: "Déduite des trois autres, et jamais confondue avec la proximité.",
+    score: false,
+  },
+] as const;
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Quatre grandeurs, quatre compartiments</figcaption>
+  <ul class="casier">
+    {
+      GRANDEURS.map((grandeur) => (
+        <li
+          class:list={["compartiment", grandeur.teinte, { "compartiment--score": grandeur.score }]}
+        >
+          {grandeur.score && <span class="marque">Entre dans le score</span>}
+          <strong>{grandeur.titre}</strong>
+          <span>{grandeur.texte}</span>
+        </li>
+      ))
+    }
+  </ul>
+</figure>
+
+<style>
+  /*
+   * LE CASIER : un seul cadre, divisé par des cloisons épaisses. Pas quatre
+   * cartes : quatre cases d'un même meuble, qu'on ne vide pas l'une dans l'autre.
+   */
+  .casier {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    border: 3px solid var(--couleur-encre);
+    border-radius: var(--rayon-carte);
+    overflow: hidden;
+  }
+
+  @media (min-width: 48rem) {
+    .casier {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .compartiment {
+    display: grid;
+    align-content: start;
+    gap: var(--pas-1);
+    margin: 0;
+    padding: var(--pas-3);
+    background: var(--couleur-surface);
+    font-size: var(--t-petit);
+    line-height: 1.45;
+    border-top: 6px solid var(--vif);
+  }
+
+  .compartiment + .compartiment {
+    box-shadow: inset 0 3px 0 var(--couleur-encre);
+  }
+
+  @media (min-width: 48rem) {
+    .compartiment + .compartiment {
+      box-shadow: inset 3px 0 0 var(--couleur-encre);
+    }
+  }
+
+  .compartiment strong {
+    font-size: 1.0625rem;
+    color: var(--vif);
+  }
+
+  .compartiment--score {
+    background: var(--pastel);
+  }
+
+  .marque {
+    justify-self: start;
+    padding: 2px 10px;
+    border-radius: var(--rayon-actionnable);
+    background: var(--vif);
+    color: var(--couleur-fond);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+</style>

@@ -1,0 +1,91 @@
+---
+/*
+ * Graphique : combien de fois un candidat arrive premier, selon qu'il est peu
+ * ou beaucoup documenté.
+ *
+ * Deux barres à l'échelle, avec les chiffres que la page donne en toutes
+ * lettres juste au-dessus : documenté sur une affirmation sur vingt-quatre,
+ * premier une fois sur trois ; documenté sur dix-huit, une fois sur cent.
+ * Mesure de septembre 2026. Le graphique ne dit rien de plus que la phrase ; il
+ * la rend visible.
+ *
+ * Aucun candidat n'est nommé : c'est une propriété du calcul, pas d'un acteur.
+ * Longueurs fixes (un tiers, un centième) : aucun style en ligne.
+ */
+---
+
+<figure class="schema t-prune">
+  <figcaption class="schema-titre">
+    Arriver premier par accident&nbsp;: mesuré en septembre 2026
+  </figcaption>
+  <div class="graphique">
+    <p class="ligne">
+      <span class="etiquette">Documenté sur 1 affirmation sur 24</span>
+      <span class="piste" aria-hidden="true"><span class="barre barre--tiers"></span></span>
+      <strong class="valeur">premier 1 fois sur 3</strong>
+    </p>
+    <p class="ligne">
+      <span class="etiquette">Documenté sur 18 affirmations sur 24</span>
+      <span class="piste" aria-hidden="true"><span class="barre barre--centieme"></span></span>
+      <strong class="valeur">premier 1 fois sur 100</strong>
+    </p>
+  </div>
+  <p class="lecture">Des scores moyens presque identiques, et un ordre qui trompait.</p>
+</figure>
+
+<style>
+  .graphique {
+    display: grid;
+    gap: var(--pas-3);
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--pastel);
+  }
+
+  .ligne {
+    display: grid;
+    gap: 4px var(--pas-2);
+    margin: 0;
+    font-size: var(--t-petit);
+  }
+
+  @media (min-width: 48rem) {
+    .ligne {
+      grid-template-columns: 15rem 1fr 11rem;
+      align-items: center;
+    }
+  }
+
+  .piste {
+    display: block;
+    height: 1.5rem;
+    border-radius: 6px;
+    background: var(--couleur-surface);
+    overflow: hidden;
+  }
+
+  .barre {
+    display: block;
+    height: 100%;
+    background: var(--vif);
+  }
+
+  .barre--tiers {
+    width: calc(100% / 3);
+  }
+
+  /* Un centième : trop fin pour se voir, donc 3 px au minimum, comme un trait. */
+  .barre--centieme {
+    width: max(1%, 3px);
+  }
+
+  .valeur {
+    color: var(--vif);
+  }
+
+  .lecture {
+    margin: var(--pas-2) 0 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+</style>

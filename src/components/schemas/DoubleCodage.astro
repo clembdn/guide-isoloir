@@ -1,0 +1,190 @@
+---
+/*
+ * Schéma : le protocole de double codage à l'aveugle, en Y.
+ *
+ * Deux relevés indépendants en haut, qui ne se voient pas ; ils se rejoignent
+ * après verrouillage pour être confrontés ; la confrontation se sépare en deux
+ * issues. Au-dessus de tout, une mention : le protocole N'A PAS ENCORE ÉTÉ
+ * APPLIQUÉ. Le schéma décrit ce qui sera fait, et il le dit avant qu'on le lise.
+ *
+ * Contenu repris de la page, sans ajout.
+ */
+import Icone from "../Icone.astro";
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Le protocole, tel qu'il sera appliqué</figcaption>
+  <p class="pas-encore">
+    <Icone nom="clock-countdown" graisse="bold" />
+    Pas encore appliqué&nbsp;: aucune campagne n'a eu lieu.
+  </p>
+
+  <div class="y">
+    <div class="releves">
+      <p class="releve t-indigo">
+        <strong>Relevé A</strong>
+        <span>Une première personne code chaque position.</span>
+      </p>
+      <p class="cloison" aria-hidden="true">
+        <Icone nom="eye-slash" /><span>ne se voient pas</span>
+      </p>
+      <p class="releve t-cyan">
+        <strong>Relevé B</strong>
+        <span>Une seconde, de sensibilité politique différente, code la même chose.</span>
+      </p>
+    </div>
+
+    <p class="etape">
+      <Icone nom="lock" graisse="bold" />
+      <span
+        ><strong>Verrouillés</strong>, puis comparés&nbsp;: les écarts sont examinés un par un.</span
+      >
+    </p>
+
+    <div class="issues">
+      <p class="issue t-sarcelle">
+        <strong>Écart résolu</strong>
+        <span>En revenant à la source, jamais par compromis.</span>
+      </p>
+      <p class="issue t-prune">
+        <strong>Désaccord maintenu</strong>
+        <span>Publié comme tel, et la position est marquée incertaine.</span>
+      </p>
+    </div>
+  </div>
+</figure>
+
+<style>
+  .pas-encore {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-3);
+    padding: 4px 12px;
+    border: 2px dashed var(--couleur-encre-faible);
+    border-radius: var(--rayon-actionnable);
+    font-size: var(--t-petit);
+    font-weight: 700;
+  }
+
+  .pas-encore :global(.icone) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  /*
+   * LE Y : deux branches en haut, un tronc au milieu, deux branches en bas.
+   * Les traits de jonction sont des bordures ; aucun dessin en SVG.
+   */
+  .y {
+    display: grid;
+    justify-items: center;
+    gap: var(--pas-4);
+  }
+
+  .releves,
+  .issues {
+    position: relative;
+    display: grid;
+    gap: var(--pas-2);
+    width: 100%;
+  }
+
+  @media (min-width: 48rem) {
+    .releves {
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+    }
+
+    .issues {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--pas-5);
+    }
+
+    /* Les deux relevés descendent vers l'étape commune. */
+    .releves::after,
+    .issues::before {
+      content: "";
+      position: absolute;
+      left: 25%;
+      right: 25%;
+      height: calc(var(--pas-4) / 2);
+      border: 3px solid var(--couleur-trait);
+    }
+
+    .releves::after {
+      top: 100%;
+      border-top: 0;
+      border-radius: 0 0 16px 16px;
+    }
+
+    .issues::before {
+      bottom: 100%;
+      border-bottom: 0;
+      border-radius: 16px 16px 0 0;
+    }
+  }
+
+  .releve,
+  .issue {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: var(--pas-2) var(--pas-3);
+    border-radius: var(--rayon-carte);
+    border: 2px solid var(--vif);
+    background: var(--pastel);
+    font-size: var(--t-petit);
+  }
+
+  .releve strong,
+  .issue strong {
+    font-size: 1.0625rem;
+    color: var(--vif);
+  }
+
+  /* La cloison entre les deux relevés : ils ne se voient pas. */
+  .cloison {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--couleur-encre-faible);
+  }
+
+  .cloison :global(.icone) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  @media (min-width: 48rem) {
+    .cloison {
+      flex-direction: column;
+      align-self: stretch;
+      padding: 0 var(--pas-2);
+      border-inline: 3px dashed var(--couleur-trait);
+      text-align: center;
+    }
+  }
+
+  .etape {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
+    margin: 0;
+    padding: var(--pas-2) var(--pas-3);
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-encre);
+    color: var(--couleur-fond);
+    font-size: var(--t-petit);
+  }
+
+  .etape :global(.icone) {
+    flex: none;
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+</style>

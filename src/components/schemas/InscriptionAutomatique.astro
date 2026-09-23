@@ -1,0 +1,190 @@
+---
+/*
+ * Schéma : êtes-vous déjà inscrit ? Un aiguillage.
+ *
+ * Une question en tête, deux voies dessous. À gauche, les deux situations qui
+ * donnent une inscription automatique ; à droite, le cas où il faut faire la
+ * démarche. C'est la liste de l'article, mise en forme de choix : on se situe
+ * au lieu de lire.
+ *
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+import Icone from "../Icone.astro";
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Êtes-vous déjà inscrit&nbsp;?</figcaption>
+  <div class="aiguillage">
+    <p class="question">
+      <Icone nom="question" graisse="bold" />
+      Vous avez 18 ans, ou les aurez la veille du scrutin
+    </p>
+
+    <div class="voies">
+      <section class="voie t-sarcelle">
+        <p class="condition">Vous êtes dans l'une de ces deux situations</p>
+        <ul class="cas">
+          <li>
+            <Icone nom="student" />
+            <span>Vous avez fait votre <strong>recensement citoyen à 16&nbsp;ans</strong></span>
+          </li>
+          <li class="ou" aria-hidden="true">ou</li>
+          <li>
+            <Icone nom="identification-card" />
+            <span>Vous êtes <strong>devenu français depuis 2019</strong></span>
+          </li>
+        </ul>
+        <p class="issue">
+          <Icone nom="seal-check" graisse="fill" />
+          Inscription automatique&nbsp;: rien à faire
+        </p>
+      </section>
+
+      <section class="voie t-prune">
+        <p class="condition">Aucune des deux</p>
+        <p class="issue">
+          <Icone nom="hand-pointing" graisse="fill" />
+          Il faut vous inscrire&nbsp;: voir plus bas
+        </p>
+      </section>
+    </div>
+  </div>
+</figure>
+
+<style>
+  .aiguillage {
+    display: grid;
+    justify-items: center;
+  }
+
+  /* La question : une pilule, reliée aux deux voies par un embranchement. */
+  .question {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0;
+    padding: var(--pas-2) var(--pas-3);
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-aplat);
+    color: var(--couleur-sur-aplat);
+    font-weight: 700;
+    text-align: center;
+  }
+
+  .question :global(.icone) {
+    flex: none;
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  .voies {
+    position: relative;
+    display: grid;
+    gap: var(--pas-3);
+    width: 100%;
+    padding-top: var(--pas-5);
+  }
+
+  /*
+   * L'EMBRANCHEMENT : un trait qui descend de la question, puis se sépare vers
+   * chaque voie. Dessiné par deux bordures arrondies.
+   */
+  .voies::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 3px;
+    height: calc(var(--pas-5) / 2);
+    background: var(--couleur-trait);
+    transform: translateX(-50%);
+  }
+
+  @media (min-width: 40rem) {
+    .voies {
+      grid-template-columns: 3fr 2fr;
+      align-items: start;
+    }
+
+    .voies::after {
+      content: "";
+      position: absolute;
+      top: calc(var(--pas-5) / 2);
+      left: 25%;
+      right: 25%;
+      height: calc(var(--pas-5) / 2);
+      border: 3px solid var(--couleur-trait);
+      border-bottom: 0;
+      border-radius: 16px 16px 0 0;
+    }
+  }
+
+  .voie {
+    display: grid;
+    gap: var(--pas-2);
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    border: 2px solid var(--vif);
+    background: var(--couleur-surface);
+  }
+
+  .condition {
+    margin: 0;
+    font-weight: 700;
+    color: var(--vif);
+  }
+
+  .cas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-1);
+  }
+
+  .cas li:not(.ou) {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
+    margin: 0;
+    padding: var(--pas-2);
+    border-radius: 12px;
+    background: var(--pastel);
+    font-size: var(--t-petit);
+  }
+
+  .cas :global(.icone) {
+    flex: none;
+    width: 1.4rem;
+    height: 1.4rem;
+    color: var(--vif);
+  }
+
+  .ou {
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    text-align: center;
+    color: var(--couleur-encre-faible);
+  }
+
+  .issue {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0;
+    padding: var(--pas-2) var(--pas-3);
+    border-radius: var(--rayon-actionnable);
+    background: var(--vif);
+    color: var(--couleur-fond);
+    font-weight: 700;
+    font-size: var(--t-petit);
+  }
+
+  .issue :global(.icone) {
+    flex: none;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+</style>

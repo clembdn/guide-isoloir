@@ -17,7 +17,7 @@
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME, ELECTION } from "../lib/site";
-import { articlesPublies } from "../lib/comprendre";
+import { articlesPublies, TEINTES_RUBRIQUE } from "../lib/comprendre";
 import { formatDateFr } from "../lib/date";
 import { QUESTIONS } from "../data/questions";
 import { ACTEURS, CANDIDATURES } from "../data/acteurs";
@@ -109,7 +109,7 @@ const ECHELLE_APERCU = [
 ];
 
 /** Cinq teintes de rubrique, dans l'ordre de parution des articles. */
-const TEINTES = ["t-violet", "t-indigo", "t-sarcelle", "t-cyan", "t-prune"] as const;
+const TEINTES = TEINTES_RUBRIQUE;
 
 const PREUVES = [
   {

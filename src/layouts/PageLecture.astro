@@ -1,0 +1,338 @@
+---
+/*
+ * Gabarit des pages de lecture longue : articles de /comprendre,
+ * méthodologie, à propos.
+ *
+ * MISE EN PAGE À DEUX COLONNES SUR GRAND ÉCRAN, comme les pages de produit
+ * d'Apple : un sommaire collant à gauche, qui suit la lecture, et la page à
+ * droite, où titres, texte et schémas partagent le même bord gauche. Sur
+ * téléphone, le sommaire se replie en tête de page.
+ *
+ * RIEN NE CHANGE POUR LES MOTEURS ET LES ASSISTANTS : le contenu, son ordre,
+ * ses titres et ses ancres sont ceux de la page ; le sommaire est une liste de
+ * liens d'ancre, lisible sans JavaScript. Le script ne fait qu'indiquer la
+ * section en cours.
+ *
+ * Deux emplacements : `tete` (fil d'Ariane, titre, date, chapeau) et le corps.
+ * Chaque titre de niveau 2 du corps doit porter l'`id` que le sommaire cite.
+ */
+import BaseLayout from "./BaseLayout.astro";
+import type { TeinteRubrique } from "../lib/comprendre";
+
+type Props = {
+  title: string;
+  description: string;
+  updated: string;
+  /** Teinte de rubrique : traits des titres, sommaire, piste de lecture. */
+  teinte: TeinteRubrique;
+  /** Sections de la page, dans l'ordre : l'`id` du titre et son texte. */
+  sommaire: readonly { id: string; texte: string }[];
+  /** « Dans cet article », « Sur cette page »… */
+  libelleSommaire?: string;
+};
+
+const {
+  title,
+  description,
+  updated,
+  teinte,
+  sommaire,
+  libelleSommaire = "Sur cette page",
+} = Astro.props;
+---
+
+<BaseLayout title={title} description={description} updated={updated} gabarit="libre">
+  <div class={`article ${teinte}`}>
+    <aside class="sommaire-large" aria-label={libelleSommaire}>
+      <p class="sommaire-titre">{libelleSommaire}</p>
+      <div class="sommaire-corps">
+        <span class="piste" aria-hidden="true"><span class="piste-progression"></span></span>
+        <ol data-sommaire>
+          {
+            sommaire.map((titre) => (
+              <li>
+                <a href={`#${titre.id}`}>{titre.texte}</a>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+    </aside>
+
+    <header class="article-tete">
+      <slot name="tete" />
+    </header>
+
+    <div class="article-corps">
+      <details class="sommaire-mobile">
+        <summary>{libelleSommaire}</summary>
+        <ol data-sommaire>
+          {
+            sommaire.map((titre) => (
+              <li>
+                <a href={`#${titre.id}`}>{titre.texte}</a>
+              </li>
+            ))
+          }
+        </ol>
+      </details>
+
+      <slot />
+    </div>
+  </div>
+
+  <slot name="apres" />
+</BaseLayout>
+
+<script>
+  /*
+   * SECTION EN COURS, DANS LE SOMMAIRE.
+   *
+   * Amélioration progressive : sans ce script, le sommaire reste une liste de
+   * liens qui fonctionne. Aucun écouteur de défilement : un IntersectionObserver
+   * signale qu'un titre a franchi le haut de la fenêtre, et l'on retient le
+   * dernier titre passé au-dessus d'une ligne placée au tiers de l'écran.
+   * Aucune requête, aucune donnée : le script ne lit que la page.
+   */
+  const liens = [...document.querySelectorAll<HTMLAnchorElement>("[data-sommaire] a")];
+  const titres = [...new Set(liens.map((lien) => decodeURIComponent(lien.hash.slice(1))))]
+    .map((id) => document.getElementById(id))
+    .filter((titre): titre is HTMLElement => titre !== null);
+
+  function marquer() {
+    const ligne = window.innerHeight / 3;
+    let courant: HTMLElement | undefined = titres[0];
+    for (const titre of titres) {
+      if (titre.getBoundingClientRect().top <= ligne) courant = titre;
+    }
+    for (const lien of liens) {
+      if (courant && decodeURIComponent(lien.hash.slice(1)) === courant.id) {
+        lien.setAttribute("aria-current", "location");
+      } else {
+        lien.removeAttribute("aria-current");
+      }
+    }
+  }
+
+  if (titres.length > 0 && "IntersectionObserver" in window) {
+    const observateur = new IntersectionObserver(marquer, {
+      rootMargin: "0px 0px -66% 0px",
+      threshold: [0, 1],
+    });
+    for (const titre of titres) observateur.observe(titre);
+    marquer();
+  }
+</script>
+
+<style>
+  /*
+   * La colonne de l'article : le texte garde la mesure de lecture (38 rem), les
+   * schémas prennent toute la largeur de la colonne, et tous partent du MÊME
+   * BORD GAUCHE — le titre reste au-dessus de ce qu'il introduit.
+   */
+  .article {
+    width: 100%;
+    max-width: 74rem;
+    margin-inline: auto;
+    padding: var(--pas-4) var(--gouttiere) 0;
+  }
+
+  .article-tete,
+  .article-corps {
+    min-width: 0;
+  }
+
+  /*
+   * Le contenu vient d'une autre page ou d'un autre gabarit : ses éléments ne
+   * portent pas l'attribut de portée de ce fichier, d'où les `:global`.
+   */
+  .article-corps :global(.prose > :not(.schema)),
+  .article-corps > :global(:not(.prose, .sommaire-mobile, .schema)) {
+    max-width: var(--mesure);
+  }
+
+  @media (min-width: 64rem) {
+    .article {
+      display: grid;
+      grid-template-columns: 14rem minmax(0, 1fr);
+      grid-template-rows: auto 1fr;
+      column-gap: var(--pas-6);
+    }
+
+    .sommaire-large {
+      grid-column: 1;
+      grid-row: 1 / 3;
+    }
+
+    .article-tete,
+    .article-corps {
+      grid-column: 2;
+      max-width: 52rem;
+    }
+  }
+
+  /*
+   * LES TITRES DE SECTION SE DÉTACHENT : un trait dans la teinte de la
+   * rubrique au-dessus de chacun, et une marge d'ancrage pour que l'en-tête
+   * collant ne les cache pas quand on y saute depuis le sommaire.
+   */
+  .article-corps :global(h2) {
+    scroll-margin-top: 6rem;
+    margin-top: var(--pas-6);
+  }
+
+  .article-corps :global(h2)::before {
+    content: "";
+    display: block;
+    width: 2.5rem;
+    height: 6px;
+    margin-bottom: var(--pas-2);
+    border-radius: 3px;
+    background: var(--vif);
+  }
+
+  /* ─── Sommaire, grand écran ───────────────────────────────────────────── */
+
+  .sommaire-large {
+    display: none;
+  }
+
+  @media (min-width: 64rem) {
+    .sommaire-large {
+      display: block;
+      position: sticky;
+      top: 6.5rem;
+      align-self: start;
+      max-height: calc(100dvh - 8rem);
+      overflow-y: auto;
+      padding-top: var(--pas-5);
+    }
+  }
+
+  .sommaire-titre {
+    margin: 0 0 var(--pas-2);
+    font-size: var(--t-petit);
+    font-weight: 700;
+  }
+
+  .sommaire-corps {
+    position: relative;
+    padding-left: var(--pas-3);
+  }
+
+  /*
+   * LA PISTE : un filet vertical, rempli au fil de la lecture de la page. Liée
+   * au défilement, sans script. Propriétés détaillées, jamais le raccourci
+   * `animation` : le minifieur le fondait avec `animation-timeline` en un
+   * raccourci que Chrome rejette.
+   */
+  .piste {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 3px;
+    border-radius: 2px;
+    background: var(--couleur-trait);
+    overflow: hidden;
+  }
+
+  .piste-progression {
+    display: block;
+    height: 100%;
+    background: var(--vif);
+    transform-origin: top center;
+    transform: scaleY(0);
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .piste-progression {
+      animation-name: lecture;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: scroll(root block);
+    }
+  }
+
+  @keyframes lecture {
+    from {
+      transform: scaleY(0);
+    }
+
+    to {
+      transform: scaleY(1);
+    }
+  }
+
+  .sommaire-corps ol,
+  .sommaire-mobile ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .sommaire-corps li,
+  .sommaire-mobile li {
+    margin: 0;
+  }
+
+  .sommaire-corps a,
+  .sommaire-mobile a {
+    display: block;
+    padding: 0.4rem 0;
+    color: var(--couleur-encre-faible);
+    font-size: var(--t-petit);
+    line-height: 1.35;
+    text-decoration: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .sommaire-corps a:hover {
+      color: var(--couleur-encre);
+    }
+  }
+
+  /*
+   * La section en cours : pleine encre, en gras. Pas de pastille sur la piste :
+   * elle suivait la section, quand la piste suit la page, et les deux ne
+   * coïncidaient pas.
+   */
+  .sommaire-corps a[aria-current="location"] {
+    color: var(--couleur-encre);
+    font-weight: 700;
+  }
+
+  /* ─── Sommaire, téléphone ─────────────────────────────────────────────── */
+
+  .sommaire-mobile {
+    margin: 0 0 var(--pas-4);
+    padding: 0 var(--pas-3);
+    border-radius: var(--rayon-carte);
+    background: var(--pastel);
+  }
+
+  .sommaire-mobile summary {
+    display: flex;
+    align-items: center;
+    min-height: 48px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .sommaire-mobile ol {
+    padding-bottom: var(--pas-2);
+  }
+
+  .sommaire-mobile a {
+    color: var(--couleur-encre);
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  @media (min-width: 64rem) {
+    .sommaire-mobile {
+      display: none;
+    }
+  }
+</style>

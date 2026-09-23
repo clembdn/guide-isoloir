@@ -1,0 +1,193 @@
+---
+/*
+ * Schéma : ce qu'un président décide, en trois cercles concentriques.
+ *
+ * Au centre, ce qu'il décide seul ; autour, ce qu'il décide avec un
+ * contreseing ; à l'extérieur, ce qui ne dépend pas de lui. Les cercles vont en
+ * s'élargissant, et c'est le message de l'article : « la première colonne est
+ * courte ».
+ *
+ * C'EST UN RÉCAPITULATIF, PLACÉ DANS « CE QU'IL FAUT EN RETENIR » : il reprend
+ * en mots courts les trois listes de l'article, sans leurs réserves — qui
+ * restent dans le texte, au-dessus. Aucun fait nouveau.
+ */
+const CERCLES = [
+  {
+    teinte: "t-violet",
+    titre: "Seul",
+    sousTitre: "sans contreseing",
+    elements: [
+      "Nommer le Premier ministre",
+      "Dissoudre l'Assemblée nationale",
+      "Soumettre un projet de loi au référendum, sur proposition",
+      "Saisir le Conseil constitutionnel",
+      "Nommer trois membres du Conseil constitutionnel",
+      "Pouvoirs exceptionnels",
+      "Messages au Parlement",
+    ],
+  },
+  {
+    teinte: "t-indigo",
+    titre: "Pas seul",
+    sousTitre: "avec le contreseing d'un ministre",
+    elements: [
+      "Nommer les ministres",
+      "Promulguer les lois",
+      "Ordonnances et décrets en conseil des ministres",
+      "Négocier et ratifier les traités",
+      "Chef des armées",
+      "Droit de grâce",
+    ],
+  },
+  {
+    teinte: "t-sarcelle",
+    titre: "Pas du tout",
+    sousTitre: "gouvernement et Parlement",
+    elements: [
+      "Le budget",
+      "Les lois",
+      "Retraites, impôts, droit du travail, santé, école",
+      "Le droit européen, sans le renégocier",
+    ],
+  },
+] as const;
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Ce qu'un président décide, du centre vers le bord</figcaption>
+  <div class="cercles">
+    <div class="cible" aria-hidden="true">
+      <span class="anneau anneau--3 t-sarcelle"><span>Pas du tout</span></span>
+      <span class="anneau anneau--2 t-indigo"><span>Pas seul</span></span>
+      <span class="anneau anneau--1 t-violet"><span>Seul</span></span>
+    </div>
+
+    <div class="listes">
+      {
+        CERCLES.map((cercle) => (
+          <section class:list={["liste", cercle.teinte]}>
+            <h3>
+              <span class="pastille" aria-hidden="true" />
+              {cercle.titre}
+              <span class="sous-titre">{cercle.sousTitre}</span>
+            </h3>
+            <ul>
+              {cercle.elements.map((element) => (
+                <li>{element}</li>
+              ))}
+            </ul>
+          </section>
+        ))
+      }
+    </div>
+  </div>
+</figure>
+
+<style>
+  .cercles {
+    display: grid;
+    gap: var(--pas-4);
+    align-items: center;
+  }
+
+  @media (min-width: 56rem) {
+    .cercles {
+      grid-template-columns: 17rem 1fr;
+      gap: var(--pas-5);
+    }
+  }
+
+  /* LA CIBLE : trois disques emboîtés, centrés, du plus large au plus petit. */
+  .cible {
+    position: relative;
+    justify-self: center;
+    width: min(17rem, 80vw);
+    aspect-ratio: 1;
+  }
+
+  .anneau {
+    position: absolute;
+    display: grid;
+    justify-items: center;
+    border-radius: 50%;
+    background: var(--pastel);
+    border: 3px solid var(--vif);
+  }
+
+  .anneau span {
+    padding-top: 0.6rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--vif);
+  }
+
+  .anneau--3 {
+    inset: 0;
+  }
+
+  .anneau--2 {
+    inset: 18%;
+  }
+
+  /* Le centre, plein : la liste la plus courte, et la seule qui lui appartient. */
+  .anneau--1 {
+    inset: 36%;
+    align-items: center;
+    background: var(--couleur-aplat);
+    border-color: var(--couleur-aplat);
+  }
+
+  .anneau--1 span {
+    padding: 0;
+    color: var(--couleur-sur-aplat);
+  }
+
+  .listes {
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  @media (min-width: 40rem) {
+    .listes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .liste h3 {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: var(--pas-1);
+    align-items: center;
+    margin: 0 0 var(--pas-1);
+    font-size: 1.0625rem;
+  }
+
+  .pastille {
+    width: 0.9rem;
+    height: 0.9rem;
+    border-radius: 50%;
+    background: var(--vif);
+  }
+
+  .sous-titre {
+    grid-column: 2;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--couleur-encre-faible);
+  }
+
+  .liste ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: var(--t-petit);
+    line-height: 1.45;
+  }
+
+  .liste li + li {
+    margin-top: 4px;
+  }
+
+  .liste li::marker {
+    color: var(--vif);
+  }
+</style>

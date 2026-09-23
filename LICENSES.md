@@ -62,6 +62,20 @@ sa licence. L'historique git la conserve.
 La police est auto-hébergée, pas appelée à distance : `font-src 'self'` l'impose,
 et un test Playwright vérifie qu'aucune requête ne sort vers un domaine tiers.
 
+## Icônes — licence MIT
+
+Fichier : [`src/icones/LICENSE-phosphor.txt`](src/icones/LICENSE-phosphor.txt)
+
+Les icônes des schémas de `/comprendre` viennent de **Phosphor Icons**
+(`@phosphor-icons/core`), copyright 2023 Phosphor Icons, sous licence MIT. Elles
+sont lues dans `node_modules` au build par `src/components/Icone.astro` et
+insérées dans le HTML : aucun fichier d'icône n'est appelé à distance. La MIT
+autorise l'usage, la modification et la redistribution, et impose de conserver la
+notice de copyright et le texte de licence, ce que fait le fichier ci-dessus.
+
+Le signe de l'isoloir employé dans le schéma du bureau de vote n'est pas une
+icône Phosphor : c'est le logo du site (`src/marque/isoloir.svg`).
+
 ## Portraits et logos — licences libres, une par fichier
 
 Répertoire : [`public/medias/`](public/medias/) — manifeste :

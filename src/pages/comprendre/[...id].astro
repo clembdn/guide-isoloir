@@ -7,21 +7,26 @@
  */
 import { render } from "astro:content";
 import ArticleLayout from "../../layouts/ArticleLayout.astro";
-import { articlesPublies } from "../../lib/comprendre";
+import { articlesPublies, teinteArticle } from "../../lib/comprendre";
 import type { GetStaticPaths } from "astro";
 
 export const getStaticPaths = (async () => {
   const articles = await articlesPublies();
-  return articles.map((article) => ({
+  return articles.map((article, index) => ({
     params: { id: article.id },
-    props: { article },
+    props: { article, teinte: teinteArticle(index) },
   }));
 }) satisfies GetStaticPaths;
 
-const { article } = Astro.props;
-const { Content } = await render(article);
+const { article, teinte } = Astro.props;
+const { Content, headings } = await render(article);
+
+/* Le sommaire ne reprend que les sections : les titres de niveau 2. */
+const titres = headings
+  .filter((titre) => titre.depth === 2)
+  .map(({ slug, text }) => ({ id: slug, texte: text }));
 ---
 
-<ArticleLayout article={article} corps={article.body ?? ""}>
+<ArticleLayout article={article} corps={article.body ?? ""} titres={titres} teinte={teinte}>
   <Content />
 </ArticleLayout>

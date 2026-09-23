@@ -1,0 +1,184 @@
+---
+/*
+ * Schéma : la fenêtre de recueil des parrainages, sur une frise proportionnelle.
+ *
+ * Du décret de convocation (publié au plus tard le 7 février 2027) à la date
+ * limite (vendredi 12 mars 2027, 18 h), puis au premier tour (18 avril 2027).
+ * Les deux segments sont à l'échelle : 33 jours, puis 37. Le recueil peut
+ * commencer plus tôt si le décret paraît plus tôt ; le schéma dit « au plus
+ * tard », comme l'article.
+ *
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+import Icone from "../Icone.astro";
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Quelques semaines, et la poste</figcaption>
+  <div class="frise">
+    <ol class="jalons">
+      <li class="jalon t-indigo">
+        <span class="jalon-point" aria-hidden="true"><Icone nom="scroll" /></span>
+        <strong>7&nbsp;février 2027, au plus tard</strong>
+        <span
+          >Décret de convocation au Journal officiel&nbsp;: les formulaires partent aux élus.</span
+        >
+      </li>
+      <li class="jalon t-prune">
+        <span class="jalon-point" aria-hidden="true"><Icone nom="mailbox" /></span>
+        <strong>Vendredi 12&nbsp;mars 2027, 18&nbsp;h</strong>
+        <span
+          >Le sixième vendredi avant le premier tour&nbsp;: les parrainages doivent être parvenus au
+          Conseil constitutionnel, par la poste uniquement.</span
+        >
+      </li>
+      <li class="jalon t-sarcelle">
+        <span class="jalon-point" aria-hidden="true"><Icone nom="flag-banner" /></span>
+        <strong>18&nbsp;avril 2027</strong>
+        <span>Premier tour.</span>
+      </li>
+    </ol>
+    <div class="segments" aria-hidden="true">
+      <span class="segment segment--recueil">Recueil des parrainages</span>
+      <span class="segment segment--apres"></span>
+    </div>
+  </div>
+</figure>
+
+<style>
+  /*
+   * TÉLÉPHONE : trois jalons empilés sur une ligne verticale. GRAND ÉCRAN : une
+   * frise horizontale, jalons posés au-dessus de deux segments à l'échelle
+   * (33 et 37 jours) — le premier, coloré, est la fenêtre du recueil.
+   */
+  .jalons {
+    position: relative;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  .jalons::before {
+    content: "";
+    position: absolute;
+    top: 1.5rem;
+    bottom: 1.5rem;
+    left: calc(1.5rem - 2px);
+    width: 4px;
+    border-radius: 2px;
+    background: var(--couleur-trait);
+  }
+
+  .jalon {
+    position: relative;
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    column-gap: var(--pas-2);
+    margin: 0;
+    font-size: var(--t-petit);
+  }
+
+  .jalon-point {
+    grid-row: span 2;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--vif);
+    color: var(--couleur-fond);
+  }
+
+  .jalon-point :global(.icone) {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .jalon strong {
+    color: var(--vif);
+  }
+
+  .segments {
+    display: none;
+  }
+
+  @media (min-width: 48rem) {
+    .frise {
+      --colonnes: 33fr 37fr;
+      position: relative;
+      padding-top: var(--pas-2);
+    }
+
+    .jalons {
+      grid-template-columns: var(--colonnes) 0fr;
+      gap: 0;
+    }
+
+    .jalons::before {
+      display: none;
+    }
+
+    /* Chaque jalon se pose au bord gauche de sa colonne ; le dernier, sur le bord droit. */
+    .jalon {
+      grid-template-columns: 1fr;
+      padding: 0 var(--pas-3) var(--pas-2) 0;
+      border-left: 3px solid var(--vif);
+      padding-left: var(--pas-2);
+      align-content: start;
+    }
+
+    /* Le texte du 12 mars s'arrête avant le jalon du premier tour, posé au bord droit. */
+    .jalon:nth-child(2) {
+      padding-right: 13rem;
+    }
+
+    .jalon:last-child {
+      width: 12rem;
+      margin-left: -12rem;
+      padding-left: 0;
+      padding-right: var(--pas-2);
+      border-left: 0;
+      border-right: 3px solid var(--vif);
+      text-align: right;
+      justify-items: end;
+    }
+
+    .jalon-point {
+      grid-row: auto;
+      margin-bottom: var(--pas-1);
+    }
+
+    .segments {
+      display: grid;
+      grid-template-columns: var(--colonnes);
+      height: 2.5rem;
+      margin-top: 0;
+    }
+
+    .segment {
+      display: flex;
+      align-items: center;
+      padding-left: var(--pas-2);
+      font-size: 0.8125rem;
+      font-weight: 700;
+    }
+
+    .segment--recueil {
+      border-radius: 12px 0 0 12px;
+      background: var(--pastel-indigo);
+      color: var(--couleur-encre);
+      border: 2px solid var(--vif-indigo);
+    }
+
+    .segment--apres {
+      border-radius: 0 12px 12px 0;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--couleur-trait) 0 2px,
+        transparent 2px 8px
+      );
+    }
+  }
+</style>

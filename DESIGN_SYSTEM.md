@@ -375,6 +375,61 @@ pour un plafond de 25.
 Contrastes du menu ouvert, sur l'aplat : libellés 8,2:1 (clair) et 7,8:1 (sombre), descriptions
 6,2:1 et 5,9:1, bordure du bouton « Fermer » 4,0:1 et 3,6:1.
 
+### Articles de /comprendre : sommaire et schémas (23 septembre 2026)
+
+**Gabarit.** `src/layouts/PageLecture.astro` porte le sommaire et la colonne de lecture ; il sert
+aux articles (via `ArticleLayout`), à `/methodologie` et à `/a-propos`. Une page qui l'emploie
+donne un `id` à chacun de ses titres de niveau 2 et passe la liste au sommaire. `ListeIcones`
+remplace les puces des listes « fait / ne fait pas ».
+
+**Mise en page.** Sur grand écran, deux colonnes, comme les pages de produit d'Apple : un
+**sommaire collant** à gauche (titres de niveau 2 et « Sources »), qui surligne la section en
+cours et montre la progression de lecture sur une piste verticale ; l'article à droite, où titres,
+texte et schémas partent **du même bord gauche** — le texte garde la mesure de lecture, les schémas
+prennent la colonne entière (52 rem). Sur téléphone, le sommaire se replie en tête d'article.
+Chaque titre de section porte un trait dans la **teinte de rubrique de l'article**, la même que
+sa carte d'accueil (`teinteArticle`, `src/lib/comprendre.ts`).
+
+La piste est liée au défilement en CSS ; la section en cours est marquée par un script de
+442 octets (IntersectionObserver, aucun écouteur de défilement, aucune requête). **Sans script, le
+sommaire reste une liste de liens d'ancre** : contenu, ordre, titres, ancres et balisages
+`Article`/`BreadcrumbList` sont inchangés pour les moteurs et les assistants.
+
+**Schémas.** Un article peut être en **MDX** et insérer des composants de
+`src/components/schemas/` à l'endroit exact du texte qu'ils remplacent. Premier exemple :
+`ou-et-comment-voter.mdx`.
+
+- **Chaque schéma a la forme de son objet**, jamais la même carte arrondie partout. Au
+  23 septembre 2026, dans les cinq articles :
+  - _bureau de vote_ : zigzag guidé — cases reliées par des vagues fléchées, serpentin sur grand
+    écran, cases alternées sur téléphone ; cartes d'identité avec tampon « Refusée » ; frise des
+    horaires ; enveloppe et bulletin déchiré dessinés en CSS ;
+  - _inscription_ : aiguillage « déjà inscrit ? » ; trois voies en arches ; frise des anniversaires ;
+  - _procuration_ : trois chemins en embranchement (tronc, coudes, sans cartes) ; durées en
+    barres à l'échelle ;
+  - _parrainage_ : trois conditions en grands chiffres cerclés ; fenêtre de recueil sur une frise
+    à l'échelle ;
+  - _président_ : trois cercles concentriques, en récapitulatif ;
+  - _/methodologie_ : chaîne de résolution en escalier (libellés lus dans `NIVEAUX_RESOLUTION`) ;
+    quatre grandeurs en casier à cloisons ; fréquence du premier rang en barres ; double codage en
+    Y, avec la mention « pas encore appliqué » ;
+  - _/a-propos_ : trois questions, trois réponses, en lignes typographiques.
+- **Essayés et écartés par l'éditeur**, pour ne pas les refaire : trois colonnes pastel
+  identiques pour les chemins de procuration (« trop IA » ; le skill taste refuse les rangées de
+  cartes égales) ; un cadran de vingt-quatre heures
+  pour les horaires (moins lisible qu'une frise : une journée se lit de gauche à droite) ; une ligne
+  droite de stations pour le bureau de vote (texte à l'air libre, pas assez de structure) ; une
+  pastille devant la section en cours du sommaire (elle suivait la section, la piste suit la page).
+- **Plusieurs teintes par schéma** : les cinq teintes de rubrique, autorisées ici parce que le
+  contenu est pédagogique (§1.1). Jamais sur un candidat, une position ou un score.
+- **Un schéma remplace un passage, il ne le double pas**, et il ne porte **aucun fait nouveau**.
+  Un fait perdu en route se remet dans le texte.
+- **Aucun vert « oui », aucun rouge « non »** : un statut se dit par le titre, la forme et le mot
+  (tampon), l'icône double le texte.
+- **Icônes Phosphor** (MIT, notice dans `src/icones/`) insérées au build par
+  `src/components/Icone.astro`, toujours décoratives ; l'isoloir est le signe du site.
+- **Zéro JavaScript** dans les schémas, zéro `style=""`, tout le texte dans le HTML.
+
 ### Implémentés dans `src/styles/base.css`
 
 `.page` `.enveloppe` `.enveloppe-large` `.contenu` `.contenu--libre` `.pied`

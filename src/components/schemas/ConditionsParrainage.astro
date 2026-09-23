@@ -1,0 +1,135 @@
+---
+/*
+ * Schéma : les trois conditions cumulatives d'un parrainage valide.
+ *
+ * Trois grands chiffres dans trois cercles, reliés par des « et » : c'est le
+ * mot qui compte, puisque les trois sont exigées à la fois, et que ce sont la
+ * deuxième et la troisième qu'on oublie.
+ *
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+const CONDITIONS = [
+  {
+    teinte: "t-violet",
+    chiffre: "500",
+    unite: "parrainages",
+    texte: "au moins, conformes et validés : 500 personnes différentes, pas 500 mandats",
+  },
+  {
+    teinte: "t-sarcelle",
+    chiffre: "30",
+    unite: "départements",
+    texte: "ou collectivités d'outre-mer, au moins, représentés par les élus signataires",
+  },
+  {
+    teinte: "t-prune",
+    chiffre: "< 1/10",
+    unite: "d'un même département",
+    texte:
+      "Moins d'un dixième des parrainages peut venir d'un même département ou d'une même collectivité d'outre-mer",
+  },
+] as const;
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Trois conditions, toutes à la fois</figcaption>
+  <ol class="conditions">
+    {
+      CONDITIONS.map((condition, index) => (
+        <li class:list={["condition", condition.teinte]}>
+          {index > 0 && (
+            <span class="et" aria-hidden="true">
+              et
+            </span>
+          )}
+          <span class="disque">
+            <strong class="chiffre">{condition.chiffre}</strong>
+            <span class="unite">{condition.unite}</span>
+          </span>
+          <span class="texte">{condition.texte}</span>
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .conditions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-6);
+  }
+
+  @media (min-width: 48rem) {
+    .conditions {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--pas-5);
+    }
+  }
+
+  .condition {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--pas-2);
+    margin: 0;
+    text-align: center;
+  }
+
+  /* Le chiffre dans un disque, cerclé de sa teinte : la forme dit « seuil ». */
+  .disque {
+    display: grid;
+    place-content: center;
+    width: 9rem;
+    height: 9rem;
+    border-radius: 50%;
+    background: var(--pastel);
+    box-shadow:
+      inset 0 0 0 4px var(--vif),
+      0 0 0 8px var(--couleur-fond),
+      0 0 0 10px var(--vif);
+  }
+
+  .chiffre {
+    font-size: 2.5rem;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: var(--vif);
+    white-space: nowrap;
+  }
+
+  .unite {
+    font-size: 0.8125rem;
+    font-weight: 700;
+  }
+
+  .texte {
+    max-width: 16rem;
+    font-size: var(--t-petit);
+    line-height: 1.45;
+  }
+
+  /* « et » entre deux conditions : au-dessus sur téléphone, à gauche sur grand écran. */
+  .et {
+    position: absolute;
+    top: calc(-1 * var(--pas-6) / 2);
+    left: 50%;
+    padding: 0 var(--pas-2);
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-encre);
+    color: var(--couleur-fond);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    transform: translate(-50%, -50%);
+  }
+
+  @media (min-width: 48rem) {
+    .et {
+      top: 4.5rem;
+      left: calc(-1 * var(--pas-5) / 2);
+      transform: translate(-50%, -50%);
+    }
+  }
+</style>

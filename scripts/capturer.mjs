@@ -70,6 +70,10 @@ const ROUTES = [
   { chemin: "/candidats/marine-le-pen", nom: "Fiche candidat" },
   { chemin: "/themes/travail-et-retraites", nom: "Thème" },
   { chemin: "/donnees", nom: "Données" },
+  /* Article à schémas : cartes, cadre tireté, frise hachurée. */
+  { chemin: "/comprendre/ou-et-comment-voter", nom: "Article à schémas" },
+  { chemin: "/comprendre/s-inscrire-sur-les-listes-electorales", nom: "Article inscription" },
+  { chemin: "/comprendre/ce-qu-un-president-decide-seul", nom: "Article président" },
   { chemin: "/a-propos", nom: "À propos" },
   { chemin: "/financement", nom: "Financement" },
 ];

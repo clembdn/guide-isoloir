@@ -1,0 +1,155 @@
+---
+/*
+ * Schéma : vote blanc et vote nul, dessinés.
+ *
+ * Le blanc est une ENVELOPPE VIDE, le nul un BULLETIN DÉCHIRÉ ET ANNOTÉ : deux
+ * objets, deux formes, parce que le point à retenir est qu'ils ne sont pas la
+ * même chose. Ce qu'ils ont en commun va dessous, sur toute la largeur.
+ *
+ * Dessins en CSS pur, décoratifs : la définition est dans le texte à côté.
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Blanc ou nul : deux votes différents</figcaption>
+  <div class="paire">
+    <section class="cas t-cyan">
+      <span class="dessin" aria-hidden="true"><span class="enveloppe"></span></span>
+      <div>
+        <h3>Vote blanc</h3>
+        <p>Une enveloppe vide, ou un bulletin sans nom de candidat.</p>
+      </div>
+    </section>
+    <section class="cas t-prune">
+      <span class="dessin" aria-hidden="true"><span class="bulletin"></span></span>
+      <div>
+        <h3>Vote nul</h3>
+        <p>Un bulletin déchiré ou annoté.</p>
+      </div>
+    </section>
+  </div>
+  <p class="commun">
+    Les deux sont décomptés séparément et annoncés publiquement, mais ni l'un ni l'autre n'entre
+    dans les suffrages exprimés, qui servent au calcul des pourcentages.
+  </p>
+</figure>
+
+<style>
+  .paire {
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  @media (min-width: 40rem) {
+    .paire {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .cas {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    align-items: center;
+    gap: var(--pas-3);
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--pastel);
+  }
+
+  .cas h3 {
+    margin: 0 0 4px;
+    font-size: 1.125rem;
+  }
+
+  .cas p {
+    margin: 0;
+    font-size: var(--t-petit);
+  }
+
+  .dessin {
+    display: grid;
+    place-items: center;
+    height: 6rem;
+  }
+
+  /* L'enveloppe : un rectangle, et son rabat en triangle. Vide. */
+  .enveloppe {
+    position: relative;
+    width: 6.5rem;
+    height: 4.25rem;
+    border: 3px solid var(--vif);
+    border-radius: 6px;
+    background: var(--couleur-surface);
+    overflow: hidden;
+  }
+
+  .enveloppe::before {
+    content: "";
+    position: absolute;
+    inset: -3px -3px 45%;
+    background: var(--vif);
+    clip-path: polygon(0 0, 100% 0, 50% 100%);
+    opacity: 0.85;
+  }
+
+  /*
+   * Le bulletin : une feuille au bord inférieur déchiré (en dents de scie), et
+   * un trait de crayon en travers — déchiré ou annoté.
+   */
+  .bulletin {
+    position: relative;
+    width: 4.5rem;
+    height: 5.5rem;
+    background: var(--couleur-surface);
+    border: 3px solid var(--vif);
+    border-bottom: 0;
+    clip-path: polygon(
+      0 0,
+      100% 0,
+      100% 88%,
+      88% 100%,
+      75% 90%,
+      62% 100%,
+      50% 90%,
+      38% 100%,
+      25% 90%,
+      12% 100%,
+      0 88%
+    );
+    transform: rotate(-6deg);
+  }
+
+  .bulletin::before {
+    content: "";
+    position: absolute;
+    left: 14%;
+    right: 14%;
+    top: 22%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--couleur-trait);
+    box-shadow:
+      0 12px 0 var(--couleur-trait),
+      0 24px 0 var(--couleur-trait);
+  }
+
+  .bulletin::after {
+    content: "";
+    position: absolute;
+    left: 6%;
+    right: 6%;
+    top: 48%;
+    height: 5px;
+    border-radius: 3px;
+    background: var(--vif);
+    transform: rotate(-32deg);
+  }
+
+  .commun {
+    margin: var(--pas-3) 0 0;
+    padding: var(--pas-2) var(--pas-3);
+    border-left: 4px solid var(--couleur-signature);
+    font-size: var(--t-petit);
+  }
+</style>

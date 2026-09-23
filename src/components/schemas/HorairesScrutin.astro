@@ -1,0 +1,141 @@
+---
+/*
+ * Schéma : les horaires du bureau de vote, sur une frise de la journée.
+ *
+ * De 7 h à 21 h, une heure par case. De 8 h à 19 h, le vote est ouvert. De
+ * 19 h à 20 h, la case est hachurée : un arrêté du préfet peut retarder la
+ * fermeture, sans dépasser 20 h. C'est exactement ce que dit l'article, et rien
+ * de plus : le texte sous le schéma ajoute que l'ouverture peut aussi être
+ * avancée, sans heure, parce que l'article n'en donne pas.
+ *
+ * LA FRISE A ÉTÉ PRÉFÉRÉE AU CADRAN. Un cadran de vingt-quatre heures a été
+ * essayé le 23 septembre 2026 : plus original, jugé moins lisible par
+ * l'éditeur. Une journée se lit de gauche à droite, pas en tournant.
+ *
+ * Les heures sont fixes : les cases sont écrites en dur, sans calcul ni style en
+ * ligne — la CSP hachée refuserait `style=""`.
+ */
+const HEURES = [7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] as const;
+
+function etat(heure: number): "ferme" | "ouvert" | "prolongation" {
+  if (heure >= 8 && heure < 19) return "ouvert";
+  if (heure === 19) return "prolongation";
+  return "ferme";
+}
+---
+
+<figure class="schema t-indigo">
+  <figcaption class="schema-titre">
+    Pour l'élection présidentielle, de 8&nbsp;h à 19&nbsp;h
+  </figcaption>
+  <div
+    class="frise"
+    role="img"
+    aria-label="Vote ouvert de 8 heures à 19 heures ; fermeture repoussée possible jusqu'à 20 heures."
+  >
+    <ol class="heures" aria-hidden="true">
+      {HEURES.map((heure) => <li class={`heure heure--${etat(heure)}`} />)}
+    </ol>
+    <ol class="reperes" aria-hidden="true">
+      {
+        HEURES.map((heure) => (
+          <li class={heure === 20 ? "repere-large" : undefined}>
+            {heure === 8 || heure === 19 || heure === 20 ? `${heure}\u00a0h` : ""}
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+  <ul class="legende">
+    <li><span class="pastille pastille--ouvert" aria-hidden="true"></span>Vote ouvert</li>
+    <li>
+      <span class="pastille pastille--prolongation" aria-hidden="true"></span>Fermeture repoussée
+      possible, jusqu'à 20&nbsp;h au plus tard
+    </li>
+  </ul>
+</figure>
+
+<style>
+  .frise {
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--pastel);
+  }
+
+  .heures,
+  .reperes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(14, minmax(0, 1fr));
+  }
+
+  .heures {
+    gap: 3px;
+  }
+
+  .heure {
+    height: 2.75rem;
+    margin: 0;
+    border-radius: 6px;
+    background: var(--couleur-surface);
+  }
+
+  .heure--ouvert {
+    background: var(--vif);
+  }
+
+  /* Hachures : « possible », pas « certain ». Une texture qui signifie, pas un dégradé. */
+  .heure--prolongation {
+    background: repeating-linear-gradient(-45deg, var(--vif) 0 3px, var(--couleur-surface) 3px 7px);
+  }
+
+  .reperes li {
+    margin: var(--pas-1) 0 0;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* Sur téléphone, « 19 h » et « 20 h » tomberaient dans deux cases de 22 px. */
+  @media (max-width: 29.99rem) {
+    .repere-large {
+      visibility: hidden;
+    }
+  }
+
+  .legende {
+    list-style: none;
+    margin: var(--pas-3) 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1) var(--pas-4);
+    font-size: var(--t-petit);
+  }
+
+  .legende li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-1);
+    margin: 0;
+  }
+
+  .pastille {
+    flex: none;
+    width: 1rem;
+    height: 1rem;
+    margin-top: 0.15rem;
+    border-radius: 4px;
+  }
+
+  .pastille--ouvert {
+    background: var(--vif);
+  }
+
+  .pastille--prolongation {
+    background: repeating-linear-gradient(-45deg, var(--vif) 0 2px, var(--couleur-surface) 2px 5px);
+  }
+</style>

@@ -640,6 +640,26 @@ a {
   margin-bottom: 0;
 }
 
+/*
+ * SCHÉMAS DES ARTICLES (src/components/schemas/).
+ *
+ * Un schéma prend toute la largeur de la colonne de l'article (jusqu'à 52 rem
+ * sur grand écran), quand le texte garde la mesure de lecture. Les deux
+ * partent du même bord gauche : le titre reste au-dessus de ce qu'il
+ * introduit. Voir ArticleLayout.astro.
+ */
+.schema {
+  /* Sans `margin-inline: 0`, une `<figure>` garde les 40 px de retrait du navigateur. */
+  margin: var(--pas-4) 0 var(--pas-5);
+}
+
+.schema-titre {
+  margin: 0 0 var(--pas-3);
+  font-size: var(--t-h3);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+}
+
 /* Tableaux. Chiffres tabulaires : une colonne de nombres doit s'aligner. */
 
 table {

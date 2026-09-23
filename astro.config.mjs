@@ -1,4 +1,5 @@
 // @ts-check
+import mdx from "@astrojs/mdx";
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -134,7 +135,13 @@ export default defineConfig({
      */
     syntaxHighlight: false,
   },
-  integrations: [svelte(), cspEnTetes()],
+  /*
+   * MDX pour les articles de /comprendre qui portent des schémas : un
+   * composant s'insère à l'endroit exact du texte qu'il remplace. Les autres
+   * articles restent en Markdown pur. Aucun JavaScript client : les schémas
+   * sont des composants .astro, rendus en HTML au build.
+   */
+  integrations: [svelte(), mdx(), cspEnTetes()],
   devToolbar: {
     enabled: false,
   },

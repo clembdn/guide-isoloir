@@ -29,18 +29,21 @@ sources:
     consulteLe: "2026-09-14"
 ---
 
+import InscriptionAutomatique from "../../components/schemas/InscriptionAutomatique.astro";
+import VoiesInscription from "../../components/schemas/VoiesInscription.astro";
+import AnniversaireCampagne from "../../components/schemas/AnniversaireCampagne.astro";
+
 Voter suppose d'être inscrit sur la liste électorale d'une commune. Ce n'est pas
 automatique pour tout le monde, mais ça l'est plus souvent qu'on ne le croit.
 
 ## Vérifiez d'abord : vous êtes peut-être déjà inscrit
 
-Deux situations donnent une inscription automatique, sans aucune démarche :
+Deux situations donnent une inscription automatique, sans aucune démarche.
 
-- vous avez atteint 18 ans et vous aviez fait votre **recensement citoyen à 16 ans** ;
-- vous êtes **devenu français depuis 2019**.
+<InscriptionAutomatique />
 
-Dans les deux cas, l'administration vous a inscrit sans vous le demander. C'est le cas
-de la plupart des primo-votants.
+L'administration vous a alors inscrit sans vous le demander. C'est le cas de la plupart
+des primo-votants.
 
 Un téléservice permet de vérifier en une minute si vous êtes inscrit, et dans quel
 bureau de vote. Commencez par là : si la réponse est oui, vous n'avez rien à faire.
@@ -71,14 +74,7 @@ bureau de vote de cette commune. Une inscription chez vos parents alors que vous
 
 ## Comment s'inscrire
 
-Trois voies, au choix :
-
-- **En ligne**, par le téléservice de demande d'inscription. Il faut une version
-  numérisée d'un justificatif d'identité et d'un justificatif de domicile de moins de
-  trois mois.
-- **En mairie**, avec les mêmes pièces et le formulaire cerfa n° 12669. Vous pouvez
-  charger quelqu'un de le faire à votre place, avec un pouvoir écrit et signé.
-- **Par courrier**, avec les mêmes pièces.
+<VoiesInscription />
 
 ## La date limite
 
@@ -100,9 +96,7 @@ L. 32) : vous n'êtes pas inscrit et vous
 atteignez 18 ans après le 12 mars, vous avez déménagé récemment, vous avez acquis la
 nationalité française récemment, ou vous avez recouvré votre droit de vote récemment.
 
-Votre anniversaire tombe pendant la campagne ? Si vous avez 18 ans entre le 13 mars et
-le 17 avril 2027, vous pourrez voter aux deux tours. Entre le 18 avril et le 1er mai,
-seulement au second. À partir du 2 mai, pas à cette élection.
+<AnniversaireCampagne />
 
 Ne visez pas la date limite. Une pièce manquante suffit à faire échouer une demande
 déposée la veille.

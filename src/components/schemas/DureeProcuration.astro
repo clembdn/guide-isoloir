@@ -1,0 +1,79 @@
+---
+/*
+ * Schéma : combien de temps dure une procuration.
+ *
+ * Des barres à l'échelle : un an pour une inscription sur une liste communale,
+ * trois ans sur une liste consulaire, et le cas le plus court, une seule
+ * élection. Les longueurs sont proportionnelles et fixes (un tiers, trois
+ * tiers) : aucun calcul, aucun style en ligne.
+ *
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Au plus long, selon votre liste électorale</figcaption>
+  <ul class="durees">
+    <li class="duree t-cyan">
+      <span class="libelle">Une seule élection</span>
+      <span class="barre barre--election" aria-hidden="true"></span>
+    </li>
+    <li class="duree t-indigo">
+      <span class="libelle">Liste électorale communale&nbsp;: <strong>un an</strong> au plus</span>
+      <span class="barre barre--un-an" aria-hidden="true"></span>
+    </li>
+    <li class="duree t-sarcelle">
+      <span class="libelle"
+        >Liste électorale consulaire&nbsp;: <strong>trois ans</strong> au plus</span
+      >
+      <span class="barre barre--trois-ans" aria-hidden="true"></span>
+    </li>
+  </ul>
+  <p class="note">Rien n'oblige à prendre le maximum : trois ou six mois sont possibles.</p>
+</figure>
+
+<style>
+  .durees {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  .duree {
+    display: grid;
+    gap: var(--pas-1);
+    margin: 0;
+  }
+
+  .libelle {
+    font-size: var(--t-petit);
+  }
+
+  .barre {
+    display: block;
+    height: 1.25rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--vif);
+  }
+
+  /* Une élection n'a pas de durée fixe : un point, pas une barre. */
+  .barre--election {
+    width: 1.25rem;
+  }
+
+  .barre--un-an {
+    width: calc(100% / 3);
+  }
+
+  .barre--trois-ans {
+    width: 100%;
+  }
+
+  .note {
+    margin: var(--pas-3) 0 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+</style>

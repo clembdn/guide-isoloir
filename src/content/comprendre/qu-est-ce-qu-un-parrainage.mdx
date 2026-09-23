@@ -45,6 +45,9 @@ sources:
     consulteLe: "2026-09-14"
 ---
 
+import ConditionsParrainage from "../../components/schemas/ConditionsParrainage.astro";
+import FenetreParrainages from "../../components/schemas/FenetreParrainages.astro";
+
 Avant que les électeurs choisissent, des élus filtrent. Pour figurer sur le bulletin,
 un candidat doit réunir les signatures d'un certain nombre d'élus. C'est cette étape
 qui explique pourquoi des personnalités très commentées dans les médias ne se
@@ -55,13 +58,9 @@ constitutionnel emploie les deux.
 
 ## Trois conditions cumulatives
 
-Une candidature n'est retenue que si les trois sont remplies :
+Une candidature n'est retenue que si les trois sont remplies.
 
-- **au moins 500 parrainages** conformes et validés ;
-- signés par des élus représentant **au moins 30 départements ou collectivités
-  d'outre-mer** ;
-- **moins d'un dixième** des parrainages provenant d'un même département ou d'une même
-  collectivité d'outre-mer.
+<ConditionsParrainage />
 
 Les 500 sont **500 personnes différentes, pas 500 mandats**. Un élu qui cumule
 plusieurs fonctions ne compte qu'une fois.
@@ -114,8 +113,7 @@ le 10 avril. Appliquée au 18 avril 2027, la règle place cette limite au
 **7 février 2027**. C'est sa publication qui déclenche l'envoi des formulaires aux
 élus.
 
-Les parrainages doivent ensuite **parvenir au Conseil constitutionnel avant 18 heures,
-le sixième vendredi précédant le premier tour**, soit le **vendredi 12 mars 2027**.
+<FenetreParrainages />
 
 **Et l'envoi se fait par la poste, uniquement.** Aucun dépôt direct au Conseil n'est
 accepté. C'est à l'élu de tenir compte du délai d'acheminement du courrier ; le Conseil

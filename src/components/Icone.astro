@@ -1,0 +1,54 @@
+---
+/*
+ * Icône Phosphor (MIT), insérée dans le HTML au build.
+ *
+ * Le SVG est lu dans `node_modules` et rendu en ligne : aucun fichier à
+ * charger, aucun script, aucune requête. Il hérite de la couleur du texte
+ * (`fill="currentColor"`), donc des jetons, dans les deux thèmes.
+ *
+ * Toujours décorative : l'information est portée par le texte à côté. Un
+ * lecteur d'écran n'a pas à entendre « enveloppe » avant « Prenez une
+ * enveloppe ».
+ */
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+type Props = {
+  /** Nom du fichier Phosphor, sans extension : `envelope-simple`, `x`… */
+  nom: string;
+  /** Graisse Phosphor. `duotone` n'existe pas dans ce paquet. */
+  graisse?: "regular" | "bold" | "fill" | "light";
+  class?: string;
+};
+
+const { nom, graisse = "regular", class: classe } = Astro.props;
+
+/*
+ * Lu sur le disque, au build, un fichier à la fois : charger tout le paquet
+ * par `import.meta.glob` ferait lire des milliers de SVG à chaque construction.
+ */
+const suffixe = graisse === "regular" ? "" : `-${graisse}`;
+/*
+ * Depuis la racine du projet, où le build est lancé : un chemin relatif au
+ * module pointerait vers le dossier compilé, pas vers `node_modules`.
+ */
+const chemin = join(
+  process.cwd(),
+  "node_modules/@phosphor-icons/core/assets",
+  graisse,
+  `${nom}${suffixe}.svg`,
+);
+let brut: string;
+try {
+  brut = readFileSync(chemin, "utf8");
+} catch {
+  throw new Error(`Icône Phosphor introuvable : ${nom} (${graisse}).`);
+}
+
+const svg = brut.replace(
+  "<svg ",
+  `<svg aria-hidden="true" focusable="false" class="icone${classe ? ` ${classe}` : ""}" `,
+);
+---
+
+<Fragment set:html={svg} />

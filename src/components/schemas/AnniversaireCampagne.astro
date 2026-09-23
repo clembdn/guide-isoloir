@@ -1,0 +1,155 @@
+---
+/*
+ * Schéma : votre anniversaire tombe pendant la campagne. Une frise.
+ *
+ * Trois périodes, de longueur proportionnelle au nombre de jours : 18 ans entre
+ * le 13 mars et le 17 avril 2027 (36 jours), les deux tours ; entre le 18 avril
+ * et le 1er mai (14 jours), le second seulement ; à partir du 2 mai, pas cette
+ * élection (sa largeur ne mesure rien : elle n'a pas de fin). Au-dessus, les trois repères : date limite d'inscription, premier et
+ * second tour.
+ *
+ * Contenu repris de l'article vérifié, sans ajout. Les largeurs sont fixes
+ * (36 / 14 / 12 fractions) : aucun calcul, aucun style en ligne.
+ */
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Vous aurez 18&nbsp;ans pendant la campagne&nbsp;?</figcaption>
+  <div class="frise">
+    <ol class="reperes">
+      <li class="repere repere--limite">
+        <strong>12&nbsp;mars</strong>
+        <span>date limite d'inscription</span>
+      </li>
+      <li class="repere repere--t1">
+        <strong>18&nbsp;avril</strong>
+        <span>premier tour</span>
+      </li>
+      <li class="repere repere--t2">
+        <strong>2&nbsp;mai</strong>
+        <span>second tour</span>
+      </li>
+    </ol>
+
+    <ol class="periodes">
+      <li class="periode t-sarcelle">
+        <span class="periode-dates">18 ans du 13&nbsp;mars au 17&nbsp;avril 2027</span>
+        <strong>Vous votez aux deux tours</strong>
+      </li>
+      <li class="periode t-indigo">
+        <span class="periode-dates">du 18&nbsp;avril au 1<sup>er</sup>&nbsp;mai</span>
+        <strong>Au second tour seulement</strong>
+      </li>
+      <li class="periode periode--hors">
+        <span class="periode-dates">à partir du 2&nbsp;mai</span>
+        <strong>Pas à cette élection</strong>
+      </li>
+    </ol>
+  </div>
+</figure>
+
+<style>
+  /*
+   * GRAND ÉCRAN : une frise horizontale, périodes proportionnelles à leur durée,
+   * repères posés sur leurs bords. TÉLÉPHONE : les périodes s'empilent, chacune
+   * avec ses dates, et les repères deviennent une ligne de légende.
+   */
+  .reperes {
+    list-style: none;
+    margin: 0 0 var(--pas-2);
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1) var(--pas-3);
+    font-size: 0.8125rem;
+  }
+
+  .repere {
+    display: grid;
+    margin: 0;
+  }
+
+  .repere span {
+    color: var(--couleur-encre-faible);
+  }
+
+  .periodes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 4px;
+  }
+
+  .periode {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: var(--pas-2) var(--pas-3);
+    border-radius: 12px;
+    background: var(--pastel);
+    border-left: 6px solid var(--vif);
+  }
+
+  .periode-dates {
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  .periode--hors {
+    background: transparent;
+    border: 2px dashed var(--couleur-trait);
+    border-left-width: 6px;
+  }
+
+  @media (min-width: 48rem) {
+    .frise {
+      /*
+       * 36 et 14 jours, à l'échelle. La troisième période n'a pas de fin : sa
+       * largeur n'est pas une durée, elle laisse seulement la place au texte.
+       */
+      --colonnes: 36fr 14fr 12fr;
+    }
+
+    .reperes {
+      display: grid;
+      grid-template-columns: var(--colonnes);
+      gap: 0;
+    }
+
+    /* Chaque repère se pose sur le BORD GAUCHE de la période qu'il ouvre ou ferme. */
+    .repere {
+      padding-left: var(--pas-1);
+      border-left: 3px solid var(--couleur-encre);
+    }
+
+    .periodes {
+      grid-template-columns: var(--colonnes);
+      gap: 0;
+    }
+
+    .periode {
+      min-height: 6rem;
+      align-content: end;
+      border-radius: 0;
+      border-left: 3px solid var(--couleur-fond);
+    }
+
+    .periode:first-child {
+      border-radius: 14px 0 0 14px;
+    }
+
+    .periode:last-child {
+      border-radius: 0 14px 14px 0;
+    }
+
+    .periode.t-sarcelle,
+    .periode.t-indigo {
+      border-top: 6px solid var(--vif);
+    }
+
+    .periode--hors {
+      border: 2px dashed var(--couleur-trait);
+    }
+  }
+</style>

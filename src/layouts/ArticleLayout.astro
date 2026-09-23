@@ -5,20 +5,30 @@
  * Balisage `Article` + `BreadcrumbList`, signature nommée, date de mise à jour
  * et date de vérification des faits, sources listées en fin d'article.
  *
+ * La mise en page (sommaire collant, colonne de lecture) vient de
+ * `PageLecture.astro`, partagé avec la méthodologie et la page À propos.
+ *
  * Pas de `FAQPage` : depuis 2023 les résultats enrichis FAQ sont réservés aux
  * sites gouvernementaux et de santé reconnus. Voir CLAUDE.md, section SEO.
  */
-import BaseLayout from "./BaseLayout.astro";
+import PageLecture from "./PageLecture.astro";
 import { formatDateFr } from "../lib/date";
-import { minutesDeLecture, type Article } from "../lib/comprendre";
+import { minutesDeLecture, type Article, type TeinteRubrique } from "../lib/comprendre";
 import { EDITOR_NAME, SITE_NAME, SITE_URL } from "../lib/site";
 
 type Props = {
   article: Article;
   corps: string;
+  /** Sections de l'article (titres de niveau 2), pour le sommaire. */
+  titres: readonly { id: string; texte: string }[];
+  /** Teinte de rubrique de l'article, la même que sur sa carte d'accueil. */
+  teinte: TeinteRubrique;
 };
 
-const { article, corps } = Astro.props;
+const { article, corps, titres, teinte } = Astro.props;
+
+/* Le sommaire se termine sur les sources : elles font partie de l'article. */
+const sommaire = [...titres, { id: "sources", texte: "Sources" }];
 const { data } = article;
 
 const url = new URL(`/comprendre/${article.id}`, SITE_URL).href;
@@ -63,21 +73,30 @@ const filAriane = {
 };
 ---
 
-<BaseLayout title={data.titre} description={data.description} updated={data.misAJourLe}>
-  <nav class="fil-ariane" aria-label="Fil d'Ariane">
-    <a href="/">{SITE_NAME}</a>
-    <span aria-hidden="true">/</span>
-    <a href="/comprendre">Comprendre</a>
-  </nav>
+<PageLecture
+  title={data.titre}
+  description={data.description}
+  updated={data.misAJourLe}
+  teinte={teinte}
+  sommaire={sommaire}
+  libelleSommaire="Dans cet article"
+>
+  <Fragment slot="tete">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <a href="/">{SITE_NAME}</a>
+      <span aria-hidden="true">/</span>
+      <a href="/comprendre">Comprendre</a>
+    </nav>
 
-  <h1>{data.titre}</h1>
+    <h1>{data.titre}</h1>
 
-  <p class="mise-a-jour">
-    Mis à jour le <time datetime={data.misAJourLe}>{formatDateFr(data.misAJourLe)}</time> ·
-    {minutes} minute{minutes > 1 ? "s" : ""} de lecture
-  </p>
+    <p class="mise-a-jour">
+      Mis à jour le <time datetime={data.misAJourLe}>{formatDateFr(data.misAJourLe)}</time> ·
+      {minutes} minute{minutes > 1 ? "s" : ""} de lecture
+    </p>
 
-  <p class="question">{data.question}</p>
+    <p class="question">{data.question}</p>
+  </Fragment>
 
   <div class="prose">
     <slot />
@@ -111,6 +130,8 @@ const filAriane = {
     )
   }
 
-  <script type="application/ld+json" set:html={JSON.stringify(articleLd)} is:inline />
-  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
-</BaseLayout>
+  <Fragment slot="apres">
+    <script type="application/ld+json" set:html={JSON.stringify(articleLd)} is:inline />
+    <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+  </Fragment>
+</PageLecture>

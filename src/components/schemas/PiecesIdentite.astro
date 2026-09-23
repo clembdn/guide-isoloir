@@ -1,0 +1,189 @@
+---
+/*
+ * Schéma : quelles pièces d'identité sont acceptées au bureau de vote.
+ *
+ * Chaque pièce est dessinée comme une petite carte d'identité — une bande de
+ * couleur, une photo, deux lignes —, rangée dans l'un des trois groupes. Les
+ * pièces refusées portent un tampon « Refusée », incliné : le refus se lit par
+ * la forme et par le mot, pas par un rouge (famille de parti exclue, et un
+ * statut s'écrit).
+ *
+ * Trois groupes, et c'est la valeur du schéma : la liste de l'article faisait
+ * lire la tolérance des cinq ans comme une règle générale, alors qu'elle ne
+ * vaut que pour la carte d'identité et le passeport.
+ *
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+import Icone from "../Icone.astro";
+
+const GROUPES = [
+  {
+    icone: "clock-countdown",
+    teinte: "t-sarcelle",
+    titre: "Valides, ou périmées depuis moins de cinq ans",
+    pieces: ["Carte nationale d'identité", "Passeport"],
+    refus: false,
+  },
+  {
+    icone: "check-circle",
+    teinte: "t-indigo",
+    titre: "Valides seulement",
+    pieces: [
+      "Permis de conduire",
+      "Carte Vitale avec photographie",
+      "Carte de mobilité inclusion, carte du combattant, carte d'identité de fonctionnaire de l'État, avec photographie",
+    ],
+    refus: false,
+  },
+  {
+    icone: "x-circle",
+    teinte: "t-prune",
+    titre: "Refusées",
+    pieces: [
+      "Une photo dans un téléphone, une photocopie : il faut l'original",
+      "Un permis de conduire ou une carte de mobilité inclusion périmés",
+      "La carte électorale seule : ce n'est pas une pièce d'identité",
+    ],
+    refus: true,
+  },
+] as const;
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">
+    La pièce d'identité, obligatoire dans une commune de 1&nbsp;000 habitants et plus
+  </figcaption>
+  <div class="groupes">
+    {
+      GROUPES.map((groupe) => (
+        <section class:list={["groupe", groupe.teinte, { "groupe--refus": groupe.refus }]}>
+          <h3 class="groupe-titre">
+            <Icone nom={groupe.icone} graisse="bold" />
+            {groupe.titre}
+          </h3>
+          <ul class="pieces">
+            {groupe.pieces.map((piece) => (
+              <li class="piece">
+                <span class="piece-photo" aria-hidden="true" />
+                {groupe.refus && (
+                  <span class="tampon" aria-hidden="true">
+                    Refusée
+                  </span>
+                )}
+                <span class="piece-nom">{piece}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
+  </div>
+</figure>
+
+<style>
+  .groupes {
+    display: grid;
+    gap: var(--pas-4);
+  }
+
+  @media (min-width: 48rem) {
+    .groupes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--pas-3);
+    }
+  }
+
+  .groupe-titre {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-2);
+    font-size: 1rem;
+    line-height: 1.3;
+  }
+
+  .groupe-titre :global(.icone) {
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    color: var(--vif);
+  }
+
+  .pieces {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-2);
+  }
+
+  /*
+   * UNE CARTE D'IDENTITÉ STYLISÉE : bande supérieure dans la teinte du groupe,
+   * une photo ronde, le nom de la pièce. Coins de carte plastique, pas de pilule.
+   */
+  .piece {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--pas-2);
+    margin: 0;
+    padding: calc(var(--pas-2) + 6px) var(--pas-2) var(--pas-2);
+    border-radius: 10px;
+    border: 1px solid var(--couleur-trait);
+    background: var(--couleur-surface);
+    overflow: hidden;
+  }
+
+  .piece::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 6px;
+    background: var(--vif);
+  }
+
+  .piece-photo {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 50%;
+    background: var(--pastel);
+    border: 2px solid var(--vif);
+  }
+
+  .piece-nom {
+    font-size: var(--t-petit);
+    line-height: 1.4;
+  }
+
+  /*
+   * Refusée : cadre tireté, bande éteinte, et le tampon PREND LA PLACE de la
+   * photo, au-dessus du nom — posé de travers, comme un vrai tampon. Placé à
+   * côté du texte, il l'écrasait dans une colonne étroite.
+   */
+  .groupe--refus .piece {
+    grid-template-columns: 1fr;
+    gap: var(--pas-1);
+    border-style: dashed;
+    background: transparent;
+  }
+
+  .groupe--refus .piece::before {
+    background: var(--couleur-trait);
+  }
+
+  .groupe--refus .piece-photo {
+    display: none;
+  }
+
+  .tampon {
+    justify-self: start;
+    padding: 1px 8px;
+    border: 2px solid var(--vif);
+    border-radius: 6px;
+    color: var(--vif);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    transform: rotate(-6deg);
+  }
+</style>

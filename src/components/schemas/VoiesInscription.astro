@@ -1,0 +1,139 @@
+---
+/*
+ * Schéma : les trois voies pour s'inscrire, dessinées comme trois portes.
+ *
+ * Une arche par voie — la forme de l'isoloir, qui est aussi celle d'une porte
+ * qu'on franchit. Ce qu'elles ont en commun (les pièces à fournir) va dessous,
+ * sur toute la largeur, pour ne pas le répéter trois fois.
+ *
+ * Contenu repris de l'article vérifié, sans ajout.
+ */
+import Icone from "../Icone.astro";
+
+const VOIES = [
+  {
+    icone: "desktop",
+    teinte: "t-indigo",
+    titre: "En ligne",
+    texte: "Par le téléservice de demande d'inscription, avec une version numérisée des pièces.",
+  },
+  {
+    icone: "bank",
+    teinte: "t-sarcelle",
+    titre: "En mairie",
+    texte:
+      "Avec le formulaire cerfa n° 12669. Quelqu'un peut le faire à votre place, avec un pouvoir écrit et signé.",
+  },
+  {
+    icone: "envelope-simple",
+    teinte: "t-prune",
+    titre: "Par courrier",
+    texte: "Avec les mêmes pièces.",
+  },
+] as const;
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Trois voies, au choix</figcaption>
+  <ul class="portes">
+    {
+      VOIES.map((voie) => (
+        <li class:list={["porte", voie.teinte]}>
+          <span class="porte-icone">
+            <Icone nom={voie.icone} />
+          </span>
+          <strong class="porte-titre">{voie.titre}</strong>
+          <span class="porte-texte">{voie.texte}</span>
+        </li>
+      ))
+    }
+  </ul>
+  <p class="pieces">
+    <Icone nom="identification-card" />
+    <span>
+      Dans les trois cas&nbsp;: <strong>un justificatif d'identité</strong> et{" "}
+      <strong>un justificatif de domicile de moins de trois mois</strong>.
+    </span>
+  </p>
+</figure>
+
+<style>
+  .portes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-2);
+  }
+
+  @media (min-width: 40rem) {
+    .portes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--pas-3);
+    }
+  }
+
+  /* L'ARCHE : le haut en plein cintre, le bas droit, comme une porte ou un isoloir. */
+  .porte {
+    display: grid;
+    justify-items: center;
+    align-content: start;
+    gap: var(--pas-1);
+    margin: 0;
+    padding: var(--pas-5) var(--pas-3) var(--pas-3);
+    border: 2px solid var(--vif);
+    border-radius: 999px 999px 14px 14px;
+    background: var(--pastel);
+    text-align: center;
+  }
+
+  @media (max-width: 39.99rem) {
+    /* Sur téléphone, l'arche s'allonge moins : un demi-cercle sur une carte. */
+    .porte {
+      border-radius: 120px 120px 14px 14px;
+      padding-top: var(--pas-4);
+    }
+  }
+
+  .porte-icone {
+    display: grid;
+    place-items: center;
+    width: 3.25rem;
+    height: 3.25rem;
+    margin-bottom: var(--pas-1);
+    border-radius: 50%;
+    background: var(--vif);
+    color: var(--couleur-fond);
+  }
+
+  .porte-icone :global(.icone) {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
+
+  .porte-titre {
+    font-size: 1.125rem;
+  }
+
+  .porte-texte {
+    font-size: var(--t-petit);
+    line-height: 1.45;
+  }
+
+  .pieces {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-2);
+    margin: var(--pas-3) 0 0;
+    padding: var(--pas-2) var(--pas-3);
+    border-left: 4px solid var(--couleur-signature);
+    font-size: var(--t-petit);
+  }
+
+  .pieces :global(.icone) {
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    color: var(--couleur-signature);
+  }
+</style>
