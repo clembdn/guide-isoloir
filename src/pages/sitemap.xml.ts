@@ -11,6 +11,8 @@
 import type { APIRoute } from "astro";
 import { SITE_URL } from "../lib/site";
 import { articlesPublies } from "../lib/comprendre";
+import { DONNEES_MISES_A_JOUR, fiches, pagesThemes } from "../lib/fiches";
+import { MEDIAS_RELEVES_LE } from "../data/medias";
 
 type SitemapEntry = {
   path: string;
@@ -18,27 +20,46 @@ type SitemapEntry = {
 };
 
 /**
- * Pages fixes indexables. Toute page ajoutée ici doit être indexable :
+ * Pages fixes indexables, avec la date de leur constante `UPDATED`.
+ *
  *   - `/resultat` est exclu pour toujours (noindex, confidentialité) ;
- *   - `/test` est exclu tant qu'il est vide.
+ *   - `/test` est exclu : il porte un noindex, c'est un outil et non une page à
+ *     lire. L'intention « quel candidat me correspond » est portée par
+ *     l'accueil, qui y mène.
+ *
+ * Les pages GÉNÉRÉES (fiches, thèmes, données) ne figurent pas ici : leur liste
+ * et leur date se lisent dans les données, plus bas. Écrites à la main, elles
+ * seraient fausses le jour où une position est ajoutée.
  */
 const PAGES_FIXES: readonly SitemapEntry[] = [
-  { path: "/", lastmod: "2026-09-14" },
+  { path: "/", lastmod: "2026-09-23" },
   { path: "/comprendre", lastmod: "2026-09-14" },
   { path: "/a-propos", lastmod: "2026-09-14" },
-  { path: "/methodologie", lastmod: "2026-09-14" },
+  { path: "/methodologie", lastmod: "2026-09-21" },
   { path: "/charte-editoriale", lastmod: "2026-09-14" },
   { path: "/corrections", lastmod: "2026-09-14" },
   { path: "/financement", lastmod: "2026-09-14" },
   { path: "/mentions-legales", lastmod: "2026-09-14" },
-  { path: "/credits-images", lastmod: "2026-09-20" },
+  { path: "/credits-images", lastmod: MEDIAS_RELEVES_LE },
 ];
 
 export const GET: APIRoute = async () => {
   const articles = await articlesPublies();
 
+  const toutesFiches = fiches();
+  const themes = pagesThemes();
+  const plusRecente = (dates: readonly string[]) => dates.reduce((a, b) => (a > b ? a : b));
+
   const entrees: SitemapEntry[] = [
     ...PAGES_FIXES,
+    { path: "/candidats", lastmod: plusRecente(toutesFiches.map((fiche) => fiche.misAJour)) },
+    ...toutesFiches.map((fiche) => ({
+      path: `/candidats/${fiche.acteur.slug}`,
+      lastmod: fiche.misAJour,
+    })),
+    { path: "/themes", lastmod: plusRecente(themes.map((theme) => theme.misAJour)) },
+    ...themes.map((theme) => ({ path: `/themes/${theme.slug}`, lastmod: theme.misAJour })),
+    { path: "/donnees", lastmod: DONNEES_MISES_A_JOUR },
     ...articles.map((article) => ({
       path: `/comprendre/${article.id}`,
       lastmod: article.data.misAJourLe,

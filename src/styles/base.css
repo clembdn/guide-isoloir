@@ -210,6 +210,8 @@
 
   /* Mouvement : une courbe, une durée. */
   --sortie: cubic-bezier(0.22, 1, 0.36, 1);
+  /* Un mouvement qui traverse l'écran, comme un rideau qu'on tire : départ et arrivée doux. */
+  --va-et-vient: cubic-bezier(0.77, 0, 0.175, 1);
   --duree: 180ms;
 }
 
@@ -829,8 +831,70 @@ hr {
   display: block;
 }
 
+/*
+ * LE RIDEAU S'OUVRE SUR LE BUREAU DE VOTE. Une fois, à l'arrivée : deux pans
+ * violets, fermés au premier affichage, s'écartent vers les bords. C'est le
+ * motif du logo et de la navigation, joué sur la photo.
+ *
+ * L'image est peinte DESSOUS dès le départ : le rideau ne retarde pas le plus
+ * grand affichage de la page, que Lighthouse mesure. Par défaut, les pans sont
+ * HORS CHAMP ; seule l'animation les amène d'abord au centre. Sans animation —
+ * navigateur ancien ou « réduire les animations » —, la photo est simplement là.
+ */
+.hero-media::before,
+.hero-media::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  z-index: 1;
+  width: 50.5%;
+  background: var(--couleur-aplat);
+  pointer-events: none;
+}
+
+.hero-media::before {
+  left: 0;
+  transform: translateX(-101%);
+}
+
+.hero-media::after {
+  right: 0;
+  transform: translateX(101%);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero-media::before {
+    animation: rideau-gauche 1s var(--va-et-vient) 0.25s both;
+  }
+
+  .hero-media::after {
+    animation: rideau-droite 1s var(--va-et-vient) 0.25s both;
+  }
+}
+
+@keyframes rideau-gauche {
+  from {
+    transform: none;
+  }
+
+  to {
+    transform: translateX(-101%);
+  }
+}
+
+@keyframes rideau-droite {
+  from {
+    transform: none;
+  }
+
+  to {
+    transform: translateX(101%);
+  }
+}
+
 .hero-credit {
   position: absolute;
+  z-index: 2;
   right: 0.6rem;
   bottom: 0.5rem;
   margin: 0;
@@ -894,43 +958,7 @@ hr {
   color: var(--couleur-encre-faible);
 }
 
-/* Aperçu d'une affirmation. Statique, non interactif. */
-
-.apercu {
-  background: var(--couleur-surface);
-  border: 1px solid var(--couleur-trait);
-  border-radius: var(--rayon-carte-l);
-  box-shadow: var(--ombre-1);
-  padding: var(--pas-4) var(--pas-3);
-  max-width: 46rem;
-}
-
-@media (min-width: 48rem) {
-  .apercu {
-    padding: var(--pas-5);
-  }
-}
-
-.etiquette {
-  display: inline-flex;
-  align-items: center;
-  margin: 0 0 var(--pas-3);
-  padding: 0.3rem 0.85rem;
-  border-radius: var(--rayon-actionnable);
-  background: var(--pastel-violet);
-  color: var(--vif-violet);
-  font-size: var(--t-petit);
-  font-weight: 700;
-}
-
-.apercu-affirmation {
-  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.75rem);
-  font-weight: 700;
-  line-height: 1.22;
-  letter-spacing: -0.026em;
-  text-wrap: pretty;
-  margin-bottom: var(--pas-4);
-}
+/* Échelle de réponse de la démo de l'accueil. Statique, non interactive. */
 
 .echelle {
   list-style: none;

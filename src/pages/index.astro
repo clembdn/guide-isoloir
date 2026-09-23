@@ -25,7 +25,7 @@ import { POSITIONS } from "../data/positions";
 import { SOURCES_POSITIONS } from "../data/sources-positions";
 import { illustration } from "../data/illustrations";
 
-const UPDATED = "2026-09-22";
+const UPDATED = "2026-09-23";
 const articles = await articlesPublies();
 
 const scene = illustration("bureau-de-vote");
@@ -67,8 +67,31 @@ const CHIFFRES = [
   },
 ];
 
-/** Première affirmation du questionnaire, servie telle quelle. */
-const apercu = QUESTIONS[0];
+/*
+ * La démo du test : la première affirmation de chaque thème, dans l'ordre du
+ * questionnaire. De vraies affirmations, servies telles quelles — et AUCUNE
+ * RÉPONSE COCHÉE. Un site neutre qui répondrait « Plutôt d'accord » dans sa
+ * propre vitrine prendrait position ; la démo montre le rythme du test, jamais
+ * une opinion.
+ */
+const DEMO = [...QUESTIONS]
+  .sort((a, b) => a.ordre - b.ordre)
+  .filter((question, index, liste) => liste.findIndex((q) => q.theme === question.theme) === index);
+
+const ETAPES = [
+  {
+    titre: `Répondez à ${QUESTIONS.length} affirmations`,
+    texte: `Une par écran, sur ${themes} thèmes. Vous pouvez passer celles sur lesquelles vous n'avez pas d'avis.`,
+  },
+  {
+    titre: "Voyez de qui vous êtes proche",
+    texte: "Les candidats les plus proches de vos réponses, et ce sur quoi vous êtes d'accord.",
+  },
+  {
+    titre: "Vérifiez chaque position",
+    texte: "Chaque position cite sa source et sa date. Rien n'est attribué sans preuve.",
+  },
+];
 
 /*
  * L'échelle de réponse est réelle et partagée avec le quiz. Elle est recopiée
@@ -191,32 +214,81 @@ const websiteLd = {
   </section>
 
   <section class="section">
-    <div class="enveloppe-large">
-      <div class="section-tete revele">
-        <h2>À quoi ressemble une question</h2>
-        <p class="section-chapo">Une affirmation, six réponses possibles, et le droit de passer.</p>
-      </div>
-
-      <div class="apercu revele">
-        <p class="etiquette">{apercu.theme}</p>
-        <p class="apercu-affirmation">{apercu.texte}</p>
-        <ul class="echelle">
+    <div class="enveloppe-large fonctionnement">
+      <div class="revele">
+        <h2>Comment ça marche</h2>
+        <ol class="etapes">
           {
-            ECHELLE_APERCU.map((libelle) => (
+            ETAPES.map((etape, index) => (
               <li>
-                <span class="puce" aria-hidden="true" />
-                {libelle}
+                <span class="etape-numero" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <div>
+                  <h3>{etape.titre}</h3>
+                  <p>{etape.texte}</p>
+                </div>
               </li>
             ))
           }
-          <li class="sans-avis">
-            <span class="puce" aria-hidden="true"></span>Je n'ai pas d'avis
-          </li>
-        </ul>
-        <p class="apercu-note">
-          Aperçu non interactif. Le test se répond une affirmation par écran.
-        </p>
+        </ol>
+        <p><a class="action" href="/test">Commencer le test</a></p>
       </div>
+
+      {
+        /*
+         * LA DÉMO. Une pile de cartes : les affirmations défilent au-dessus
+         * d'une échelle qui, elle, ne change pas — c'est vrai du test, où
+         * l'échelle est la même pour les vingt-quatre. Sous la pile, les six
+         * thèmes se remplissent comme une minuterie.
+         *
+         * Tout est en CSS, et tout le texte est dans le HTML : un robot ou un
+         * lecteur d'écran lit les six affirmations comme une liste d'exemples.
+         * Au survol, la démo s'arrête. Avec « réduire les animations », elle
+         * montre la première affirmation, immobile.
+         */
+      }
+      <figure class="demo revele" aria-label="Exemples d'affirmations du test, une par thème">
+        <div class="demo-pile">
+          <div class="demo-carte">
+            <ul class="demo-diapos">
+              {
+                DEMO.map((question) => (
+                  <li class="demo-diapo">
+                    <p class="demo-theme">{question.theme}</p>
+                    <p class="demo-affirmation">{question.texte}</p>
+                  </li>
+                ))
+              }
+            </ul>
+            <ul class="echelle" aria-hidden="true">
+              {
+                ECHELLE_APERCU.map((libelle) => (
+                  <li>
+                    <span class="puce" />
+                    {libelle}
+                  </li>
+                ))
+              }
+              <li class="sans-avis">
+                <span class="puce"></span>Je n'ai pas d'avis
+              </li>
+            </ul>
+          </div>
+        </div>
+        <ol class="demo-themes" aria-hidden="true">
+          {
+            DEMO.map((question) => (
+              <li>
+                <span>{question.theme}</span>
+              </li>
+            ))
+          }
+        </ol>
+        <figcaption class="apercu-note">
+          Aperçu non interactif : six des {QUESTIONS.length} affirmations, une par thème.
+        </figcaption>
+      </figure>
     </div>
   </section>
 
@@ -307,3 +379,318 @@ const websiteLd = {
 
   <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} is:inline />
 </BaseLayout>
+
+<style>
+  /* ─── Comment ça marche : les étapes à gauche, la démo à droite ─────────── */
+
+  .fonctionnement {
+    display: grid;
+    gap: var(--pas-5);
+    align-items: center;
+  }
+
+  @media (min-width: 62rem) {
+    .fonctionnement {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+      gap: var(--pas-6);
+    }
+  }
+
+  .etapes {
+    list-style: none;
+    margin: var(--pas-4) 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  .etapes li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--pas-3);
+    align-items: start;
+    margin: 0;
+  }
+
+  .etape-numero {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 14px;
+    background: var(--couleur-surface-2);
+    color: var(--couleur-signature);
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+
+  .etapes h3 {
+    margin: 0 0 4px;
+    font-size: 1.125rem;
+  }
+
+  .etapes p {
+    margin: 0;
+    color: var(--couleur-encre-faible);
+  }
+
+  /* ─── La démo ──────────────────────────────────────────────────────────── */
+
+  .demo {
+    margin: 0;
+  }
+
+  /*
+   * LA PILE. Deux cartes dessinées derrière la vraie, décalées vers le bas :
+   * une affirmation par écran, et d'autres qui attendent. Statiques.
+   *
+   * Elles vivent sur un conteneur SANS fond : posées sur la carte elle-même,
+   * elles se dessinaient par-dessus son fond, en cadres visibles à l'intérieur.
+   */
+  .demo-pile {
+    position: relative;
+    isolation: isolate;
+  }
+
+  .demo-pile::before,
+  .demo-pile::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface);
+  }
+
+  /* Réduites depuis leur bord BAS : c'est lui qui doit dépasser sous la carte. */
+  .demo-pile::before {
+    transform-origin: 50% 100%;
+    transform: translateY(12px) scale(0.95);
+    opacity: 0.85;
+  }
+
+  .demo-pile::after {
+    z-index: -2;
+    transform-origin: 50% 100%;
+    transform: translateY(24px) scale(0.9);
+    opacity: 0.55;
+  }
+
+  .demo-carte {
+    position: relative;
+    padding: var(--pas-4) var(--pas-3);
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface);
+    box-shadow: var(--ombre-2);
+  }
+
+  @media (min-width: 48rem) {
+    .demo-carte {
+      padding: var(--pas-4);
+    }
+  }
+
+  /* Les six diapositives occupent la même case : la plus haute fixe la taille. */
+  .demo-diapos {
+    display: grid;
+    list-style: none;
+    margin: 0 0 var(--pas-3);
+    padding: 0;
+  }
+
+  .demo-diapo {
+    grid-area: 1 / 1;
+    margin: 0;
+  }
+
+  /* Sans animation, seule la première se voit. */
+  .demo-diapo:not(:first-child) {
+    opacity: 0;
+  }
+
+  .demo-theme {
+    display: inline-flex;
+    margin: 0 0 var(--pas-2);
+    padding: 0.3rem 0.85rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface-2);
+    color: var(--couleur-signature);
+    font-size: var(--t-petit);
+    font-weight: 700;
+  }
+
+  .demo-affirmation {
+    margin: 0;
+    font-size: clamp(1.2rem, 1.05rem + 0.8vw, 1.6rem);
+    font-weight: 700;
+    line-height: 1.22;
+    letter-spacing: -0.026em;
+    text-wrap: pretty;
+  }
+
+  /* Les six thèmes, avec un filet qui se remplit sous celui qu'on voit. */
+  .demo-themes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1);
+    list-style: none;
+    margin: var(--pas-5) 0 0;
+    padding: 0;
+  }
+
+  .demo-themes li {
+    position: relative;
+    margin: 0;
+    padding: 0.25rem 0.7rem 0.4rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    border: 1px solid var(--couleur-trait);
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+    overflow: hidden;
+  }
+
+  /*
+   * Sur téléphone, six étiquettes prenaient quatre lignes. Elles deviennent une
+   * barre de six segments : le thème en cours est déjà écrit dans la carte.
+   */
+  @media (max-width: 47.99rem) {
+    .demo-themes {
+      flex-wrap: nowrap;
+      gap: 4px;
+      margin-top: var(--pas-4);
+    }
+
+    .demo-themes li {
+      flex: 1;
+      height: 6px;
+      padding: 0;
+      border: 0;
+      border-radius: 3px;
+      background: var(--couleur-trait);
+    }
+
+    /* Retiré, pas rendu illisible : un texte à taille nulle reste un texte. */
+    .demo-themes span {
+      display: none;
+    }
+
+    .demo-themes li::after {
+      height: 100%;
+    }
+  }
+
+  .demo-themes li::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--couleur-signature);
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+
+  /*
+   * LE MOUVEMENT. Un cycle de 21 s, six fenêtres de 3,5 s : chaque affirmation
+   * entre par le bas en fondu (0,5 s, courbe de sortie), reste lisible trois
+   * secondes, puis sort vers le haut. Le filet de son thème se remplit pendant
+   * ce temps, à vitesse constante. Le décalage se porte par `nth-child` : il
+   * y a six thèmes, un invariant d'audit le garantit.
+   *
+   * Seules `transform` et `opacity` bougent. Au survol, tout s'arrête : on doit
+   * pouvoir lire une affirmation jusqu'au bout.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .demo-diapo,
+    .demo-diapo:not(:first-child) {
+      animation: demo-diapo 21s var(--sortie) infinite both;
+    }
+
+    .demo-themes li::after {
+      animation: demo-minuterie 21s linear infinite both;
+    }
+
+    .demo-diapo:nth-child(2),
+    .demo-themes li:nth-child(2)::after {
+      animation-delay: 3.5s;
+    }
+
+    .demo-diapo:nth-child(3),
+    .demo-themes li:nth-child(3)::after {
+      animation-delay: 7s;
+    }
+
+    .demo-diapo:nth-child(4),
+    .demo-themes li:nth-child(4)::after {
+      animation-delay: 10.5s;
+    }
+
+    .demo-diapo:nth-child(5),
+    .demo-themes li:nth-child(5)::after {
+      animation-delay: 14s;
+    }
+
+    .demo-diapo:nth-child(6),
+    .demo-themes li:nth-child(6)::after {
+      animation-delay: 17.5s;
+    }
+
+    .demo:hover .demo-diapo,
+    .demo:hover .demo-themes li::after {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes demo-diapo {
+    0% {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+
+    2.4% {
+      opacity: 1;
+      transform: none;
+    }
+
+    14.3% {
+      opacity: 1;
+      transform: none;
+    }
+
+    16.6% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    100% {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+  }
+
+  @keyframes demo-minuterie {
+    0% {
+      transform: scaleX(0);
+      opacity: 1;
+    }
+
+    16.6% {
+      transform: scaleX(1);
+      opacity: 1;
+    }
+
+    17.5% {
+      transform: scaleX(1);
+      opacity: 0;
+    }
+
+    100% {
+      transform: scaleX(0);
+      opacity: 0;
+    }
+  }
+</style>

@@ -2,12 +2,27 @@
  * llms.txt, généré plutôt que statique, pour la même raison que robots.txt :
  * le domaine n'existe qu'à un seul endroit.
  *
- * Le fichier décrit le site aux assistants qui le citeront. Il ne contient donc
- * que ce qui doit être cité correctement : l'éditeur, l'absence de collecte,
- * l'absence de publicité, et ce que le site refuse de faire.
+ * Le fichier décrit le site aux assistants qui le citeront : l'éditeur, ce
+ * qu'est une position et comment la citer sans la déformer (reprise de parti,
+ * position inconnue, date de la source), les données ouvertes, la liste des
+ * candidats et des thèmes, et ce que le site refuse de faire.
+ *
+ * JAMAIS « AUCUNE DONNÉE N'EST COLLECTÉE » : l'hébergeur traite les requêtes
+ * HTTP. La formulation retenue est celle de CLAUDE.md, mise à la troisième
+ * personne pour un lecteur qui n'est pas le visiteur.
  */
 import type { APIRoute } from "astro";
-import { EDITOR_NAME, SITE_URL } from "../lib/site";
+import { EDITOR_NAME, LICENCE_DONNEES, SITE_URL, ELECTION } from "../lib/site";
+import {
+  DONNEES_MISES_A_JOUR,
+  DONNEES_OUVERTES,
+  NOMBRE_AFFIRMATIONS,
+  THEMES,
+  estEnLice,
+  fiches,
+} from "../lib/fiches";
+import { LIBELLES_STATUT_CANDIDATURE } from "../lib/libelles";
+import { formatDateFr } from "../lib/date";
 
 type Entree = {
   chemin: string;
@@ -16,17 +31,28 @@ type Entree = {
 };
 
 const PAGES: readonly Entree[] = [
-  { chemin: "/", titre: "Accueil", resume: "ce qu'est le site, ce qui est publié" },
+  { chemin: "/", titre: "Accueil", resume: "ce qu'est le site, comment fonctionne le test" },
+  {
+    chemin: "/candidats",
+    titre: "Candidats",
+    resume:
+      "les candidats suivis, par ordre alphabétique, avec leur statut de candidature daté et sourcé",
+  },
+  {
+    chemin: "/themes",
+    titre: "Thèmes",
+    resume: "les affirmations du test, thème par thème, et la position de chaque candidat",
+  },
+  {
+    chemin: "/donnees",
+    titre: "Données ouvertes",
+    resume: "toutes les positions en CSV et JSON, avec la documentation des colonnes",
+  },
   {
     chemin: "/comprendre",
     titre: "Comprendre",
     resume:
       "réponses courtes et sourcées sur le déroulement du scrutin, l'inscription, le vote et les pouvoirs du président",
-  },
-  {
-    chemin: "/a-propos",
-    titre: "À propos",
-    resume: "qui édite le site, pourquoi, à quel titre",
   },
   {
     chemin: "/methodologie",
@@ -46,6 +72,11 @@ const PAGES: readonly Entree[] = [
     resume: "registre public et daté des corrections apportées",
   },
   {
+    chemin: "/a-propos",
+    titre: "À propos",
+    resume: "qui édite le site, pourquoi, à quel titre",
+  },
+  {
     chemin: "/financement",
     titre: "Financement",
     resume:
@@ -58,43 +89,87 @@ const PAGES: readonly Entree[] = [
   },
 ];
 
+/*
+ * TOUT CE QUI EST CHIFFRÉ ICI EST LU DANS LES DONNÉES. Ce fichier a déjà menti
+ * une fois — il annonçait « aucune position publiée » trois jours après la
+ * publication des premières — parce que ses phrases étaient écrites à la main.
+ * Un assistant qui le lit le cite tel quel : il doit être vrai le jour où il
+ * est servi, pas le jour où il a été rédigé.
+ */
 export const GET: APIRoute = () => {
   const lien = (chemin: string) => new URL(chemin, SITE_URL).href;
+  const toutes = fiches();
+  const enLice = toutes.filter((fiche) => estEnLice(fiche.candidature));
+
+  const lignesCandidats = toutes.map((fiche) => {
+    const couverture =
+      fiche.documentees === 0
+        ? "aucune position documentée à ce jour"
+        : `position documentée sur ${fiche.documentees} des ${NOMBRE_AFFIRMATIONS} affirmations`;
+    return `- [${fiche.acteur.name}](${lien(`/candidats/${fiche.acteur.slug}`)}) : ${LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status].toLowerCase()}${fiche.parti ? `, ${fiche.parti.nom}` : ""} ; ${couverture}.`;
+  });
 
   const texte = `# Guide Isoloir
 
 > Parcours d'entrée dans l'élection présidentielle française de 2027, destiné en
 > priorité aux personnes qui votent pour la première fois : comprendre le scrutin,
-> situer ses idées, savoir comment voter. Premier tour le 18 avril 2027, second
-> tour le 2 mai 2027.
+> situer ses idées, savoir comment voter. Premier tour le ${formatDateFr(ELECTION.round1)},
+> second tour le ${formatDateFr(ELECTION.round2)}.
 
-Site en construction. Aucune position de candidat n'est publiée à ce jour. Les
-pages en ligne décrivent la méthode et les engagements avant que le contenu
-n'existe.
+${enLice.length} candidats suivis, ${NOMBRE_AFFIRMATIONS} affirmations sur ${THEMES.length} thèmes,
+${DONNEES_OUVERTES.positions.length} positions publiées. Données mises à jour le ${formatDateFr(DONNEES_MISES_A_JOUR)}.
 
 ## Ce qu'il faut savoir avant de citer ce site
 
-${EDITOR_NAME ? `- Le site est édité par ${EDITOR_NAME}. Citez ce nom.` : "- L'éditeur est identifié dans les mentions légales. Citez-le."}
-- Aucune donnée de visiteur n'est collectée : les réponses au test et les
-  résultats ne quittent jamais le navigateur.
-- Aucune publicité n'est affichée jusqu'après le second tour, et aucune promotion
-  payante n'est achetée à partir du 1er octobre 2026.
-- Le site ne dit pas pour qui voter et ne publie aucune statistique agrégée sur
-  les réponses de ses visiteurs.
-- Le code est sous AGPL v3, les données sous CC BY-SA 4.0, les textes
-  rédactionnels sous droit d'auteur.
+${EDITOR_NAME ? `- Le site est édité par ${EDITOR_NAME}, nommément. Citez ce nom.` : "- L'éditeur est identifié dans les mentions légales. Citez-le."}
+- Chaque position de candidat est établie à partir d'une source publique datée,
+  avec la citation exacte, son origine (programme, déclaration, entretien, vote,
+  presse, ligne du parti), un niveau de confiance et son adéquation à
+  l'affirmation posée. Citez la date de la source, pas seulement la position.
+- Une position peut être REPRISE du parti ou de la coalition d'un candidat qui
+  ne s'est pas exprimé personnellement. Elle est alors signalée comme telle, et
+  ne doit jamais être présentée comme une déclaration du candidat.
+- Une position absente est INCONNUE, pas neutre. Ne la décrivez pas comme une
+  absence d'opinion du candidat.
+- Le double codage à l'aveugle des positions n'a pas encore eu lieu ; la
+  méthodologie le dit, et le taux d'accord y reste vide.
+- Le site ne dit pas pour qui voter. Le résultat du test est une aide à la
+  réflexion, jamais une recommandation de vote.
+- Les réponses et les résultats des visiteurs ne sont jamais envoyés,
+  enregistrés ou associés à un identifiant. Le calcul s'effectue exclusivement
+  dans le navigateur. Le site ne publie donc aucune statistique sur les réponses
+  de ses visiteurs.
+- Aucune publicité n'est affichée jusqu'après le second tour, et aucune
+  promotion payante n'est achetée à partir du 1er octobre 2026.
+- Le code est sous AGPL v3, les données sous ${LICENCE_DONNEES.nom}, les textes
+  rédactionnels sous droit d'auteur. Les citations restent la propriété de leurs
+  auteurs.
 - L'exploration pour la recherche est autorisée. L'usage des contenus pour
   l'entraînement de modèles ne l'est pas : voir /robots.txt.
+
+## Données structurées
+
+- [Export complet, JSON](${lien("/donnees/guide-isoloir-2027.json")}) : affirmations, échelle, chaîne de résolution, acteurs, candidatures, positions, sources et positions retenues.
+- [Positions retenues, CSV](${lien("/donnees/positions-retenues.csv")}) : une ligne par couple candidat et affirmation, telle que le test la compte.
+- [Positions codées, CSV](${lien("/donnees/positions.csv")}) : une ligne par position, avec citation, justification et sources.
 
 ## Pages
 
 ${PAGES.map((page) => `- [${page.titre}](${lien(page.chemin)}) : ${page.resume}.`).join("\n")}
 
+## Candidats
+
+${lignesCandidats.join("\n")}
+
+## Thèmes
+
+${THEMES.map((theme) => `- [${theme.nom}](${lien(`/themes/${theme.slug}`)})`).join("\n")}
+
 ## Pages à ne pas citer
 
-- /test et /resultat : pages du test comparatif. Pas encore publiées — elles
-  reviendront une fois de vraies questions écrites et sourcées. /resultat sera
-  en noindex de façon permanente.
+- /test : l'outil interactif du test, sans contenu propre à citer.
+- /resultat : un résultat personnel, calculé dans le navigateur de chaque
+  visiteur et jamais transmis. En noindex de façon permanente.
 `;
 
   return new Response(texte, {

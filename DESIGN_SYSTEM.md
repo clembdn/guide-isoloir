@@ -261,7 +261,28 @@ page sans rien ajouter. `--gouttiere` vaut 20 px et ne descend jamais en dessous
 
 ## 5. Mouvement
 
-Une courbe, `--sortie: cubic-bezier(0.22, 1, 0.36, 1)`, et une durée, `--duree: 180ms`.
+Deux courbes et une durée : `--sortie: cubic-bezier(0.22, 1, 0.36, 1)` pour ce qui entre ou sort,
+`--va-et-vient: cubic-bezier(0.77, 0, 0.175, 1)` pour ce qui traverse l'écran (le rideau), et
+`--duree: 180ms` pour l'interface.
+
+### L'accueil, seul endroit où le mouvement explique (23 septembre 2026)
+
+Page vue rarement, donc seul budget de mouvement « explicatif » du site, hors révélation du
+résultat :
+
+- **Le rideau s'ouvre sur la photo du bureau de vote**, une fois, à l'arrivée : deux pans
+  `--couleur-aplat` s'écartent en 1 s, `--va-et-vient`, après 250 ms. L'image est peinte dessous
+  dès le départ : **mesuré, le LCP reste la photo à 60 ms, CLS 0**. Par défaut les pans sont hors
+  champ ; seule l'animation les amène d'abord au centre.
+- **La démo du test**, section « Comment ça marche » : une pile de cartes où six vraies
+  affirmations, une par thème, défilent au-dessus d'une échelle fixe (cycle de 21 s, fenêtres de
+  3,5 s, entrée par le bas en 0,5 s), avec une minuterie linéaire sous le thème en cours. **Aucune
+  réponse n'est cochée** : un site neutre qui répondrait dans sa propre vitrine prendrait position.
+  Pause au survol. Tout le texte est dans le HTML.
+
+Refusés, et pourquoi : les compteurs qui défilent (un chiffre en `content:` est invisible aux
+moteurs et aux assistants, et un compteur n'explique rien) ; le fondu d'entrée du titre (il
+retarderait le LCP).
 
 Ce qui bouge :
 
