@@ -41,32 +41,30 @@ const questions = projeter(QUESTIONS);
   description="Vingt-quatre affirmations, six thèmes. Vos réponses restent dans votre navigateur et ne sont jamais envoyées."
   noindex={true}
   actionEntete={false}
+  gabarit="libre"
 >
-  <h1>Test comparatif</h1>
+  <div class="enveloppe-large">
+    {
+      /*
+       * Le titre existe pour les lecteurs d'écran et le plan de la page, pas à
+       * l'œil : une chose par écran, et cette chose est la question. La
+       * promesse de confidentialité est rendue sous le quiz, par l'îlot.
+       */
+    }
+    <h1 class="visuellement-masque">Test comparatif</h1>
 
-  <p>
-    Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un identifiant.
-    Le calcul s'effectue exclusivement dans votre navigateur, et vos réponses disparaissent quand
-    vous fermez cet onglet.
-  </p>
+    <Quiz client:load questions={questions} />
 
-  <Quiz client:load questions={questions} />
-
-  <noscript>
-    <p class="reserve">
-      Le test a besoin de JavaScript pour fonctionner : c'est ce qui permet de calculer vos
-      résultats dans votre navigateur, sans jamais envoyer vos réponses. La première question
-      ci-dessus est lisible, mais vous ne pourrez ni y répondre ni passer à la suivante.
-    </p>
-    <p class="reserve">
-      La <a href="/methodologie">méthodologie</a> décrit la méthode de calcul, et la rubrique
-      <a href="/comprendre">Comprendre</a> ne demande aucun JavaScript.
-    </p>
-  </noscript>
-
-  <p>
-    La <a href="/methodologie">méthodologie</a> décrit comment les positions sont établies, et la&#32;<a
-      href="/charte-editoriale">charte éditoriale</a
-    > comment les candidats sont référencés.
-  </p>
+    <noscript>
+      <p class="reserve">
+        Le test a besoin de JavaScript pour fonctionner : c'est ce qui permet de calculer vos
+        résultats dans votre navigateur, sans jamais envoyer vos réponses. La première question
+        ci-dessus est lisible, mais vous ne pourrez ni y répondre ni passer à la suivante.
+      </p>
+      <p class="reserve">
+        La <a href="/methodologie">méthodologie</a> décrit la méthode de calcul, et la rubrique
+        <a href="/comprendre">Comprendre</a> ne demande aucun JavaScript.
+      </p>
+    </noscript>
+  </div>
 </BaseLayout>

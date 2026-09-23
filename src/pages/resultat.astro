@@ -127,77 +127,102 @@ const seuilActeursMin = seuilDepuisEnvironnement(
   description="Résultat du test comparatif de Guide Isoloir, calculé dans votre navigateur."
   noindex={true}
   actionEntete={false}
+  gabarit="libre"
 >
-  <h1>Votre résultat</h1>
-
   {
     /*
-     * Le bandeau est rendu ICI, en HTML statique, et non seulement dans l'îlot :
-     * il doit être lu avant l'hydratation, et rester lisible si le JavaScript
-     * échoue. Un avertissement qui dépend du script qu'il avertit ne protège
-     * personne.
+     * GABARIT LIBRE, LARGEUR UTILE. Le résultat est le seul écran dense du site :
+     * sur ordinateur, les candidats se rangent sur deux colonnes plutôt que
+     * d'empiler des cartes dans une colonne de lecture, avec du vide de part et
+     * d'autre.
      */
-    PREVISUALISATION && <p class="bandeau-previsualisation">{BANDEAU_PREVISUALISATION}</p>
   }
+  <div class="page-resultat">
+    <h1>Votre résultat</h1>
 
-  <p>
-    Ce résultat a été calculé dans votre navigateur, à partir des réponses conservées dans cet
-    onglet. Il n'a été ni envoyé, ni enregistré, ni associé à un identifiant.
-  </p>
-
-  {
-    servies.length === 0 ? (
-      <section class="cadre-lecture">
-        <h2>Aucune position n'est encore publiée</h2>
-        <p>
-          {nonRelues} position{nonRelues > 1 ? "s" : ""} sont codées et attendent leur relecture.
-          Aucune n'est servie tant qu'elle n'a pas été confrontée : un classement établi sur des
-          codages non relus ressemblerait trait pour trait à un classement fiable, et rien ne l'en
-          distinguerait à l'œil.
-        </p>
-        <p>
-          La <a href="/methodologie">méthodologie</a> décrit comment une position est établie, et le
-          dépôt public permet de lire chaque codage avec sa source avant qu'il soit publié.
-        </p>
-      </section>
-    ) : (
+    {
       /*
-       * `avertissement=""` : le bandeau de prévisualisation est rendu en HTML
-       * statique plus haut, pas ici. Le passer AUSSI à l'îlot l'affichait deux
-       * fois. Le rendu statique est celui qu'on garde, parce qu'il se lit avant
-       * l'hydratation et survit à une panne de JavaScript.
+       * Le bandeau est rendu ICI, en HTML statique, et non seulement dans l'îlot :
+       * il doit être lu avant l'hydratation, et rester lisible si le JavaScript
+       * échoue. Un avertissement qui dépend du script qu'il avertit ne protège
+       * personne.
        */
-      <Resultat
-        client:load
-        questions={questions}
-        acteurs={candidats}
-        annuaire={acteurs}
-        positions={servies}
-        candidatures={candidatures}
-        sources={sources}
-        visuels={visuels}
-        seuilCouverture={seuilCouverture}
-        seuilActeursMin={seuilActeursMin}
-        avertissement=""
-      />
-    )
-  }
+      PREVISUALISATION && <p class="bandeau-previsualisation">{BANDEAU_PREVISUALISATION}</p>
+    }
 
-  <noscript>
-    <p class="reserve">
-      Le calcul se fait dans votre navigateur, et il a besoin de JavaScript. Sans lui, il n'y a rien
-      à afficher ici : vos réponses ne sont stockées nulle part ailleurs, et aucun serveur ne peut
-      les calculer à votre place.
+    <p class="promesse-resultat">
+      Calculé dans votre navigateur. Vos réponses et vos résultats ne sont jamais envoyés,
+      enregistrés ou associés à un identifiant.
     </p>
-  </noscript>
 
-  <p>
-    La <a href="/methodologie">méthodologie</a> explique comment les positions sont établies, ce que le
-    calcul fait, et ce qu'il ne fait pas.
-  </p>
+    {
+      servies.length === 0 ? (
+        <section class="cadre-lecture">
+          <h2>Aucune position n'est encore publiée</h2>
+          <p>
+            {nonRelues} position{nonRelues > 1 ? "s" : ""} sont codées et attendent leur relecture.
+            Aucune n'est servie tant qu'elle n'a pas été confrontée : un classement établi sur des
+            codages non relus ressemblerait trait pour trait à un classement fiable, et rien ne l'en
+            distinguerait à l'œil.
+          </p>
+          <p>
+            La <a href="/methodologie">méthodologie</a> décrit comment une position est établie, et
+            le dépôt public permet de lire chaque codage avec sa source avant qu'il soit publié.
+          </p>
+        </section>
+      ) : (
+        /*
+         * `avertissement=""` : le bandeau de prévisualisation est rendu en HTML
+         * statique plus haut, pas ici. Le passer AUSSI à l'îlot l'affichait deux
+         * fois. Le rendu statique est celui qu'on garde, parce qu'il se lit avant
+         * l'hydratation et survit à une panne de JavaScript.
+         */
+        <Resultat
+          client:load
+          questions={questions}
+          acteurs={candidats}
+          annuaire={acteurs}
+          positions={servies}
+          candidatures={candidatures}
+          sources={sources}
+          visuels={visuels}
+          seuilCouverture={seuilCouverture}
+          seuilActeursMin={seuilActeursMin}
+          avertissement=""
+        />
+      )
+    }
+
+    <noscript>
+      <p class="reserve">
+        Le calcul se fait dans votre navigateur, et il a besoin de JavaScript. Sans lui, il n'y a
+        rien à afficher ici : vos réponses ne sont stockées nulle part ailleurs, et aucun serveur ne
+        peut les calculer à votre place.
+      </p>
+    </noscript>
+
+    <p>
+      La <a href="/methodologie">méthodologie</a> explique comment les positions sont établies, ce que
+      le calcul fait, et ce qu'il ne fait pas.
+    </p>
+  </div>
 </BaseLayout>
 
 <style>
+  .page-resultat {
+    padding-top: var(--pas-3);
+    width: 100%;
+    max-width: 66rem;
+    margin-inline: auto;
+    padding-inline: var(--gouttiere);
+  }
+
+  .promesse-resultat {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+    margin-bottom: var(--pas-4);
+  }
+
   .bandeau-previsualisation {
     border: 2px solid var(--couleur-signature);
     padding: var(--pas-3);

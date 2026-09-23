@@ -500,6 +500,19 @@ a {
   }
 }
 
+/*
+ * Texte présent pour les lecteurs d'écran et le plan de la page, invisible à
+ * l'œil. Jamais `display: none`, qui le retirerait aussi de l'arbre accessible.
+ */
+.visuellement-masque {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Lien d'évitement. */
 
 .evitement {

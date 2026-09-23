@@ -492,14 +492,36 @@ les PNG sont des pixels figés.
 
 ---
 
-## 11. Ce qui reste à faire
+## 11. Test et résultat (23 septembre 2026)
 
-- **Carte partageable de résultat** : 1080 × 1350 et 1080 × 1920, générée côté client. À ne pas
-  confondre avec `public/medias/marque/partage.png`, qui est l'aperçu de lien du site et ne dépend
-  d'aucune réponse.
+**`/test`** — une chose par écran. Le paragraphe de confidentialité est passé sous le quiz, en
+petit, dans la formulation publique autorisée. Au-dessus de la question : une barre de
+vingt-quatre segments groupés par thème, et l'étiquette du thème en cours. Sous la question, la
+définition du terme, repliée. Les réponses sont des pilules pleine largeur : le bouton radio reste
+**natif** (groupe, flèches, annonce), seul son dessin change, et la réponse cochée prend l'aplat.
+Sur grand écran, une colonne « Votre parcours » montre les six thèmes et leurs quatre points,
+remplis au fil des réponses ; elle n'est pas interactive et ne coûte aucune tabulation.
+
+**`/resultat`** — gabarit libre, largeur utile (66 rem). Une phrase de promesse, le cadre de
+lecture en une phrase, les réserves en une ligne chacune (l'explication longue se déplie), la
+bascule dessinée en interrupteur sur une case **native**. Chaque candidat est une carte : grand
+numéro de rang, portrait carré arrondi identique pour tous, qualification, barre, score et
+couverture, puis un **profil par thème** — une barre par thème dans la même encre, avec
+« 3 sur 4 » à côté et « non documenté » plutôt qu'une barre à zéro, sans aucun pourcentage. Deux
+colonnes sur grand écran. Les écartés deviennent des étiquettes, sans rang ni barre.
+
+**Carte partageable** — `src/lib/carte-partage.ts`, chargé au clic seulement. Deux PNG dessinés
+sur `<canvas>` (1080 × 1350 et 1080 × 1920), fond violet, logo recoloré en blanc, rangs 1 à 3 ex
+æquo compris, chaque score avec sa couverture et sa qualification, « Ce n'est pas une
+recommandation de vote », l'état de la bascule et la graine. **Aucun portrait** : leur licence
+exige de créditer l'auteur, ce qu'une image qui circule seule ne fait pas. Partage natif du
+téléphone quand il existe, sinon enregistrement. Images en `blob:` : rien ne sort du navigateur.
+
+## 12. Ce qui reste à faire
+
 - **Illustrations de rubrique** : les cartes de `/comprendre` portent aujourd'hui la couleur et la
   typographie seules. Les photographies libres essayées ont été jugées amateur par l'éditeur et
   retirées. Une piste graphique reste à trancher.
 - **Lighthouse** : à relancer sur `/`, `/test`, `/resultat` et un article après cette refonte.
-- **Écran de résultat** : il suit la palette par les jetons, mais sa densité n'a pas été
-  retravaillée pour la nouvelle direction.
+- **Budget JavaScript de `/resultat`** : environ 25 ko gzip au chargement (moteur Svelte compris),
+  pour un budget de 20 ko. Le dépassement précède cette refonte.

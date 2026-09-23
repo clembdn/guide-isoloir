@@ -41,7 +41,13 @@
   import type { Candidate, PoliticalActor, Stance } from "../lib/modele";
   import type { QuestionAffichee } from "../lib/projection";
   import type { SourcePosition } from "../lib/acteurs";
-  import { SEUIL_ACCORD, SEUIL_PUBLICATION, dateAnterieureALaCampagne } from "../lib/seuils";
+  import {
+    PLANCHER_POURCENTAGE,
+    SEUIL_ACCORD,
+    SEUIL_PUBLICATION,
+    dateAnterieureALaCampagne,
+  } from "../lib/seuils";
+  import { SITE_URL } from "../lib/site";
   import { formatDateFr } from "../lib/date";
   import { LIBELLES_ADEQUATION, LIBELLES_CONFIANCE } from "../lib/libelles";
   import { initiales } from "../lib/initiales";
@@ -295,6 +301,87 @@
       .filter((detail) => detail.accord !== null && detail.accord >= SEUIL_ACCORD);
   }
 
+  /** Slug de chaque candidat classé, pour le lien vers sa fiche. */
+  const slugParActeur = new Map(acteurs.map((acteur) => [acteur.id, acteur.slug]));
+
+  /*
+   * CARTE PARTAGEABLE, DESSINÉE À LA DEMANDE.
+   *
+   * Le module de dessin n'est chargé qu'au clic : il ne pèse rien sur l'arrivée
+   * sur la page. Les images sont des URL `blob:` locales, autorisées par la CSP
+   * (`img-src blob:`), et révoquées dès qu'elles ne correspondent plus à
+   * l'écran — un changement de bascule change les couvertures, donc la carte.
+   */
+  let cartes = $state<{ post: string; story: string } | null>(null);
+  let fichiers: { post: File; story: File } | null = null;
+  let carteEnCours = $state(false);
+  let carteErreur = $state(false);
+  let peutPartager = $state(false);
+
+  function oublierCartes() {
+    if (cartes) {
+      URL.revokeObjectURL(cartes.post);
+      URL.revokeObjectURL(cartes.story);
+    }
+    cartes = null;
+    fichiers = null;
+  }
+
+  $effect(() => {
+    // Toute modification de la bascule rend la carte périmée.
+    void inclureHeritage;
+    return oublierCartes;
+  });
+
+  async function creerCartes() {
+    carteEnCours = true;
+    carteErreur = false;
+    try {
+      const { dessinerCartes } = await import("../lib/carte-partage");
+      const blobs = await dessinerCartes({
+        lignes: tete.map((resultat) => ({
+          rang: resultat.rang ?? 0,
+          nom: resultat.nom,
+          parti: visuelParActeur.get(resultat.actorId)?.parti ?? null,
+          pourcentage:
+            resultat.score !== null && resultat.couverture.taux >= PLANCHER_POURCENTAGE
+              ? Math.round(resultat.score * 100)
+              : null,
+          documentees: resultat.couverture.documentees,
+          applicables: resultat.couverture.applicables,
+          qualification: qualifier(resultat),
+        })),
+        heritage: inclureHeritage,
+        graine: graineLisible,
+        questionsApplicables: classement.questionsApplicables,
+        questionsPosees: classement.questionsPosees,
+        domaine: new URL(SITE_URL).host,
+      });
+      oublierCartes();
+      fichiers = {
+        post: new File([blobs.post], "guide-isoloir-publication.png", { type: "image/png" }),
+        story: new File([blobs.story], "guide-isoloir-story.png", { type: "image/png" }),
+      };
+      peutPartager = navigator.canShare?.({ files: [fichiers.post] }) ?? false;
+      cartes = { post: URL.createObjectURL(blobs.post), story: URL.createObjectURL(blobs.story) };
+    } catch (erreur) {
+      console.error("Carte partageable :", erreur);
+      carteErreur = true;
+    } finally {
+      carteEnCours = false;
+    }
+  }
+
+  /** Partage natif du téléphone : c'est la personne qui choisit où l'image va. */
+  async function partager(format: "post" | "story") {
+    if (!fichiers) return;
+    try {
+      await navigator.share({ files: [fichiers[format]], title: "Mon résultat Guide Isoloir" });
+    } catch {
+      // Partage annulé : rien à faire, l'image reste enregistrable.
+    }
+  }
+
   function recommencer() {
     effacerEtat();
     window.location.assign("/test");
@@ -324,12 +411,8 @@
     <blockquote class="citation">« {detail.citation} »</blockquote>
   {/if}
   <!--
-    AVERTISSEMENT D'ANCIENNETÉ, EN PLEINE ENCRE ET AVANT LES LIENS.
-
-    Il est rendu au-dessus des sources, et non en note après elles, parce qu'il
-    conditionne la lecture de ce qui précède : savoir qu'une position vient d'un
-    autre scrutin change ce qu'on fait du chiffre. Une mention qu'il faut
-    chercher n'avertit personne.
+    AVERTISSEMENT D'ANCIENNETÉ, EN PLEINE ENCRE ET AVANT LES LIENS : il
+    conditionne la lecture de ce qui précède.
   -->
   {@const dateAncienne = sourceAnterieureALaCampagne(detail)}
   {#if dateAncienne !== null}
@@ -353,359 +436,462 @@
 
 {#snippet reglageHeritage()}
   <!--
-    LA BASCULE EST EN TÊTE, et elle est rendue DANS LES DEUX ÉTATS — avec
-    classement comme sans.
-
-    Décocher l'héritage peut faire passer le classement sous le seuil de
-    publication et le faire disparaître. Si la bascule disparaissait avec lui,
-    le lecteur serait enfermé dans l'état qu'il vient de choisir, sans aucun
-    moyen de revenir en arrière : un réglage dont on ne peut pas sortir n'est
-    pas un réglage, c'est une impasse.
+    LA BASCULE EST RENDUE DANS LES DEUX ÉTATS — avec classement comme sans.
+    Décocher l'héritage peut faire disparaître le classement ; si la bascule
+    disparaissait avec lui, le lecteur serait enfermé dans l'état qu'il vient de
+    choisir. Case à cocher NATIVE, dessinée en interrupteur : elle garde son rôle,
+    son nom et son comportement au clavier.
   -->
   <section class="reglage">
     <label class="bascule">
       <input type="checkbox" bind:checked={inclureHeritage} />
-      <span>
+      <span class="bascule-texte">
         Inclure les positions héritées du parti
         <span class="explication">
-          Quand un candidat ne s'est pas exprimé sur une affirmation, utiliser la position de son
-          parti. Chaque position reprise reste identifiée comme telle dans le détail.
+          Quand un candidat ne s'est pas exprimé, utiliser la position de son parti, toujours
+          signalée comme telle.
         </span>
       </span>
     </label>
   </section>
 {/snippet}
 
-{#if charge && !aRepondu}
-  <div class="vide">
-    <h2>Aucune réponse à comparer</h2>
-    <p>
-      Vos réponses restent dans l'onglet où vous avez passé le test. Si vous avez fermé cet onglet,
-      rechargé la page depuis un autre, ou effacé vos réponses, il n'y a plus rien à afficher. C'est
-      voulu : rien n'est conservé ailleurs.
-    </p>
-    <p><a class="action" href="/test">Passer le test</a></p>
-  </div>
-{:else if charge && !publiable}
-  <!--
-    SOUS LE SEUIL : PAS DE CLASSEMENT DE ZÉROS.
-
-    Deux causes possibles, et elles ne se disent pas de la même façon :
-
-      - le lecteur a DÉCOCHÉ l'héritage. Le message nomme alors ce que ce
-        réglage vient de retirer — les candidats qui ne se sont pas exprimés
-        personnellement n'ont plus rien de documenté — plutôt que de servir un
-        état d'avancement générique qui n'expliquerait pas la disparition ;
-      - le codage n'est pas assez avancé, héritage compris. C'est l'état du
-        projet, et c'est ce qu'on dit.
-  -->
-  {@render reglageHeritage()}
-
-  <section class="cadre-lecture">
-    {#if !inclureHeritage}
-      <h2>Sans les positions de parti, il n'y a pas assez de matière</h2>
+<div class="resultat">
+  {#if charge && !aRepondu}
+    <div class="panneau vide">
+      <h2>Aucune réponse à comparer</h2>
       <p>
-        Vous avez exclu les positions héritées du parti. Il ne reste alors que ce que les candidats
-        ont dit ou écrit EUX-MÊMES, et
-        {candidatsAvecPositionPropre === 0
-          ? "aucun des candidats"
-          : `${candidatsAvecPositionPropre} candidat${candidatsAvecPositionPropre > 1 ? "s" : ""} sur ${tousLesActeurs.length}`}
-        {candidatsAvecPositionPropre === 0 ? "ne documente" : "documentent"} une position personnelle
-        sur les {classement.questionsApplicables} affirmations auxquelles vous avez répondu.
-        {phraseSeuil(acteursAuSeuil, seuilCouverture, seuilActeursMin)}
+        Vos réponses restent dans l'onglet où vous avez passé le test. Si vous l'avez fermé ou
+        effacé vos réponses, il n'y a plus rien à afficher. C'est voulu : rien n'est conservé
+        ailleurs.
       </p>
-      <p>
-        C'est une information en soi : à sept mois du scrutin, la plupart des candidats ne se sont
-        pas encore exprimés affirmation par affirmation. Recochez la case ci-dessus pour utiliser la
-        ligne de leur parti — chaque position reprise reste signalée comme telle.
-      </p>
-    {:else}
-      <h2>Le classement n'est pas encore publiable</h2>
-      <p>
-        Un classement suppose assez de matière pour que l'ordre entre les acteurs dise quelque
-        chose. Le seuil retenu est de {Math.round(seuilCouverture * 100)} % des affirmations documentées
-        pour au moins {seuilActeursMin} acteurs. Aujourd'hui,
-        {acteursAuSeuil}
-        {acteursAuSeuil > 1 ? "acteurs atteignent" : "acteur atteint"} ce seuil sur les {classement.questionsApplicables}
-        affirmations auxquelles vous avez répondu.
-      </p>
-      <p>
-        Afficher un ordre dans cet état reviendrait à classer des acteurs sur ce qui a été codé en
-        premier, pas sur ce qu'ils défendent. La <a href="/methodologie">méthodologie</a> décrit l'avancement
-        du codage et ce qui reste à documenter.
-      </p>
-    {/if}
-  </section>
-{:else if charge}
-  {#if avertissement}
-    <p class="avertissement-previsualisation">{avertissement}</p>
-  {/if}
+      <p><a class="action" href="/test">Passer le test</a></p>
+    </div>
+  {:else if charge && !publiable}
+    <!--
+      SOUS LE SEUIL : PAS DE CLASSEMENT DE ZÉROS. Deux causes, qui ne se disent
+      pas de la même façon : la bascule décochée, ou le codage pas assez avancé.
+    -->
+    {@render reglageHeritage()}
 
-  <!--
-    Le cadre de lecture vient AVANT le classement, au corps du texte. Le mettre
-    après, ou en petit, reviendrait à publier un verdict assorti d'une clause de
-    style.
-  -->
-  <section class="cadre-lecture">
-    <h2>Ce classement n'est pas une recommandation</h2>
-    <p>
-      Il indique de quels acteurs vos réponses sont les plus proches <em
-        >sur les questions posées</em
-      >, et rien d'autre. Il ne tient compte ni de ce qui n'a pas été demandé, ni de la crédibilité
-      d'un engagement, ni de ce qu'un élu peut réellement décider.
-    </p>
-    <p>
-      Servez-vous-en comme d'un point de départ pour aller lire les positions elles-mêmes, pas comme
-      d'une réponse.
-    </p>
-  </section>
-
-  {@render reglageHeritage()}
-
-  {#if classement.profilPeuMarque}
-    <p class="reserve">
-      Vos réponses sont peu tranchées, ou trop peu nombreuses. Le classement ci-dessous est
-      mathématiquement valable et ne veut pas dire grand-chose : avec des positions proches du
-      milieu, presque tout le monde paraît proche de vous.
-    </p>
-  {/if}
-
-  {#if couvertureFaible}
-    <p class="reserve">
-      Les acteurs en tête sont peu documentés sur les questions auxquelles vous avez répondu, ou le
-      sont par des inférences plutôt que par des déclarations. Le classement porte alors sur peu de
-      matière : lisez le détail par thème avant d'en tirer quoi que ce soit.
-    </p>
-  {/if}
-
-  {#if couvertureInegale}
-    <p class="reserve">
-      Les acteurs en tête ne sont pas documentés dans les mêmes proportions. Certains partis ont
-      publié une plateforme complète, d'autres n'ont encore rien publié pour 2027 : le nombre
-      d'affirmations documentées, affiché sous chaque acteur, varie donc fortement de l'un à
-      l'autre. Un acteur documenté sur trois affirmations qui tombent d'accord avec vous passe
-      devant un acteur documenté sur dix-huit dont seize tombent d'accord. Le calcul ne récompense
-      pas le volume, mais l'ordre entre deux acteurs inégalement documentés reste fragile.
-    </p>
-  {/if}
-
-  {#if classement.ecartsTenus}
-    <p class="reserve">
-      Les premiers écarts sont trop faibles pour départager qui que ce soit. Lisez ces acteurs comme
-      un groupe, pas comme un ordre.
-    </p>
-  {/if}
-
-  <h2>Les plus proches de vos réponses</h2>
-
-  <ol class="classement">
-    {#each tete as resultat (resultat.actorId)}
-      {@const accords = affirmationsDAccord(resultat)}
-      <li class="acteur">
-        <p class="rang">Rang {resultat.rang}</p>
-
-        <!--
-          IDENTITÉ : PORTRAIT, NOM, PARTI.
-
-          `alt=""` sur les deux images, et c'est délibéré : le nom du candidat
-          et celui de son parti sont écrits juste à côté, en texte. Un `alt`
-          qui les répéterait ferait entendre deux fois la même chose à un
-          lecteur d'écran.
-
-          `width` et `height` sont posés en attributs pour que la place soit
-          réservée avant le chargement : sans eux, chaque photo pousse le
-          classement vers le bas en arrivant.
-        -->
-        <div class="identite">
-          {#if visuelParActeur.get(resultat.actorId)?.portrait}
-            <img
-              class="portrait"
-              src={visuelParActeur.get(resultat.actorId)?.portrait}
-              alt=""
-              width="56"
-              height="56"
-              loading="lazy"
-              decoding="async"
-            />
-          {:else}
-            <p class="portrait portrait-absent" aria-hidden="true">{initiales(resultat.nom)}</p>
-          {/if}
-          <div class="identite-texte">
-            <h3 class="nom">{resultat.nom}</h3>
-            {#if visuelParActeur.get(resultat.actorId)?.parti}
-              <p class="parti">
-                {#if visuelParActeur.get(resultat.actorId)?.logo}
-                  <img
-                    class="logo"
-                    src={visuelParActeur.get(resultat.actorId)?.logo}
-                    alt=""
-                    height="18"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                {/if}
-                <span>{visuelParActeur.get(resultat.actorId)?.parti}</span>
-              </p>
-            {/if}
-          </div>
-        </div>
-
-        <p class="qualification">{qualifier(resultat)}</p>
-
-        <!--
-          Barre en SVG. `width` est un attribut de présentation, pas un style en
-          ligne. Une seule encre, une seule opacité : seule la longueur varie.
-        -->
-        <svg
-          class="barre"
-          viewBox="0 0 100 4"
-          preserveAspectRatio="none"
-          role="img"
-          aria-label={`${qualifier(resultat)} avec ${resultat.nom}`}
-        >
-          <rect class="barre-fond" x="0" y="0" width="100" height="4"></rect>
-          <rect class="barre-valeur" x="0" y="0" width={longueur(resultat.score)} height="4"></rect>
-        </svg>
-
-        <ScoreEtCouverture {resultat} />
-
-        <!--
-          LE SCORE EST CLIQUABLE. Un chiffre qu'on ne peut pas ouvrir est un
-          chiffre qu'il faut croire. Celui-ci se déplie sur les affirmations qui
-          l'ont produit, chacune avec son verbatim, sa source et sa date.
-        -->
-        <details class="detail">
-          <summary>
-            Ce sur quoi vous êtes d'accord ({accords.length})
-          </summary>
-          {#if accords.length === 0}
-            <p class="inconnu">
-              Aucune affirmation documentée ne vous rapproche de cet acteur. Son score vient
-              d'accords partiels, pas d'accords francs.
-            </p>
-          {/if}
-          <ul class="positions">
-            {#each accords as detail (detail.questionId)}
-              <li>
-                <p class="affirmation-detail">{textesQuestions.get(detail.questionId)}</p>
-                <p class="ligne">
-                  Vous : {LIBELLES_REPONSE[detail.reponseElecteur]} — Position : {LIBELLES_REPONSE[
-                    detail.positionActeur ?? 0
-                  ]}.
-                </p>
-                {@render provenance(detail)}
-              </li>
-            {/each}
-          </ul>
-        </details>
-
-        <details class="detail">
-          <summary>Détail par thème</summary>
-          {#each resultat.parTheme as theme (theme.theme)}
-            <h4 class="theme">{theme.theme}</h4>
-            {#if theme.score === null}
-              <p class="inconnu">
-                Aucune position documentée sur ce thème. Il est écarté du calcul, pas compté comme
-                un désaccord.
-              </p>
-            {/if}
-            <ul class="positions">
-              {#each theme.positions as detail (detail.questionId)}
-                <li>
-                  <p class="affirmation-detail">{textesQuestions.get(detail.questionId)}</p>
-                  <p class="ligne">
-                    Vous : {LIBELLES_REPONSE[detail.reponseElecteur]}
-                  </p>
-                  {#if detail.positionActeur === null}
-                    <p class="ligne">Position inconnue.</p>
-                  {:else}
-                    <p class="ligne">Position : {LIBELLES_REPONSE[detail.positionActeur]}.</p>
-                    {@render provenance(detail)}
-                  {/if}
-                </li>
-              {/each}
-            </ul>
-          {/each}
-        </details>
-      </li>
-    {/each}
-  </ol>
-
-  <!--
-    LES ÉCARTÉS, NOMMÉS.
-
-    Un classement qui affiche huit candidats sur vingt sans dire où sont passés
-    les douze autres se lit comme une sélection éditoriale. Ils sont donc tous
-    nommés, avec leur couverture réelle, et la raison est écrite.
-
-    CE QUI EST DÉLIBÉRÉMENT ABSENT : aucun rang, aucune barre, aucun
-    pourcentage, et l'ordre est alphabétique. Le moindre ordre se lit comme un
-    classement, et c'est exactement ce qu'on vient de refuser de faire pour eux.
-    La couverture est écrite en toutes lettres — « documenté sur 3 des 24 » —
-    parce que c'est la seule information qu'on possède réellement sur eux.
-  -->
-  {#if classement.nonClasses.length > 0}
-    <section class="ecartes">
-      <h2>Pas encore assez documentés pour être classés</h2>
-      <p>
-        Ces {classement.nonClasses.length} candidats sont comparés sur trop peu d'affirmations pour qu'un
-        rang veuille dire quelque chose. Les classer quand même les avantagerait : moins un candidat documente
-        de positions, plus son score est instable, et plus il arrive en tête par accident. Le seuil retenu
-        est de {Math.round(seuilCouverture * 100)} % des affirmations que vous avez renseignées. La
-        <a href="/methodologie">méthodologie</a> explique la mesure.
-      </p>
-      <ul class="liste-ecartes">
-        {#each classement.nonClasses as resultat (resultat.actorId)}
-          <li>
-            <span class="ecarte-nom">{resultat.nom}</span>
-            <span class="ecarte-couverture">
-              {resultat.couverture.documentees === 0
-                ? "aucune position documentée"
-                : `documenté sur ${resultat.couverture.documentees} des ${resultat.couverture.applicables} affirmations`}
-            </span>
-          </li>
-        {/each}
-      </ul>
+    <section class="panneau cadre-lecture">
       {#if !inclureHeritage}
-        <p class="reserve">
-          Vous avez exclu les positions héritées du parti. Recocher la case ci-dessus ferait revenir
-          au classement les candidats dont le parti a publié une ligne.
+        <h2>Sans les positions de parti, il n'y a pas assez de matière</h2>
+        <p>
+          Il ne reste que ce que les candidats ont dit ou écrit eux-mêmes, et
+          {candidatsAvecPositionPropre === 0
+            ? "aucun des candidats"
+            : `${candidatsAvecPositionPropre} candidat${candidatsAvecPositionPropre > 1 ? "s" : ""} sur ${tousLesActeurs.length}`}
+          {candidatsAvecPositionPropre === 0 ? "ne documente" : "documentent"} une position personnelle
+          sur les {classement.questionsApplicables} affirmations auxquelles vous avez répondu.
+          {phraseSeuil(acteursAuSeuil, seuilCouverture, seuilActeursMin)}
+        </p>
+        <p>
+          Recochez la case ci-dessus pour utiliser la ligne de leur parti : chaque position reprise
+          reste signalée comme telle.
+        </p>
+      {:else}
+        <h2>Le classement n'est pas encore publiable</h2>
+        <p>
+          Le seuil retenu est de {Math.round(seuilCouverture * 100)} % des affirmations documentées pour
+          au moins {seuilActeursMin} acteurs. Aujourd'hui,
+          {acteursAuSeuil}
+          {acteursAuSeuil > 1 ? "acteurs atteignent" : "acteur atteint"} ce seuil sur les {classement.questionsApplicables}
+          affirmations auxquelles vous avez répondu.
+        </p>
+        <p>
+          Afficher un ordre dans cet état reviendrait à classer des acteurs sur ce qui a été codé en
+          premier. La <a href="/methodologie">méthodologie</a> décrit l'avancement du codage.
         </p>
       {/if}
     </section>
+  {:else if charge}
+    {#if avertissement}
+      <p class="avertissement-previsualisation">{avertissement}</p>
+    {/if}
+
+    <!--
+      Le cadre de lecture vient AVANT le classement, au corps du texte, mais en
+      une phrase : un avertissement de trois paragraphes n'est plus lu.
+    -->
+    <div class="preambule">
+      <section class="cadre-lecture">
+        <h2>Ce classement n'est pas une recommandation</h2>
+        <p>
+          Il dit de qui vos réponses sont les plus proches <em>sur les questions posées</em>, rien
+          d'autre. Servez-vous-en pour aller lire les positions, pas comme d'une réponse.
+        </p>
+      </section>
+
+      {@render reglageHeritage()}
+
+      <!--
+      LES RÉSERVES, EN UNE LIGNE CHACUNE. Elles restent affichées, jamais
+      masquées ; l'explication longue se déplie pour qui la cherche.
+    -->
+      {#if classement.profilPeuMarque || couvertureFaible || couvertureInegale || classement.ecartsTenus}
+        <section class="reserves" aria-labelledby="titre-reserves">
+          <h2 id="titre-reserves" class="reserves-titre">À savoir avant de lire</h2>
+          <ul>
+            {#if classement.profilPeuMarque}
+              <li>
+                Vos réponses sont peu tranchées : presque tout le monde paraît proche de vous.
+              </li>
+            {/if}
+            {#if couvertureFaible}
+              <li>
+                Les acteurs en tête sont peu documentés : le classement porte sur peu de matière.
+              </li>
+            {/if}
+            {#if couvertureInegale}
+              <li>
+                Ils ne sont pas documentés dans les mêmes proportions : l'ordre entre eux reste
+                fragile.
+              </li>
+            {/if}
+            {#if classement.ecartsTenus}
+              <li>Les écarts sont trop faibles pour départager : lisez-les comme un groupe.</li>
+            {/if}
+          </ul>
+          {#if couvertureInegale}
+            <details class="pourquoi">
+              <summary>Pourquoi l'ordre est fragile</summary>
+              <p>
+                Certains partis ont publié une plateforme complète, d'autres rien encore pour 2027.
+                Un acteur documenté sur trois affirmations qui tombent d'accord avec vous passe
+                devant un acteur documenté sur dix-huit dont seize tombent d'accord. Le calcul ne
+                récompense pas le volume, mais l'ordre entre deux acteurs inégalement documentés
+                reste fragile.
+              </p>
+            </details>
+          {/if}
+        </section>
+      {/if}
+    </div>
+
+    <h2 class="titre-classement">Les plus proches de vos réponses</h2>
+
+    <ol class="classement">
+      {#each tete as resultat (resultat.actorId)}
+        {@const accords = affirmationsDAccord(resultat)}
+        {@const visuel = visuelParActeur.get(resultat.actorId)}
+        <li class="acteur">
+          <div class="acteur-tete">
+            <p class="rang">
+              <span class="rang-mot">Rang</span>
+              <span class="rang-numero">{resultat.rang}</span>
+            </p>
+
+            <!--
+              IDENTITÉ. `alt=""` : le nom et le parti sont écrits juste à côté.
+              `width` et `height` en attributs : la place est réservée avant le
+              chargement, rien ne saute.
+            -->
+            <div class="identite">
+              {#if visuel?.portrait}
+                <img
+                  class="portrait"
+                  src={visuel.portrait}
+                  alt=""
+                  width="64"
+                  height="64"
+                  loading="lazy"
+                  decoding="async"
+                />
+              {:else}
+                <p class="portrait portrait-absent" aria-hidden="true">{initiales(resultat.nom)}</p>
+              {/if}
+              <div class="identite-texte">
+                <h3 class="nom">{resultat.nom}</h3>
+                {#if visuel?.parti}
+                  <p class="parti">
+                    {#if visuel.logo}
+                      <img
+                        class="logo"
+                        src={visuel.logo}
+                        alt=""
+                        height="18"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    {/if}
+                    <span>{visuel.parti}</span>
+                  </p>
+                {/if}
+              </div>
+            </div>
+          </div>
+
+          <p class="qualification">{qualifier(resultat)}</p>
+
+          <!--
+            Barre en SVG. `width` est un attribut de présentation, pas un style
+            en ligne. Une seule encre, une seule opacité : seule la longueur varie.
+          -->
+          <svg
+            class="barre"
+            viewBox="0 0 100 4"
+            preserveAspectRatio="none"
+            role="img"
+            aria-label={`${qualifier(resultat)} avec ${resultat.nom}`}
+          >
+            <rect class="barre-fond" x="0" y="0" width="100" height="4"></rect>
+            <rect class="barre-valeur" x="0" y="0" width={longueur(resultat.score)} height="4"
+            ></rect>
+          </svg>
+
+          <ScoreEtCouverture {resultat} />
+
+          <!--
+            PROFIL PAR THÈME, EN UN COUP D'ŒIL. Une barre d'accord par thème, même
+            encre que la barre principale, et à côté le nombre d'affirmations
+            documentées : un thème non documenté est dit tel, il n'est pas dessiné
+            à zéro. Aucun pourcentage ici — la règle « jamais un chiffre sans sa
+            couverture » vaut aussi pour le détail.
+          -->
+          <ul class="profil" aria-label={`Accord avec ${resultat.nom}, thème par thème`}>
+            {#each resultat.parTheme as theme (theme.theme)}
+              <li class="profil-theme">
+                <span class="profil-nom">{theme.theme}</span>
+                {#if theme.score === null}
+                  <span class="profil-inconnu">non documenté</span>
+                {:else}
+                  <svg
+                    class="profil-barre"
+                    viewBox="0 0 100 4"
+                    preserveAspectRatio="none"
+                    aria-hidden="true"
+                  >
+                    <rect class="profil-fond" x="0" y="0" width="100" height="4"></rect>
+                    <rect class="profil-valeur" x="0" y="0" width={longueur(theme.score)} height="4"
+                    ></rect>
+                  </svg>
+                  <span class="profil-couverture">{theme.documentees} sur {theme.applicables}</span>
+                {/if}
+              </li>
+            {/each}
+          </ul>
+
+          <!--
+            LE SCORE SE DÉPLIE sur les affirmations qui l'ont produit, chacune
+            avec son verbatim, sa source et sa date.
+          -->
+          <details class="detail">
+            <summary>Ce sur quoi vous êtes d'accord ({accords.length})</summary>
+            {#if accords.length === 0}
+              <p class="inconnu">
+                Aucune affirmation documentée ne vous rapproche de cet acteur. Son score vient
+                d'accords partiels, pas d'accords francs.
+              </p>
+            {/if}
+            <ul class="positions">
+              {#each accords as detail (detail.questionId)}
+                <li>
+                  <p class="affirmation-detail">{textesQuestions.get(detail.questionId)}</p>
+                  <p class="ligne">
+                    Vous : {LIBELLES_REPONSE[detail.reponseElecteur]} — Position : {LIBELLES_REPONSE[
+                      detail.positionActeur ?? 0
+                    ]}.
+                  </p>
+                  {@render provenance(detail)}
+                </li>
+              {/each}
+            </ul>
+          </details>
+
+          <details class="detail">
+            <summary>Détail par thème</summary>
+            {#each resultat.parTheme as theme (theme.theme)}
+              <h4 class="theme">{theme.theme}</h4>
+              {#if theme.score === null}
+                <p class="inconnu">
+                  Aucune position documentée sur ce thème. Il est écarté du calcul, pas compté comme
+                  un désaccord.
+                </p>
+              {/if}
+              <ul class="positions">
+                {#each theme.positions as detail (detail.questionId)}
+                  <li>
+                    <p class="affirmation-detail">{textesQuestions.get(detail.questionId)}</p>
+                    <p class="ligne">Vous : {LIBELLES_REPONSE[detail.reponseElecteur]}</p>
+                    {#if detail.positionActeur === null}
+                      <p class="ligne">Position inconnue.</p>
+                    {:else}
+                      <p class="ligne">Position : {LIBELLES_REPONSE[detail.positionActeur]}.</p>
+                      {@render provenance(detail)}
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+            {/each}
+          </details>
+
+          {#if slugParActeur.get(resultat.actorId)}
+            <p class="vers-fiche">
+              <a href={`/candidats/${slugParActeur.get(resultat.actorId)}`}>
+                Toutes les positions de {resultat.nom}
+              </a>
+            </p>
+          {/if}
+        </li>
+      {/each}
+    </ol>
+
+    <!--
+      LES ÉCARTÉS, NOMMÉS : aucun rang, aucune barre, aucun pourcentage, ordre
+      alphabétique. La couverture est écrite en toutes lettres, parce que c'est
+      la seule information qu'on possède réellement sur eux.
+    -->
+    {#if classement.nonClasses.length > 0}
+      <section class="ecartes">
+        <h2>Pas encore assez documentés pour être classés</h2>
+        <p>
+          Ces {classement.nonClasses.length} candidats sont comparés sur trop peu d'affirmations pour
+          qu'un rang veuille dire quelque chose : moins un candidat documente de positions, plus il arrive
+          en tête par accident. Le seuil retenu est de {Math.round(seuilCouverture * 100)} % des affirmations
+          renseignées. La <a href="/methodologie">méthodologie</a> explique la mesure.
+        </p>
+        <ul class="liste-ecartes">
+          {#each classement.nonClasses as resultat (resultat.actorId)}
+            <li>
+              <span class="ecarte-nom">{resultat.nom}</span>
+              <span class="ecarte-couverture">
+                {resultat.couverture.documentees === 0
+                  ? "aucune position documentée"
+                  : `documenté sur ${resultat.couverture.documentees} des ${resultat.couverture.applicables} affirmations`}
+              </span>
+            </li>
+          {/each}
+        </ul>
+        {#if !inclureHeritage}
+          <p class="reserve">
+            Vous avez exclu les positions héritées du parti. Recocher la case ci-dessus ferait
+            revenir au classement les candidats dont le parti a publié une ligne.
+          </p>
+        {/if}
+      </section>
+    {/if}
+
+    <!--
+      CARTE PARTAGEABLE. La graine et l'état de la bascule sont IMPRIMÉS dans la
+      carte, pas déduits : ce sont les deux paramètres qui permettent de refaire
+      exactement le même écran. L'image est dessinée dans le navigateur, au
+      clic, par un module chargé à ce moment-là seulement.
+    -->
+    <section class="carte">
+      <h2>Partager ce résultat</h2>
+      <p class="parametres">
+        Positions héritées : <strong>{inclureHeritage ? "incluses" : "exclues"}</strong>. Graine
+        d'affichage : <strong class="graine">{graineLisible}</strong>. Calculé sur {classement.questionsApplicables}
+        affirmations sur {classement.questionsPosees}.
+      </p>
+
+      {#if cartes === null}
+        <p class="carte-invitation">
+          Une image au format publication et story, avec vos rangs, leurs couvertures et ces
+          paramètres. Elle est dessinée ici, dans votre navigateur : rien n'est envoyé.
+        </p>
+        <button
+          class="action action--secondaire"
+          type="button"
+          onclick={creerCartes}
+          disabled={carteEnCours}
+        >
+          {carteEnCours ? "Création de l'image…" : "Créer mon image"}
+        </button>
+        {#if carteErreur}
+          <p class="reserve">
+            L'image n'a pas pu être dessinée dans ce navigateur. Une capture d'écran de cette page
+            fera l'affaire : elle porte les mêmes paramètres.
+          </p>
+        {/if}
+      {:else}
+        <div class="cartes-apercu">
+          <figure>
+            <img
+              src={cartes.post}
+              alt="Aperçu de l'image au format publication"
+              width="1080"
+              height="1350"
+            />
+            <figcaption>Publication · 1080 × 1350</figcaption>
+          </figure>
+          <figure>
+            <img
+              src={cartes.story}
+              alt="Aperçu de l'image au format story"
+              width="1080"
+              height="1920"
+            />
+            <figcaption>Story · 1080 × 1920</figcaption>
+          </figure>
+        </div>
+        <div class="cartes-actions">
+          {#if peutPartager}
+            <button class="action" type="button" onclick={() => partager("post")}
+              >Partager l'image</button
+            >
+          {/if}
+          <a
+            class="action action--secondaire"
+            href={cartes.post}
+            download="guide-isoloir-publication.png"
+          >
+            Enregistrer la publication
+          </a>
+          <a
+            class="action action--secondaire"
+            href={cartes.story}
+            download="guide-isoloir-story.png"
+          >
+            Enregistrer la story
+          </a>
+        </div>
+      {/if}
+    </section>
+
+    <p class="effacer">
+      <button class="lien" type="button" onclick={recommencer}>Effacer mes réponses</button>
+    </p>
   {/if}
-
-  <!--
-    CARTE PARTAGEABLE.
-
-    Une capture d'écran de ces chiffres circule sans rien qui dise comment ils
-    ont été obtenus. Deux personnes aux mêmes réponses obtiendraient des ordres
-    différents à score égal, et des couvertures différentes selon la bascule,
-    sans qu'aucune capture ne montre le réglage. Les deux paramètres sont donc
-    IMPRIMÉS DANS LA CARTE, pas déduits : la graine fixe l'ordre des ex æquo,
-    l'état de la bascule fixe les couvertures.
-  -->
-  <section class="carte">
-    <h2>Partager ce résultat</h2>
-    <p class="parametres">
-      Positions héritées : <strong>{inclureHeritage ? "incluses" : "exclues"}</strong>. Graine
-      d'affichage : <strong class="graine">{graineLisible}</strong>. Calculé sur {classement.questionsApplicables}
-      affirmations sur {classement.questionsPosees}.
-    </p>
-    <p class="reserve">
-      Ces deux paramètres suffisent à refaire exactement le même écran : mêmes réponses, même
-      réglage, même ordre à score égal. Sans eux, une capture ne prouve rien. Ils ne contiennent pas
-      vos réponses — la graine en est une empreinte, et elle ne quitte pas votre navigateur.
-    </p>
-  </section>
-
-  <p class="effacer">
-    <button class="lien" type="button" onclick={recommencer}>Effacer mes réponses</button>
-  </p>
-{/if}
+</div>
 
 <style>
   /* Les tokens viennent de src/styles/base.css. DESIGN_SYSTEM.md fait foi. */
+
+  .resultat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--pas-4);
+  }
+
+  .resultat > :global(*) {
+    margin-block: 0;
+  }
+
+  /* Un panneau groupe ce qui va ensemble : une carte qui délimite, pas qui décore. */
+  .panneau,
+  .cadre-lecture {
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte);
+    background: var(--couleur-surface-2);
+  }
+
+  .panneau h2,
+  .cadre-lecture h2 {
+    font-size: var(--t-h3);
+    margin: 0 0 var(--pas-1);
+  }
+
+  .panneau p,
+  .cadre-lecture p {
+    margin: 0 0 var(--pas-2);
+  }
+
+  .panneau p:last-child,
+  .cadre-lecture p:last-child {
+    margin-bottom: 0;
+  }
 
   .avertissement-previsualisation,
   .reserve {
@@ -713,7 +899,7 @@
     font-size: var(--t-petit);
     border-left: 3px solid var(--couleur-signature);
     padding-left: var(--pas-3);
-    margin: 0 0 var(--pas-4);
+    margin: 0;
   }
 
   .avertissement-previsualisation {
@@ -721,67 +907,198 @@
     color: var(--couleur-encre);
   }
 
-  .cadre-lecture {
-    margin-block: var(--pas-5);
-  }
-
-  .cadre-lecture h2 {
-    margin-top: 0;
-  }
-
-  /* Réglage : encadré discret, mais au-dessus du classement qu'il modifie. */
-  .reglage {
-    border-top: 1px solid var(--couleur-trait);
-    border-bottom: 1px solid var(--couleur-trait);
-    padding-block: var(--pas-3);
-    margin-bottom: var(--pas-4);
-  }
+  /* ─── Bascule : une case native dessinée en interrupteur ──────────────── */
 
   .bascule {
     display: flex;
-    gap: var(--pas-2);
     align-items: flex-start;
+    gap: var(--pas-2);
     cursor: pointer;
   }
 
-  /* 24 px : cible tactile décente à 375 px, sans agrandir la case elle-même. */
   .bascule input {
-    inline-size: 1.5rem;
-    block-size: 1.5rem;
-    margin: 0;
+    appearance: none;
     flex: none;
-    accent-color: var(--couleur-aplat);
+    position: relative;
+    width: 46px;
+    height: 28px;
+    margin: 0;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-encre-faible);
+    cursor: pointer;
+    transition: background-color var(--duree) var(--sortie);
+  }
+
+  .bascule input::before {
+    content: "";
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--couleur-surface);
+    box-shadow: var(--ombre-1);
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .bascule input:checked {
+    background: var(--couleur-aplat);
+  }
+
+  .bascule input:checked::before {
+    transform: translateX(18px);
+  }
+
+  .bascule-texte {
+    font-weight: 600;
+    line-height: 1.35;
   }
 
   .explication {
     display: block;
-    color: var(--couleur-encre-faible);
+    margin-top: 2px;
+    font-weight: 400;
     font-size: var(--t-petit);
-    margin-top: var(--pas-1);
+    color: var(--couleur-encre-faible);
+  }
+
+  /* ─── Réserves ────────────────────────────────────────────────────────── */
+
+  .reserves {
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte);
+    border: 1px solid var(--couleur-trait);
+    background: var(--couleur-surface);
+  }
+
+  .reserves-titre {
+    font-size: var(--t-petit);
+    margin: 0 0 var(--pas-1);
+  }
+
+  .reserves ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    font-size: var(--t-petit);
+  }
+
+  .reserves li + li {
+    margin-top: 4px;
+  }
+
+  .pourquoi {
+    margin-top: var(--pas-2);
+    font-size: var(--t-petit);
+  }
+
+  .pourquoi summary,
+  .detail summary {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--couleur-signature);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .pourquoi p {
+    margin: 0;
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * PRÉAMBULE. Sur ordinateur, le cadre de lecture et les réserves se lisent
+   * côte à côte, la bascule en dessous : tout tient dans l'écran d'arrivée.
+   */
+  .preambule {
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  @media (min-width: 64rem) {
+    .preambule {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+
+    .preambule > .reglage {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    /* Sans réserve à afficher, le cadre de lecture prend toute la largeur. */
+    .preambule:not(:has(.reserves)) > .cadre-lecture {
+      grid-column: 1 / -1;
+    }
+
+    .classement {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      align-items: start;
+    }
+
+    .cartes-apercu {
+      max-width: 40rem;
+    }
+  }
+
+  /* ─── Classement ──────────────────────────────────────────────────────── */
+
+  .titre-classement {
+    margin-top: var(--pas-3);
   }
 
   .classement {
     list-style: none;
-    padding: 0;
     margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-3);
   }
 
   .acteur {
-    margin-bottom: var(--pas-6);
+    margin: 0;
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface);
+    border: 1px solid var(--couleur-trait);
+    box-shadow: var(--ombre-1);
   }
 
+  .acteur-tete {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-3);
+    margin-bottom: var(--pas-2);
+  }
+
+  /* Le rang en grand chiffre : c'est l'information que la carte ordonne. */
   .rang {
-    color: var(--couleur-encre-faible);
-    font-size: var(--t-petit);
-    font-variant-numeric: tabular-nums;
+    flex: none;
+    display: grid;
+    justify-items: center;
     margin: 0;
+    line-height: 1;
+    color: var(--couleur-signature);
+  }
+
+  .rang-mot {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--couleur-encre-faible);
+  }
+
+  .rang-numero {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.04em;
   }
 
   .identite {
     display: flex;
     align-items: center;
     gap: var(--pas-2);
-    margin: var(--pas-1) 0 var(--pas-2);
+    min-width: 0;
   }
 
   .identite-texte {
@@ -790,23 +1107,23 @@
 
   .nom {
     margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
   }
 
   /*
-   * Portrait carré, sans arrondi et sans ombre.
-   *
-   * La pastille ronde à ombre douce est le réflexe par défaut, et la section 9
-   * du brief le refuse nommément. Le carré tient aussi mieux la promesse de
-   * neutralité : un cadre identique pour tous, une seule bordure, aucune
-   * différence de traitement d'un candidat à l'autre.
+   * PORTRAIT CARRÉ, identique pour tous : un cadre, une bordure, une taille.
+   * Aucune différence de traitement d'un candidat à l'autre.
    */
   .portrait {
     flex: none;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
+    margin: 0;
     object-fit: cover;
     /* Les photos libres sont cadrées de vingt façons ; le haut est le plus sûr. */
     object-position: top center;
+    border-radius: 14px;
     border: 1px solid var(--couleur-trait);
     background: var(--couleur-trait);
   }
@@ -814,7 +1131,6 @@
   .portrait-absent {
     display: grid;
     place-items: center;
-    margin: 0;
     font-size: var(--t-petit);
     font-weight: 600;
     letter-spacing: 0.04em;
@@ -822,7 +1138,7 @@
      * Fond de surface, pas la teinte des filets : sur `--couleur-trait`, les
      * initiales en encre faible tombaient à 4,2:1, mesuré par capturer.mjs.
      */
-    background: var(--couleur-surface);
+    background: var(--couleur-surface-2);
     color: var(--couleur-encre-faible);
   }
 
@@ -830,18 +1146,15 @@
     display: flex;
     align-items: center;
     gap: var(--pas-1);
-    margin: var(--pas-1) 0 0;
+    margin: 2px 0 0;
     font-size: var(--t-petit);
     color: var(--couleur-encre-faible);
   }
 
   /*
-   * Logo sur plaque claire, dans les deux thèmes.
-   *
-   * La plupart de ces logos sont du texte sombre sur fond transparent : posés
-   * directement sur le fond sombre du thème nuit, ils disparaissent. La plaque
-   * n'est pas une carte décorative, c'est ce qui les rend lisibles — et elle
-   * est la même pour tous, ce que la neutralité exige.
+   * Logo sur plaque claire, dans les deux thèmes : la plupart sont du texte
+   * sombre sur fond transparent et disparaîtraient sur le fond sombre. La
+   * plaque est la même pour tous, ce que la neutralité exige.
    */
   .logo {
     flex: none;
@@ -851,68 +1164,113 @@
     object-fit: contain;
     background: #ffffff;
     padding: 2px 3px;
+    border-radius: 4px;
     border: 1px solid var(--couleur-trait);
   }
 
   .qualification {
-    font-weight: 600;
+    display: inline-block;
     margin: 0 0 var(--pas-2);
+    padding: 3px 10px;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface-2);
+    font-size: var(--t-petit);
+    font-weight: 600;
   }
 
-  /*
-   * Une seule encre, une seule opacité, pour tous les rangs. La couleur
-   * signature est réservée à ce sur quoi on agit : un score n'est pas une
-   * action, et le teinter reviendrait à faire d'une proximité une adhésion.
-   */
   .barre {
     display: block;
     width: 100%;
-    height: 4px;
-    margin-bottom: var(--pas-2);
+    height: 10px;
+    border-radius: 5px;
+    overflow: hidden;
   }
 
-  .barre-fond {
+  /* Une seule encre pour toutes les barres, principales et par thème. */
+  .barre-fond,
+  .profil-fond {
     fill: var(--couleur-trait);
   }
 
-  .barre-valeur {
-    fill: var(--couleur-encre);
+  .barre-valeur,
+  .profil-valeur {
+    fill: var(--couleur-signature);
   }
 
-  .inconnu {
+  /* ─── Profil par thème ────────────────────────────────────────────────── */
+
+  .profil {
+    list-style: none;
+    margin: var(--pas-3) 0 var(--pas-1);
+    padding: var(--pas-2) 0 0;
+    border-top: 1px solid var(--couleur-trait);
+    display: grid;
+    gap: 6px;
+  }
+
+  .profil-theme {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 4.5rem auto;
+    align-items: center;
+    gap: var(--pas-2);
+    margin: 0;
+    font-size: 0.8125rem;
+  }
+
+  .profil-nom {
     color: var(--couleur-encre-faible);
-    font-size: var(--t-petit);
-    margin: 0 0 var(--pas-2);
+    line-height: 1.25;
   }
 
-  .detail summary {
-    cursor: pointer;
-    font-size: var(--t-petit);
-    color: var(--couleur-signature);
-    padding-block: var(--pas-1);
+  .profil-barre {
+    display: block;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .profil-couverture {
+    color: var(--couleur-encre-faible);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .profil-inconnu {
+    grid-column: 2 / 4;
+    color: var(--couleur-encre-faible);
+    font-style: italic;
+  }
+
+  /* ─── Détails dépliables ──────────────────────────────────────────────── */
+
+  .detail {
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .detail:last-of-type {
+    border-bottom: 1px solid var(--couleur-trait);
   }
 
   .theme {
     font-size: var(--t-petit);
-    text-transform: none;
-    margin: var(--pas-3) 0 var(--pas-2);
+    margin: var(--pas-3) 0 var(--pas-1);
   }
 
   .positions {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 var(--pas-2);
+  }
+
+  .positions li {
+    margin: 0 0 var(--pas-3);
     font-size: var(--t-petit);
   }
 
-  .positions > li {
-    border-top: 1px solid var(--couleur-trait);
-    padding-block: var(--pas-2);
-    margin: 0;
-  }
-
   .affirmation-detail {
-    margin: 0 0 var(--pas-1);
+    font-weight: 600;
+    margin: 0 0 4px;
   }
 
   .ligne {
@@ -927,23 +1285,15 @@
     display: block;
   }
 
-  /*
-   * En pleine encre et bordé, comme la mention d'héritage : ce n'est pas une
-   * réserve de bas de page, c'est ce qui empêche de prendre un programme de
-   * 2024 pour une position de 2027.
-   */
+  /* L'héritage et l'ancienneté en pleine encre : ce sont eux qui évitent la confusion. */
+  .heritage {
+    color: var(--couleur-encre);
+  }
+
   .ancienne {
     margin: var(--pas-1) 0;
     padding-left: var(--pas-2);
     border-left: 2px solid var(--couleur-encre-faible);
-    color: var(--couleur-encre);
-  }
-
-  /*
-   * L'héritage est en pleine encre, pas en gris : c'est l'information qui
-   * empêche de prendre une ligne de parti pour une déclaration de candidat.
-   */
-  .heritage {
     color: var(--couleur-encre);
   }
 
@@ -959,79 +1309,132 @@
     color: var(--couleur-encre-faible);
   }
 
-  /*
-   * LES ÉCARTÉS.
-   *
-   * Même filet, même retrait que la carte : c'est une section de bas de page,
-   * pas un second classement. Aucun aplat, aucune bordure de bloc, aucun
-   * numéro — le traitement typographique doit dire « liste » là où le
-   * classement au-dessus dit « ordre ».
-   */
-  .ecartes {
-    border-top: 1px solid var(--couleur-trait);
-    padding-top: var(--pas-3);
-    margin-top: var(--pas-5);
+  .inconnu {
+    color: var(--couleur-encre-faible);
+    font-size: var(--t-petit);
   }
 
-  .liste-ecartes {
-    list-style: none;
-    margin: var(--pas-3) 0 0;
-    padding: 0;
-  }
-
-  .liste-ecartes li {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0 var(--pas-1);
-    align-items: baseline;
-    padding: var(--pas-1) 0;
-    border-bottom: 1px solid var(--couleur-trait);
-  }
-
-  .ecarte-nom {
+  .vers-fiche {
+    margin: var(--pas-2) 0 0;
+    font-size: var(--t-petit);
     font-weight: 600;
   }
 
-  /*
-   * La couverture passe à la ligne sous le nom à 375 px, et se range à sa suite
-   * dès qu'il y a la place : `flex-wrap` suffit, aucune requête de média.
-   */
-  .ecarte-couverture {
+  .vers-fiche a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /* ─── Écartés : des étiquettes, pas une liste ordonnée ────────────────── */
+
+  .ecartes {
+    margin-top: var(--pas-3);
+  }
+
+  .ecartes h2 {
+    font-size: var(--t-h3);
+  }
+
+  .ecartes > p {
     font-size: var(--t-petit);
     color: var(--couleur-encre-faible);
   }
 
-  .carte {
-    border-top: 1px solid var(--couleur-trait);
-    padding-top: var(--pas-3);
-    margin-top: var(--pas-5);
+  .liste-ecartes {
+    list-style: none;
+    padding: 0;
+    margin: var(--pas-2) 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1);
   }
 
-  .parametres {
+  .liste-ecartes li {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 8px 14px;
+    border-radius: 14px;
+    border: 1px solid var(--couleur-trait);
+    background: var(--couleur-surface);
+  }
+
+  .ecarte-nom {
+    font-weight: 600;
     font-size: var(--t-petit);
   }
 
-  .graine {
-    font-variant-numeric: tabular-nums;
-    letter-spacing: 0.05em;
+  .ecarte-couverture {
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
   }
 
-  .action {
-    display: inline-block;
-    background: var(--couleur-aplat);
-    color: var(--couleur-sur-aplat);
-    text-decoration: none;
-    font-weight: 600;
-    padding: var(--pas-2) var(--pas-4);
-    border-radius: var(--rayon-actionnable);
-    transition: transform var(--duree) var(--sortie);
+  /* ─── Carte partageable ───────────────────────────────────────────────── */
+
+  .carte {
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface-2);
   }
 
-  .action:active {
-    transform: scale(0.98);
+  .carte h2 {
+    font-size: var(--t-h3);
+    margin: 0 0 var(--pas-1);
+  }
+
+  .parametres,
+  .carte-invitation {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+    margin: 0 0 var(--pas-2);
+  }
+
+  .cartes-apercu {
+    display: grid;
+    grid-template-columns: 1fr 0.8fr;
+    align-items: end;
+    gap: var(--pas-2);
+    margin-bottom: var(--pas-3);
+  }
+
+  .cartes-apercu figure {
+    margin: 0;
+  }
+
+  .cartes-apercu img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    box-shadow: var(--ombre-2);
+  }
+
+  .cartes-apercu figcaption {
+    margin-top: var(--pas-1);
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  .cartes-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1);
+  }
+
+  .action:disabled {
+    opacity: 0.6;
+    cursor: progress;
+  }
+
+  .effacer {
+    font-size: var(--t-petit);
   }
 
   .lien {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
     background: none;
     border: 0;
     padding: 0;
@@ -1040,10 +1443,5 @@
     text-decoration: underline;
     text-underline-offset: 2px;
     cursor: pointer;
-  }
-
-  .effacer {
-    margin-top: var(--pas-5);
-    font-size: var(--t-petit);
   }
 </style>

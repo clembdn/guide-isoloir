@@ -415,3 +415,40 @@ test("classés et écartés réunis couvrent tous les candidats comparés", asyn
   expect(ecartes).toBeGreaterThan(0);
   expect(classes + ecartes).toBeGreaterThanOrEqual(4);
 });
+
+test("la carte partageable se dessine dans le navigateur, aux deux formats", async ({ page }) => {
+  await avecReponses(page);
+  test.skip(await sansClassement(page), RAISON_SANS_CLASSEMENT);
+
+  /*
+   * Le module de dessin est chargé À LA DEMANDE. Un import manquant dans le
+   * composant ne se voyait qu'au clic, et le bouton affichait alors « l'image
+   * n'a pas pu être dessinée » sans qu'aucun test ne le remarque. C'est arrivé.
+   */
+  const erreurs: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") erreurs.push(message.text());
+  });
+
+  await page.getByRole("button", { name: "Créer mon image" }).click();
+  const images = page.locator(".cartes-apercu img");
+  await expect(images).toHaveCount(2);
+
+  const tailles = await images.evaluateAll((liste) =>
+    Promise.all(
+      (liste as HTMLImageElement[]).map(async (image) => {
+        await image.decode();
+        return `${image.naturalWidth}x${image.naturalHeight}`;
+      }),
+    ),
+  );
+  expect(tailles).toEqual(["1080x1350", "1080x1920"]);
+
+  // Les images sont locales : rien n'est parti vers un serveur pour les produire.
+  for (const source of await images.evaluateAll((liste) =>
+    (liste as HTMLImageElement[]).map((image) => image.src),
+  )) {
+    expect(source.startsWith("blob:")).toBe(true);
+  }
+  expect(erreurs).toEqual([]);
+});
