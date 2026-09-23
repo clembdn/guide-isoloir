@@ -73,6 +73,47 @@ type NavEntry = {
   label: string;
 };
 
+/** Entrée de la navigation principale : la barre sur grand écran, le menu sur téléphone. */
+type NavPrincipale = NavEntry & {
+  /** Une ligne, affichée sous le libellé dans le menu mobile seulement. */
+  description: string;
+};
+
+/**
+ * Navigation principale, dans l'ordre du parcours : qui se présente, sur quoi,
+ * comment voter, comment c'est fait, qui l'écrit.
+ *
+ * Le test n'y figure pas : il a son propre bouton, à côté, et le répéter ici
+ * ferait deux appels pour la même action.
+ */
+export const NAV_PRINCIPALE: readonly NavPrincipale[] = [
+  {
+    href: "/candidats",
+    label: "Candidats",
+    description: "Ce que chacun a dit, citation et source à l'appui",
+  },
+  {
+    href: "/themes",
+    label: "Thèmes",
+    description: "Les positions de tous, affirmation par affirmation",
+  },
+  {
+    href: "/comprendre",
+    label: "Comprendre",
+    description: "Le scrutin, l'inscription et le vote, en deux minutes",
+  },
+  {
+    href: "/methodologie",
+    label: "Méthode",
+    description: "Comment une position est établie, et ce qu'on ne sait pas",
+  },
+  {
+    href: "/a-propos",
+    label: "À propos",
+    description: "Qui écrit ce site, et pourquoi",
+  },
+];
+
 /** Sections atteignables depuis le pied de page, dans l'ordre. */
 export const FOOTER_NAV: readonly NavEntry[] = [
   { href: "/test", label: "Le test" },

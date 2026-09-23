@@ -262,82 +262,9 @@ body {
 }
 
 /*
- * En-tête collant. `backdrop-filter` sur un fond semi-opaque : le contenu
- * défile dessous sans que le titre devienne illisible. Le repli est un fond
- * plein, pas une transparence, pour les navigateurs sans la propriété.
+ * L'en-tête et la navigation vivent dans `src/components/Navigation.astro`,
+ * styles compris : un seul endroit pour la barre, le menu et leur mouvement.
  */
-.entete {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--couleur-fond);
-  border-bottom: 1px solid var(--couleur-trait);
-}
-
-@supports (backdrop-filter: blur(12px)) {
-  .entete {
-    background: color-mix(in srgb, var(--couleur-fond) 84%, transparent);
-    backdrop-filter: blur(12px);
-  }
-}
-
-.entete .enveloppe,
-.entete .enveloppe-large {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--pas-3);
-  min-height: 60px;
-}
-
-/*
- * Bloc-marque. C'est une image, pas du texte : elle porte ses deux teintes
- * elle-même et ne lit aucun jeton d'ici. Le fichier servi est généré depuis le
- * maître par scripts/generer-marque.mjs, qui recopie la teinte de signature une
- * fois pour toutes. Voir DESIGN_SYSTEM.md § 10.
- *
- * LA HAUTEUR EST LA MESURE, PAS LA LARGEUR. Un bloc-marque se cale sur la
- * hauteur de la ligne qui l'entoure ; sa largeur suit le rapport du dessin
- * (205,32 × 40, soit 5,13 fois plus large que haut). À 375 px, 24 px de haut
- * font 123 px de large, et il reste de la place pour « Commencer ».
- */
-.marque {
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-
-.marque-bloc {
-  display: block;
-  height: 1.5rem;
-  width: auto;
-}
-
-@media (min-width: 40rem) {
-  .marque-bloc {
-    height: 1.75rem;
-  }
-}
-
-/*
- * Le survol ne peut plus souligner : il n'y a plus de texte. Il atténue, sur
- * la seule propriété admise par le budget de mouvement, et le `:focus-visible`
- * garde l'anneau net du socle plutôt qu'une atténuation qui le rendrait moins
- * lisible au clavier.
- */
-.marque:hover .marque-bloc {
-  opacity: 0.72;
-  transition: opacity var(--duree) var(--sortie);
-}
-
-/* Raccourci vers le test dans l'en-tête. Absent de /test et de /resultat :
-   il y serait redondant, et il coûterait une tabulation au parcours clavier. */
-.entete-action {
-  padding: 0.5rem 1.1rem;
-  min-height: 40px;
-  font-size: var(--t-petit);
-}
 
 .pied {
   border-top: 1px solid var(--couleur-trait);

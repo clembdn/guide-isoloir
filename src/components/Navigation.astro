@@ -1,0 +1,696 @@
+---
+/*
+ * En-tête et navigation principale.
+ *
+ * LE MOTIF EST CELUI DU LOGO : UN RIDEAU D'ISOLOIR QUI SE FERME.
+ *
+ *   - Sur grand écran, survoler un lien tire deux demi-rideaux depuis ses
+ *     bords jusqu'au centre. La page en cours garde son rideau fermé.
+ *   - Sur téléphone, le menu s'ouvre en plein écran : deux panneaux violets se
+ *     rejoignent au milieu, puis les liens apparaissent.
+ *   - Au défilement, la barre posée à plat devient une pilule flottante.
+ *
+ * ZÉRO OCTET DE JAVASCRIPT. Le menu est un `popover` natif : ouverture,
+ * fermeture par Échap ou par un appui à côté, et retour du focus sont assurés
+ * par le navigateur. L'entrée se joue par `@starting-style`, la pilule par une
+ * animation liée au défilement. Un navigateur qui ne connaît pas l'une de ces
+ * propriétés affiche l'état final, sans le mouvement : le contenu ne dépend
+ * jamais de l'animation.
+ *
+ * BUDGET CLAVIER. Sur téléphone, les liens sont dans le menu fermé et ne
+ * coûtent qu'une tabulation, celle du bouton. C'est ce qui garde le parcours
+ * de /test sous les 25 tabulations exigées par `quiz-clavier.spec.ts`.
+ *
+ * Seul `transform` et `opacity` bougent. `prefers-reduced-motion` retire
+ * tout déplacement.
+ */
+import { NAV_PRINCIPALE, SITE_NAME } from "../lib/site";
+
+type Props = {
+  /** Affiche le bouton « Commencer le test ». Faux sur /test et /resultat. */
+  actionEntete: boolean;
+};
+
+const { actionEntete } = Astro.props;
+
+/*
+ * Le bloc-marque est CHARGÉ COMME IMAGE, pas inséré dans le HTML : en ligne,
+ * ses courbes coûtaient 3,2 ko gzip par page, sur une page qui en pèse 3,7.
+ * Le fichier est généré par `scripts/generer-marque.mjs` ; ne pas le modifier
+ * à la main. Les dimensions en attributs évitent le saut de mise en page.
+ */
+const MARQUE = {
+  src: "/medias/marque/guide-isoloir.svg",
+  largeur: 205,
+  hauteur: 40,
+} as const;
+
+/*
+ * `build.format: "file"` fait apparaître `.html` dans le chemin au build. Une
+ * rubrique est active sur sa page et sur toutes ses pages filles : une fiche
+ * candidat allume « Candidats ».
+ */
+const chemin = Astro.url.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/";
+const estActif = (href: string) => chemin === href || chemin.startsWith(`${href}/`);
+---
+
+<header class="entete">
+  <div class="barre enveloppe-large">
+    <a class="marque" href="/">
+      <img
+        class="marque-bloc"
+        src={MARQUE.src}
+        width={MARQUE.largeur}
+        height={MARQUE.hauteur}
+        alt={`${SITE_NAME}, retour à l'accueil`}
+      />
+    </a>
+
+    <nav class="nav-large" aria-label="Navigation principale">
+      <ul>
+        {
+          NAV_PRINCIPALE.map((entree) => (
+            <li>
+              <a
+                class="nav-lien"
+                href={entree.href}
+                aria-current={estActif(entree.href) ? "page" : undefined}
+              >
+                {entree.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      {
+        actionEntete && (
+          <a class="action entete-action" href="/test">
+            {/* Un seul élément : dans un conteneur flex, l'espace de tête d'un
+                 enfant tomberait, et l'on lirait « Commencerle test ». */}
+            <span>
+              Commencer<span class="large-seulement"> le test</span>
+            </span>
+          </a>
+        )
+      }
+      <button class="menu-bouton" type="button" popovertarget="menu">
+        <span class="menu-icone" aria-hidden="true"></span>
+        <span class="menu-bouton-texte">Menu</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="menu" id="menu" popover>
+    <div class="menu-tete">
+      <p class="menu-titre">{SITE_NAME}</p>
+      <button class="menu-fermer" type="button" popovertarget="menu" popovertargetaction="hide">
+        Fermer
+      </button>
+    </div>
+
+    <nav aria-label="Navigation principale">
+      <ul class="menu-liste">
+        {
+          NAV_PRINCIPALE.map((entree) => (
+            <li>
+              <a href={entree.href} aria-current={estActif(entree.href) ? "page" : undefined}>
+                <span class="menu-libelle">{entree.label}</span>
+                <span class="menu-description">{entree.description}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="menu-pied">
+      {
+        actionEntete && (
+          <a class="menu-action" href="/test">
+            Commencer le test
+          </a>
+        )
+      }
+      <p class="menu-promesse">Aucune publicité. Vos réponses restent dans votre navigateur.</p>
+    </div>
+  </div>
+</header>
+
+<style>
+  /* ─── La barre ─────────────────────────────────────────────────────────── */
+
+  .entete {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .barre {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
+    min-height: 64px;
+  }
+
+  /*
+   * LA SURFACE. Un pseudo-élément, et non le fond de la barre : c'est ce qui
+   * permet de la faire apparaître au défilement en n'animant que son opacité
+   * et sa taille. Sur téléphone, un bandeau pleine largeur ; sur grand écran,
+   * une pilule qui flotte sous le haut de la fenêtre.
+   *
+   * Par défaut elle est VISIBLE : un navigateur sans animation liée au
+   * défilement garde une barre lisible au-dessus du contenu qui passe dessous.
+   */
+  .entete::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--couleur-fond);
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  @supports (backdrop-filter: blur(12px)) {
+    .entete::before {
+      background: color-mix(in srgb, var(--couleur-fond) 82%, transparent);
+      backdrop-filter: blur(14px) saturate(160%);
+    }
+  }
+
+  .marque {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-right: auto;
+    text-decoration: none;
+  }
+
+  .marque-bloc {
+    display: block;
+    height: 1.5rem;
+    width: auto;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .marque:hover .marque-bloc {
+      opacity: 0.72;
+      transition: opacity var(--duree) var(--sortie);
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+  }
+
+  .entete-action {
+    padding: 0.5rem 1.1rem;
+    min-height: 44px;
+    font-size: var(--t-petit);
+    white-space: nowrap;
+  }
+
+  /*
+   * « Commencer le test » partout pour un lecteur d'écran ; « Commencer » à
+   * l'œil sur téléphone, où la place manque. Le nom accessible ne change
+   * jamais avec la largeur de l'écran.
+   */
+  .large-seulement {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  /* ─── Le bouton de menu ────────────────────────────────────────────────── */
+
+  .menu-bouton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pas-1);
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 0.7rem;
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    color: var(--couleur-encre);
+    font: inherit;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* Le texte s'efface sous 25 rem, pas le nom : le bouton reste « Menu ». */
+  @media (max-width: 24.99rem) {
+    .menu-bouton-texte {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+  }
+
+  /* Deux traits, décalés : un rideau entrouvert plutôt qu'un hamburger. */
+  .menu-icone {
+    position: relative;
+    display: block;
+    width: 16px;
+    height: 10px;
+  }
+
+  .menu-icone::before,
+  .menu-icone::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+  }
+
+  .menu-icone::before {
+    top: 0;
+    width: 100%;
+  }
+
+  .menu-icone::after {
+    bottom: 0;
+    width: 62%;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .menu-bouton:hover {
+      border-color: var(--couleur-signature);
+    }
+  }
+
+  /* ─── La navigation sur grand écran ────────────────────────────────────── */
+
+  .nav-large {
+    display: none;
+  }
+
+  .nav-large li {
+    margin: 0;
+  }
+
+  .nav-large ul {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-lien {
+    position: relative;
+    isolation: isolate;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 0.95rem;
+    border-radius: var(--rayon-actionnable);
+    color: var(--couleur-encre);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  /*
+   * LES DEUX DEMI-RIDEAUX. Chacun part de son bord, arrondi côté extérieur,
+   * droit côté intérieur : fermés, ils forment une seule pilule. Un demi-pixel
+   * de recouvrement évite la couture au centre.
+   */
+  .nav-lien::before,
+  .nav-lien::after {
+    content: "";
+    position: absolute;
+    inset-block: 5px;
+    z-index: -1;
+    width: calc(50% + 0.5px);
+    background: var(--couleur-surface-2);
+    transform: scaleX(0);
+    transition: transform 220ms var(--sortie);
+  }
+
+  .nav-lien::before {
+    left: 0;
+    transform-origin: left center;
+    border-radius: var(--rayon-actionnable) 0 0 var(--rayon-actionnable);
+  }
+
+  .nav-lien::after {
+    right: 0;
+    transform-origin: right center;
+    border-radius: 0 var(--rayon-actionnable) var(--rayon-actionnable) 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .nav-lien:hover::before,
+    .nav-lien:hover::after {
+      transform: scaleX(1);
+    }
+  }
+
+  /* La page en cours : rideau fermé, encre de signature. */
+  .nav-lien[aria-current="page"] {
+    color: var(--couleur-signature);
+  }
+
+  .nav-lien[aria-current="page"]::before,
+  .nav-lien[aria-current="page"]::after {
+    transform: scaleX(1);
+  }
+
+  /* ─── Grand écran : la pilule flottante ────────────────────────────────── */
+
+  @media (min-width: 64rem) {
+    .entete {
+      padding-top: var(--pas-2);
+    }
+
+    .entete::before {
+      content: none;
+    }
+
+    .barre {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      min-height: 60px;
+    }
+
+    .barre::before {
+      content: "";
+      position: absolute;
+      inset: 0 var(--gouttiere);
+      z-index: -1;
+      border: 1px solid var(--couleur-trait);
+      border-radius: var(--rayon-actionnable);
+      background: var(--couleur-fond);
+      box-shadow: var(--ombre-1);
+    }
+
+    @supports (backdrop-filter: blur(12px)) {
+      .barre::before {
+        background: color-mix(in srgb, var(--couleur-surface) 78%, transparent);
+        backdrop-filter: blur(16px) saturate(170%);
+      }
+    }
+
+    .marque {
+      justify-self: start;
+      margin-right: 0;
+      padding-left: var(--pas-3);
+    }
+
+    .marque-bloc {
+      height: 1.75rem;
+    }
+
+    .nav-large {
+      display: block;
+    }
+
+    .actions {
+      justify-self: end;
+      padding-right: var(--pas-3);
+    }
+
+    .large-seulement {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+    }
+
+    .menu-bouton,
+    .menu {
+      display: none;
+    }
+  }
+
+  /*
+   * La pilule n'apparaît qu'au défilement : en haut de page, la barre est
+   * posée à plat sur le fond, sans cadre. Liée au défilement, sans script.
+   * Derrière `no-preference` : avec `reduce`, la pilule est simplement là.
+   */
+  @supports (animation-timeline: scroll()) {
+    @media (prefers-reduced-motion: no-preference) {
+      .entete::before,
+      .barre::before {
+        /*
+         * En propriétés détaillées, jamais en raccourci `animation` : le
+         * minifieur fondait le tout en un raccourci contenant `scroll()`, que
+         * Chrome rejette en bloc — l'animation disparaissait sans erreur.
+         */
+        animation-name: surface-apparait;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 72px;
+      }
+    }
+  }
+
+  @keyframes surface-apparait {
+    from {
+      opacity: 0;
+      transform: scale(0.985);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ─── Le menu plein écran ──────────────────────────────────────────────── */
+
+  /*
+   * Hors `popover`, le bouton ne ferait rien et le panneau s'afficherait dans
+   * le flux, au milieu de la page. Il est donc retiré : la navigation reste
+   * complète dans le pied de page.
+   */
+  @supports not selector(:popover-open) {
+    .menu-bouton,
+    .menu {
+      display: none;
+    }
+  }
+
+  @supports selector(:popover-open) {
+    .menu {
+      position: fixed;
+      inset: 0;
+      isolation: isolate;
+      width: 100%;
+      max-width: none;
+      height: 100dvh;
+      max-height: none;
+      margin: 0;
+      padding: 0 var(--gouttiere) var(--pas-4);
+      border: 0;
+      background: transparent;
+      color: var(--couleur-sur-aplat);
+      overflow-y: auto;
+      /*
+       * `display` et `overlay` restent le temps de la sortie : sans eux, le
+       * panneau disparaîtrait d'un coup au lieu de rouvrir son rideau.
+       */
+      transition:
+        display 260ms allow-discrete,
+        overlay 260ms allow-discrete;
+    }
+
+    .menu:popover-open {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .menu::backdrop {
+      background: transparent;
+    }
+
+    /* Deux panneaux, un par moitié, qui se rejoignent au centre. */
+    .menu::before,
+    .menu::after {
+      content: "";
+      position: fixed;
+      inset-block: 0;
+      z-index: -1;
+      width: 50.5%;
+      background: var(--couleur-aplat);
+      transform: scaleX(0);
+      transition: transform 240ms var(--sortie);
+    }
+
+    .menu::before {
+      left: 0;
+      transform-origin: left center;
+    }
+
+    .menu::after {
+      right: 0;
+      transform-origin: right center;
+    }
+
+    .menu:popover-open::before,
+    .menu:popover-open::after {
+      transform: scaleX(1);
+    }
+
+    /* Le contenu arrive quand le rideau est presque fermé, et part aussitôt. */
+    .menu > * {
+      opacity: 0;
+      transform: translateY(10px);
+      transition:
+        opacity 160ms var(--sortie),
+        transform 220ms var(--sortie);
+    }
+
+    .menu:popover-open > * {
+      opacity: 1;
+      transform: none;
+      transition-delay: 110ms;
+    }
+
+    @starting-style {
+      .menu:popover-open::before,
+      .menu:popover-open::after {
+        transform: scaleX(0);
+      }
+
+      .menu:popover-open > * {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+    }
+
+    /* Menu ouvert : la page dessous ne défile plus. */
+    :global(html:has(.menu:popover-open)) {
+      overflow: hidden;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .menu::before,
+    .menu::after,
+    .menu > * {
+      transition: none;
+    }
+  }
+
+  .menu-tete {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 64px;
+  }
+
+  .menu-titre {
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  .menu-fermer {
+    min-height: 44px;
+    padding: 0 1rem;
+    border: 1px solid color-mix(in srgb, var(--couleur-sur-aplat) 62%, var(--couleur-aplat));
+    border-radius: var(--rayon-actionnable);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .menu-liste {
+    list-style: none;
+    margin: var(--pas-3) 0 var(--pas-4);
+    padding: 0;
+  }
+
+  .menu-liste li + li {
+    border-top: 1px solid color-mix(in srgb, var(--couleur-sur-aplat) 28%, var(--couleur-aplat));
+  }
+
+  .menu-liste a {
+    display: block;
+    padding-block: var(--pas-2);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .menu-libelle {
+    display: block;
+    font-size: clamp(1.75rem, 1.3rem + 2.2vw, 2.25rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.035em;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .menu-liste a[aria-current="page"] .menu-libelle {
+    text-decoration: underline;
+    text-decoration-thickness: 3px;
+    text-underline-offset: 0.18em;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .menu-liste a:hover .menu-libelle {
+      transform: translateX(6px);
+    }
+  }
+
+  .menu-description {
+    display: block;
+    margin-top: 2px;
+    font-size: var(--t-petit);
+    color: color-mix(in srgb, var(--couleur-sur-aplat) 84%, var(--couleur-aplat));
+  }
+
+  .menu-pied {
+    margin-top: auto;
+  }
+
+  /* L'action s'inverse sur l'aplat : fond clair, encre de signature. */
+  .menu-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-sur-aplat);
+    color: var(--couleur-aplat);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .menu-promesse {
+    margin: var(--pas-3) 0 0;
+    font-size: var(--t-petit);
+    color: color-mix(in srgb, var(--couleur-sur-aplat) 84%, var(--couleur-aplat));
+  }
+
+  /* L'anneau de signature disparaîtrait sur l'aplat de signature. */
+  .menu :focus-visible {
+    outline-color: var(--couleur-sur-aplat);
+  }
+</style>

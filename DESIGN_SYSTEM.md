@@ -317,11 +317,39 @@ présence du nom de l'éditeur sur chaque page publique en dépend.
 `/resultat`** : il y serait redondant, et chaque lien d'en-tête coûte une tabulation au parcours
 clavier, dont le budget jusqu'au premier radio du quiz est plafonné à 25.
 
+### Navigation (23 septembre 2026)
+
+`src/components/Navigation.astro` porte l'en-tête entier, styles compris. Son motif est celui du
+logo : **un rideau d'isoloir qui se ferme**.
+
+- **Grand écran (≥ 64 rem)** : logo, cinq liens au centre (Candidats, Thèmes, Comprendre, Méthode,
+  À propos, tirés de `NAV_PRINCIPALE` dans `src/lib/site.ts`), « Commencer le test » à droite.
+  Survoler un lien tire deux demi-rideaux `--couleur-surface-2` depuis ses bords jusqu'au centre ;
+  la page en cours (`aria-current="page"`, rubrique et pages filles) garde le rideau fermé et
+  prend l'encre de signature.
+- **Téléphone** : logo, « Commencer » (nom accessible « Commencer le test »), bouton « Menu ». Le
+  menu est un `popover` natif plein écran : deux panneaux `--couleur-aplat` se rejoignent au
+  centre en 240 ms, puis les liens arrivent, chacun avec une ligne de description.
+- **Au défilement**, la barre posée à plat devient une surface dépolie — une pilule flottante sur
+  grand écran — par une animation liée au défilement (`animation-timeline: scroll()`).
+
+**Zéro JavaScript.** Ouverture, Échap, appui à côté et retour du focus viennent du navigateur ;
+l'entrée se joue par `@starting-style`. Sans `popover`, le bouton et le panneau sont retirés et le
+pied de page porte la navigation. Sans animation liée au défilement, la surface est simplement
+visible. **Les propriétés d'animation s'écrivent détaillées**, jamais en raccourci : le minifieur
+fondait `animation` et `animation-timeline` en un raccourci que Chrome rejette en bloc.
+
+Budget clavier mesuré jusqu'au premier radio de `/test` : **4 tabulations à 375 px, 8 à 1280 px**,
+pour un plafond de 25.
+
+Contrastes du menu ouvert, sur l'aplat : libellés 8,2:1 (clair) et 7,8:1 (sombre), descriptions
+6,2:1 et 5,9:1, bordure du bouton « Fermer » 4,0:1 et 3,6:1.
+
 ### Implémentés dans `src/styles/base.css`
 
-`.page` `.enveloppe` `.enveloppe-large` `.entete` `.marque` `.contenu` `.contenu--libre` `.pied`
+`.page` `.enveloppe` `.enveloppe-large` `.contenu` `.contenu--libre` `.pied`
 `.evitement` `.fil-ariane` `.mise-a-jour` `.chantier` `.question` `.sources` `.signature`
-`.reserve` `.prose` `.action` `.action--grand` `.action--secondaire` `.entete-action` `.section`
+`.reserve` `.prose` `.action` `.action--grand` `.action--secondaire` `.section`
 `.section-tete` `.section-chapo` `.revele` `.hero` `.hero-grille` `.hero-media` `.hero-credit`
 `.chiffres` `.apercu` `.etiquette` `.echelle` `.cartes` `.carte` `.preuves` `.preuve-puce`
 `.promesse` `.final`, les cinq teintes `.t-*`, plus les balises de contenu.
