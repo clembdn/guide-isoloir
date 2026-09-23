@@ -18,6 +18,7 @@ import {
 import { SANS_AVIS, type Reponse } from "../session-test";
 import type { Question } from "../questions";
 import { SEUIL_PUBLICATION } from "../seuils";
+import { creerResolveur } from "./resolution";
 import {
   NIVEAUX_RESOLUTION,
   type Classement,
@@ -88,24 +89,6 @@ function grainePourReponses(reponses: Readonly<Record<string, Reponse>>): number
 /** Accord entre deux positions, dans [0, 1]. Symétrique par construction. */
 function accord(reponse: StanceValue, position: StanceValue): number {
   return (AMPLITUDE - Math.abs(reponse - position)) / AMPLITUDE;
-}
-
-/**
- * Meilleure position disponible pour un couple acteur/question.
- *
- * La chaîne de résolution est une préférence, pas un filtre : on retient le
- * maillon le plus haut disponible. À maillon égal, la position la plus
- * récemment mise à jour, puis l'identifiant, pour que rien ne dépende de
- * l'ordre du tableau.
- */
-function meilleurePosition(candidates: readonly Stance[]): Stance | null {
-  if (candidates.length === 0) return null;
-
-  return [...candidates].sort((a, b) => {
-    const rangA = NIVEAU_PAR_CLE.get(a.provenance)?.rang ?? Number.MAX_SAFE_INTEGER;
-    const rangB = NIVEAU_PAR_CLE.get(b.provenance)?.rang ?? Number.MAX_SAFE_INTEGER;
-    return rangA - rangB || b.updatedAt.localeCompare(a.updatedAt) || a.id.localeCompare(b.id);
-  })[0]!;
 }
 
 /** Moyenne d'une liste. `null` si la liste est vide. */
@@ -196,54 +179,12 @@ export function calculer({
     a.localeCompare(b),
   );
 
-  /** Positions indexées par acteur puis par question. Aucune clé composée. */
-  const parActeur = new Map<string, Map<string, Stance[]>>();
-  for (const position of positions) {
-    const parQuestion = parActeur.get(position.actorId) ?? new Map<string, Stance[]>();
-    parQuestion.set(position.questionId, [
-      ...(parQuestion.get(position.questionId) ?? []),
-      position,
-    ]);
-    parActeur.set(position.actorId, parQuestion);
-  }
-
-  /**
-   * Chaîne de reprise par acteur.
-   *
-   * L'ordre de `baselineActorIds` est une préférence éditoriale déclarée dans les
-   * données — coalition avant parti, par exemple — pas l'ordre incident d'un
-   * tableau. Il est donc respecté tel quel, et c'est la seule place du moteur où
-   * un ordre d'entrée compte.
+  /*
+   * Une seule résolution pour tout le site : les fiches candidat emploient le
+   * même résolveur, et ne peuvent donc pas afficher une autre position que
+   * celle qui compte ici. Voir `resolution.ts`.
    */
-  const reprises = new Map(
-    candidatures.map((candidature) => [candidature.actorId, candidature.baselineActorIds]),
-  );
-  const nomParId = new Map(annuaire.map((acteur) => [acteur.id, acteur.name]));
-
-  /**
-   * Position retenue pour un couple acteur/question, et son origine.
-   *
-   * La position personnelle l'emporte toujours, même mal documentée : un candidat
-   * qui contredit son parti dit quelque chose, et l'écraser par la ligne du parti
-   * serait une falsification. À défaut seulement, on descend la chaîne de
-   * reprise.
-   */
-  function resoudre(
-    acteurId: string,
-    questionId: string,
-  ): { position: Stance; heriteDe: string | null; heriteDeId: string | null } | null {
-    const propre = meilleurePosition(parActeur.get(acteurId)?.get(questionId) ?? []);
-    if (propre !== null) return { position: propre, heriteDe: null, heriteDeId: null };
-
-    for (const repris of reprises.get(acteurId) ?? []) {
-      const position = meilleurePosition(parActeur.get(repris)?.get(questionId) ?? []);
-      if (position !== null) {
-        return { position, heriteDe: nomParId.get(repris) ?? repris, heriteDeId: repris };
-      }
-    }
-
-    return null;
-  }
+  const resoudre = creerResolveur({ positions, candidatures, annuaire });
 
   /*
    * Type de retour annoté, et non `satisfies` : sans lui, `rang: null` est
