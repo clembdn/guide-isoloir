@@ -45,10 +45,14 @@
   const couverture = $derived(resultat.couverture);
   /** Positions reprises d'un autre acteur. Voir `Couverture.personnelles`. */
   const heritees = $derived(couverture.documentees - couverture.personnelles);
-  const assezCouvert = $derived(couverture.taux >= PLANCHER_POURCENTAGE);
-
   /** Entier : une décimale suggérerait une précision que le calcul n'a pas. */
-  const pourcentage = $derived(Math.round(resultat.score * 100));
+  const pourcentage = $derived(resultat.score === null ? null : Math.round(resultat.score * 100));
+
+  /*
+   * Pas de chiffre sans score : un acteur sur lequel on ne sait rien a un score
+   * `null`, pas zéro, et il ne doit pas afficher « NaN % ».
+   */
+  const assezCouvert = $derived(pourcentage !== null && couverture.taux >= PLANCHER_POURCENTAGE);
 </script>
 
 <p class="resultat-score">

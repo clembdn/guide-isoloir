@@ -106,7 +106,13 @@ function niveauIncertitude(couverture: Couverture, dispersion: number): NiveauIn
 }
 
 export type EntreesMoteur = {
-  questions: readonly Question[];
+  /**
+   * Le moteur ne lit que l'identifiant et le thème d'une question. Il ne
+   * demande donc que ça : l'îlot de résultat lui passe des questions PROJETÉES,
+   * sans `direction`, qui ne doit jamais atteindre le navigateur. Exiger le type
+   * complet obligeait à mentir au typage, et `svelte-check` l'a relevé.
+   */
+  questions: readonly Pick<Question, "id" | "theme">[];
   acteurs: readonly PoliticalActor[];
   positions: readonly Stance[];
   reponses: Readonly<Record<string, Reponse>>;

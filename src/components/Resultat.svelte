@@ -194,8 +194,13 @@
   /** Rangs 1 à 3. Les ex æquo peuvent donc en faire plus de trois. */
   const tete = $derived(classement.classes.filter((resultat) => resultat.rang! <= 3));
 
-  const textesQuestions = new Map(questions.map((q) => [q.id, q.texte]));
-  const sourceParId = new Map(sources.map((source) => [source.id, source]));
+  /*
+   * Index de lecture, dérivés des propriétés : `$derived` et non une constante,
+   * pour qu'ils suivent les propriétés si elles changeaient. Des objets simples,
+   * pas des `Map`, qui seraient des structures mutables hors de la réactivité.
+   */
+  const textesQuestions = $derived(Object.fromEntries(questions.map((q) => [q.id, q.texte])));
+  const sourceParId = $derived(Object.fromEntries(sources.map((source) => [source.id, source])));
 
   /** Graine en hexadécimal : plus court à recopier, et manifestement pas un score. */
   const graineLisible = $derived(classement.graineAffichage.toString(16).padStart(8, "0"));
@@ -249,13 +254,15 @@
     [-2]: "Pas du tout d'accord",
   };
 
-  const visuelParActeur = new Map(visuels.map((visuel) => [visuel.actorId, visuel]));
+  const visuelParActeur = $derived(
+    Object.fromEntries(visuels.map((visuel) => [visuel.actorId, visuel])),
+  );
 
   /** Date à signaler sous une position dont toutes les sources précèdent la campagne. */
   function sourceAnterieureALaCampagne(detail: DetailPosition): string | null {
     return dateAnterieureALaCampagne(
       detail.sourceIds
-        .map((id) => sourceParId.get(id)?.dateDeclaration)
+        .map((id) => sourceParId[id]?.dateDeclaration)
         .filter((date): date is string => date !== undefined),
     );
   }
@@ -271,6 +278,7 @@
     if (classement.profilPeuMarque || classement.ecartsTenus || resultat.incertitude === "forte") {
       return "Résultat incertain";
     }
+    if (resultat.score === null) return "Résultat incertain";
     return resultat.score >= 0.72 ? "Proximité forte" : "Proximité modérée";
   }
 
@@ -302,7 +310,9 @@
   }
 
   /** Slug de chaque candidat classé, pour le lien vers sa fiche. */
-  const slugParActeur = new Map(acteurs.map((acteur) => [acteur.id, acteur.slug]));
+  const slugParActeur = $derived(
+    Object.fromEntries(acteurs.map((acteur) => [acteur.id, acteur.slug])),
+  );
 
   /*
    * CARTE PARTAGEABLE, DESSINÉE À LA DEMANDE.
@@ -342,7 +352,7 @@
         lignes: tete.map((resultat) => ({
           rang: resultat.rang ?? 0,
           nom: resultat.nom,
-          parti: visuelParActeur.get(resultat.actorId)?.parti ?? null,
+          parti: visuelParActeur[resultat.actorId]?.parti ?? null,
           pourcentage:
             resultat.score !== null && resultat.couverture.taux >= PLANCHER_POURCENTAGE
               ? Math.round(resultat.score * 100)
@@ -423,7 +433,7 @@
     </p>
   {/if}
   {#each detail.sourceIds as sourceId (sourceId)}
-    {@const source = sourceParId.get(sourceId)}
+    {@const source = sourceParId[sourceId]}
     {#if source}
       <p class="source">
         <a href={source.url} rel="noreferrer">{source.titre}</a>
@@ -574,7 +584,7 @@
     <ol class="classement">
       {#each tete as resultat (resultat.actorId)}
         {@const accords = affirmationsDAccord(resultat)}
-        {@const visuel = visuelParActeur.get(resultat.actorId)}
+        {@const visuel = visuelParActeur[resultat.actorId]}
         <li class="acteur">
           <div class="acteur-tete">
             <p class="rang">
@@ -636,7 +646,7 @@
             aria-label={`${qualifier(resultat)} avec ${resultat.nom}`}
           >
             <rect class="barre-fond" x="0" y="0" width="100" height="4"></rect>
-            <rect class="barre-valeur" x="0" y="0" width={longueur(resultat.score)} height="4"
+            <rect class="barre-valeur" x="0" y="0" width={longueur(resultat.score ?? 0)} height="4"
             ></rect>
           </svg>
 
@@ -687,7 +697,7 @@
             <ul class="positions">
               {#each accords as detail (detail.questionId)}
                 <li>
-                  <p class="affirmation-detail">{textesQuestions.get(detail.questionId)}</p>
+                  <p class="affirmation-detail">{textesQuestions[detail.questionId]}</p>
                   <p class="ligne">
                     Vous : {LIBELLES_REPONSE[detail.reponseElecteur]} — Position : {LIBELLES_REPONSE[
                       detail.positionActeur ?? 0
@@ -712,7 +722,7 @@
               <ul class="positions">
                 {#each theme.positions as detail (detail.questionId)}
                   <li>
-                    <p class="affirmation-detail">{textesQuestions.get(detail.questionId)}</p>
+                    <p class="affirmation-detail">{textesQuestions[detail.questionId]}</p>
                     <p class="ligne">Vous : {LIBELLES_REPONSE[detail.reponseElecteur]}</p>
                     {#if detail.positionActeur === null}
                       <p class="ligne">Position inconnue.</p>
@@ -726,9 +736,9 @@
             {/each}
           </details>
 
-          {#if slugParActeur.get(resultat.actorId)}
+          {#if slugParActeur[resultat.actorId]}
             <p class="vers-fiche">
-              <a href={`/candidats/${slugParActeur.get(resultat.actorId)}`}>
+              <a href={`/candidats/${slugParActeur[resultat.actorId]}`}>
                 Toutes les positions de {resultat.nom}
               </a>
             </p>
@@ -810,7 +820,7 @@
           <figure>
             <img
               src={cartes.post}
-              alt="Aperçu de l'image au format publication"
+              alt="Carte au format publication, 1080 × 1350"
               width="1080"
               height="1350"
             />
@@ -819,7 +829,7 @@
           <figure>
             <img
               src={cartes.story}
-              alt="Aperçu de l'image au format story"
+              alt="Carte au format story, 1080 × 1920"
               width="1080"
               height="1920"
             />
