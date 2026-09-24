@@ -7,6 +7,11 @@
  * issues. Au-dessus de tout, une mention : le protocole N'A PAS ENCORE ÉTÉ
  * APPLIQUÉ. Le schéma décrit ce qui sera fait, et il le dit avant qu'on le lise.
  *
+ * LE Y EST DESSINÉ EN TRAITS, À TOUTES LES TAILLES : deux colonnes étroites en
+ * haut, séparées par un tireté ; des coudes qui les rejoignent sur un nœud
+ * cadenassé ; une fourche vers les deux issues. Les cartes bordées empilées qui
+ * l'ont précédé perdaient la forme en Y sur téléphone, là où l'on lit.
+ *
  * Contenu repris de la page, sans ajout.
  */
 import Icone from "../Icone.astro";
@@ -20,34 +25,40 @@ import Icone from "../Icone.astro";
   </p>
 
   <div class="y">
-    <div class="releves">
-      <p class="releve t-indigo">
-        <strong>Relevé A</strong>
+    <p class="cloison">
+      <Icone nom="eye-slash" graisse="bold" />
+      <span>Deux relevés qui ne se voient pas</span>
+    </p>
+
+    <div class="paire paire--releves">
+      <p class="branche t-indigo">
+        <strong><span class="pastille" aria-hidden="true"></span>Relevé A</strong>
         <span>Une première personne code chaque position.</span>
       </p>
-      <p class="cloison" aria-hidden="true">
-        <Icone nom="eye-slash" /><span>ne se voient pas</span>
-      </p>
-      <p class="releve t-cyan">
-        <strong>Relevé B</strong>
+      <p class="branche t-cyan">
+        <strong><span class="pastille" aria-hidden="true"></span>Relevé B</strong>
         <span>Une seconde, de sensibilité politique différente, code la même chose.</span>
       </p>
     </div>
 
-    <p class="etape">
-      <Icone nom="lock" graisse="bold" />
-      <span
-        ><strong>Verrouillés</strong>, puis comparés&nbsp;: les écarts sont examinés un par un.</span
-      >
-    </p>
+    <span class="coude coude--jonction" aria-hidden="true"></span>
 
-    <div class="issues">
-      <p class="issue t-sarcelle">
-        <strong>Écart résolu</strong>
+    <div class="noeud-central">
+      <span class="cadenas" aria-hidden="true"><Icone nom="lock" graisse="bold" /></span>
+      <p>
+        <strong>Verrouillés</strong>, puis comparés&nbsp;: les écarts sont examinés un par un.
+      </p>
+    </div>
+
+    <span class="coude coude--fourche" aria-hidden="true"></span>
+
+    <div class="paire">
+      <p class="branche t-sarcelle">
+        <strong><span class="pastille" aria-hidden="true"></span>Écart résolu</strong>
         <span>En revenant à la source, jamais par compromis.</span>
       </p>
-      <p class="issue t-prune">
-        <strong>Désaccord maintenu</strong>
+      <p class="branche t-prune">
+        <strong><span class="pastille" aria-hidden="true"></span>Désaccord maintenu</strong>
         <span>Publié comme tel, et la position est marquée incertaine.</span>
       </p>
     </div>
@@ -56,135 +67,161 @@ import Icone from "../Icone.astro";
 
 <style>
   .pas-encore {
-    display: inline-flex;
-    align-items: center;
+    display: flex;
+    align-items: flex-start;
     gap: var(--pas-1);
     margin: 0 0 var(--pas-3);
-    padding: 4px 12px;
-    border: 2px dashed var(--couleur-encre-faible);
-    border-radius: var(--rayon-actionnable);
+    color: var(--couleur-encre-faible);
     font-size: var(--t-petit);
     font-weight: 700;
   }
 
   .pas-encore :global(.icone) {
+    flex: none;
     width: 1.1rem;
     height: 1.1rem;
+    margin-top: 0.15em;
   }
 
-  /*
-   * LE Y : deux branches en haut, un tronc au milieu, deux branches en bas.
-   * Les traits de jonction sont des bordures ; aucun dessin en SVG.
-   */
   .y {
-    display: grid;
-    justify-items: center;
-    gap: var(--pas-4);
+    max-width: 40rem;
   }
 
-  .releves,
-  .issues {
-    position: relative;
-    display: grid;
-    gap: var(--pas-2);
-    width: 100%;
-  }
-
-  @media (min-width: 48rem) {
-    .releves {
-      grid-template-columns: 1fr auto 1fr;
-      align-items: center;
-    }
-
-    .issues {
-      grid-template-columns: 1fr 1fr;
-      gap: var(--pas-5);
-    }
-
-    /* Les deux relevés descendent vers l'étape commune. */
-    .releves::after,
-    .issues::before {
-      content: "";
-      position: absolute;
-      left: 25%;
-      right: 25%;
-      height: calc(var(--pas-4) / 2);
-      border: 3px solid var(--couleur-trait);
-    }
-
-    .releves::after {
-      top: 100%;
-      border-top: 0;
-      border-radius: 0 0 16px 16px;
-    }
-
-    .issues::before {
-      bottom: 100%;
-      border-bottom: 0;
-      border-radius: 16px 16px 0 0;
-    }
-  }
-
-  .releve,
-  .issue {
-    display: grid;
-    gap: 2px;
-    margin: 0;
-    padding: var(--pas-2) var(--pas-3);
-    border-radius: var(--rayon-carte);
-    border: 2px solid var(--vif);
-    background: var(--pastel);
-    font-size: var(--t-petit);
-  }
-
-  .releve strong,
-  .issue strong {
-    font-size: 1.0625rem;
-    color: var(--vif);
-  }
-
-  /* La cloison entre les deux relevés : ils ne se voient pas. */
   .cloison {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
-    margin: 0;
+    gap: 6px;
+    margin: 0 0 var(--pas-2);
+    color: var(--couleur-encre-faible);
     font-size: 0.8125rem;
     font-weight: 700;
-    color: var(--couleur-encre-faible);
   }
 
   .cloison :global(.icone) {
-    width: 1.1rem;
-    height: 1.1rem;
+    width: 1rem;
+    height: 1rem;
   }
 
-  @media (min-width: 48rem) {
-    .cloison {
-      flex-direction: column;
-      align-self: stretch;
-      padding: 0 var(--pas-2);
-      border-inline: 3px dashed var(--couleur-trait);
-      text-align: center;
-    }
+  /* Deux colonnes à toutes les tailles : c'est la forme du Y. */
+  .paire {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    column-gap: var(--pas-3);
   }
 
-  .etape {
-    display: flex;
-    align-items: center;
-    gap: var(--pas-2);
+  /* Entre les deux relevés, la cloison tiretée : ils ne se voient pas. */
+  .paire--releves {
+    position: relative;
+  }
+
+  .paire--releves::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    border-left: 2px dashed var(--couleur-trait);
+  }
+
+  .branche {
+    display: grid;
+    align-content: start;
+    gap: 2px;
     margin: 0;
-    padding: var(--pas-2) var(--pas-3);
-    border-radius: var(--rayon-actionnable);
-    background: var(--couleur-encre);
-    color: var(--couleur-fond);
     font-size: var(--t-petit);
+    line-height: 1.4;
+    text-align: center;
   }
 
-  .etape :global(.icone) {
-    flex: none;
-    width: 1.3rem;
-    height: 1.3rem;
+  .branche strong {
+    font-size: 1rem;
+    line-height: 1.3;
+    color: var(--vif);
+  }
+
+  .pastille {
+    display: inline-block;
+    width: 0.625rem;
+    height: 0.625rem;
+    margin-right: 6px;
+    border-radius: 50%;
+    background: var(--vif);
+    vertical-align: 0.05em;
+  }
+
+  /*
+   * LES COUDES : un cadre ouvert d'un côté, du centre d'une colonne au centre
+   * de l'autre, et une tige au milieu. Jonction : └─┬─┘. Fourche : ┌─┴─┐.
+   */
+  .coude {
+    position: relative;
+    display: block;
+    height: 2.25rem;
+    margin: var(--pas-1) 0;
+  }
+
+  .coude::before {
+    content: "";
+    position: absolute;
+    left: 25%;
+    right: 25%;
+    height: 50%;
+    border: 3px solid var(--couleur-trait);
+  }
+
+  .coude::after {
+    content: "";
+    position: absolute;
+    left: calc(50% - 1.5px);
+    height: 50%;
+    border-left: 3px solid var(--couleur-trait);
+  }
+
+  .coude--jonction::before {
+    top: 0;
+    border-top: 0;
+  }
+
+  .coude--jonction::after {
+    bottom: 0;
+  }
+
+  .coude--fourche::before {
+    bottom: 0;
+    border-bottom: 0;
+  }
+
+  .coude--fourche::after {
+    top: 0;
+  }
+
+  .noeud-central {
+    display: grid;
+    justify-items: center;
+    gap: var(--pas-1);
+    text-align: center;
+  }
+
+  .noeud-central p {
+    max-width: 22rem;
+    margin: 0;
+    font-size: var(--t-petit);
+    line-height: 1.4;
+  }
+
+  .cadenas {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    background: var(--couleur-signature);
+    color: var(--couleur-fond);
+  }
+
+  .cadenas :global(.icone) {
+    width: 1.4rem;
+    height: 1.4rem;
   }
 </style>

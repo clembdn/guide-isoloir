@@ -7,6 +7,9 @@
  * s'élargissant, et c'est le message de l'article : « la première colonne est
  * courte ».
  *
+ * Les anneaux sont des TRAITS, pas des disques pastel à bord coloré (écartés le
+ * 24 septembre 2026, « trop IA ») ; seul le centre est plein.
+ *
  * C'EST UN RÉCAPITULATIF, PLACÉ DANS « CE QU'IL FAUT EN RETENIR » : il reprend
  * en mots courts les trois listes de l'article, sans leurs réserves — qui
  * restent dans le texte, au-dessus. Aucun fait nouveau.
@@ -101,8 +104,14 @@ const CERCLES = [
   .cible {
     position: relative;
     justify-self: center;
-    width: min(17rem, 80vw);
+    width: min(15rem, 70vw);
     aspect-ratio: 1;
+  }
+
+  @media (min-width: 56rem) {
+    .cible {
+      width: 17rem;
+    }
   }
 
   .anneau {
@@ -110,7 +119,7 @@ const CERCLES = [
     display: grid;
     justify-items: center;
     border-radius: 50%;
-    background: var(--pastel);
+    background: var(--couleur-fond);
     border: 3px solid var(--vif);
   }
 
@@ -142,14 +151,30 @@ const CERCLES = [
     color: var(--couleur-sur-aplat);
   }
 
+  /* Téléphone : trois groupes sous des filets. Plus large : trois colonnes. */
   .listes {
     display: grid;
-    gap: var(--pas-3);
+  }
+
+  .liste {
+    padding: var(--pas-2) 0;
+    border-top: 1px solid var(--couleur-trait);
   }
 
   @media (min-width: 40rem) {
     .listes {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--couleur-trait);
+    }
+
+    .liste {
+      padding: var(--pas-2) var(--pas-2) 0 0;
+      border-top: 0;
+    }
+
+    .liste + .liste {
+      padding-left: var(--pas-2);
+      border-left: 1px solid var(--couleur-trait);
     }
   }
 
@@ -183,8 +208,12 @@ const CERCLES = [
     line-height: 1.45;
   }
 
+  .liste li {
+    margin: 0;
+  }
+
   .liste li + li {
-    margin-top: 4px;
+    margin-top: 2px;
   }
 
   .liste li::marker {

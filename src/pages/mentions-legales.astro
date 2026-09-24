@@ -1,9 +1,10 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import { CONTACT_EMAIL, EDITOR_NAME, REPOSITORY_URL, SITE_NAME, SITE_URL } from "../lib/site";
 
-const UPDATED = "2026-09-14";
+const UPDATED = MISES_A_JOUR["/mentions-legales"];
 
 // Le domaine n'est affiché que s'il en est réellement un.
 const domaine = SITE_URL.endsWith(".invalid") ? null : new URL(SITE_URL).host;

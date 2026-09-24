@@ -2,9 +2,12 @@
 /*
  * Schéma : les trois conditions cumulatives d'un parrainage valide.
  *
- * Trois grands chiffres dans trois cercles, reliés par des « et » : c'est le
- * mot qui compte, puisque les trois sont exigées à la fois, et que ce sont la
- * deuxième et la troisième qu'on oublie.
+ * Trois grands chiffres typographiques, reliés par des « et » posés sur les
+ * filets qui les séparent : c'est le mot qui compte, puisque les trois sont
+ * exigées à la fois, et que ce sont la deuxième et la troisième qu'on oublie.
+ *
+ * Les trois doubles cercles qui l'ont précédé ont été écartés le 24 septembre
+ * 2026 : 800 px de haut à 375 px pour trois nombres.
  *
  * Contenu repris de l'article vérifié, sans ajout.
  */
@@ -42,7 +45,7 @@ const CONDITIONS = [
               et
             </span>
           )}
-          <span class="disque">
+          <span class="seuil">
             <strong class="chiffre">{condition.chiffre}</strong>
             <span class="unite">{condition.unite}</span>
           </span>
@@ -54,42 +57,33 @@ const CONDITIONS = [
 </figure>
 
 <style>
+  /*
+   * Téléphone : trois lignes, le chiffre à gauche, le texte à droite. Grand
+   * écran : trois colonnes. Les « et » se posent sur les filets de séparation.
+   */
   .conditions {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: var(--pas-6);
-  }
-
-  @media (min-width: 48rem) {
-    .conditions {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--pas-5);
-    }
   }
 
   .condition {
     position: relative;
     display: grid;
-    justify-items: center;
-    gap: var(--pas-2);
+    grid-template-columns: 7rem minmax(0, 1fr);
+    column-gap: var(--pas-3);
+    align-items: center;
     margin: 0;
-    text-align: center;
+    padding: var(--pas-3) 0;
   }
 
-  /* Le chiffre dans un disque, cerclé de sa teinte : la forme dit « seuil ». */
-  .disque {
+  .condition + .condition {
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .seuil {
     display: grid;
-    place-content: center;
-    width: 9rem;
-    height: 9rem;
-    border-radius: 50%;
-    background: var(--pastel);
-    box-shadow:
-      inset 0 0 0 4px var(--vif),
-      0 0 0 8px var(--couleur-fond),
-      0 0 0 10px var(--vif);
   }
 
   .chiffre {
@@ -98,37 +92,57 @@ const CONDITIONS = [
     letter-spacing: -0.04em;
     color: var(--vif);
     white-space: nowrap;
+    font-variant-numeric: tabular-nums;
   }
 
   .unite {
+    margin-top: 4px;
     font-size: 0.8125rem;
     font-weight: 700;
+    line-height: 1.3;
   }
 
   .texte {
-    max-width: 16rem;
     font-size: var(--t-petit);
     line-height: 1.45;
   }
 
-  /* « et » entre deux conditions : au-dessus sur téléphone, à gauche sur grand écran. */
   .et {
     position: absolute;
-    top: calc(-1 * var(--pas-6) / 2);
-    left: 50%;
-    padding: 0 var(--pas-2);
-    border-radius: var(--rayon-actionnable);
-    background: var(--couleur-encre);
-    color: var(--couleur-fond);
+    top: 0;
+    left: 0;
+    padding-right: var(--pas-1);
+    background: var(--couleur-fond);
+    color: var(--couleur-encre-faible);
     font-size: 0.8125rem;
-    font-weight: 700;
-    transform: translate(-50%, -50%);
+    font-weight: 800;
+    line-height: 1;
+    transform: translateY(-55%);
   }
 
   @media (min-width: 48rem) {
+    .conditions {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .condition {
+      grid-template-columns: 1fr;
+      align-content: start;
+      align-items: start;
+      row-gap: var(--pas-2);
+      padding: 0 var(--pas-3) 0 0;
+    }
+
+    .condition + .condition {
+      padding-left: var(--pas-3);
+      border-top: 0;
+      border-left: 1px solid var(--couleur-trait);
+    }
+
     .et {
-      top: 4.5rem;
-      left: calc(-1 * var(--pas-5) / 2);
+      top: 1.25rem;
+      left: 0;
+      padding: 4px 0;
       transform: translate(-50%, -50%);
     }
   }

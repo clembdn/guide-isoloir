@@ -8,12 +8,13 @@
  * parle ensuite de ce que le site fait, pas de qui le fait.
  */
 import PageLecture from "../layouts/PageLecture.astro";
+import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import ListeIcones from "../components/ListeIcones.astro";
 import TroisQuestions from "../components/schemas/TroisQuestions.astro";
 import { EDITOR_NAME, CONTACT_EMAIL } from "../lib/site";
 
-const UPDATED = "2026-09-23";
+const UPDATED = MISES_A_JOUR["/a-propos"];
 
 const SOMMAIRE = [
   { id: "pourquoi", texte: "Pourquoi ce site existe" },

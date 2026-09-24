@@ -36,30 +36,33 @@
 </figure>
 
 <style>
+  /*
+   * Deux colonnes à toutes les tailles, séparées par un filet : on compare
+   * d'un regard. Le dessin au-dessus, le texte dessous. Aucun fond : les blocs
+   * pastel arrondis qui les portaient ont été écartés le 24 septembre 2026.
+   */
   .paire {
     display: grid;
-    gap: var(--pas-3);
-  }
-
-  @media (min-width: 40rem) {
-    .paire {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: 40rem;
   }
 
   .cas {
     display: grid;
-    grid-template-columns: 7rem 1fr;
-    align-items: center;
-    gap: var(--pas-3);
-    padding: var(--pas-3);
-    border-radius: var(--rayon-carte-l);
-    background: var(--pastel);
+    align-content: start;
+    gap: var(--pas-2);
+    padding-right: var(--pas-2);
+  }
+
+  .cas + .cas {
+    padding: 0 0 0 var(--pas-2);
+    border-left: 1px solid var(--couleur-trait);
   }
 
   .cas h3 {
     margin: 0 0 4px;
     font-size: 1.125rem;
+    color: var(--vif);
   }
 
   .cas p {
@@ -69,7 +72,7 @@
 
   .dessin {
     display: grid;
-    place-items: center;
+    place-items: center start;
     height: 6rem;
   }
 
@@ -147,9 +150,10 @@
   }
 
   .commun {
+    max-width: 40rem;
     margin: var(--pas-3) 0 0;
-    padding: var(--pas-2) var(--pas-3);
-    border-left: 4px solid var(--couleur-signature);
+    padding-top: var(--pas-2);
+    border-top: 1px solid var(--couleur-trait);
     font-size: var(--t-petit);
   }
 </style>

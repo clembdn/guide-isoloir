@@ -7,6 +7,11 @@
  * démarche. C'est la liste de l'article, mise en forme de choix : on se situe
  * au lieu de lire.
  *
+ * Dessiné comme les chemins de procuration : un tronc à gauche, une branche à
+ * coude par voie, dans sa teinte. La pilule de question, les blocs bordés et
+ * les pilules de réponse qui l'ont précédé ont été écartés le 24 septembre
+ * 2026 (« trop IA »).
+ *
  * Contenu repris de l'article vérifié, sans ajout.
  */
 import Icone from "../Icone.astro";
@@ -14,14 +19,15 @@ import Icone from "../Icone.astro";
 
 <figure class="schema">
   <figcaption class="schema-titre">Êtes-vous déjà inscrit&nbsp;?</figcaption>
-  <div class="aiguillage">
+  <div class="arbre">
     <p class="question">
       <Icone nom="question" graisse="bold" />
       Vous avez 18 ans, ou les aurez la veille du scrutin
     </p>
 
-    <div class="voies">
-      <section class="voie t-sarcelle">
+    <ul class="voies">
+      <li class="voie t-sarcelle">
+        <span class="point" aria-hidden="true"></span>
         <p class="condition">Vous êtes dans l'une de ces deux situations</p>
         <ul class="cas">
           <li>
@@ -38,100 +44,106 @@ import Icone from "../Icone.astro";
           <Icone nom="seal-check" graisse="fill" />
           Inscription automatique&nbsp;: rien à faire
         </p>
-      </section>
+      </li>
 
-      <section class="voie t-prune">
+      <li class="voie t-prune">
+        <span class="point" aria-hidden="true"></span>
         <p class="condition">Aucune des deux</p>
         <p class="issue">
           <Icone nom="hand-pointing" graisse="fill" />
           Il faut vous inscrire&nbsp;: voir plus bas
         </p>
-      </section>
-    </div>
+      </li>
+    </ul>
   </div>
 </figure>
 
 <style>
-  .aiguillage {
-    display: grid;
-    justify-items: center;
+  /*
+   * LE TRONC ET LES COUDES, comme `CheminsProcuration.astro` : un trait
+   * vertical sous la question ; chaque voie s'y raccroche par un coude arrondi
+   * dans sa teinte, qui finit sur un point.
+   */
+  .arbre {
+    --coude: 3.25rem;
+    --tronc: 0.6rem;
+    --y-point: calc(var(--pas-3) + 0.7rem);
+    max-width: 36rem;
   }
 
-  /* La question : une pilule, reliée aux deux voies par un embranchement. */
   .question {
-    position: relative;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--pas-1);
     margin: 0;
-    padding: var(--pas-2) var(--pas-3);
-    border-radius: var(--rayon-actionnable);
-    background: var(--couleur-aplat);
-    color: var(--couleur-sur-aplat);
+    font-size: 1.0625rem;
     font-weight: 700;
-    text-align: center;
+    line-height: 1.35;
   }
 
   .question :global(.icone) {
     flex: none;
     width: 1.3rem;
     height: 1.3rem;
+    color: var(--couleur-signature);
   }
 
   .voies {
-    position: relative;
-    display: grid;
-    gap: var(--pas-3);
-    width: 100%;
-    padding-top: var(--pas-5);
-  }
-
-  /*
-   * L'EMBRANCHEMENT : un trait qui descend de la question, puis se sépare vers
-   * chaque voie. Dessiné par deux bordures arrondies.
-   */
-  .voies::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 50%;
-    width: 3px;
-    height: calc(var(--pas-5) / 2);
-    background: var(--couleur-trait);
-    transform: translateX(-50%);
-  }
-
-  @media (min-width: 40rem) {
-    .voies {
-      grid-template-columns: 3fr 2fr;
-      align-items: start;
-    }
-
-    .voies::after {
-      content: "";
-      position: absolute;
-      top: calc(var(--pas-5) / 2);
-      left: 25%;
-      right: 25%;
-      height: calc(var(--pas-5) / 2);
-      border: 3px solid var(--couleur-trait);
-      border-bottom: 0;
-      border-radius: 16px 16px 0 0;
-    }
+    list-style: none;
+    margin: 0;
+    padding: 0;
   }
 
   .voie {
+    position: relative;
     display: grid;
     gap: var(--pas-2);
-    padding: var(--pas-3);
-    border-radius: var(--rayon-carte-l);
-    border: 2px solid var(--vif);
-    background: var(--couleur-surface);
+    margin: 0;
+    padding: var(--pas-3) 0 var(--pas-2) var(--coude);
+  }
+
+  .voie + .voie {
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .voie::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: var(--tronc);
+    width: calc(var(--coude) - var(--tronc) - 26px);
+    height: var(--y-point);
+    border-left: 3px solid var(--vif);
+    border-bottom: 3px solid var(--vif);
+    border-bottom-left-radius: 14px;
+    z-index: 1;
+  }
+
+  .voie:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--tronc);
+    width: 3px;
+    background: var(--couleur-trait);
+  }
+
+  .point {
+    position: absolute;
+    top: calc(var(--y-point) - 6px);
+    left: calc(var(--coude) - 30px);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: var(--vif);
   }
 
   .condition {
     margin: 0;
+    font-size: 1.0625rem;
     font-weight: 700;
+    line-height: 1.35;
     color: var(--vif);
   }
 
@@ -140,51 +152,45 @@ import Icone from "../Icone.astro";
     margin: 0;
     padding: 0;
     display: grid;
-    gap: var(--pas-1);
+    gap: 4px;
+    font-size: var(--t-petit);
+    line-height: 1.4;
   }
 
-  .cas li:not(.ou) {
+  .cas li {
     display: flex;
-    align-items: center;
-    gap: var(--pas-2);
+    align-items: flex-start;
+    gap: var(--pas-1);
     margin: 0;
-    padding: var(--pas-2);
-    border-radius: 12px;
-    background: var(--pastel);
-    font-size: var(--t-petit);
   }
 
   .cas :global(.icone) {
     flex: none;
-    width: 1.4rem;
-    height: 1.4rem;
+    width: 1.25rem;
+    height: 1.25rem;
     color: var(--vif);
   }
 
   .ou {
-    margin: 0;
+    padding-left: calc(1.25rem + var(--pas-1));
+    color: var(--couleur-encre-faible);
     font-size: 0.8125rem;
     font-weight: 700;
-    text-align: center;
-    color: var(--couleur-encre-faible);
   }
 
   .issue {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: var(--pas-1);
     margin: 0;
-    padding: var(--pas-2) var(--pas-3);
-    border-radius: var(--rayon-actionnable);
-    background: var(--vif);
-    color: var(--couleur-fond);
     font-weight: 700;
-    font-size: var(--t-petit);
+    line-height: 1.35;
   }
 
   .issue :global(.icone) {
     flex: none;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.3rem;
+    height: 1.3rem;
+    color: var(--vif);
   }
 </style>

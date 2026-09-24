@@ -1,10 +1,14 @@
 ---
 /*
- * Schéma : les trois voies pour s'inscrire, dessinées comme trois portes.
+ * Schéma : les trois voies pour s'inscrire.
  *
- * Une arche par voie — la forme de l'isoloir, qui est aussi celle d'une porte
- * qu'on franchit. Ce qu'elles ont en commun (les pièces à fournir) va dessous,
- * sur toute la largeur, pour ne pas le répéter trois fois.
+ * Trois lignes sous des filets — trois colonnes sur grand écran —, chacune
+ * menée par un nœud rond portant son icône. Ce qu'elles ont en commun (les
+ * pièces à fournir) va dessous, pour ne pas le répéter trois fois.
+ *
+ * Les trois arches bordées qui l'ont précédé ont été écartées le 24 septembre
+ * 2026 : empilées pleine largeur sur téléphone, elles faisaient trois grands
+ * cadres colorés, « trop IA ».
  *
  * Contenu repris de l'article vérifié, sans ajout.
  */
@@ -35,21 +39,21 @@ const VOIES = [
 
 <figure class="schema">
   <figcaption class="schema-titre">Trois voies, au choix</figcaption>
-  <ul class="portes">
+  <ul class="voies">
     {
       VOIES.map((voie) => (
-        <li class:list={["porte", voie.teinte]}>
-          <span class="porte-icone">
+        <li class:list={["voie", voie.teinte]}>
+          <span class="noeud" aria-hidden="true">
             <Icone nom={voie.icone} />
           </span>
-          <strong class="porte-titre">{voie.titre}</strong>
-          <span class="porte-texte">{voie.texte}</span>
+          <strong>{voie.titre}</strong>
+          <span class="texte">{voie.texte}</span>
         </li>
       ))
     }
   </ul>
   <p class="pieces">
-    <Icone nom="identification-card" />
+    <Icone nom="identification-card" graisse="bold" />
     <span>
       Dans les trois cas&nbsp;: <strong>un justificatif d'identité</strong> et{" "}
       <strong>un justificatif de domicile de moins de trois mois</strong>.
@@ -58,82 +62,91 @@ const VOIES = [
 </figure>
 
 <style>
-  .portes {
+  .voies {
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: var(--pas-2);
   }
 
-  @media (min-width: 40rem) {
-    .portes {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--pas-3);
-    }
-  }
-
-  /* L'ARCHE : le haut en plein cintre, le bas droit, comme une porte ou un isoloir. */
-  .porte {
+  .voie {
     display: grid;
-    justify-items: center;
-    align-content: start;
-    gap: var(--pas-1);
+    grid-template-columns: 2.75rem minmax(0, 1fr);
+    column-gap: var(--pas-2);
+    align-items: center;
     margin: 0;
-    padding: var(--pas-5) var(--pas-3) var(--pas-3);
-    border: 2px solid var(--vif);
-    border-radius: 999px 999px 14px 14px;
-    background: var(--pastel);
-    text-align: center;
+    padding: var(--pas-2) 0;
+    border-top: 1px solid var(--couleur-trait);
   }
 
-  @media (max-width: 39.99rem) {
-    /* Sur téléphone, l'arche s'allonge moins : un demi-cercle sur une carte. */
-    .porte {
-      border-radius: 120px 120px 14px 14px;
-      padding-top: var(--pas-4);
-    }
-  }
-
-  .porte-icone {
+  .noeud {
+    grid-row: span 2;
+    align-self: start;
     display: grid;
     place-items: center;
-    width: 3.25rem;
-    height: 3.25rem;
-    margin-bottom: var(--pas-1);
+    width: 2.75rem;
+    height: 2.75rem;
     border-radius: 50%;
     background: var(--vif);
     color: var(--couleur-fond);
   }
 
-  .porte-icone :global(.icone) {
-    width: 1.6rem;
-    height: 1.6rem;
+  .noeud :global(.icone) {
+    width: 1.4rem;
+    height: 1.4rem;
   }
 
-  .porte-titre {
-    font-size: 1.125rem;
+  .voie strong {
+    font-size: 1.0625rem;
+    color: var(--vif);
   }
 
-  .porte-texte {
+  .texte {
     font-size: var(--t-petit);
     line-height: 1.45;
+  }
+
+  @media (min-width: 40rem) {
+    .voies {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      border-top: 1px solid var(--couleur-trait);
+    }
+
+    .voie {
+      grid-template-columns: 1fr;
+      align-content: start;
+      align-items: start;
+      gap: 4px;
+      padding: var(--pas-3) var(--pas-3) var(--pas-3) 0;
+      border-top: 0;
+    }
+
+    .voie + .voie {
+      padding-left: var(--pas-3);
+      border-left: 1px solid var(--couleur-trait);
+    }
+
+    .noeud {
+      grid-row: auto;
+      margin-bottom: var(--pas-1);
+    }
   }
 
   .pieces {
     display: flex;
     align-items: flex-start;
     gap: var(--pas-2);
-    margin: var(--pas-3) 0 0;
-    padding: var(--pas-2) var(--pas-3);
-    border-left: 4px solid var(--couleur-signature);
+    margin: 0;
+    padding-top: var(--pas-2);
+    border-top: 1px solid var(--couleur-trait);
     font-size: var(--t-petit);
+    line-height: 1.45;
   }
 
   .pieces :global(.icone) {
     flex: none;
-    width: 1.35rem;
-    height: 1.35rem;
+    width: 1.5rem;
+    height: 1.5rem;
     color: var(--couleur-signature);
   }
 </style>

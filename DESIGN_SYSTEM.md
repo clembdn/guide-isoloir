@@ -390,8 +390,12 @@ prennent la colonne entière (52 rem). Sur téléphone, le sommaire se replie en
 Chaque titre de section porte un trait dans la **teinte de rubrique de l'article**, la même que
 sa carte d'accueil (`teinteArticle`, `src/lib/comprendre.ts`).
 
-La piste est liée au défilement en CSS ; la section en cours est marquée par un script de
-442 octets (IntersectionObserver, aucun écouteur de défilement, aucune requête). **Sans script, le
+La piste est liée au défilement en CSS ; la section en cours est marquée par un court script
+(écouteur de défilement passif, un calcul par image, aucune requête). La ligne de lecture est au
+tiers de l'écran, puis **glisse jusqu'au bas de la fenêtre en fin de page** : sans cela, le dernier
+titre (« Sources ») n'était jamais marqué, alors que la piste arrivait à 100 %. L'IntersectionObserver
+d'origine a été retiré le 24 septembre 2026 : il ne voyait pas les sauts (touche Fin, clic dans le
+sommaire). `tests/e2e/sommaire.spec.ts` garde les deux cas. **Sans script, le
 sommaire reste une liste de liens d'ancre** : contenu, ordre, titres, ancres et balisages
 `Article`/`BreadcrumbList` sont inchangés pour les moteurs et les assistants.
 
@@ -399,20 +403,31 @@ sommaire reste une liste de liens d'ancre** : contenu, ordre, titres, ancres et 
 `src/components/schemas/` à l'endroit exact du texte qu'ils remplacent. Premier exemple :
 `ou-et-comment-voter.mdx`.
 
-- **Chaque schéma a la forme de son objet**, jamais la même carte arrondie partout. Au
-  23 septembre 2026, dans les cinq articles :
-  - _bureau de vote_ : zigzag guidé — cases reliées par des vagues fléchées, serpentin sur grand
-    écran, cases alternées sur téléphone ; cartes d'identité avec tampon « Refusée » ; frise des
-    horaires ; enveloppe et bulletin déchiré dessinés en CSS ;
-  - _inscription_ : aiguillage « déjà inscrit ? » ; trois voies en arches ; frise des anniversaires ;
+- **Le trait, pas la boîte** (24 septembre 2026, direction choisie par l'éditeur). Aucun cadre
+  coloré : ni fond pastel sous le contenu, ni bord gauche épais, ni bordure de couleur autour
+  d'un bloc, ni pilule décorative. La teinte va sur les **marques** — points, numéros, traits,
+  barres, icônes, titres courts. La structure est une **ligne** : le rail (`.rail`,
+  `.rail-noeud`, `.rail-texte` dans `base.css`), le tronc à coudes des chemins de procuration,
+  des filets de 1 px pour séparer. Un cercle pour un nœud, aucun arrondi ailleurs.
+- **375 px d'abord** : une colonne, pas d'indentation progressive, environ un écran et demi au
+  plus par schéma. Le grand écran peut déplier en horizontal, jamais l'inverse.
+- **Chaque schéma a la forme de son objet**. Au 24 septembre 2026 :
+  - _bureau de vote_ : rail à six nœuds, l'isoloir en nœud agrandi dans la couleur signature ;
+    pièces d'identité en trois groupes sous filets, tampon « Refusée » ; horaires en blocs sur un
+    axe ; enveloppe et bulletin déchiré dessinés en CSS, côte à côte ;
+  - _inscription_ : aiguillage « déjà inscrit ? » en tronc à coudes ; trois voies sous filets
+    (trois colonnes sur grand écran) ; anniversaires en frise verticale sur téléphone, horizontale
+    et à l'échelle sur grand écran ;
   - _procuration_ : trois chemins en embranchement (tronc, coudes, sans cartes) ; durées en
     barres à l'échelle ;
-  - _parrainage_ : trois conditions en grands chiffres cerclés ; fenêtre de recueil sur une frise
-    à l'échelle ;
-  - _président_ : trois cercles concentriques, en récapitulatif ;
-  - _/methodologie_ : chaîne de résolution en escalier (libellés lus dans `NIVEAUX_RESOLUTION`) ;
-    quatre grandeurs en casier à cloisons ; fréquence du premier rang en barres ; double codage en
-    Y, avec la mention « pas encore appliqué » ;
+  - _parrainage_ : trois conditions en grands chiffres typographiques, « et » posés sur les
+    filets ; fenêtre de recueil sur une frise à l'échelle ;
+  - _président_ : trois cercles concentriques en traits, centre plein, en récapitulatif ;
+  - _pour qui voter_ : quatre étapes sur le rail, chacune avec son lien ;
+  - _/methodologie_ : chaîne de résolution sur un rail à neuf nœuds (pleins, puis contour, puis
+    tireté ; libellés lus dans `NIVEAUX_RESOLUTION`) ; quatre grandeurs sous filets ; fréquence
+    du premier rang en barres sur un filet de base ; double codage en Y dessiné en traits à
+    toutes les tailles, avec la mention « pas encore appliqué » ;
   - _/a-propos_ : trois questions, trois réponses, en lignes typographiques.
 - **Essayés et écartés par l'éditeur**, pour ne pas les refaire : trois colonnes pastel
   identiques pour les chemins de procuration (« trop IA » ; le skill taste refuse les rangées de
@@ -420,6 +435,11 @@ sommaire reste une liste de liens d'ancre** : contenu, ordre, titres, ancres et 
   pour les horaires (moins lisible qu'une frise : une journée se lit de gauche à droite) ; une ligne
   droite de stations pour le bureau de vote (texte à l'air libre, pas assez de structure) ; une
   pastille devant la section en cours du sommaire (elle suivait la section, la piste suit la page).
+  Le 24 septembre 2026 (« trop IA », « illisible sur téléphone ») : l'escalier indenté de la
+  chaîne de résolution ; les cartes pastel à bord gauche épais ; les six cases bordées en zigzag
+  du bureau de vote (1 300 px de haut à 375 px) ; les arches des voies d'inscription ; les doubles
+  cercles des conditions de parrainage (800 px pour trois nombres) ; le casier à cloisons des
+  quatre grandeurs ; les disques pastel des cercles du président.
 - **Plusieurs teintes par schéma** : les cinq teintes de rubrique, autorisées ici parce que le
   contenu est pédagogique (§1.1). Jamais sur un candidat, une position ou un score.
 - **Un schéma remplace un passage, il ne le double pas**, et il ne porte **aucun fait nouveau**.

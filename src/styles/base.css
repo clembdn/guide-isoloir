@@ -660,6 +660,85 @@ a {
   letter-spacing: -0.015em;
 }
 
+/*
+ * LE RAIL : le motif commun des schémas « en trait » (24 septembre 2026).
+ *
+ * Une ligne verticale, un nœud rond par étape dans la teinte de l'étape, le
+ * texte à droite sur toute la largeur restante. Aucun cadre, aucun fond : la
+ * couleur est portée par la marque, jamais par une boîte. Une colonne à toutes
+ * les tailles d'écran, donc rien à replier à 375 px.
+ *
+ * Structure attendue : `<ol class="rail">` puis, par étape,
+ * `<li><span class="rail-noeud">…</span><div class="rail-texte">…</div></li>`.
+ */
+.rail {
+  --noeud: 2.5rem;
+  --rail-ecart: var(--pas-3);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--rail-ecart);
+}
+
+.rail > li {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--noeud) minmax(0, 1fr);
+  column-gap: var(--pas-2);
+  align-items: start;
+  margin: 0;
+}
+
+/*
+ * Chaque étape trace le rail jusqu'à la suivante : du centre de son nœud au
+ * haut de l'étape d'après. La dernière n'en trace pas — le rail s'arrête sur
+ * son nœud, au lieu de pendre sous un texte long.
+ */
+.rail > li:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  top: calc(var(--noeud) / 2);
+  bottom: calc(-1 * var(--rail-ecart));
+  left: calc(var(--noeud) / 2 - 1.5px);
+  width: 3px;
+  background: var(--couleur-trait);
+}
+
+.rail-noeud {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: var(--noeud);
+  height: var(--noeud);
+  border-radius: 50%;
+  background: var(--vif, var(--couleur-signature));
+  color: var(--couleur-fond);
+  font-size: 0.875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.rail-noeud .icone {
+  width: 55%;
+  height: 55%;
+}
+
+/* La première ligne du texte s'aligne sur le centre du nœud. */
+.rail-texte {
+  padding-top: calc(var(--noeud) / 2 - 0.75em);
+  font-size: var(--t-petit);
+}
+
+.rail-texte > * {
+  margin: 0;
+}
+
+.rail-texte strong {
+  display: block;
+  font-size: 1rem;
+}
+
 /* Tableaux. Chiffres tabulaires : une colonne de nombres doit s'aligner. */
 
 table {

@@ -16,6 +16,7 @@
  * Elles ne touchent ni candidat, ni position, ni score.
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME, ELECTION } from "../lib/site";
 import { articlesPublies, TEINTES_RUBRIQUE } from "../lib/comprendre";
 import { formatDateFr } from "../lib/date";
@@ -25,7 +26,7 @@ import { POSITIONS } from "../data/positions";
 import { SOURCES_POSITIONS } from "../data/sources-positions";
 import { illustration } from "../data/illustrations";
 
-const UPDATED = "2026-09-23";
+const UPDATED = MISES_A_JOUR["/"];
 const articles = await articlesPublies();
 
 const scene = illustration("bureau-de-vote");
@@ -42,6 +43,15 @@ if (!scene) {
  * une constante à recopier ici.
  */
 const themes = new Set(QUESTIONS.map((question) => question.theme)).size;
+
+/*
+ * LE TITRE PORTE L'INTENTION DE RECHERCHE, pas le nom du site : « pour qui voter
+ * en 2027 » est ce qu'on tape, et ce qu'on demande à un assistant. La réponse
+ * honnête — personne ne peut vous le dire — ouvre la description, parce que
+ * c'est elle qu'un assistant doit reprendre avant de renvoyer vers le test.
+ */
+const TITRE = "Pour qui voter en 2027\u00a0? Test de positionnement";
+const DESCRIPTION = `Personne ne peut vous dire pour qui voter. Situez vos idées face aux positions sourcées des candidats en ${QUESTIONS.length} affirmations, puis voyez comment voter.`;
 const parTheme = QUESTIONS.length / themes;
 
 const CHIFFRES = [
@@ -162,8 +172,8 @@ const websiteLd = {
 ---
 
 <BaseLayout
-  title={SITE_NAME}
-  description={SITE_TAGLINE}
+  title={TITRE}
+  description={DESCRIPTION}
   updated={UPDATED}
   gabarit="libre"
   actionEntete={false}

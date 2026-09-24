@@ -13,6 +13,7 @@ import { SITE_URL } from "../lib/site";
 import { articlesPublies } from "../lib/comprendre";
 import { DONNEES_MISES_A_JOUR, fiches, pagesThemes } from "../lib/fiches";
 import { MEDIAS_RELEVES_LE } from "../data/medias";
+import { MISES_A_JOUR } from "../lib/mises-a-jour";
 
 type SitemapEntry = {
   path: string;
@@ -20,7 +21,8 @@ type SitemapEntry = {
 };
 
 /**
- * Pages fixes indexables, avec la date de leur constante `UPDATED`.
+ * Pages fixes indexables. Leur date vient de `MISES_A_JOUR`, la constante que
+ * chaque page affiche elle-même : elle ne peut plus différer de la page.
  *
  *   - `/resultat` est exclu pour toujours (noindex, confidentialité) ;
  *   - `/test` est exclu : il porte un noindex, c'est un outil et non une page à
@@ -32,14 +34,7 @@ type SitemapEntry = {
  * seraient fausses le jour où une position est ajoutée.
  */
 const PAGES_FIXES: readonly SitemapEntry[] = [
-  { path: "/", lastmod: "2026-09-23" },
-  { path: "/comprendre", lastmod: "2026-09-14" },
-  { path: "/a-propos", lastmod: "2026-09-14" },
-  { path: "/methodologie", lastmod: "2026-09-21" },
-  { path: "/charte-editoriale", lastmod: "2026-09-14" },
-  { path: "/corrections", lastmod: "2026-09-14" },
-  { path: "/financement", lastmod: "2026-09-14" },
-  { path: "/mentions-legales", lastmod: "2026-09-14" },
+  ...Object.entries(MISES_A_JOUR).map(([path, lastmod]) => ({ path, lastmod })),
   { path: "/credits-images", lastmod: MEDIAS_RELEVES_LE },
 ];
 

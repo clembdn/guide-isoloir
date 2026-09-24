@@ -1,0 +1,60 @@
+---
+titre: "Pour qui voter en 2027 ?"
+description: "Personne ne peut vous dire pour qui voter, ni un site ni un assistant. Voici comment vous situer vous-même avant le premier tour, en quatre étapes."
+question: "Pour qui voter en 2027 ? Personne ne peut répondre à votre place. Vous pouvez en revanche comparer vos idées aux positions des candidats, sources à l'appui."
+publieLe: "2026-09-24"
+misAJourLe: "2026-09-24"
+relecture: verifie
+verifiePar: "Clément Boudon"
+verifieLe: "2026-09-24"
+ordre: 0
+voirAussi:
+  - ce-qu-un-president-decide-seul
+  - s-inscrire-sur-les-listes-electorales
+  - ou-et-comment-voter
+sources:
+  - titre: "Comment voter à la présidentielle 2027 ?"
+    url: "https://www.info.gouv.fr/actualite/comment-voter-a-la-presidentielle-2027"
+    editeur: "Gouvernement"
+    consulteLe: "2026-09-18"
+---
+
+import EtapesChoisir from "../../components/schemas/EtapesChoisir.astro";
+import { ELECTION } from "../../lib/site";
+import { formatDateFr } from "../../lib/date";
+
+Le premier tour de l'élection présidentielle a lieu le {formatDateFr(ELECTION.round1)}, le
+second le {formatDateFr(ELECTION.round2)}. Si vous votez pour la première fois, la question
+vient vite : pour qui ?
+
+## Personne ne peut vous le dire
+
+Ni ce site, ni un comparateur, ni un assistant conversationnel. Un vote tient à ce qui
+compte pour vous : vos priorités, la confiance que vous accordez à une personne, ce que
+vous attendez d'un second tour. Aucun calcul ne connaît ces choses-là.
+
+Un outil peut en revanche vous montrer de quels candidats vos idées sont proches, sur
+des positions écrites et sourcées. C'est un point de départ, pas une réponse.
+
+## Quatre étapes pour choisir
+
+<EtapesChoisir />
+
+## Ce que le test fait, et ce qu'il ne fait pas
+
+Le test compare vos réponses aux positions des candidats, affirmation par affirmation,
+puis thème par thème. Vos réponses et vos résultats ne sont jamais envoyés, enregistrés
+ou associés à un identifiant. Le calcul s'effectue exclusivement dans votre navigateur.
+
+Il ne vous dit pas pour qui voter. Un classement mesure une distance entre des réponses
+et des positions écrites, rien de plus. Un candidat trop peu documenté n'est pas classé
+du tout, et il est nommé à part. La [méthodologie](/methodologie) détaille le calcul et
+ses limites.
+
+## Avant le premier tour
+
+Pour voter, il faut être inscrit sur les listes électorales. Beaucoup de personnes le
+sont sans le savoir : l'article sur [l'inscription](/comprendre/s-inscrire-sur-les-listes-electorales)
+dit comment le vérifier, et jusqu'à quand s'inscrire. Le jour du scrutin, l'article
+[où et comment voter](/comprendre/ou-et-comment-voter) décrit le passage au bureau de
+vote. Si vous êtes absent, vous pouvez [donner procuration](/comprendre/donner-procuration).

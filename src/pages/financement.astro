@@ -1,11 +1,12 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import Signature from "../components/Signature.astro";
 import { formatDateFr } from "../lib/date";
 import { CONTACT_EMAIL, ELECTION } from "../lib/site";
 
-const UPDATED = "2026-09-14";
+const UPDATED = MISES_A_JOUR["/financement"];
 
 /** Fin de l'interdiction publicitaire que le site s'impose : après le second tour. */
 const FIN_INTERDICTION_PUB = ELECTION.round2;

@@ -89,10 +89,20 @@ const {
    * SECTION EN COURS, DANS LE SOMMAIRE.
    *
    * Amélioration progressive : sans ce script, le sommaire reste une liste de
-   * liens qui fonctionne. Aucun écouteur de défilement : un IntersectionObserver
-   * signale qu'un titre a franchi le haut de la fenêtre, et l'on retient le
-   * dernier titre passé au-dessus d'une ligne placée au tiers de l'écran.
-   * Aucune requête, aucune donnée : le script ne lit que la page.
+   * liens qui fonctionne. On retient le dernier titre passé au-dessus d'une
+   * ligne de lecture placée au tiers de l'écran. Aucune requête, aucune donnée :
+   * le script ne lit que la page.
+   *
+   * LA LIGNE DESCEND EN FIN DE PAGE. Le dernier titre (« Sources », le plus
+   * souvent) ne remonte jamais jusqu'au tiers de l'écran : la page s'arrête
+   * avant. Sur les deux derniers tiers d'écran de défilement, la ligne glisse
+   * donc jusqu'au bas de la fenêtre ; en bas de page, tout titre visible est
+   * lu, et la dernière section est marquée quand la piste est pleine.
+   *
+   * UN ÉCOUTEUR DE DÉFILEMENT, PASSIF ET REGROUPÉ PAR IMAGE. Un
+   * IntersectionObserver ne voyait pas les sauts — touche Fin, barre glissée,
+   * clic dans le sommaire — parce qu'aucun titre ne changeait d'état pendant le
+   * saut : le marquage restait figé sur une section quittée depuis longtemps.
    */
   const liens = [...document.querySelectorAll<HTMLAnchorElement>("[data-sommaire] a")];
   const titres = [...new Set(liens.map((lien) => decodeURIComponent(lien.hash.slice(1))))]
@@ -100,7 +110,9 @@ const {
     .filter((titre): titre is HTMLElement => titre !== null);
 
   function marquer() {
-    const ligne = window.innerHeight / 3;
+    const hauteur = window.innerHeight;
+    const restant = document.documentElement.scrollHeight - window.scrollY - hauteur;
+    const ligne = hauteur / 3 + Math.max(0, (hauteur * 2) / 3 - restant);
     let courant: HTMLElement | undefined = titres[0];
     for (const titre of titres) {
       if (titre.getBoundingClientRect().top <= ligne) courant = titre;
@@ -114,12 +126,18 @@ const {
     }
   }
 
-  if (titres.length > 0 && "IntersectionObserver" in window) {
-    const observateur = new IntersectionObserver(marquer, {
-      rootMargin: "0px 0px -66% 0px",
-      threshold: [0, 1],
-    });
-    for (const titre of titres) observateur.observe(titre);
+  if (titres.length > 0) {
+    let attente = false;
+    const planifier = () => {
+      if (attente) return;
+      attente = true;
+      requestAnimationFrame(() => {
+        attente = false;
+        marquer();
+      });
+    };
+    window.addEventListener("scroll", planifier, { passive: true });
+    window.addEventListener("resize", planifier, { passive: true });
     marquer();
   }
 </script>

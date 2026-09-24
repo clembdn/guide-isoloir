@@ -5,8 +5,18 @@
  * Trois périodes, de longueur proportionnelle au nombre de jours : 18 ans entre
  * le 13 mars et le 17 avril 2027 (36 jours), les deux tours ; entre le 18 avril
  * et le 1er mai (14 jours), le second seulement ; à partir du 2 mai, pas cette
- * élection (sa largeur ne mesure rien : elle n'a pas de fin). Au-dessus, les trois repères : date limite d'inscription, premier et
- * second tour.
+ * élection (sa largeur ne mesure rien : elle n'a pas de fin). Les trois
+ * repères — date limite d'inscription, premier et second tour — bornent les
+ * périodes.
+ *
+ * UNE SEULE LISTE, DANS L'ORDRE DU TEMPS : repère, période, repère, période…
+ * TÉLÉPHONE : une frise verticale, les repères en points sur le rail, les
+ * périodes en segments épais de leur teinte, le texte à droite. À 375 px, une
+ * frise horizontale donnait 70 px à la seconde période : illisible. GRAND
+ * ÉCRAN : frise horizontale à l'échelle, repères au-dessus, périodes dessous.
+ *
+ * Les cartes pastel à bord gauche épais qui portaient les périodes ont été
+ * écartées le 24 septembre 2026 (« trop IA »).
  *
  * Contenu repris de l'article vérifié, sans ajout. Les largeurs sont fixes
  * (36 / 14 / 12 fractions) : aucun calcul, aucun style en ligne.
@@ -15,80 +25,97 @@
 
 <figure class="schema">
   <figcaption class="schema-titre">Vous aurez 18&nbsp;ans pendant la campagne&nbsp;?</figcaption>
-  <div class="frise">
-    <ol class="reperes">
-      <li class="repere repere--limite">
-        <strong>12&nbsp;mars</strong>
-        <span>date limite d'inscription</span>
-      </li>
-      <li class="repere repere--t1">
-        <strong>18&nbsp;avril</strong>
-        <span>premier tour</span>
-      </li>
-      <li class="repere repere--t2">
-        <strong>2&nbsp;mai</strong>
-        <span>second tour</span>
-      </li>
-    </ol>
-
-    <ol class="periodes">
-      <li class="periode t-sarcelle">
-        <span class="periode-dates">18 ans du 13&nbsp;mars au 17&nbsp;avril 2027</span>
-        <strong>Vous votez aux deux tours</strong>
-      </li>
-      <li class="periode t-indigo">
-        <span class="periode-dates">du 18&nbsp;avril au 1<sup>er</sup>&nbsp;mai</span>
-        <strong>Au second tour seulement</strong>
-      </li>
-      <li class="periode periode--hors">
-        <span class="periode-dates">à partir du 2&nbsp;mai</span>
-        <strong>Pas à cette élection</strong>
-      </li>
-    </ol>
-  </div>
+  <ol class="frise">
+    <li class="repere repere--1">
+      <strong>12&nbsp;mars</strong>
+      <span>date limite d'inscription</span>
+    </li>
+    <li class="periode periode--1 t-sarcelle">
+      <span class="periode-dates">18 ans du 13&nbsp;mars au 17&nbsp;avril 2027</span>
+      <strong>Vous votez aux deux tours</strong>
+    </li>
+    <li class="repere repere--2">
+      <strong>18&nbsp;avril</strong>
+      <span>premier tour</span>
+    </li>
+    <li class="periode periode--2 t-indigo">
+      <span class="periode-dates">du 18&nbsp;avril au 1<sup>er</sup>&nbsp;mai</span>
+      <strong>Au second tour seulement</strong>
+    </li>
+    <li class="repere repere--3">
+      <strong>2&nbsp;mai</strong>
+      <span>second tour</span>
+    </li>
+    <li class="periode periode--3 periode--hors">
+      <span class="periode-dates">à partir du 2&nbsp;mai</span>
+      <strong>Pas à cette élection</strong>
+    </li>
+  </ol>
 </figure>
 
 <style>
-  /*
-   * GRAND ÉCRAN : une frise horizontale, périodes proportionnelles à leur durée,
-   * repères posés sur leurs bords. TÉLÉPHONE : les périodes s'empilent, chacune
-   * avec ses dates, et les repères deviennent une ligne de légende.
-   */
-  .reperes {
+  .frise {
+    --rail: 0.5rem;
     list-style: none;
-    margin: 0 0 var(--pas-2);
+    margin: 0;
     padding: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--pas-1) var(--pas-3);
-    font-size: 0.8125rem;
+    display: grid;
+    max-width: 36rem;
   }
 
-  .repere {
+  .frise li {
+    position: relative;
     display: grid;
     margin: 0;
+    padding-left: 2rem;
+  }
+
+  /* ─── Téléphone : frise verticale ─────────────────────────────────────── */
+
+  .repere {
+    font-size: var(--t-petit);
+    line-height: 1.35;
   }
 
   .repere span {
     color: var(--couleur-encre-faible);
   }
 
-  .periodes {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 4px;
+  /* Le repère : un point sur le rail. */
+  .repere::before {
+    content: "";
+    position: absolute;
+    top: 0.2rem;
+    left: calc(var(--rail) / 2 + 0.5rem - 8px);
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--couleur-encre);
   }
 
   .periode {
-    display: grid;
     gap: 2px;
-    margin: 0;
-    padding: var(--pas-2) var(--pas-3);
-    border-radius: 12px;
-    background: var(--pastel);
-    border-left: 6px solid var(--vif);
+    padding-block: var(--pas-2);
+  }
+
+  /* La période : un segment épais du rail, dans sa teinte. */
+  .periode::before {
+    content: "";
+    position: absolute;
+    top: 4px;
+    bottom: 4px;
+    left: 0.5rem;
+    width: var(--rail);
+    border-radius: 2px;
+    background: var(--vif);
+  }
+
+  .periode--hors::before {
+    width: 0;
+    left: calc(0.5rem + var(--rail) / 2 - 1.5px);
+    border-radius: 0;
+    background: none;
+    border-left: 3px dashed var(--couleur-trait);
   }
 
   .periode-dates {
@@ -96,11 +123,15 @@
     color: var(--couleur-encre-faible);
   }
 
-  .periode--hors {
-    background: transparent;
-    border: 2px dashed var(--couleur-trait);
-    border-left-width: 6px;
+  .periode strong {
+    color: var(--vif, var(--couleur-encre));
   }
+
+  .periode--hors strong {
+    color: var(--couleur-encre-faible);
+  }
+
+  /* ─── Grand écran : frise horizontale, à l'échelle ─────────────────────── */
 
   @media (min-width: 48rem) {
     .frise {
@@ -108,48 +139,62 @@
        * 36 et 14 jours, à l'échelle. La troisième période n'a pas de fin : sa
        * largeur n'est pas une durée, elle laisse seulement la place au texte.
        */
-      --colonnes: 36fr 14fr 12fr;
+      grid-template-columns: 36fr 14fr 12fr;
+      max-width: none;
     }
 
-    .reperes {
-      display: grid;
-      grid-template-columns: var(--colonnes);
-      gap: 0;
+    .frise li {
+      padding-left: 0;
     }
 
-    /* Chaque repère se pose sur le BORD GAUCHE de la période qu'il ouvre ou ferme. */
+    .repere--1,
+    .periode--1 {
+      grid-column: 1;
+    }
+
+    .repere--2,
+    .periode--2 {
+      grid-column: 2;
+    }
+
+    .repere--3,
+    .periode--3 {
+      grid-column: 3;
+    }
+
+    /* Chaque repère se pose sur le BORD GAUCHE de la période qu'il ouvre. */
     .repere {
-      padding-left: var(--pas-1);
+      grid-row: 1;
+      padding: 0 var(--pas-1) var(--pas-2);
       border-left: 3px solid var(--couleur-encre);
     }
 
-    .periodes {
-      grid-template-columns: var(--colonnes);
-      gap: 0;
+    .repere::before {
+      display: none;
     }
 
     .periode {
-      min-height: 6rem;
-      align-content: end;
-      border-radius: 0;
-      border-left: 3px solid var(--couleur-fond);
+      grid-row: 2;
+      padding: calc(var(--rail) * 2 + var(--pas-2)) var(--pas-2) 0 var(--pas-1);
     }
 
-    .periode:first-child {
-      border-radius: 14px 0 0 14px;
+    .periode::before {
+      top: 0;
+      bottom: auto;
+      left: 0;
+      right: 3px;
+      width: auto;
+      height: calc(var(--rail) * 2);
     }
 
-    .periode:last-child {
-      border-radius: 0 14px 14px 0;
-    }
-
-    .periode.t-sarcelle,
-    .periode.t-indigo {
-      border-top: 6px solid var(--vif);
-    }
-
-    .periode--hors {
-      border: 2px dashed var(--couleur-trait);
+    .periode--hors::before {
+      left: 0;
+      right: 0;
+      width: auto;
+      height: 0;
+      top: calc(var(--rail) - 1.5px);
+      border-left: 0;
+      border-top: 3px dashed var(--couleur-trait);
     }
   }
 </style>

@@ -1,5 +1,6 @@
 ---
 import PageLecture from "../layouts/PageLecture.astro";
+import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import Signature from "../components/Signature.astro";
 import ListeIcones from "../components/ListeIcones.astro";
@@ -10,7 +11,7 @@ import DoubleCodage from "../components/schemas/DoubleCodage.astro";
 import { CONTACT_EMAIL } from "../lib/site";
 import { SEUIL_PUBLICATION } from "../lib/seuils";
 
-const UPDATED = "2026-09-21";
+const UPDATED = MISES_A_JOUR["/methodologie"];
 
 /*
  * Lu depuis la constante, jamais recopié à la main : un seuil qui bouge dans le

@@ -1,0 +1,83 @@
+---
+/*
+ * Schéma : quatre étapes pour choisir soi-même, sur le rail commun.
+ *
+ * C'est le plan de l'article « Pour qui voter en 2027 ? » : chaque étape
+ * renvoie vers la page du site qui la traite. Aucun fait, aucun candidat : le
+ * schéma oriente, il ne conclut rien.
+ *
+ * Le nombre d'affirmations est lu dans les données, jamais écrit à la main.
+ */
+import Icone from "../Icone.astro";
+import { QUESTIONS } from "../../data/questions";
+
+const ETAPES = [
+  {
+    teinte: "t-violet",
+    icone: "bank",
+    titre: "Comprendre ce qu'un président décide",
+    texte: "Seul, avec un gouvernement, ou pas du tout.",
+    lien: { href: "/comprendre/ce-qu-un-president-decide-seul", texte: "Lire l'article" },
+  },
+  {
+    teinte: "t-indigo",
+    icone: "compass",
+    titre: "Situer vos idées",
+    texte: `${QUESTIONS.length} affirmations, une par écran. Vos réponses restent dans votre navigateur.`,
+    lien: { href: "/test", texte: "Faire le test" },
+  },
+  {
+    teinte: "t-sarcelle",
+    icone: "magnifying-glass",
+    titre: "Vérifier chaque position",
+    texte: "Chaque position affiche sa source, sa date et la citation qui la fonde.",
+    lien: { href: "/candidats", texte: "Voir les candidats" },
+  },
+  {
+    teinte: "t-prune",
+    icone: "check-square",
+    titre: "Savoir comment voter",
+    texte: "Inscription, bureau de vote, procuration.",
+    lien: { href: "/comprendre", texte: "Voir les réponses courtes" },
+  },
+] as const;
+---
+
+<figure class="schema">
+  <figcaption class="schema-titre">Quatre étapes, et c'est vous qui concluez</figcaption>
+  <ol class="rail etapes">
+    {
+      ETAPES.map((etape) => (
+        <li class={etape.teinte}>
+          <span class="rail-noeud">
+            <Icone nom={etape.icone} />
+          </span>
+          <div class="rail-texte">
+            <strong>{etape.titre}</strong>
+            <span>{etape.texte}</span>
+            <a href={etape.lien.href}>{etape.lien.texte}</a>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+</figure>
+
+<style>
+  .etapes {
+    --noeud: 2.75rem;
+    max-width: 36rem;
+  }
+
+  .rail-texte > span {
+    display: block;
+    margin-top: 2px;
+    line-height: 1.45;
+  }
+
+  .rail-texte a {
+    display: inline-block;
+    margin-top: 4px;
+    font-weight: 700;
+  }
+</style>

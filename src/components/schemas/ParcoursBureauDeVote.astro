@@ -1,22 +1,20 @@
 ---
 /*
- * Schéma : le parcours dans un bureau de vote, en zigzag guidé.
+ * Schéma : le parcours dans un bureau de vote, sur le rail commun des schémas.
  *
- * Six cases reliées par des vagues fléchées, dans la teinte de l'étape d'où
- * elles partent. Sur grand écran, le chemin serpente : de gauche à droite sur la
- * première rangée, il descend, puis revient de droite à gauche. Sur téléphone,
- * les cases alternent d'un bord à l'autre, reliées par des vagues verticales.
- * L'isoloir est l'étape mise en avant, sur l'aplat, avec le signe du site :
- * c'est celle qu'on croit facultative, et l'article insiste pour dire qu'elle
- * ne l'est pas.
+ * Six étapes, un nœud par étape avec son icône, dans la teinte de l'étape.
+ * L'isoloir est mis en avant par un nœud plus grand, dans la couleur
+ * signature, avec le signe du site : c'est l'étape qu'on croit facultative, et
+ * l'article insiste pour dire qu'elle ne l'est pas.
  *
- * Une ligne droite de stations a été essayée le 23 septembre 2026 ; l'éditeur
- * l'a jugée trop peu structurée, le texte flottant à l'air libre.
+ * Écartés : une ligne droite de stations sans structure (23 septembre 2026) ;
+ * six cases bordées en zigzag reliées par des vagues (24 septembre 2026) —
+ * 1 300 px de haut à 375 px, et des cartes à bord coloré jugées « trop IA ».
  *
  * C'EST LA LISTE DE L'ARTICLE, PAS UN AJOUT : chaque étape reprend ou resserre
  * ce que l'article vérifié disait déjà, sans fait nouveau. L'ordre du HTML est
- * l'ordre des étapes, quelle que soit la place à l'écran ; la liste est
- * annoncée comme telle, les vagues et les icônes sont décoratives.
+ * l'ordre des étapes ; la liste est annoncée comme telle, les numéros et les
+ * icônes sont décoratifs.
  */
 import Icone from "../Icone.astro";
 import signeIsoloir from "../../marque/isoloir.svg?raw";
@@ -79,20 +77,22 @@ const isoloir = signeIsoloir
 
 <figure class="schema">
   <figcaption class="schema-titre">Dans le bureau de vote, en six étapes</figcaption>
-  <ol class="chemin">
+  <ol class="rail parcours">
     {
       ETAPES.map((etape, index) => (
-        <li class:list={["etape", etape.teinte, { "etape--cle": etape.cle }]}>
-          <span class="etape-tete">
-            <span class="etape-numero" aria-hidden="true">
-              {index + 1}
-            </span>
-            <span class="etape-icone">
-              {etape.icone ? <Icone nom={etape.icone} /> : <Fragment set:html={isoloir} />}
-            </span>
+        <li class:list={[etape.teinte, { "etape--cle": etape.cle }]}>
+          <span class="rail-noeud">
+            {etape.icone ? <Icone nom={etape.icone} /> : <Fragment set:html={isoloir} />}
           </span>
-          <strong class="etape-titre">{etape.titre}</strong>
-          <span class="etape-texte">{etape.texte}</span>
+          <div class="rail-texte">
+            <strong>
+              <span class="numero" aria-hidden="true">
+                {index + 1}.
+              </span>{" "}
+              {etape.titre}
+            </strong>
+            <span>{etape.texte}</span>
+          </div>
         </li>
       ))
     }
@@ -100,207 +100,38 @@ const isoloir = signeIsoloir
 </figure>
 
 <style>
-  /*
-   * LES VAGUES. Deux SVG — une vague horizontale, une verticale, chacune
-   * terminée par une flèche — employés comme MASQUES : la couleur vient du
-   * fond de l'élément, donc de la teinte de l'étape, dans les deux thèmes. Une
-   * URL `data:` est autorisée par la CSP (`img-src data:`) ; ce n'est pas un
-   * style en ligne.
-   */
-  .chemin {
-    --vague-h: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 60 20'%3E%3Cpath d='M2 10 C 8 3, 14 3, 18 10 S 28 17, 32 10 S 42 3, 46 10' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M47 4 L 56 10 L 47 16' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --vague-v: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 60'%3E%3Cpath d='M10 2 C 3 8, 3 14, 10 18 S 17 28, 10 32 S 3 42, 10 46' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M4 47 L 10 56 L 16 47' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    --ecart: 3.25rem;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--ecart);
+  .parcours {
+    --noeud: 2.75rem;
+    max-width: 36rem;
   }
 
-  /* ─── Une case par étape ──────────────────────────────────────────────── */
-
-  .etape {
-    position: relative;
-    display: grid;
-    gap: 4px;
-    align-content: start;
-    margin: 0;
-    padding: var(--pas-3);
-    border: 2px solid var(--vif);
-    border-radius: var(--rayon-carte);
-    background: var(--couleur-surface);
-  }
-
-  .etape-tete {
-    display: flex;
-    align-items: center;
-    gap: var(--pas-2);
-    margin-bottom: var(--pas-1);
-  }
-
-  .etape-numero {
-    display: grid;
-    place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    border-radius: 50%;
-    background: var(--vif);
-    color: var(--couleur-fond);
-    font-size: 0.875rem;
-    font-weight: 700;
-  }
-
-  .etape-icone {
-    display: grid;
-    place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: 12px;
-    background: var(--pastel);
+  .numero {
     color: var(--vif);
+    font-variant-numeric: tabular-nums;
   }
 
-  .etape-icone :global(.icone) {
-    width: 1.4rem;
-    height: 1.4rem;
-  }
-
-  .etape-titre {
-    font-size: 1.0625rem;
-    line-height: 1.3;
-  }
-
-  .etape-texte {
-    font-size: var(--t-petit);
+  .rail-texte > span {
+    display: block;
+    margin-top: 2px;
     line-height: 1.45;
-    color: var(--couleur-encre-faible);
-  }
-
-  /* L'isoloir : la case sur l'aplat. */
-  .etape--cle {
-    border-color: var(--couleur-aplat);
-    background: var(--couleur-aplat);
-    color: var(--couleur-sur-aplat);
-    box-shadow: 0 0 0 6px var(--pastel);
-  }
-
-  .etape--cle .etape-texte {
-    color: inherit;
-  }
-
-  .etape--cle .etape-numero {
-    background: var(--couleur-sur-aplat);
-    color: var(--couleur-aplat);
-  }
-
-  .etape--cle .etape-icone {
-    background: var(--couleur-sur-aplat);
-    color: var(--couleur-aplat);
-  }
-
-  /* ─── Les vagues entre les cases ──────────────────────────────────────── */
-
-  .etape:not(:last-child)::after {
-    content: "";
-    position: absolute;
-    background: var(--vif);
-    mask-repeat: no-repeat;
-    mask-position: center;
-    mask-size: contain;
   }
 
   /*
-   * TÉLÉPHONE : un zigzag vertical. Les cases alternent d'un bord à l'autre,
-   * une vague descend de chacune vers la suivante.
+   * L'ISOLOIR : un nœud plus grand, dans la couleur signature, qui déborde du
+   * rail. Le texte reste aligné sur la même colonne que les autres étapes.
    */
-  @media (max-width: 47.99rem) {
-    .etape:nth-child(odd) {
-      margin-right: 12%;
-    }
-
-    .etape:nth-child(even) {
-      margin-left: 12%;
-    }
-
-    .etape:not(:last-child)::after {
-      top: 100%;
-      left: 50%;
-      width: 1.5rem;
-      height: var(--ecart);
-      transform: translateX(-50%);
-      mask-image: var(--vague-v);
-    }
-
-    .etape--cle:not(:last-child)::after {
-      top: calc(100% + 6px);
-      height: calc(var(--ecart) - 6px);
-    }
+  .etape--cle .rail-noeud {
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-left: calc((var(--noeud) - 3.5rem) / 2);
+    background: var(--couleur-signature);
   }
 
-  /*
-   * GRAND ÉCRAN : un serpentin. Trois cases de gauche à droite, une vague qui
-   * descend, trois cases de droite à gauche. L'ordre du HTML ne change pas :
-   * seule la place à l'écran suit le chemin.
-   */
-  @media (min-width: 48rem) {
-    .chemin {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--ecart) calc(var(--ecart) + 0.5rem);
-    }
+  .etape--cle .rail-texte {
+    padding-top: calc(1.75rem - 0.75em);
+  }
 
-    .etape:nth-child(4) {
-      grid-column: 3;
-      grid-row: 2;
-    }
-
-    .etape:nth-child(5) {
-      grid-column: 2;
-      grid-row: 2;
-    }
-
-    .etape:nth-child(6) {
-      grid-column: 1;
-      grid-row: 2;
-    }
-
-    /* Vers la droite : 1 → 2, 2 → 3. */
-    .etape:nth-child(1)::after,
-    .etape:nth-child(2)::after {
-      top: 50%;
-      left: 100%;
-      width: calc(var(--ecart) + 0.5rem);
-      height: 1.5rem;
-      transform: translateY(-50%);
-      mask-image: var(--vague-h);
-    }
-
-    /* Vers le bas : 3 → 4. */
-    .etape:nth-child(3)::after {
-      top: 100%;
-      left: 50%;
-      width: 1.5rem;
-      height: var(--ecart);
-      transform: translateX(-50%);
-      mask-image: var(--vague-v);
-    }
-
-    /* Vers la gauche : 4 → 5, 5 → 6. La vague est retournée. */
-    .etape:nth-child(4)::after,
-    .etape:nth-child(5)::after {
-      top: 50%;
-      right: 100%;
-      width: calc(var(--ecart) + 0.5rem);
-      height: 1.5rem;
-      transform: translateY(-50%) scaleX(-1);
-      mask-image: var(--vague-h);
-    }
-
-    /* La case de l'isoloir porte un halo de 6 px : la vague part au-delà. */
-    .etape--cle::after {
-      margin-right: 6px;
-    }
+  .etape--cle .rail-texte strong {
+    font-size: 1.1875rem;
   }
 </style>

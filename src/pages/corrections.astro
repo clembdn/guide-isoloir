@@ -10,11 +10,12 @@
  * dur dans cette page.
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import Signature from "../components/Signature.astro";
 import { formatDateFr } from "../lib/date";
 
-const UPDATED = "2026-09-14";
+const UPDATED = MISES_A_JOUR["/corrections"];
 
 type Correction = {
   /** Date ISO `AAAA-MM-JJ` de publication de la correction. */

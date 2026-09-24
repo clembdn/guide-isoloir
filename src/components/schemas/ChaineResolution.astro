@@ -1,12 +1,17 @@
 ---
 /*
- * Schéma : la chaîne de résolution des sources, en escalier descendant.
+ * Schéma : la chaîne de résolution des sources, sur un rail vertical.
  *
- * Neuf marches, du maillon le plus fort au plus faible ; la première
- * disponible l'emporte. Chaque marche descend d'un cran vers la droite : la
- * forme dit l'ordre avant qu'on lise les mots. Les marches sont groupées par
- * ce qu'elles rapportent — ce que le candidat a dit ou fait, ce que dit son
- * camp, une déduction, rien.
+ * Neuf maillons, du plus fort au plus faible ; le premier disponible
+ * l'emporte. Ils sont groupés par ce qu'ils rapportent — ce que le candidat a
+ * dit ou fait, ce que dit son camp, une déduction, rien — et la force décroît
+ * dans la forme même : nœuds pleins et rail continu tant que la source vient
+ * de l'acteur, nœud en contour et rail tireté pour la déduction, nœud tireté
+ * vide pour « position inconnue ».
+ *
+ * L'escalier indenté qui l'a précédé a été écarté le 24 septembre 2026 : à
+ * 375 px, le décalage mangeait la largeur et cassait les libellés, et ses
+ * cartes pastel à bord coloré faisaient « généré ».
  *
  * LES LIBELLÉS VIENNENT DU MOTEUR (`NIVEAUX_RESOLUTION`), pas d'une copie : ce
  * sont les mêmes mots que la ligne « Origine » sous chaque position des fiches
@@ -49,136 +54,123 @@ const marches = NIVEAUX_RESOLUTION.map((niveau) => {
 
 <figure class="schema">
   <figcaption class="schema-titre">La première source disponible l'emporte</figcaption>
-  <ol class="escalier">
+  <ol class="chaine">
     {
       marches.map((marche) => (
-        <li class:list={["marche", `marche--${marche.rang}`, marche.teinte]}>
+        <li class:list={["maillon", marche.teinte, { "maillon--deduit": marche.rang === 8 }]}>
           {marche.groupe && <span class="groupe">{marche.groupe}</span>}
-          <span class="palier">
-            <span class="rang">{marche.rang}</span>
-            <span class="libelle">{marche.libelle}</span>
-          </span>
+          <span class="noeud">{marche.rang}</span>
+          <span class="libelle">{marche.libelle}</span>
         </li>
       ))
     }
-    <li class="marche marche--9 marche--inconnue">
+    <li class="maillon maillon--inconnu">
       <span class="groupe">Rien</span>
-      <span class="palier">
-        <span class="rang">9</span>
-        <span class="libelle">Position inconnue</span>
-      </span>
+      <span class="noeud">9</span>
+      <span class="libelle">Position inconnue</span>
     </li>
   </ol>
 </figure>
 
 <style>
-  .escalier {
+  /*
+   * Chaque maillon trace le rail jusqu'au suivant : un trait par maillon, et
+   * non un seul pour toute la liste, pour que la partie déduite puisse passer
+   * en tireté. Le premier part du centre de son nœud, le dernier s'y arrête.
+   */
+  .chaine {
+    --noeud: 2rem;
+    --ecart: 0.625rem;
     list-style: none;
     margin: 0;
     padding: 0;
     display: grid;
-    gap: 6px;
+    gap: var(--ecart);
+    max-width: 34rem;
   }
 
-  .marche {
+  .maillon {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--noeud) minmax(0, 1fr);
+    column-gap: var(--pas-2);
+    align-items: center;
     margin: 0;
   }
 
-  /*
-   * L'ESCALIER : chaque marche décale son palier d'un cran vers la droite.
-   * Sur téléphone, le cran est plus petit, pour que la dernière reste lisible.
-   */
-  .marche--2 {
-    --cran: 1;
-  }
-  .marche--3 {
-    --cran: 2;
-  }
-  .marche--4 {
-    --cran: 3;
-  }
-  .marche--5 {
-    --cran: 4;
-  }
-  .marche--6 {
-    --cran: 5;
-  }
-  .marche--7 {
-    --cran: 6;
-  }
-  .marche--8 {
-    --cran: 7;
-  }
-  .marche--9 {
-    --cran: 8;
+  .maillon::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: calc(-1 * var(--ecart));
+    left: calc(var(--noeud) / 2 - 1.5px);
+    border-left: 3px solid var(--couleur-trait);
   }
 
-  .palier {
-    display: flex;
-    align-items: center;
-    gap: var(--pas-2);
-    margin-left: calc(var(--cran, 0) * 0.9rem);
-    padding: 0.6rem var(--pas-2);
-    border-radius: 10px;
-    background: var(--pastel);
-    border-left: 5px solid var(--vif);
+  .maillon:first-child::before {
+    top: calc(var(--noeud) / 2 + 1.25rem);
   }
 
-  @media (min-width: 48rem) {
-    .palier {
-      margin-left: calc(var(--cran, 0) * 2.25rem);
-    }
+  .maillon:last-child::before {
+    bottom: auto;
+    height: calc(1.25rem + var(--pas-2) + var(--noeud) / 2);
   }
 
-  .rang {
-    flex: none;
+  .maillon--deduit::before,
+  .maillon--inconnu::before {
+    border-left-style: dashed;
+  }
+
+  .groupe {
+    grid-column: 2;
+    margin-top: var(--pas-2);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    line-height: 1.25rem;
+    color: var(--vif);
+  }
+
+  .maillon:first-child .groupe {
+    margin-top: 0;
+  }
+
+  .noeud {
+    position: relative;
+    grid-column: 1;
     display: grid;
     place-items: center;
-    width: 1.75rem;
-    height: 1.75rem;
+    width: var(--noeud);
+    height: var(--noeud);
     border-radius: 50%;
     background: var(--vif);
     color: var(--couleur-fond);
     font-size: 0.8125rem;
     font-weight: 700;
+    font-variant-numeric: tabular-nums;
   }
 
   .libelle {
-    font-size: var(--t-petit);
+    grid-column: 2;
     font-weight: 600;
+    line-height: 1.3;
   }
 
-  .groupe {
-    display: block;
-    margin: var(--pas-2) 0 4px calc(var(--cran, 0) * 0.9rem);
-    font-size: 0.8125rem;
-    font-weight: 700;
+  /* La déduction : le nœud n'est plus qu'un contour. */
+  .maillon--deduit .noeud {
+    background: var(--couleur-fond);
+    border: 2px solid var(--vif);
     color: var(--vif);
   }
 
-  @media (min-width: 48rem) {
-    .groupe {
-      margin-left: calc(var(--cran, 0) * 2.25rem);
-    }
+  /* Rien : un nœud vide, tireté, dans la couleur des filets. */
+  .maillon--inconnu .noeud {
+    background: var(--couleur-fond);
+    border: 2px dashed var(--couleur-encre-faible);
+    color: var(--couleur-encre-faible);
   }
 
-  .marche:first-child .groupe {
-    margin-top: 0;
-  }
-
-  /* Rien : la marche est vide, tiretée. */
-  .marche--inconnue .palier {
-    background: transparent;
-    border: 2px dashed var(--couleur-trait);
-    border-left-width: 5px;
-  }
-
-  .marche--inconnue .rang {
-    background: var(--couleur-trait);
-    color: var(--couleur-encre);
-  }
-
-  .marche--inconnue .groupe {
+  .maillon--inconnu .groupe,
+  .maillon--inconnu .libelle {
     color: var(--couleur-encre-faible);
   }
 </style>

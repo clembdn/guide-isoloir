@@ -34,12 +34,10 @@
 </figure>
 
 <style>
+  /* Aucun conteneur : les barres se posent sur la page, sur un filet de base. */
   .graphique {
     display: grid;
     gap: var(--pas-3);
-    padding: var(--pas-3);
-    border-radius: var(--rayon-carte-l);
-    background: var(--pastel);
   }
 
   .ligne {
@@ -56,12 +54,11 @@
     }
   }
 
+  /* La piste est le total : un filet épais, sur lequel la barre se lit. */
   .piste {
     display: block;
-    height: 1.5rem;
-    border-radius: 6px;
-    background: var(--couleur-surface);
-    overflow: hidden;
+    height: 1.25rem;
+    border-bottom: 3px solid var(--couleur-trait);
   }
 
   .barre {

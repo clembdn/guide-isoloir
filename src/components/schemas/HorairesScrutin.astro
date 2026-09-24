@@ -56,10 +56,13 @@ function etat(heure: number): "ferme" | "ouvert" | "prolongation" {
 </figure>
 
 <style>
+  /*
+   * Aucun conteneur : les heures se posent sur un axe, à angle droit. Le fond
+   * pastel arrondi et les heures en pilules ont été écartés le 24 septembre
+   * 2026 (« trop IA »).
+   */
   .frise {
-    padding: var(--pas-3);
-    border-radius: var(--rayon-carte-l);
-    background: var(--pastel);
+    max-width: 40rem;
   }
 
   .heures,
@@ -72,14 +75,21 @@ function etat(heure: number): "ferme" | "ouvert" | "prolongation" {
   }
 
   .heures {
-    gap: 3px;
+    gap: 2px;
+    border-bottom: 3px solid var(--couleur-encre);
   }
 
+  /* Une heure fermée : un simple cran sur l'axe. */
   .heure {
-    height: 2.75rem;
+    align-self: end;
+    height: 0.75rem;
     margin: 0;
-    border-radius: 6px;
-    background: var(--couleur-surface);
+    background: var(--couleur-trait);
+  }
+
+  .heure--ouvert,
+  .heure--prolongation {
+    height: 2.75rem;
   }
 
   .heure--ouvert {
@@ -88,7 +98,7 @@ function etat(heure: number): "ferme" | "ouvert" | "prolongation" {
 
   /* Hachures : « possible », pas « certain ». Une texture qui signifie, pas un dégradé. */
   .heure--prolongation {
-    background: repeating-linear-gradient(-45deg, var(--vif) 0 3px, var(--couleur-surface) 3px 7px);
+    background: repeating-linear-gradient(-45deg, var(--vif) 0 3px, var(--couleur-fond) 3px 7px);
   }
 
   .reperes li {
@@ -128,7 +138,6 @@ function etat(heure: number): "ferme" | "ouvert" | "prolongation" {
     width: 1rem;
     height: 1rem;
     margin-top: 0.15rem;
-    border-radius: 4px;
   }
 
   .pastille--ouvert {
@@ -136,6 +145,6 @@ function etat(heure: number): "ferme" | "ouvert" | "prolongation" {
   }
 
   .pastille--prolongation {
-    background: repeating-linear-gradient(-45deg, var(--vif) 0 2px, var(--couleur-surface) 2px 5px);
+    background: repeating-linear-gradient(-45deg, var(--vif) 0 2px, var(--couleur-fond) 2px 5px);
   }
 </style>
