@@ -19,7 +19,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import { MEDIAS, MEDIAS_RELEVES_LE } from "../data/medias";
-import { ILLUSTRATIONS, ILLUSTRATIONS_RELEVEES_LE } from "../data/illustrations";
+import { ILLUSTRATIONS } from "../data/illustrations";
 import { ACTEURS } from "../data/acteurs";
 import { formatDateFr } from "../lib/date";
 import { trierParNomAlphabetique } from "../lib/modele";
@@ -108,9 +108,11 @@ const nommer = (acteurs: readonly { id: string; name: string; sortName: string }
 
   <p>
     Les photographies qui illustrent les pages ne représentent aucun candidat et aucun parti. Elles
-    montrent le déroulement matériel d'un scrutin. Une photographie qui laissait voir des affiches
-    de campagne nommant des candidats a été écartée pour cette raison, et le palais de l'Élysée n'a
-    pas été retenu pour l'accueil : ce site ne doit pas pouvoir être pris pour un site d'État.
+    montrent le déroulement matériel d'un scrutin, ou les textes et les institutions qui
+    l'encadrent. Deux ont été recadrées pour laisser hors champ un ruban et un bandeau tricolores.
+    Une photographie qui laissait voir des affiches de campagne nommant des candidats a été écartée
+    pour cette raison, et le palais de l'Élysée n'a pas été retenu pour l'accueil : ce site ne doit
+    pas pouvoir être pris pour un site d'État.
   </p>
 
   <ul class="credits">
@@ -128,7 +130,7 @@ const nommer = (acteurs: readonly { id: string; name: string; sortName: string }
           ) : (
             item.licence
           )}
-          . Licence relevée le {formatDateFr(ILLUSTRATIONS_RELEVEES_LE)}.{" "}
+          . Licence relevée le {formatDateFr(item.releveeLe)}.{" "}
           <span class="reserve-media">Image {item.retouches}.</span>
         </li>
       ))

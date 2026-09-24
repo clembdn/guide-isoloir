@@ -1,0 +1,242 @@
+---
+/*
+ * Décompte jusqu'au prochain tour, en direct.
+ *
+ * LE HTML STATIQUE DIT LA DATE, LE SCRIPT AJOUTE LE DÉCOMPTE. Un nombre de
+ * jours calculé au build serait faux dès le lendemain du déploiement, et un
+ * robot le lirait comme un fait. Les chiffres sont donc servis `hidden` :
+ * sans JavaScript, on lit « Premier tour le 18 avril 2027 », jamais un
+ * « J-206 » figé.
+ *
+ * La cible est l'OUVERTURE des bureaux en métropole, 8 h heure de Paris. Les
+ * territoires ultramarins concernés votent la veille : la phrase le dit, le
+ * décompte ne prétend pas suivre dix fuseaux.
+ *
+ * Pas d'`aria-live` : un lecteur d'écran annoncerait soixante changements par
+ * minute. Les chiffres sont `aria-hidden`, la phrase porte l'information.
+ *
+ * Le script est groupé par Astro dans un fichier servi par le site :
+ * `script-src 'self'` l'accepte, aucune exception de CSP n'est nécessaire.
+ */
+import { ELECTION } from "../lib/site";
+import { formatDateFr } from "../lib/date";
+
+const UNITES = [
+  { cle: "jours", libelle: "jours" },
+  { cle: "heures", libelle: "heures" },
+  { cle: "minutes", libelle: "min" },
+  { cle: "secondes", libelle: "s" },
+];
+
+/* Heure d'été en avril et en mai : Paris est à UTC+2 les deux dimanches. */
+const tour1 = {
+  ouverture: `${ELECTION.round1}T08:00:00+02:00`,
+  cloture: `${ELECTION.round1}T20:00:00+02:00`,
+};
+const tour2 = {
+  ouverture: `${ELECTION.round2}T08:00:00+02:00`,
+  cloture: `${ELECTION.round2}T20:00:00+02:00`,
+};
+---
+
+<section
+  class="decompte"
+  aria-labelledby="decompte-titre"
+  data-decompte
+  data-tour1-ouverture={tour1.ouverture}
+  data-tour1-cloture={tour1.cloture}
+  data-tour2-ouverture={tour2.ouverture}
+  data-tour2-cloture={tour2.cloture}
+>
+  <div class="enveloppe-large">
+    <h2 class="decompte-titre" id="decompte-titre">
+      <span data-decompte-libelle>Premier tour le {formatDateFr(ELECTION.round1)}</span>
+    </h2>
+
+    <ol class="decompte-chiffres" aria-hidden="true" hidden data-decompte-chiffres>
+      {
+        UNITES.map((unite) => (
+          <li>
+            <span class="decompte-valeur" data-unite={unite.cle}>
+              00
+            </span>
+            <span class="decompte-unite">{unite.libelle}</span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="decompte-date">
+      Premier tour le dimanche <time datetime={ELECTION.round1}
+        >{formatDateFr(ELECTION.round1)}</time
+      >, second tour le dimanche <time datetime={ELECTION.round2}
+        >{formatDateFr(ELECTION.round2)}</time
+      >. Dans les territoires ultramarins concernés, on vote la veille.
+    </p>
+  </div>
+</section>
+
+<script>
+  const racine = document.querySelector<HTMLElement>("[data-decompte]");
+  const libelle = racine?.querySelector<HTMLElement>("[data-decompte-libelle]");
+  const chiffres = racine?.querySelector<HTMLElement>("[data-decompte-chiffres]");
+
+  if (racine && libelle && chiffres) {
+    const date = (cle: string) => new Date(racine.dataset[cle] ?? "").getTime();
+    const tours = [
+      {
+        nom: "Premier tour",
+        ouverture: date("tour1Ouverture"),
+        cloture: date("tour1Cloture"),
+      },
+      {
+        nom: "Second tour",
+        ouverture: date("tour2Ouverture"),
+        cloture: date("tour2Cloture"),
+      },
+    ];
+    const cases = Object.fromEntries(
+      [...chiffres.querySelectorAll<HTMLElement>("[data-unite]")].map((el) => [
+        el.dataset.unite,
+        el,
+      ]),
+    );
+    const deux = (n: number) => String(n).padStart(2, "0");
+
+    const actualiser = () => {
+      const maintenant = Date.now();
+      const tour = tours.find((t) => maintenant < t.cloture);
+
+      if (!tour) {
+        // Après le second tour, la phrase statique suffit.
+        chiffres.hidden = true;
+        window.clearInterval(minuterie);
+        return;
+      }
+
+      if (maintenant >= tour.ouverture) {
+        libelle.textContent = `${tour.nom} : les bureaux de vote sont ouverts aujourd'hui`;
+        chiffres.hidden = true;
+        return;
+      }
+
+      const reste = Math.floor((tour.ouverture - maintenant) / 1000);
+      libelle.textContent = `${tour.nom} dans`;
+      cases.jours!.textContent = String(Math.floor(reste / 86400));
+      cases.heures!.textContent = deux(Math.floor(reste / 3600) % 24);
+      cases.minutes!.textContent = deux(Math.floor(reste / 60) % 60);
+      cases.secondes!.textContent = deux(reste % 60);
+      chiffres.hidden = false;
+    };
+
+    const minuterie = window.setInterval(actualiser, 1000);
+    actualiser();
+  }
+</script>
+
+<style>
+  .decompte {
+    padding-block: var(--pas-5);
+  }
+
+  .decompte-titre {
+    margin: 0 0 var(--pas-3);
+    font-size: var(--t-h3);
+    color: var(--couleur-encre-faible);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .decompte-chiffres {
+    list-style: none;
+    margin: 0 0 var(--pas-3);
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--pas-1);
+  }
+
+  .decompte-chiffres[hidden] {
+    display: none;
+  }
+
+  .decompte-chiffres li {
+    margin: 0;
+    display: grid;
+    gap: 0.25rem;
+    padding-block: var(--pas-2);
+    border-top: 2px solid var(--couleur-signature);
+  }
+
+  .decompte-valeur {
+    font-size: clamp(2.25rem, 1.2rem + 5vw, 5.5rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    color: var(--couleur-signature);
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  .decompte-unite {
+    font-size: var(--t-petit);
+    font-weight: 600;
+    color: var(--couleur-encre-faible);
+  }
+
+  .decompte-date {
+    margin: 0;
+    max-width: 52ch;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  @media (min-width: 48rem) {
+    .decompte-chiffres {
+      gap: var(--pas-3);
+    }
+  }
+
+  /*
+   * Les quatre blocs montent l'un après l'autre en entrant dans l'écran.
+   * Propriétés détaillées, jamais le raccourci `animation` : le minifieur le
+   * fusionne avec `animation-timeline` en une valeur que Chrome rejette.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .decompte-chiffres li {
+        animation-name: decompte-monte;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 70%;
+      }
+
+      .decompte-chiffres li:nth-child(2) {
+        animation-range: entry 8% entry 78%;
+      }
+
+      .decompte-chiffres li:nth-child(3) {
+        animation-range: entry 16% entry 86%;
+      }
+
+      .decompte-chiffres li:nth-child(4) {
+        animation-range: entry 24% entry 94%;
+      }
+
+      /*
+       * Sans opacité : un audit qui lit la page sans défiler compterait des
+       * chiffres pâles comme illisibles.
+       */
+      @keyframes decompte-monte {
+        from {
+          transform: translateY(1.5rem);
+        }
+
+        to {
+          transform: none;
+        }
+      }
+    }
+  }
+</style>

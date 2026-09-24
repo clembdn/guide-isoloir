@@ -35,6 +35,9 @@ voile sombre, refusée pour le fond noir et la longueur sur téléphone. « Clai
 | Bas du bouton principal à 375 × 667 | 682 px    | sous la flottaison |
 | Cibles tactiles sous 44 px          | 11        | 0                  |
 
+Le 24 septembre 2026, avant la refonte de l'accueil, la hauteur était remontée à 6 358 px. Elle
+est redescendue à ~5 300 px, avec six cartes illustrées au lieu de cinq.
+
 ---
 
 ## 1. Les trois règles
@@ -274,20 +277,87 @@ résultat :
   `--couleur-aplat` s'écartent en 1 s, `--va-et-vient`, après 250 ms. L'image est peinte dessous
   dès le départ : **mesuré, le LCP reste la photo à 60 ms, CLS 0**. Par défaut les pans sont hors
   champ ; seule l'animation les amène d'abord au centre.
-- **La démo du test**, section « Comment ça marche » : une pile de cartes où six vraies
-  affirmations, une par thème, défilent au-dessus d'une échelle fixe (cycle de 21 s, fenêtres de
-  3,5 s, entrée par le bas en 0,5 s), avec une minuterie linéaire sous le thème en cours. **Aucune
-  réponse n'est cochée** : un site neutre qui répondrait dans sa propre vitrine prendrait position.
-  Pause au survol. Tout le texte est dans le HTML.
+- **La démo du test**, section « Comment ça marche » (refaite le 24 septembre 2026) : une pile de
+  six cartes complètes — thème, affirmation, échelle réduite —, une par thème. **C'est la carte
+  entière qui glisse** : celle de devant part vers la gauche (`translateX(-30%) rotate(-5deg)`,
+  fondu) et la suivante monte de la pile. Cycle de 21 s, fenêtres de 3,5 s, délais **négatifs**
+  pour que chaque carte soit à sa place dès le chargement. L'échelle est réduite à cinq pastilles
+  et deux bornes écrites (démo passée de 681 à ~380 px à 375 px). **Aucune réponse n'est
+  cochée** : un site neutre qui répondrait dans sa propre vitrine prendrait position. Pause au
+  survol. Tout le texte est dans le HTML. Ni liste des thèmes ni légende visibles sous la carte
+  (retirées le 25 septembre 2026) : le thème en cours est déjà écrit sur la carte, et la légende
+  reste pour les lecteurs d'écran.
+
+  **Les cartes qui portent du texte ne changent jamais d'échelle en boucle.** Une carte qui
+  grandissait de 0,9 à 1 dans une animation sans fin sortait floue : Safari, et Chrome sur
+  certains processeurs graphiques, la dessinent à sa taille de départ puis l'étirent. La
+  profondeur de la pile est portée par deux cartes VIDES en pseudo-éléments, qui n'ont rien à
+  rendre net. Réduire, en revanche, est sans risque : c'est ce que fait la chute dans l'urne.
+
+- **La scène de l'urne** (`src/lib/demo-urne.ts`, 24 septembre 2026) : quand la section arrive à
+  l'écran, la scène s'épingle (`sticky`, piste de 110 svh), la démo s'arrête sur la carte qu'on
+  lisait, et **c'est le défilement qui la fait tomber** dans une urne transparente dessinée en
+  SVG aux jetons du site : élan, réduction à la largeur de la fente en pivotant, redressement,
+  enfoncement ; la question suivante monte pendant ce temps, l'urne tressaille, une légende
+  apparaît (« Dans le vrai test, c'est vous qui répondez »). La chute est une animation CSS liée
+  à une chronologie nommée (`--scene`) ; le script (2 ko compressé avec le carrousel) ne fait
+  que ce que le CSS ne sait pas : décider si la scène a lieu, figer la boucle en sachant quelle
+  carte est devant, et mesurer la distance jusqu'à la fente. **Pas de scène** sans JavaScript,
+  sans `view-timeline`, avec « réduire les animations », ou si la scène ne tient pas dans la
+  hauteur de l'écran : la démo tourne seule. Quand on remonte, la boucle repart, resynchronisée.
+- **Le décompte jusqu'au premier tour** (`src/components/CompteARebours.astro`, 24 septembre
+  2026), à la place des quatre chiffres clés jugés inutiles. Jours, heures, minutes, secondes
+  jusqu'à l'ouverture des bureaux en métropole, 8 h. Le HTML statique dit la date ; les chiffres
+  sont servis `hidden` et le script (moins de 1 ko) les révèle : sans JavaScript, jamais un
+  « J-206 » figé au jour du build. Aucune animation sur les chiffres, pas d'`aria-live`.
 
 Refusés, et pourquoi : les compteurs qui défilent (un chiffre en `content:` est invisible aux
-moteurs et aux assistants, et un compteur n'explique rien) ; le fondu d'entrée du titre (il
+moteurs et aux assistants, et un compteur n'explique rien) — le décompte n'en est pas un : ses
+chiffres sont du texte, et la date qu'il suit est écrite en clair ; le fondu d'entrée du titre (il
 retarderait le LCP).
+
+### Les effets liés au défilement de l'accueil (24 septembre 2026)
+
+Demandés par l'éditeur « façon Apple ». Tous en CSS (`animation-timeline`), styles scopés de
+`src/pages/index.astro`, mêmes trois filets que la révélation ci-dessous, propriétés détaillées
+jamais le raccourci `animation` :
+
+- **la photo d'accroche** occupe toute la largeur de l'écran ; un `clip-path` n'en montre d'abord
+  que la largeur de la page, arrondie, et le défilement ouvre ce cadre jusqu'aux bords. L'image
+  glisse de −4 % à +4 % dans son cadre (parallaxe). Titre à gauche et appel à droite au-dessus,
+  sur grand écran. Sans animation liée au défilement, elle reste à la largeur de la page ;
+- le texte de l'accroche monte en sortant par le haut ;
+- la phrase manifeste, raccourcie à « Personne ne peut vous dire pour qui voter. » (la suite
+  passe en taille courante : d'un bloc, elle prenait un écran), s'allume mot à mot DANS L'ORDRE
+  DE LECTURE, du gris (`--couleur-encre-faible`) au noir : tous les mots suivent la chronologie
+  du paragraphe, chacun sur sa tranche, rang donné par `nth-child` — un `style="--rang"` serait
+  bloqué par la CSP ;
+- les quatre blocs du décompte montent en décalé ;
+- sur téléphone, dans le carrousel « Comprendre », les photos des cartes voisines s'estompent
+  (`view(inline)`), jamais leur texte ;
+- sur grand écran, cartes et preuves montent en cascade par colonne.
+
+**Deux règles apprises à la mesure (24 septembre 2026) :**
+
+- **Aucun texte ne perd de contraste au défilement.** Lighthouse et axe lisent la page sans la
+  faire défiler : des mots à 25 % d'opacité y comptaient comme illisibles, et l'accessibilité
+  était tombée de 100 à 96. Le texte bouge par `transform` ou change de couleur entre deux
+  teintes qui passent AA ; l'opacité ne touche que les images et les formes.
+- **`overflow: clip`, jamais `hidden`, sur un ancêtre d'élément animé au défilement.**
+  `hidden` en fait un conteneur de défilement, `view()` s'y accroche, et l'animation reste figée
+  à son début sans la moindre erreur. La parallaxe de la photo n'avait jamais fonctionné pour
+  cette raison.
+
+Mesure faite sur l'accueil derrière un serveur qui compresse, comme Cloudflare (le serveur de
+`scripts/serveur-statique.mjs` ne compresse pas, et Lighthouse y compte les octets bruts) :
+100 / 100 / 100 / 100 sur mobile et sur ordinateur, avant comme après la refonte ; seul le LCP
+mobile passe de 1,5 à 1,9 s, la photo étant plus grande.
 
 Ce qui bouge :
 
 - l'action principale se soulève de 2 px au survol et se rétracte à la pression ;
-- une carte de rubrique se soulève de 4 px au survol et prend l'ombre haute ;
+- une carte de rubrique se soulève de 4 px au survol et prend l'ombre haute, et sa photo avance à
+  `scale(1.06)` en 250 ms (même état au focus clavier, mais instantané) ;
 - les sections montent de 20 px et passent de 0,3 à 1 d'opacité à l'entrée dans la fenêtre.
 
 **Tout survol est derrière `@media (hover: hover) and (pointer: fine)`.** Sur un écran tactile, un
@@ -412,7 +482,8 @@ sommaire reste une liste de liens d'ancre** : contenu, ordre, titres, ancres et 
 - **375 px d'abord** : une colonne, pas d'indentation progressive, environ un écran et demi au
   plus par schéma. Le grand écran peut déplier en horizontal, jamais l'inverse.
 - **Chaque schéma a la forme de son objet**. Au 24 septembre 2026 :
-  - _bureau de vote_ : rail à six nœuds, l'isoloir en nœud agrandi dans la couleur signature ;
+  - _bureau de vote_ : rail à six nœuds de même taille, l'isoloir dans la couleur signature (agrandi
+    jusqu'au 25 septembre 2026 : il cassait l'alignement du rail) ;
     pièces d'identité en trois groupes sous filets, tampon « Refusée » ; horaires en blocs sur un
     axe ; enveloppe et bulletin déchiré dessinés en CSS, côte à côte ;
   - _inscription_ : aiguillage « déjà inscrit ? » en tronc à coudes ; trois voies sous filets
@@ -455,9 +526,39 @@ sommaire reste une liste de liens d'ancre** : contenu, ordre, titres, ancres et 
 `.page` `.enveloppe` `.enveloppe-large` `.contenu` `.contenu--libre` `.pied`
 `.evitement` `.fil-ariane` `.mise-a-jour` `.chantier` `.question` `.sources` `.signature`
 `.reserve` `.prose` `.action` `.action--grand` `.action--secondaire` `.section`
-`.section-tete` `.section-chapo` `.revele` `.hero` `.hero-grille` `.hero-media` `.hero-credit`
-`.chiffres` `.apercu` `.etiquette` `.echelle` `.cartes` `.carte` `.preuves` `.preuve-puce`
-`.promesse` `.final`, les cinq teintes `.t-*`, plus les balises de contenu.
+`.section-tete` `.section-chapo` `.revele`, les cinq teintes `.t-*`, plus les balises de contenu.
+
+Ce qui n'appartient qu'à l'accueil — accroche, décompte, manifeste, démo, cartes, preuves,
+promesse, appel final — vit dans le style scopé de `src/pages/index.astro` depuis le
+24 septembre 2026. La pastille de crédit posée sur la photo d'accroche a été retirée : le crédit
+figure sur `/credits-images`, lié depuis le pied de chaque page.
+
+### Cartes « Comprendre » de l'accueil (24 septembre 2026)
+
+Six cartes, une par article publié, chacune avec une photographie 16:10 (Commons, recadrée par
+`scripts/recuperer-illustrations.mjs`, qui vérifie la licence et écrit les recadrages : deux
+sortent du champ un ruban et un bandeau tricolores). Plus d'étiquette « Comprendre » : le titre
+de section le dit déjà. Résumé coupé à deux lignes. Sur téléphone, un **carrousel automatique
+et sans fin** (`src/lib/carrousel.ts`) : défilement horizontal aimanté, cartes à 78 % de la
+largeur, **la carte en cours centrée**, ses deux voisines dépassent. Elle monte de 6 px, prend
+l'ombre haute, et sa photo avance lentement pendant le délai. Il avance seul toutes les 3 s —
+sans quoi le dernier article serait de fait le moins lu — et boucle grâce à DEUX copies `inert`
+de chaque côté : avec une seule, la copie centrée n'avait pas de voisine à droite, et le vide se
+comblait d'un coup au saut vers l'original (l'à-coup entre le dernier et le premier article).
+La mise en avant est portée par la carte ET ses copies : au saut, rien ne se rejoue. Des points disent où
+l'on en est ; celui en cours s'allonge et se remplit, et **c'est la fin de son animation qui fait
+avancer**, donc barre et défilement ne se désynchronisent jamais. WCAG 2.2.2 : un bouton arrête
+le défilement ; survol, focus, doigt posé, onglet caché ou rangée hors écran le suspendent ;
+« réduire les animations » l'empêche d'avancer seul. Sans JavaScript : rangée à glisser, sans
+points. Grille 2 puis 3 colonnes au-delà de 46 et 66 rem, immobile. L'image est décorative
+(`alt=""`), le titre du lien porte le sens.
+
+Les preuves de confiance passent de quatre à trois (l'éditeur n'est plus mis en avant) et
+suivent la règle « le trait, pas la boîte » : un filet au-dessus, une icône Phosphor à la place
+du numéro.
+
+La promesse d'anonymat n'a plus d'icône (posée au-dessus du titre, elle coûtait une ligne pour
+un pictogramme) ; sur grand écran, titre et texte côte à côte.
 
 ### Boutons
 

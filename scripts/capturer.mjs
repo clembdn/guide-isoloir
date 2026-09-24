@@ -247,17 +247,28 @@ function releverDansLaPage() {
    * dans `color`. Elles ne sont pas du texte, mais elles PORTENT DU SENS — la
    * longueur d'une barre est l'information. Elles sont relevées à part.
    */
+  /*
+   * UNE FORME BORDÉE SE LIT PAR SON CONTOUR. L'urne de l'accueil est un corps
+   * transparent cerné d'un trait sombre : son remplissage, presque de la
+   * couleur du fond, ne dit rien de sa lisibilité — son trait, si. Quand une
+   * forme porte un contour visible, c'est lui qu'on mesure.
+   */
   const objets = [];
   for (const rect of document.querySelectorAll("svg rect, svg path, svg circle")) {
     const style = getComputedStyle(rect);
-    const remplissage = style.fill;
-    if (!remplissage || TRANSPARENT.test(remplissage) || remplissage === "none") continue;
-    const cle = "o~" + remplissage + "~" + fondEffectif(rect.parentElement).join("|");
+    const borde =
+      style.stroke &&
+      style.stroke !== "none" &&
+      !TRANSPARENT.test(style.stroke) &&
+      parseFloat(style.strokeWidth) > 0;
+    const couleur = borde ? style.stroke : style.fill;
+    if (!couleur || TRANSPARENT.test(couleur) || couleur === "none") continue;
+    const cle = "o~" + couleur + "~" + fondEffectif(rect.parentElement).join("|");
     if (vus.has(cle)) continue;
     vus.add(cle);
     objets.push({
       selecteur: (rect.getAttribute("class") || rect.tagName).toString(),
-      couleur: remplissage,
+      couleur,
       couches: fondEffectif(rect.parentElement),
     });
   }

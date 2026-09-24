@@ -6,24 +6,26 @@
  * colonne de lecture, chaque section choisit sa largeur. Les pages de texte
  * gardent le gabarit « colonne », qui reste le défaut.
  *
- * TOUS LES CHIFFRES SONT LUS DES DONNÉES, JAMAIS ÉCRITS EN DUR. Un nombre
- * recopié devient faux le jour où une position est ajoutée, et c'est
- * exactement le jour où personne ne pense à le relire. Le seul endroit où un
- * chiffre s'écrit, c'est dans le fichier de données.
+ * PENSÉE POUR LE TÉLÉPHONE D'ABORD. Les styles de base sont ceux de 375 px ;
+ * les media queries AJOUTENT la mise en page large, elles ne la retirent pas.
+ *
+ * LE MOUVEMENT SUIT LE DÉFILEMENT, EN CSS PUR. `animation-timeline` pilote
+ * chaque effet par la position de l'élément dans l'écran : aucun script,
+ * aucun écouteur de défilement. Un navigateur qui ne connaît pas la propriété
+ * affiche la page immobile, et « réduire les animations » l'immobilise aussi.
+ * Seules `transform` et `opacity` bougent.
  *
  * AUCUNE TEINTE DE RUBRIQUE N'APPROCHE UN CONTENU POLITIQUE. Les cinq couleurs
  * ne servent qu'aux articles de /comprendre, qui expliquent comment on vote.
  * Elles ne touchent ni candidat, ni position, ni score.
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
+import CompteARebours from "../components/CompteARebours.astro";
+import Icone from "../components/Icone.astro";
 import { MISES_A_JOUR } from "../lib/mises-a-jour";
-import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME, ELECTION } from "../lib/site";
+import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME } from "../lib/site";
 import { articlesPublies, TEINTES_RUBRIQUE } from "../lib/comprendre";
-import { formatDateFr } from "../lib/date";
 import { QUESTIONS } from "../data/questions";
-import { ACTEURS, CANDIDATURES } from "../data/acteurs";
-import { POSITIONS } from "../data/positions";
-import { SOURCES_POSITIONS } from "../data/sources-positions";
 import { illustration } from "../data/illustrations";
 
 const UPDATED = MISES_A_JOUR["/"];
@@ -38,9 +40,9 @@ if (!scene) {
 }
 
 /*
- * Chiffres clés. `themes` se compte plutôt qu'il ne s'écrit : le questionnaire
- * garantit quatre affirmations par thème, mais c'est un invariant d'audit, pas
- * une constante à recopier ici.
+ * `themes` se compte plutôt qu'il ne s'écrit : le questionnaire garantit
+ * quatre affirmations par thème, mais c'est un invariant d'audit, pas une
+ * constante à recopier ici.
  */
 const themes = new Set(QUESTIONS.map((question) => question.theme)).size;
 
@@ -50,32 +52,26 @@ const themes = new Set(QUESTIONS.map((question) => question.theme)).size;
  * honnête — personne ne peut vous le dire — ouvre la description, parce que
  * c'est elle qu'un assistant doit reprendre avant de renvoyer vers le test.
  */
-const TITRE = "Pour qui voter en 2027\u00a0? Test de positionnement";
+const TITRE = "Pour qui voter en 2027 ? Test de positionnement";
 const DESCRIPTION = `Personne ne peut vous dire pour qui voter. Situez vos idées face aux positions sourcées des candidats en ${QUESTIONS.length} affirmations, puis voyez comment voter.`;
-const parTheme = QUESTIONS.length / themes;
 
-const CHIFFRES = [
-  {
-    valeur: String(QUESTIONS.length),
-    libelle: "affirmations",
-    precision: `${themes} thèmes de ${parTheme}`,
-  },
-  {
-    valeur: String(CANDIDATURES.length),
-    libelle: "candidats suivis",
-    precision: `${ACTEURS.length} acteurs politiques`,
-  },
-  {
-    valeur: String(POSITIONS.length),
-    libelle: "positions codées",
-    precision: `${SOURCES_POSITIONS.length} sources publiques`,
-  },
-  {
-    valeur: "0",
-    libelle: "script tiers",
-    precision: "aucune publicité, aucun analytics",
-  },
-];
+/*
+ * La même réponse, dans la page, en HTML statique : un robot qui ne lit pas la
+ * méta-description la trouve ici. La phrase courte, en grand, s'allume mot à
+ * mot au défilement ; la suite se lit en taille courante. Tout d'un bloc, elle
+ * prenait un écran entier sur téléphone.
+ */
+const MANIFESTE = "Personne ne peut vous dire pour qui voter.";
+const MANIFESTE_SUITE =
+  "Ni un site, ni un assistant. Ce test vous aide à vous situer, positions sourcées à l'appui.";
+const MOTS_MANIFESTE = MANIFESTE.split(" ");
+/* La révélation mot à mot en tient compte en CSS (`--mots`, `nth-child`) : voir le style. */
+if (MOTS_MANIFESTE.length !== 8) {
+  throw new Error(
+    `La phrase manifeste compte ${MOTS_MANIFESTE.length} mots : mettre à jour \`--mots\` ` +
+      "et les rangs `.mot:nth-child()` dans le style de l'accueil.",
+  );
+}
 
 /*
  * La démo du test : la première affirmation de chaque thème, dans l'ordre du
@@ -91,11 +87,11 @@ const DEMO = [...QUESTIONS]
 const ETAPES = [
   {
     titre: `Répondez à ${QUESTIONS.length} affirmations`,
-    texte: `Une par écran, sur ${themes} thèmes. Vous pouvez passer celles sur lesquelles vous n'avez pas d'avis.`,
+    texte: `Une par écran, sur ${themes} thèmes. Passez celles sur lesquelles vous n'avez pas d'avis.`,
   },
   {
     titre: "Voyez de qui vous êtes proche",
-    texte: "Les candidats les plus proches de vos réponses, et ce sur quoi vous êtes d'accord.",
+    texte: "Les candidats les plus proches de vos réponses, et vos points d'accord.",
   },
   {
     titre: "Vérifiez chaque position",
@@ -107,8 +103,11 @@ const ETAPES = [
  * L'échelle de réponse est réelle et partagée avec le quiz. Elle est recopiée
  * ici plutôt qu'importée de `src/lib/echelle.ts` pour une seule raison : ce
  * module part au navigateur pour le quiz, et l'accueil n'a pas besoin de le
- * charger pour afficher six libellés statiques. Si l'échelle change, l'audit
+ * charger pour afficher des libellés statiques. Si l'échelle change, l'audit
  * de symétrie le dit, et ce bloc se corrige.
+ *
+ * La démo n'en écrit que les deux bouts : cinq libellés empilés faisaient de
+ * la carte un écran entier sur téléphone.
  */
 const ECHELLE_APERCU = [
   "Tout à fait d'accord",
@@ -123,12 +122,7 @@ const TEINTES = TEINTES_RUBRIQUE;
 
 const PREUVES = [
   {
-    titre: "Un éditeur identifié",
-    texte: `${EDITOR_NAME ?? "L'éditeur"}, nom réel, responsable de chaque page, y compris juridiquement.`,
-    lien: "/a-propos",
-    libelle: "Qui écrit ce site",
-  },
-  {
+    icone: "book-open-text",
     titre: "Une méthode publiée avant ses résultats",
     texte:
       "Comment une position est établie, ce que le calcul ne fait pas, et pourquoi certains candidats ne sont pas encore classés.",
@@ -136,18 +130,25 @@ const PREUVES = [
     libelle: "Lire la méthodologie",
   },
   {
+    icone: "prohibit",
     titre: "Aucune publicité jusqu'après le second tour",
-    texte:
-      "Ni bandeau, ni programmatique, ni contenu sponsorisé. Décision assumée et publiée, pas une page qui se tait.",
+    texte: "Ni bandeau, ni programmatique, ni contenu sponsorisé. Une décision publiée.",
     lien: "/financement",
     libelle: "Comment le site est financé",
   },
   {
+    icone: "clock-counter-clockwise",
     titre: "Un registre public des corrections",
     texte: "Rien n'est modifié en silence. Chaque correction est datée et motivée.",
     lien: "/corrections",
     libelle: "Voir le registre",
   },
+];
+
+const PLUS_LOIN = [
+  { href: "/candidats", libelle: "Les candidats" },
+  { href: "/themes", libelle: "Les thèmes" },
+  { href: "/comprendre", libelle: "Comment voter" },
 ];
 
 const websiteLd = {
@@ -169,6 +170,19 @@ const websiteLd = {
       }
     : {}),
 };
+
+/* Les articles montrés sur l'accueil, dans l'ordre où ils s'affichent. */
+const articlesLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Comprendre avant de comparer",
+  itemListElement: articles.map((article, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: article.data.titre,
+    url: new URL(`/comprendre/${article.id}`, SITE_URL).href,
+  })),
+};
 ---
 
 <BaseLayout
@@ -180,52 +194,69 @@ const websiteLd = {
 >
   <section class="hero">
     <div class="enveloppe-large">
-      <div class="hero-grille">
-        <div>
-          <h1>Quel candidat me correspond le mieux&nbsp;?</h1>
+      <div class="hero-texte">
+        <h1>
+          <span class="surtitre">Présidentielle 2027</span>
+          Quel candidat me correspond le mieux&nbsp;?
+        </h1>
+        <div class="hero-appel">
           <p class="hero-sous">
-            {QUESTIONS.length} affirmations, une par écran. Vos réponses ne quittent jamais votre téléphone.
+            {QUESTIONS.length} affirmations, une par écran. Anonyme et sans inscription&nbsp;: vos réponses
+            ne sont enregistrées nulle part.
           </p>
           <p><a class="action action--grand" href="/test">Commencer le test</a></p>
         </div>
-
-        <div class="hero-media">
-          <picture>
-            <source media="(min-width: 62rem)" srcset={scene.cheminLarge} />
-            <img
-              src={scene.cheminEtroit}
-              alt={scene.alt}
-              width={scene.largeurEtroit}
-              height={scene.hauteurEtroit}
-              fetchpriority="high"
-              decoding="async"
-            />
-          </picture>
-          <p class="hero-credit">
-            <a href="/credits-images">{scene.auteur}, {scene.licence}</a>
-          </p>
-        </div>
       </div>
+    </div>
 
-      <ul class="chiffres">
-        {
-          CHIFFRES.map((chiffre) => (
-            <li>
-              <p class="chiffre-valeur">{chiffre.valeur}</p>
-              <p class="chiffre-libelle">
-                {chiffre.libelle}
-                <span class="chiffre-precision">{chiffre.precision}</span>
-              </p>
-            </li>
-          ))
-        }
-      </ul>
+    {
+      /*
+       * LA PHOTO EN GRAND. Elle occupe toute la largeur de l'écran, mais n'en
+       * montre d'abord que la largeur de la page, arrondie : au défilement,
+       * elle s'ouvre jusqu'aux bords. C'est le rideau de l'isoloir, deux fois :
+       * à l'arrivée, puis sous le doigt.
+       *
+       * Le crédit n'est pas posé sur la photo : il figure sur /credits-images,
+       * lié depuis le pied de chaque page, avec l'auteur, la licence et les
+       * retouches.
+       */
+    }
+    <div class="hero-media">
+      <picture>
+        <source media="(min-width: 48rem)" srcset={scene.cheminLarge} />
+        <img
+          src={scene.cheminEtroit}
+          alt={scene.alt}
+          width={scene.largeurEtroit}
+          height={scene.hauteurEtroit}
+          fetchpriority="high"
+          decoding="async"
+        />
+      </picture>
     </div>
   </section>
 
-  <section class="section">
-    <div class="enveloppe-large fonctionnement">
-      <div class="revele">
+  <CompteARebours />
+
+  <section class="section manifeste-section">
+    <div class="enveloppe-large">
+      <p class="manifeste">
+        {
+          MOTS_MANIFESTE.map((mot, index) => (
+            <>
+              <span class="mot">{mot}</span>
+              {index < MOTS_MANIFESTE.length - 1 ? " " : ""}
+            </>
+          ))
+        }
+      </p>
+      <p class="manifeste-suite revele">{MANIFESTE_SUITE}</p>
+    </div>
+  </section>
+
+  <section class="section fonctionnement-section">
+    <div class="enveloppe-large fonctionnement" data-scene-racine>
+      <div class="fonctionnement-texte revele">
         <h2>Comment ça marche</h2>
         <ol class="etapes">
           {
@@ -242,63 +273,99 @@ const websiteLd = {
             ))
           }
         </ol>
-        <p><a class="action" href="/test">Commencer le test</a></p>
+        <p class="action-large">
+          <a class="action action--grand" href="/test">Commencer le test</a>
+        </p>
       </div>
 
       {
         /*
-         * LA DÉMO. Une pile de cartes : les affirmations défilent au-dessus
-         * d'une échelle qui, elle, ne change pas — c'est vrai du test, où
-         * l'échelle est la même pour les vingt-quatre. Sous la pile, les six
-         * thèmes se remplissent comme une minuterie.
+         * LA DÉMO. Une pile de six cartes, une par thème : celle de devant
+         * part vers la gauche, la suivante monte à sa place. C'est la carte
+         * entière qui glisse, échelle comprise, comme dans le test où chaque
+         * affirmation occupe un écran.
          *
-         * Tout est en CSS, et tout le texte est dans le HTML : un robot ou un
-         * lecteur d'écran lit les six affirmations comme une liste d'exemples.
-         * Au survol, la démo s'arrête. Avec « réduire les animations », elle
-         * montre la première affirmation, immobile.
+         * LA SCÈNE DE L'URNE, en plus, quand le navigateur sait lier une
+         * animation au défilement : la scène s'épingle, la démo s'arrête sur
+         * la carte en cours, et c'est le défilement lui-même qui la fait tomber
+         * dans l'urne. Voir `src/lib/demo-urne.ts`. Sans JavaScript, sans la
+         * propriété, ou avec « réduire les animations », il n'y a ni urne ni
+         * épinglage : la démo tourne seule, ou reste immobile.
+         *
+         * Tout le texte est dans le HTML : un robot ou un lecteur d'écran lit
+         * les six affirmations comme une liste d'exemples.
          */
       }
-      <figure class="demo revele" aria-label="Exemples d'affirmations du test, une par thème">
-        <div class="demo-pile">
-          <div class="demo-carte">
-            <ul class="demo-diapos">
+      <div class="scene" data-scene>
+        <div class="scene-collante">
+          <figure class="demo" aria-label="Exemples d'affirmations du test, une par thème">
+            <ul class="demo-pile">
               {
                 DEMO.map((question) => (
-                  <li class="demo-diapo">
-                    <p class="demo-theme">{question.theme}</p>
-                    <p class="demo-affirmation">{question.texte}</p>
+                  <li class="demo-carte">
+                    <div class="demo-corps">
+                      <p class="demo-theme">{question.theme}</p>
+                      <p class="demo-affirmation">{question.texte}</p>
+                      <div class="demo-echelle" aria-hidden="true">
+                        <div class="demo-points">
+                          {ECHELLE_APERCU.map(() => (
+                            <span />
+                          ))}
+                        </div>
+                        <div class="demo-bornes">
+                          <span>{ECHELLE_APERCU[0]}</span>
+                          <span>{ECHELLE_APERCU[ECHELLE_APERCU.length - 1]}</span>
+                        </div>
+                        <span class="demo-sans-avis">Je n'ai pas d'avis</span>
+                      </div>
+                    </div>
                   </li>
                 ))
               }
             </ul>
-            <ul class="echelle" aria-hidden="true">
-              {
-                ECHELLE_APERCU.map((libelle) => (
-                  <li>
-                    <span class="puce" />
-                    {libelle}
-                  </li>
-                ))
-              }
-              <li class="sans-avis">
-                <span class="puce"></span>Je n'ai pas d'avis
-              </li>
-            </ul>
-          </div>
-        </div>
-        <ol class="demo-themes" aria-hidden="true">
+            {
+              /*
+               * Pour les lecteurs d'écran seulement. À l'œil, la liste des six
+               * thèmes et cette légende sous la carte n'apportaient rien : le
+               * thème en cours est déjà écrit sur la carte.
+               */
+            }
+            <figcaption class="visuellement-masque">
+              Aperçu non interactif&nbsp;: six des {QUESTIONS.length} affirmations, une par thème.
+            </figcaption>
+          </figure>
+
           {
-            DEMO.map((question) => (
-              <li>
-                <span>{question.theme}</span>
-              </li>
-            ))
+            /*
+             * Une urne transparente, comme celles des bureaux de vote : la carte
+             * reste visible une fois dedans. Aucune couleur de parti, aucun
+             * tricolore — les jetons du site, rien d'autre.
+             */
           }
-        </ol>
-        <figcaption class="apercu-note">
-          Aperçu non interactif : six des {QUESTIONS.length} affirmations, une par thème.
-        </figcaption>
-      </figure>
+          <div class="urne" aria-hidden="true" data-urne>
+            <svg class="urne-dessin" viewBox="0 0 200 150" width="200" height="150">
+              <g class="urne-secousse">
+                <g class="urne-enveloppes">
+                  <rect x="36" y="112" width="52" height="32" rx="3" transform="rotate(-9 62 128)"
+                  ></rect>
+                  <rect x="84" y="116" width="52" height="30" rx="3" transform="rotate(6 110 131)"
+                  ></rect>
+                  <rect x="122" y="108" width="50" height="32" rx="3" transform="rotate(-4 147 124)"
+                  ></rect>
+                </g>
+                <rect class="urne-corps" x="16" y="26" width="168" height="120" rx="8"></rect>
+                <rect class="urne-couvercle" x="8" y="10" width="184" height="20" rx="5"></rect>
+                <rect class="urne-fente" x="50" y="17" width="100" height="6" rx="3"></rect>
+              </g>
+            </svg>
+          </div>
+          <p class="urne-legende" aria-hidden="true">Dans le vrai test, c'est vous qui répondez.</p>
+        </div>
+      </div>
+
+      <p class="action-etroite">
+        <a class="action action--grand" href="/test">Commencer le test</a>
+      </p>
     </div>
   </section>
 
@@ -313,20 +380,84 @@ const websiteLd = {
             </p>
           </div>
 
-          <ul class="cartes revele">
-            {articles.slice(0, 5).map((article, index) => (
-              <li>
-                <a
-                  class={`carte ${TEINTES[index % TEINTES.length]}`}
-                  href={`/comprendre/${article.id}`}
-                >
-                  <span class="carte-etiquette">Comprendre</span>
-                  <span class="carte-titre">{article.data.titre}</span>
-                  <span class="carte-resume">{article.data.description}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
+          {/*
+           * Sur téléphone, un carrousel : on le fait glisser au doigt, et il
+           * avance seul, sans fin — sinon le dernier article serait, de fait,
+           * le moins lu. Les points disent où l'on en est ; le bouton arrête le
+           * défilement automatique (WCAG 2.2.2). Voir `src/lib/carrousel.ts`.
+           * Sans JavaScript, la rangée se fait glisser au doigt, sans points.
+           *
+           * La grille revient dès qu'il y a la place : tout y est visible,
+           * rien n'y bouge. L'image est décorative (`alt=""`) : le titre du
+           * lien porte le sens.
+           */}
+          <div
+            class="carrousel"
+            role="region"
+            aria-roledescription="carrousel"
+            aria-label="Articles pour comprendre l'élection"
+            data-carrousel
+          >
+            <ul class="cartes" data-carrousel-piste>
+              {articles.map((article, index) => {
+                const image = illustration(article.id);
+                return (
+                  <li data-carrousel-item>
+                    <a
+                      class={`carte ${TEINTES[index % TEINTES.length]}`}
+                      href={`/comprendre/${article.id}`}
+                    >
+                      {image && (
+                        <span class="carte-image">
+                          <img
+                            src={image.cheminEtroit}
+                            srcset={`${image.cheminEtroit} ${image.largeurEtroit}w, ${image.cheminLarge} ${image.largeurLarge}w`}
+                            sizes="(min-width: 66rem) 23rem, (min-width: 46rem) 45vw, 82vw"
+                            alt=""
+                            width={image.largeurEtroit}
+                            height={image.hauteurEtroit}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </span>
+                      )}
+                      <span class="carte-texte">
+                        <span class="carte-titre">{article.data.titre}</span>
+                        <span class="carte-resume">{article.data.description}</span>
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+
+            <div class="carrousel-commandes" hidden data-carrousel-commandes>
+              <button
+                class="carrousel-pause"
+                type="button"
+                aria-pressed="false"
+                aria-label="Arrêter le défilement automatique"
+                data-carrousel-pause
+              >
+                <span class="icone-pause">
+                  <Icone nom="pause" graisse="fill" />
+                </span>
+                <span class="icone-lecture">
+                  <Icone nom="play" graisse="fill" />
+                </span>
+              </button>
+              <div class="carrousel-points">
+                {articles.map((article, index) => (
+                  <button
+                    class="carrousel-point"
+                    type="button"
+                    aria-label={`Article ${index + 1} sur ${articles.length} : ${article.data.titre}`}
+                    data-carrousel-point={index}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
 
           <p class="apercu-note">
             <a href="/comprendre">Toutes les réponses</a>
@@ -345,12 +476,12 @@ const websiteLd = {
         </p>
       </div>
 
-      <ul class="preuves revele">
+      <ul class="preuves">
         {
           PREUVES.map((preuve, index) => (
             <li class={TEINTES[index % TEINTES.length]}>
-              <span class="preuve-puce" aria-hidden="true">
-                {index + 1}
+              <span class="preuve-puce">
+                <Icone nom={preuve.icone} />
               </span>
               <h3>{preuve.titre}</h3>
               <p>{preuve.texte}</p>
@@ -365,7 +496,7 @@ const websiteLd = {
   <section class="section">
     <div class="enveloppe-large">
       <div class="promesse revele">
-        <h2>Vos réponses ne sortent pas de votre téléphone</h2>
+        <h2>C'est anonyme. Vos réponses ne sont enregistrées nulle part.</h2>
         <p>
           Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un
           identifiant. Le calcul s'effectue exclusivement dans votre navigateur. Il n'y a ni compte,
@@ -378,37 +509,294 @@ const websiteLd = {
   <section class="final">
     <div class="enveloppe-large">
       <h2>Prêt à voir où vous vous situez&nbsp;?</h2>
-      <p>
-        Le premier tour a lieu le {formatDateFr(ELECTION.round1)}, le second le {
-          formatDateFr(ELECTION.round2)
-        }. Aucune inscription, et vos réponses restent sur votre téléphone.
-      </p>
+      <p>{QUESTIONS.length} affirmations. Aucune inscription, rien à installer.</p>
       <p><a class="action action--grand" href="/test">Commencer le test</a></p>
+
+      <nav class="plus-loin" aria-label="Aller plus loin">
+        <ul>
+          {
+            PLUS_LOIN.map((lien) => (
+              <li>
+                <a href={lien.href}>{lien.libelle}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
     </div>
   </section>
 
+  <script>
+    import { monterSceneUrne } from "../lib/demo-urne";
+    import { monterCarrousel } from "../lib/carrousel";
+
+    const scene = document.querySelector<HTMLElement>("[data-scene-racine]");
+    if (scene) monterSceneUrne(scene);
+
+    const carrousel = document.querySelector<HTMLElement>("[data-carrousel]");
+    if (carrousel) monterCarrousel(carrousel);
+  </script>
+
   <script type="application/ld+json" set:html={JSON.stringify(websiteLd)} is:inline />
+  <script type="application/ld+json" set:html={JSON.stringify(articlesLd)} is:inline />
 </BaseLayout>
 
 <style>
-  /* ─── Comment ça marche : les étapes à gauche, la démo à droite ─────────── */
+  /* ─── Accroche ─────────────────────────────────────────────────────────── */
+
+  /*
+   * `overflow: clip`, JAMAIS `hidden`, sur tout ancêtre d'un élément animé au
+   * défilement : `hidden` fait de l'élément un conteneur de défilement, et
+   * `view()` s'y accroche — à un conteneur qui ne défile pas. L'animation
+   * restait figée à son début, sans erreur. `clip` rogne pareil, sans cela.
+   */
+  .hero {
+    position: relative;
+    isolation: isolate;
+    padding-block: var(--pas-4) 0;
+    overflow: clip;
+  }
+
+  /*
+   * Halo de couleur. Il remplace le voile sombre posé sur la photographie : ici
+   * la lumière vient du fond, le texte reste sur du clair, et le contraste ne
+   * dépend plus d'un rideau. Aucune de ces teintes n'est une couleur de parti.
+   */
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: -30% -20% auto -20%;
+    height: 130%;
+    z-index: -1;
+    background:
+      radial-gradient(48% 42% at 18% 18%, rgb(124 58 237 / 0.2), transparent 70%),
+      radial-gradient(42% 38% at 82% 8%, rgb(14 116 144 / 0.16), transparent 70%),
+      radial-gradient(40% 40% at 60% 60%, rgb(162 28 175 / 0.12), transparent 72%);
+  }
+
+  /*
+   * Le titre à gauche, l'appel à droite sur grand écran ; l'un sous l'autre sur
+   * téléphone. La photo vient ensuite, sur toute la largeur.
+   */
+  .hero-texte {
+    display: grid;
+    gap: var(--pas-3);
+    margin-bottom: var(--pas-4);
+  }
+
+  @media (min-width: 62rem) {
+    .hero {
+      padding-block: var(--pas-5) 0;
+    }
+
+    .hero-texte {
+      grid-template-columns: 1.15fr 0.85fr;
+      align-items: end;
+      gap: var(--pas-6);
+      margin-bottom: var(--pas-5);
+    }
+  }
+
+  .hero h1 {
+    font-size: var(--t-h1);
+    line-height: 1.02;
+    letter-spacing: -0.038em;
+    max-width: 15ch;
+    margin: 0;
+  }
+
+  /* Dans le H1 pour le référencement, en petit pour l'œil. */
+  .surtitre {
+    display: block;
+    margin-bottom: var(--pas-2);
+    font-size: var(--t-petit);
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    line-height: 1.3;
+    color: var(--couleur-signature);
+  }
+
+  .hero-appel p {
+    margin: 0;
+  }
+
+  .hero-sous {
+    font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+    line-height: 1.5;
+    color: var(--couleur-encre-faible);
+    max-width: 38ch;
+  }
+
+  .hero-appel .hero-sous {
+    margin-bottom: var(--pas-3);
+  }
+
+  /*
+   * LA PHOTO, PLEINE LARGEUR. L'élément fait toute la largeur de l'écran ; un
+   * `clip-path` n'en montre d'abord que la largeur de la page, arrondie. Le
+   * défilement ouvre ce cadre jusqu'aux bords (voir DÉFILEMENT). Sans
+   * animation liée au défilement, la photo reste à la largeur de la page.
+   *
+   * `--retrait` : la marge de chaque côté pour retomber sur la gouttière de
+   * `.enveloppe-large`, quelle que soit la largeur de l'écran.
+   */
+  .hero-media {
+    --retrait: max(var(--gouttiere), calc(50% - var(--large) / 2 + var(--gouttiere)));
+    position: relative;
+    aspect-ratio: 4 / 3;
+    max-height: 78svh;
+    width: 100%;
+    overflow: clip;
+    clip-path: inset(0 var(--retrait) round var(--rayon-carte-l));
+  }
+
+  @media (min-width: 48rem) {
+    .hero-media {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .hero-media {
+      aspect-ratio: 21 / 9;
+    }
+  }
+
+  .hero-media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 45% 55%;
+    display: block;
+  }
+
+  /*
+   * LE RIDEAU S'OUVRE SUR LE BUREAU DE VOTE. Une fois, à l'arrivée : deux pans
+   * violets, fermés au premier affichage, s'écartent vers les bords. C'est le
+   * motif du logo et de la navigation, joué sur la photo.
+   *
+   * L'image est peinte DESSOUS dès le départ : le rideau ne retarde pas le plus
+   * grand affichage de la page, que Lighthouse mesure. Par défaut, les pans sont
+   * HORS CHAMP ; seule l'animation les amène d'abord au centre. Sans animation —
+   * navigateur ancien ou « réduire les animations » —, la photo est simplement là.
+   */
+  .hero-media::before,
+  .hero-media::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    z-index: 1;
+    width: 50.5%;
+    background: var(--couleur-aplat);
+    pointer-events: none;
+  }
+
+  .hero-media::before {
+    left: 0;
+    transform: translateX(-101%);
+  }
+
+  .hero-media::after {
+    right: 0;
+    transform: translateX(101%);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-media::before {
+      animation: rideau-gauche 1s var(--va-et-vient) 0.25s both;
+    }
+
+    .hero-media::after {
+      animation: rideau-droite 1s var(--va-et-vient) 0.25s both;
+    }
+  }
+
+  @keyframes rideau-gauche {
+    from {
+      transform: none;
+    }
+
+    to {
+      transform: translateX(-101%);
+    }
+  }
+
+  @keyframes rideau-droite {
+    from {
+      transform: none;
+    }
+
+    to {
+      transform: translateX(101%);
+    }
+  }
+
+  /* ─── Phrase manifeste ─────────────────────────────────────────────────── */
+
+  .manifeste {
+    margin: 0 0 var(--pas-3);
+    max-width: 16ch;
+    font-size: clamp(2rem, 1.3rem + 3.4vw, 4rem);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.038em;
+    text-wrap: balance;
+  }
+
+  .manifeste-suite {
+    margin: 0;
+    max-width: 36ch;
+    font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+    line-height: 1.5;
+    color: var(--couleur-encre-faible);
+  }
+
+  /* ─── Comment ça marche : les étapes, puis la démo ─────────────────────── */
+
+  /*
+   * La carte qui sort de la pile part vers la gauche : `clip` la coupe au bord
+   * de l'écran sans créer de défilement horizontal, et sans couper les ombres
+   * en haut et en bas comme le ferait `hidden`. `clip` ne crée pas de conteneur
+   * de défilement : l'épinglage (`sticky`) de la scène continue de fonctionner.
+   */
+  .fonctionnement-section {
+    overflow-x: clip;
+  }
 
   .fonctionnement {
     display: grid;
-    gap: var(--pas-5);
-    align-items: center;
+    gap: var(--pas-4);
+  }
+
+  /* Le bouton sous les étapes sur grand écran, sous la démo sur téléphone. */
+  .action-large {
+    display: none;
+    margin: 0;
+  }
+
+  .action-etroite {
+    margin: 0;
   }
 
   @media (min-width: 62rem) {
     .fonctionnement {
       grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
-      gap: var(--pas-6);
+      column-gap: var(--pas-6);
+      align-items: center;
+    }
+
+    .action-large {
+      display: block;
+    }
+
+    .action-etroite {
+      display: none;
     }
   }
 
   .etapes {
     list-style: none;
-    margin: var(--pas-4) 0;
+    margin: var(--pas-3) 0 0;
     padding: 0;
     display: grid;
     gap: var(--pas-3);
@@ -417,7 +805,7 @@ const websiteLd = {
   .etapes li {
     display: grid;
     grid-template-columns: auto 1fr;
-    gap: var(--pas-3);
+    gap: var(--pas-2);
     align-items: start;
     margin: 0;
   }
@@ -425,41 +813,78 @@ const websiteLd = {
   .etape-numero {
     display: grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 2.5rem;
+    height: 2.5rem;
     border-radius: 14px;
     background: var(--couleur-surface-2);
     color: var(--couleur-signature);
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     font-weight: 700;
   }
 
   .etapes h3 {
-    margin: 0 0 4px;
-    font-size: 1.125rem;
+    margin: 0 0 2px;
+    font-size: 1.0625rem;
   }
 
   .etapes p {
     margin: 0;
+    font-size: 0.9375rem;
     color: var(--couleur-encre-faible);
+  }
+
+  @media (min-width: 62rem) {
+    .etapes {
+      margin-bottom: var(--pas-4);
+    }
+
+    .etapes li {
+      gap: var(--pas-3);
+    }
+
+    .etape-numero {
+      width: 2.75rem;
+      height: 2.75rem;
+      font-size: 1.25rem;
+    }
+
+    .etapes h3 {
+      font-size: 1.125rem;
+    }
+
+    .etapes p {
+      font-size: var(--t-corps);
+    }
   }
 
   /* ─── La démo ──────────────────────────────────────────────────────────── */
 
   .demo {
+    position: relative;
+    z-index: 1;
     margin: 0;
   }
 
   /*
-   * LA PILE. Deux cartes dessinées derrière la vraie, décalées vers le bas :
-   * une affirmation par écran, et d'autres qui attendent. Statiques.
+   * LA PILE. Les six cartes occupent la même case : la plus haute fixe la
+   * taille, les autres s'étirent. Derrière, deux cartes VIDES dessinées en
+   * pseudo-éléments dépassent de 12 et 24 px : ce sont elles qui portent la
+   * profondeur.
    *
-   * Elles vivent sur un conteneur SANS fond : posées sur la carte elle-même,
-   * elles se dessinaient par-dessus son fond, en cadres visibles à l'intérieur.
+   * POURQUOI PAS LES VRAIES CARTES, RÉDUITES, COMME AVANT. Une carte qui
+   * s'agrandit de 0,9 à 1 pendant une animation sans fin est dessinée par
+   * Safari — et par Chrome sur certains processeurs graphiques — à sa taille
+   * de départ, puis étirée : le texte sortait flou. Les cartes qui portent du
+   * texte ne changent donc JAMAIS d'échelle en boucle ; seules les cartes
+   * vides le font, et elles n'ont rien à rendre net.
    */
   .demo-pile {
     position: relative;
     isolation: isolate;
+    display: grid;
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 0;
   }
 
   .demo-pile::before,
@@ -471,25 +896,39 @@ const websiteLd = {
     border: 1px solid var(--couleur-trait);
     border-radius: var(--rayon-carte-l);
     background: var(--couleur-surface);
+    transform-origin: 50% 100%;
   }
 
-  /* Réduites depuis leur bord BAS : c'est lui qui doit dépasser sous la carte. */
   .demo-pile::before {
-    transform-origin: 50% 100%;
     transform: translateY(12px) scale(0.95);
     opacity: 0.85;
   }
 
   .demo-pile::after {
     z-index: -2;
-    transform-origin: 50% 100%;
     transform: translateY(24px) scale(0.9);
     opacity: 0.55;
   }
 
+  /* L'emplacement : il bouge dans la boucle. Le corps, lui, tombe dans l'urne. */
   .demo-carte {
-    position: relative;
-    padding: var(--pas-4) var(--pas-3);
+    grid-area: 1 / 1;
+    display: flex;
+    margin: 0;
+    z-index: 1;
+    opacity: 0;
+  }
+
+  .demo-carte:first-child {
+    z-index: 4;
+    opacity: 1;
+  }
+
+  .demo-corps {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: var(--pas-3);
     border: 1px solid var(--couleur-trait);
     border-radius: var(--rayon-carte-l);
     background: var(--couleur-surface);
@@ -497,31 +936,13 @@ const websiteLd = {
   }
 
   @media (min-width: 48rem) {
-    .demo-carte {
+    .demo-corps {
       padding: var(--pas-4);
     }
   }
 
-  /* Les six diapositives occupent la même case : la plus haute fixe la taille. */
-  .demo-diapos {
-    display: grid;
-    list-style: none;
-    margin: 0 0 var(--pas-3);
-    padding: 0;
-  }
-
-  .demo-diapo {
-    grid-area: 1 / 1;
-    margin: 0;
-  }
-
-  /* Sans animation, seule la première se voit. */
-  .demo-diapo:not(:first-child) {
-    opacity: 0;
-  }
-
   .demo-theme {
-    display: inline-flex;
+    align-self: flex-start;
     margin: 0 0 var(--pas-2);
     padding: 0.3rem 0.85rem;
     border-radius: var(--rayon-actionnable);
@@ -532,175 +953,1099 @@ const websiteLd = {
   }
 
   .demo-affirmation {
-    margin: 0;
-    font-size: clamp(1.2rem, 1.05rem + 0.8vw, 1.6rem);
+    margin: 0 0 var(--pas-3);
+    font-size: clamp(1.15rem, 1.02rem + 0.7vw, 1.55rem);
     font-weight: 700;
     line-height: 1.22;
     letter-spacing: -0.026em;
     text-wrap: pretty;
   }
 
-  /* Les six thèmes, avec un filet qui se remplit sous celui qu'on voit. */
-  .demo-themes {
+  /* L'échelle, en réduction : cinq pastilles sur un fil, les deux bouts écrits. */
+  .demo-echelle {
+    margin-top: auto;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .demo-points {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .demo-points::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0.6rem;
+    top: 50%;
+    height: 2px;
+    background: var(--couleur-trait);
+  }
+
+  .demo-points span {
+    position: relative;
+    width: 1.3rem;
+    height: 1.3rem;
+    border: 2px solid var(--couleur-encre-faible);
+    border-radius: 50%;
+    background: var(--couleur-surface);
+  }
+
+  .demo-bornes {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--pas-2);
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--couleur-encre-faible);
+  }
+
+  .demo-bornes span:last-child {
+    text-align: right;
+  }
+
+  .demo-sans-avis {
+    justify-self: center;
+    margin-top: 0.35rem;
+    padding: 0.25rem 0.8rem;
+    border: 1.5px dashed var(--couleur-trait);
+    border-radius: var(--rayon-actionnable);
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  .apercu-note {
+    margin: var(--pas-2) 0 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  /* Une vraie cible : 17 px de haut collés aux cartes, l'audit la refusait. */
+  .apercu-note a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+  }
+
+  /*
+   * LE MOUVEMENT. Un cycle de 21 s, six fenêtres de 3,5 s. À la fin de chaque
+   * fenêtre, pendant la même demi-seconde, la carte de devant part vers la
+   * gauche en pivotant et la suivante monte de la pile, en fondu.
+   *
+   * Les délais sont NÉGATIFS : au chargement, chaque carte est déjà à sa place
+   * dans le cycle. Positifs, ils laisseraient les six cartes empilées devant
+   * pendant leur attente.
+   *
+   * Seules `transform` et `opacity` bougent, et jamais `scale` (voir la pile).
+   * `z-index` change par paliers : la carte de devant garde 4 jusqu'au bout de
+   * sa sortie, celle qui monte passe de 1 à 4, donc celle qui part glisse
+   * PAR-DESSUS, comme une carte qu'on écarte du doigt. Au survol, tout
+   * s'arrête : on doit pouvoir lire une affirmation jusqu'au bout.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .demo-carte {
+      animation: demo-pile 21s var(--sortie) infinite both;
+    }
+
+    .demo-carte:nth-child(2) {
+      animation-delay: -17.5s;
+    }
+
+    .demo-carte:nth-child(3) {
+      animation-delay: -14s;
+    }
+
+    .demo-carte:nth-child(4) {
+      animation-delay: -10.5s;
+    }
+
+    .demo-carte:nth-child(5) {
+      animation-delay: -7s;
+    }
+
+    .demo-carte:nth-child(6) {
+      animation-delay: -3.5s;
+    }
+
+    .demo:hover .demo-carte,
+    .demo--figee .demo-carte {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes demo-pile {
+    0%,
+    14.3% {
+      z-index: 4;
+      opacity: 1;
+      transform: none;
+    }
+
+    16.6% {
+      z-index: 4;
+      opacity: 0;
+      transform: translateX(-30%) rotate(-5deg);
+    }
+
+    16.7%,
+    97.6% {
+      z-index: 1;
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    100% {
+      z-index: 4;
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ─── La scène de l'urne ───────────────────────────────────────────────── */
+
+  /*
+   * Rien de tout ceci n'existe tant que `src/lib/demo-urne.ts` n'a pas posé
+   * `.scene-active` : pas d'urne, pas d'épinglage, pas de piste de défilement.
+   * Le script ne la pose que si le navigateur lie les animations au
+   * défilement, si « réduire les animations » n'est pas demandé, et si la
+   * scène tient dans la hauteur de l'écran.
+   */
+  .urne,
+  .urne-legende {
+    display: none;
+  }
+
+  /*
+   * La PISTE : une scène haute d'un écran, plus la distance de défilement
+   * pendant laquelle la carte tombe. La partie COLLANTE reste à l'écran
+   * pendant ce temps. La chronologie `--scene` suit la piste.
+   */
+  .scene-active .scene {
+    --scene-haut: 4.5rem;
+    height: calc(100svh - var(--scene-haut) + 110svh);
+    view-timeline-name: --scene;
+    view-timeline-axis: block;
+  }
+
+  .scene-active .scene-collante {
+    position: sticky;
+    top: var(--scene-haut);
+    height: calc(100svh - var(--scene-haut));
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--pas-2);
+  }
+
+  @media (min-width: 62rem) {
+    .scene-active .scene {
+      --scene-haut: 5.5rem;
+    }
+
+    /* Sur grand écran, les étapes restent en face de la scène épinglée. */
+    .fonctionnement.scene-active {
+      align-items: start;
+    }
+
+    .scene-active .fonctionnement-texte {
+      position: sticky;
+      top: calc(5.5rem + var(--pas-6));
+    }
+  }
+
+  .scene-active .urne {
+    display: block;
+    position: relative;
+    z-index: 2;
+    align-self: center;
+    width: min(46vw, 13rem);
+  }
+
+  @media (min-width: 62rem) {
+    .scene-active .urne {
+      width: 16rem;
+    }
+  }
+
+  /*
+   * LA QUESTION SUIVANTE monte pendant que l'autre tombe : la scène ne se vide
+   * pas. Le script la sort de la boucle (`animation: none`) le temps de la
+   * scène, puis l'y remet, resynchronisée, quand on remonte.
+   */
+  .scene-active .demo-carte.est-suivante {
+    z-index: 3;
+    opacity: 1;
+    animation: none;
+  }
+
+  .urne-dessin {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .urne-enveloppes rect {
+    fill: var(--couleur-surface-2);
+    stroke: var(--couleur-trait);
+    stroke-width: 1.5;
+  }
+
+  /* Transparente, comme une vraie : la carte se voit une fois dedans. */
+  .urne-corps {
+    fill: var(--couleur-surface);
+    fill-opacity: 0.55;
+    stroke: var(--couleur-encre-faible);
+    stroke-width: 2.5;
+  }
+
+  .urne-couvercle {
+    fill: var(--couleur-surface-2);
+    stroke: var(--couleur-encre-faible);
+    stroke-width: 2.5;
+  }
+
+  .urne-fente {
+    fill: var(--couleur-encre);
+  }
+
+  .scene-active .urne-legende {
+    display: block;
+    margin: 0;
+    text-align: center;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * LA CHUTE, liée au défilement. Seule la carte que le script a marquée
+   * `.est-devant` — celle qu'on lisait quand la démo s'est arrêtée — tombe.
+   * Trajectoire : un léger recul (l'élan), la carte se réduit à la largeur
+   * de la fente en pivotant, se redresse au-dessus, puis s'enfonce.
+   *
+   * Les distances ne se devinent pas en CSS : le script mesure la scène et
+   * écrit `--chute-haut`, `--chute-bas` (en px) et `--chute-echelle`.
+   *
+   * Ici, la carte PERD de l'échelle : réduire un texte déjà dessiné net ne le
+   * rend pas flou. C'est l'agrandissement qui le faisait.
+   */
+  @supports (view-timeline-name: --scene) {
+    .scene-active .est-devant .demo-corps {
+      transform-origin: 50% 50%;
+      animation-name: demo-chute;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --scene;
+      animation-range: contain 12% contain 78%;
+    }
+
+    .scene-active .est-suivante .demo-corps {
+      animation-name: demo-suivante;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --scene;
+      animation-range: contain 46% contain 74%;
+    }
+
+    .scene-active .urne-dessin {
+      animation-name: urne-monte;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --scene;
+      animation-range: contain 0% contain 14%;
+    }
+
+    .scene-active .urne-secousse {
+      transform-box: fill-box;
+      transform-origin: 50% 100%;
+      animation-name: urne-secousse;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --scene;
+      animation-range: contain 74% contain 86%;
+    }
+
+    .scene-active .urne-legende {
+      animation-name: urne-legende;
+      animation-duration: auto;
+      animation-timing-function: linear;
+      animation-fill-mode: both;
+      animation-timeline: --scene;
+      animation-range: contain 78% contain 90%;
+    }
+  }
+
+  @keyframes demo-chute {
+    0% {
+      transform: none;
+    }
+
+    14% {
+      transform: translateY(-10px) rotate(-1.5deg) scale(0.98);
+    }
+
+    62% {
+      transform: translateY(var(--chute-haut)) rotate(-7deg) scale(var(--chute-echelle));
+    }
+
+    74% {
+      transform: translateY(var(--chute-haut)) rotate(0deg) scale(var(--chute-echelle));
+    }
+
+    100% {
+      transform: translateY(var(--chute-bas)) rotate(0deg) scale(var(--chute-echelle));
+    }
+  }
+
+  /* Pleine avant d'être en place : à mi-fondu, on voyait la pile à travers. */
+  @keyframes demo-suivante {
+    0% {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    35% {
+      opacity: 1;
+    }
+
+    100% {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes urne-monte {
+    from {
+      opacity: 0.3;
+      transform: translateY(2rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  @keyframes urne-secousse {
+    0%,
+    100% {
+      transform: none;
+    }
+
+    40% {
+      transform: translateY(4px) scaleY(0.97);
+    }
+
+    70% {
+      transform: translateY(-2px);
+    }
+  }
+
+  @keyframes urne-legende {
+    from {
+      opacity: 0;
+      transform: translateY(0.5rem);
+    }
+
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* ─── Cartes Comprendre ────────────────────────────────────────────────── */
+
+  /*
+   * Téléphone : une rangée à faire glisser. Elle déborde jusqu'aux bords de
+   * l'écran (marges négatives), et `scroll-padding` aligne chaque carte sur la
+   * gouttière de la page. Grille à partir de 46 rem.
+   *
+   * `position: relative` : le script mesure chaque carte par `offsetLeft`,
+   * qui doit se lire depuis la rangée.
+   */
+  .cartes {
+    position: relative;
+    list-style: none;
+    display: flex;
+    gap: var(--pas-2);
+    margin: 0 calc(var(--gouttiere) * -1);
+    /* 12 px au-dessus : la carte focalisée monte de 4 px, et son contour ne doit pas être rogné. */
+    padding: var(--pas-2) var(--gouttiere);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline: var(--gouttiere);
+    scrollbar-width: none;
+  }
+
+  .cartes::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* La carte en cours est CENTRÉE : ses deux voisines dépassent de part et d'autre. */
+  .cartes li {
+    flex: 0 0 78%;
+    margin: 0;
+    scroll-snap-align: center;
+  }
+
+  /*
+   * LA CARTE EN COURS, MISE EN AVANT. Elle monte et prend l'ombre haute quand
+   * elle devient la carte en cours, et sa photo avance lentement pendant le
+   * délai, au rythme du point qui se remplit. Téléphone seulement : la grille,
+   * elle, n'a pas de carte en cours.
+   */
+  @media (max-width: 45.99rem) {
+    .cartes :global(li.est-active) .carte {
+      transform: translateY(-6px);
+      box-shadow: var(--ombre-2);
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .cartes :global(li.est-active) .carte-image img {
+        animation: carrousel-zoom var(--carrousel-delai) linear both;
+      }
+
+      .carrousel--pause .cartes :global(li.est-active) .carte-image img {
+        animation-play-state: paused;
+      }
+    }
+  }
+
+  @keyframes carrousel-zoom {
+    from {
+      transform: scale(1);
+    }
+
+    to {
+      transform: scale(1.08);
+    }
+  }
+
+  @media (min-width: 46rem) {
+    .cartes {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--pas-3);
+      margin: 0;
+      padding: 0;
+      overflow: visible;
+    }
+  }
+
+  /* Trois secondes par carte : le délai de la barre, du zoom et de l'avance. */
+  .carrousel {
+    --carrousel-delai: 3s;
+  }
+
+  /*
+   * Les commandes du carrousel : un bouton pause, puis un point par article.
+   * Le point en cours s'allonge et se remplit pendant le délai avant la carte
+   * suivante — c'est la fin de SON animation qui fait avancer le carrousel,
+   * donc la barre et le défilement ne peuvent pas se désynchroniser.
+   */
+  .carrousel-commandes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--pas-1);
+    margin-top: var(--pas-1);
+  }
+
+  .carrousel-commandes[hidden],
+  .carrousel-pause[hidden] {
+    display: none;
+  }
+
+  .carrousel-points {
+    display: flex;
+    align-items: center;
+  }
+
+  /* 44 px de haut pour le doigt, un point de 8 px pour l'œil. */
+  .carrousel-point,
+  .carrousel-pause {
+    display: grid;
+    place-items: center;
+    min-width: 24px;
+    min-height: 44px;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--couleur-encre-faible);
+    cursor: pointer;
+  }
+
+  .carrousel-pause {
+    min-width: 44px;
+  }
+
+  .carrousel-pause :global(svg) {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .icone-lecture,
+  .carrousel-pause[aria-pressed="true"] .icone-pause {
+    display: none;
+  }
+
+  .carrousel-pause[aria-pressed="true"] .icone-lecture {
+    display: inline;
+  }
+
+  .carrousel-point::before {
+    content: "";
+    display: block;
+    width: 8px;
+    height: 8px;
+    border-radius: 4px;
+    background: var(--couleur-trait);
+    background-image: linear-gradient(var(--couleur-signature), var(--couleur-signature));
+    background-repeat: no-repeat;
+    background-size: 0% 100%;
+    transition: width var(--duree) var(--sortie);
+  }
+
+  .carrousel-point[aria-current="true"]::before {
+    width: 28px;
+    background-size: 100% 100%;
+  }
+
+  /*
+   * Le remplissage. `background-size` n'est ni `transform` ni `opacity`, mais
+   * un point de 28 × 8 px ne coûte rien à repeindre, et un `scaleX` sur un
+   * pseudo-élément arrondi déformerait ses bouts.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .carrousel-point.en-cours::before {
+      animation: carrousel-minuterie var(--carrousel-delai) linear both;
+    }
+
+    .carrousel--pause .carrousel-point.en-cours::before {
+      animation-play-state: paused;
+    }
+  }
+
+  @keyframes carrousel-minuterie {
+    from {
+      background-size: 0% 100%;
+    }
+
+    to {
+      background-size: 100% 100%;
+    }
+  }
+
+  /*
+   * Grille, à partir de 46 rem : ni copies, ni commandes. Ces règles viennent
+   * APRÈS celles des commandes : à spécificité égale, la dernière gagne, et
+   * placées avant, elles laissaient les points s'afficher sur ordinateur.
+   */
+  @media (min-width: 46rem) {
+    .cartes :global(.carte-copie),
+    .carrousel-commandes,
+    .carrousel-commandes[hidden] {
+      display: none;
+    }
+  }
+
+  @media (min-width: 66rem) {
+    .cartes {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .carte {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: clip;
+    background: var(--pastel, var(--couleur-surface));
+    border-radius: var(--rayon-carte);
+    color: var(--couleur-encre);
+    text-decoration: none;
+    transition:
+      transform 220ms var(--sortie),
+      box-shadow 220ms var(--sortie);
+  }
+
+  .carte-image {
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: clip;
+  }
+
+  .carte-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 250ms var(--sortie);
+  }
+
+  .carte-texte {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: var(--pas-3);
+  }
+
+  .carte-titre {
+    font-size: var(--t-h3);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -0.018em;
+    text-wrap: balance;
+  }
+
+  .carte-resume {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    font-size: var(--t-petit);
+    line-height: 1.45;
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * Survol et focus clavier : la carte monte, la photo avance. Le survol est
+   * réservé aux pointeurs fins — sur un écran tactile, il resterait collé.
+   */
+  @media (hover: hover) and (pointer: fine) {
+    .carte:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--ombre-2);
+    }
+
+    .carte:hover .carte-image img {
+      transform: scale(1.06);
+    }
+
+    .carte:hover .carte-titre {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  /* Au clavier, le même état, mais instantané : aucune animation sur une action clavier. */
+  .carte:focus-visible {
+    transform: translateY(-4px);
+    box-shadow: var(--ombre-2);
+    transition: none;
+  }
+
+  .carte:focus-visible .carte-image img {
+    transform: scale(1.06);
+    transition: none;
+  }
+
+  /* ─── Preuves de confiance ─────────────────────────────────────────────── */
+
+  .preuves {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--pas-4);
+  }
+
+  @media (min-width: 62rem) {
+    .preuves {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--pas-4);
+    }
+  }
+
+  /*
+   * Le trait, pas la boîte : un filet au-dessus de chaque preuve, comme les
+   * schémas de /comprendre. Sur téléphone, l'icône à gauche du texte ; en
+   * colonnes, au-dessus.
+   */
+  .preuves li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: var(--pas-2);
+    align-content: start;
+    margin: 0;
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .preuves li > :not(.preuve-puce) {
+    grid-column: 2;
+  }
+
+  .preuve-puce {
+    display: inline-grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--pastel, var(--pastel-violet));
+    color: var(--vif, var(--couleur-signature));
+  }
+
+  .preuve-puce {
+    grid-row: 1 / span 3;
+  }
+
+  @media (min-width: 62rem) {
+    .preuves li {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .preuves li > :not(.preuve-puce) {
+      grid-column: 1;
+    }
+
+    .preuve-puce {
+      grid-row: auto;
+      margin-bottom: var(--pas-2);
+    }
+  }
+
+  .preuve-puce :global(svg) {
+    width: 1.35rem;
+    height: 1.35rem;
+  }
+
+  .preuves h3 {
+    margin: 0.35rem 0 0.4rem;
+    font-size: var(--t-h3);
+  }
+
+  .preuves p {
+    margin: 0 0 var(--pas-2);
+    color: var(--couleur-encre-faible);
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  /* Zone de confort tactile : la cible grandit, la mise en page ne bouge pas. */
+  .preuves a {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    margin-block: -0.4rem;
+    padding-block: 0.4rem;
+    font-weight: 600;
+    font-size: 0.9375rem;
+  }
+
+  /* ─── Promesse d'anonymat ──────────────────────────────────────────────── */
+
+  /*
+   * Sans icône : posée au-dessus du titre, elle ajoutait une ligne entière pour
+   * un pictogramme de 48 px. Sur grand écran, titre et texte côte à côte : un
+   * bloc large et bas plutôt qu'une colonne étroite au milieu d'un grand vide.
+   */
+  .promesse {
+    display: grid;
+    gap: var(--pas-3);
+    background: var(--couleur-surface-2);
+    border-radius: var(--rayon-carte-l);
+    padding: var(--pas-5) var(--pas-3);
+  }
+
+  @media (min-width: 48rem) {
+    .promesse {
+      padding: var(--pas-5);
+    }
+  }
+
+  @media (min-width: 62rem) {
+    .promesse {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: center;
+      column-gap: var(--pas-6);
+      padding: var(--pas-6) var(--pas-5);
+    }
+  }
+
+  .promesse h2 {
+    margin: 0;
+    max-width: 22ch;
+  }
+
+  .promesse p {
+    margin: 0;
+    color: var(--couleur-encre-faible);
+    max-width: 54ch;
+  }
+
+  /* ─── Appel final ──────────────────────────────────────────────────────── */
+
+  .final {
+    text-align: center;
+    padding-block: var(--pas-6);
+  }
+
+  .final h2 {
+    margin-top: 0;
+    margin-inline: auto;
+    max-width: 20ch;
+  }
+
+  .final p {
+    margin: 0 auto var(--pas-4);
+    max-width: 40ch;
+    color: var(--couleur-encre-faible);
+  }
+
+  .plus-loin ul {
     display: flex;
     flex-wrap: wrap;
-    gap: var(--pas-1);
+    justify-content: center;
+    gap: var(--pas-1) var(--pas-4);
     list-style: none;
     margin: var(--pas-5) 0 0;
     padding: 0;
   }
 
-  .demo-themes li {
-    position: relative;
+  .plus-loin li {
     margin: 0;
-    padding: 0.25rem 0.7rem 0.4rem;
-    border-radius: var(--rayon-actionnable);
-    background: var(--couleur-surface);
-    border: 1px solid var(--couleur-trait);
-    font-size: 0.8125rem;
-    color: var(--couleur-encre-faible);
-    overflow: hidden;
+  }
+
+  .plus-loin a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
   }
 
   /*
-   * Sur téléphone, six étiquettes prenaient quatre lignes. Elles deviennent une
-   * barre de six segments : le thème en cours est déjà écrit dans la carte.
-   */
-  @media (max-width: 47.99rem) {
-    .demo-themes {
-      flex-wrap: nowrap;
-      gap: 4px;
-      margin-top: var(--pas-4);
-    }
-
-    .demo-themes li {
-      flex: 1;
-      height: 6px;
-      padding: 0;
-      border: 0;
-      border-radius: 3px;
-      background: var(--couleur-trait);
-    }
-
-    /* Retiré, pas rendu illisible : un texte à taille nulle reste un texte. */
-    .demo-themes span {
-      display: none;
-    }
-
-    .demo-themes li::after {
-      height: 100%;
-    }
-  }
-
-  .demo-themes li::after {
-    content: "";
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    height: 3px;
-    background: var(--couleur-signature);
-    transform: scaleX(0);
-    transform-origin: left center;
-  }
-
-  /*
-   * LE MOUVEMENT. Un cycle de 21 s, six fenêtres de 3,5 s : chaque affirmation
-   * entre par le bas en fondu (0,5 s, courbe de sortie), reste lisible trois
-   * secondes, puis sort vers le haut. Le filet de son thème se remplit pendant
-   * ce temps, à vitesse constante. Le décalage se porte par `nth-child` : il
-   * y a six thèmes, un invariant d'audit le garantit.
+   * ─── DÉFILEMENT ──────────────────────────────────────────────────────────
    *
-   * Seules `transform` et `opacity` bougent. Au survol, tout s'arrête : on doit
-   * pouvoir lire une affirmation jusqu'au bout.
+   * Trois filets, comme `.revele` dans base.css : `no-preference`, `@supports`,
+   * et un état par défaut VISIBLE. Propriétés détaillées, jamais le raccourci
+   * `animation` : le minifieur le fusionne avec `animation-timeline` en une
+   * valeur que Chrome rejette.
+   *
+   * AUCUN TEXTE NE PERD DE CONTRASTE, même avant qu'on ait défilé. Un audit
+   * (Lighthouse, axe) lit la page sans la faire défiler : des mots à 25 %
+   * d'opacité y comptaient comme des textes illisibles, et l'accessibilité
+   * était tombée de 100 à 96. Le texte bouge donc par `transform`, ou change
+   * de couleur entre deux teintes qui passent AA ; l'opacité ne touche que les
+   * images et les formes.
    */
   @media (prefers-reduced-motion: no-preference) {
-    .demo-diapo,
-    .demo-diapo:not(:first-child) {
-      animation: demo-diapo 21s var(--sortie) infinite both;
-    }
+    @supports (animation-timeline: view()) {
+      /*
+       * Le cadre de la photo s'ouvre jusqu'aux bords de l'écran. La plage
+       * commence là où la photo se trouve au chargement : elle est donc
+       * encore à la largeur de la page tant qu'on n'a pas défilé.
+       */
+      .hero-media {
+        animation-name: accueil-photo;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 85% cover 62%;
+      }
 
-    .demo-themes li::after {
-      animation: demo-minuterie 21s linear infinite both;
-    }
+      .hero-media img {
+        animation-name: accueil-parallaxe;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 100%;
+      }
 
-    .demo-diapo:nth-child(2),
-    .demo-themes li:nth-child(2)::after {
-      animation-delay: 3.5s;
-    }
+      /* Le texte de l'accroche prend de l'avance en sortant par le haut : la photo passe dessous. */
+      .hero-texte {
+        animation-name: accueil-sortie;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 100%;
+      }
 
-    .demo-diapo:nth-child(3),
-    .demo-themes li:nth-child(3)::after {
-      animation-delay: 7s;
-    }
+      /*
+       * La phrase courte s'allume mot à mot, dans l'ordre de lecture : tous les
+       * mots suivent la chronologie du PARAGRAPHE, chacun sur sa tranche.
+       * Une chronologie par mot allumait une ligne entière d'un coup.
+       */
+      .manifeste {
+        --mots: 8;
+        view-timeline-name: --manifeste;
+      }
 
-    .demo-diapo:nth-child(4),
-    .demo-themes li:nth-child(4)::after {
-      animation-delay: 10.5s;
-    }
+      /*
+       * Le rang de chaque mot, par sa place : un `style="--rang: 3"` posé au
+       * build serait bloqué par la CSP, qui n'autorise aucun style en ligne.
+       * Douze rangs couvrent la phrase ; `--mots` doit suivre sa longueur.
+       */
+      .mot {
+        --rang: 0;
+      }
 
-    .demo-diapo:nth-child(5),
-    .demo-themes li:nth-child(5)::after {
-      animation-delay: 14s;
-    }
+      .mot:nth-child(2) {
+        --rang: 1;
+      }
 
-    .demo-diapo:nth-child(6),
-    .demo-themes li:nth-child(6)::after {
-      animation-delay: 17.5s;
-    }
+      .mot:nth-child(3) {
+        --rang: 2;
+      }
 
-    .demo:hover .demo-diapo,
-    .demo:hover .demo-themes li::after {
-      animation-play-state: paused;
-    }
-  }
+      .mot:nth-child(4) {
+        --rang: 3;
+      }
 
-  @keyframes demo-diapo {
-    0% {
-      opacity: 0;
-      transform: translateY(14px);
-    }
+      .mot:nth-child(5) {
+        --rang: 4;
+      }
 
-    2.4% {
-      opacity: 1;
-      transform: none;
-    }
+      .mot:nth-child(6) {
+        --rang: 5;
+      }
 
-    14.3% {
-      opacity: 1;
-      transform: none;
-    }
+      .mot:nth-child(7) {
+        --rang: 6;
+      }
 
-    16.6% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
+      .mot:nth-child(8) {
+        --rang: 7;
+      }
 
-    100% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-  }
+      .mot:nth-child(9) {
+        --rang: 8;
+      }
 
-  @keyframes demo-minuterie {
-    0% {
-      transform: scaleX(0);
-      opacity: 1;
-    }
+      .mot:nth-child(10) {
+        --rang: 9;
+      }
 
-    16.6% {
-      transform: scaleX(1);
-      opacity: 1;
-    }
+      .mot:nth-child(11) {
+        --rang: 10;
+      }
 
-    17.5% {
-      transform: scaleX(1);
-      opacity: 0;
-    }
+      .mot:nth-child(12) {
+        --rang: 11;
+      }
 
-    100% {
-      transform: scaleX(0);
-      opacity: 0;
+      .mot {
+        --tranche: calc(30% / var(--mots));
+        animation-name: accueil-mot;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: --manifeste;
+        animation-range: cover calc(22% + var(--rang) * var(--tranche)) cover
+          calc(22% + (var(--rang) + 1.6) * var(--tranche));
+      }
+
+      /*
+       * Carrousel : la carte au centre de la rangée est pleine, celles qui
+       * entrent et sortent sont en retrait. La chronologie est celle du
+       * défilement HORIZONTAL de la rangée. Seule la PHOTO s'estompe : un
+       * texte estompé compte comme illisible pour un audit, et une carte qui
+       * s'agrandit en défilant sortait floue sur Safari.
+       */
+      @media (max-width: 45.99rem) {
+        .cartes .carte-image {
+          animation-name: accueil-carrousel;
+          animation-duration: auto;
+          animation-timing-function: linear;
+          animation-fill-mode: both;
+          animation-timeline: view(inline);
+          animation-range: cover 0% cover 100%;
+        }
+      }
+
+      /* Grille : les cartes et les preuves montent en cascade. */
+      @media (min-width: 46rem) {
+        .cartes li,
+        .preuves li {
+          animation-name: accueil-monte;
+          animation-duration: auto;
+          animation-timing-function: linear;
+          animation-fill-mode: both;
+          animation-timeline: view();
+          animation-range: entry 0% entry 55%;
+        }
+
+        .cartes li:nth-child(3n + 2),
+        .preuves li:nth-child(2) {
+          animation-range: entry 10% entry 65%;
+        }
+
+        .cartes li:nth-child(3n),
+        .preuves li:nth-child(3) {
+          animation-range: entry 20% entry 75%;
+        }
+      }
+
+      @keyframes accueil-photo {
+        from {
+          clip-path: inset(0 var(--retrait) round var(--rayon-carte-l));
+        }
+
+        to {
+          clip-path: inset(0 0 round 0);
+        }
+      }
+
+      @keyframes accueil-parallaxe {
+        from {
+          transform: scale(1.12) translateY(-4%);
+        }
+
+        to {
+          transform: scale(1.12) translateY(4%);
+        }
+      }
+
+      @keyframes accueil-sortie {
+        to {
+          transform: translateY(-3rem);
+        }
+      }
+
+      /* Du gris au noir : les deux teintes passent AA, le mot est lisible à tout instant. */
+      @keyframes accueil-mot {
+        from {
+          color: var(--couleur-encre-faible);
+        }
+
+        to {
+          color: var(--couleur-encre);
+        }
+      }
+
+      @keyframes accueil-carrousel {
+        0%,
+        100% {
+          opacity: 0.55;
+        }
+
+        40%,
+        60% {
+          opacity: 1;
+        }
+      }
+
+      @keyframes accueil-monte {
+        from {
+          transform: translateY(1.5rem);
+        }
+
+        to {
+          transform: none;
+        }
+      }
     }
   }
 </style>

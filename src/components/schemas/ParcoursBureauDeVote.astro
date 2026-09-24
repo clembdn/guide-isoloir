@@ -3,9 +3,10 @@
  * Schéma : le parcours dans un bureau de vote, sur le rail commun des schémas.
  *
  * Six étapes, un nœud par étape avec son icône, dans la teinte de l'étape.
- * L'isoloir est mis en avant par un nœud plus grand, dans la couleur
- * signature, avec le signe du site : c'est l'étape qu'on croit facultative, et
- * l'article insiste pour dire qu'elle ne l'est pas.
+ * L'isoloir est mis en avant par la couleur signature et le signe du site :
+ * c'est l'étape qu'on croit facultative, et l'article insiste pour dire
+ * qu'elle ne l'est pas. Même TAILLE que les autres nœuds (25 septembre 2026) :
+ * plus grand, il cassait l'alignement du rail et jurait avec le reste.
  *
  * Écartés : une ligne droite de stations sans structure (23 septembre 2026) ;
  * six cases bordées en zigzag reliées par des vagues (24 septembre 2026) —
@@ -116,22 +117,8 @@ const isoloir = signeIsoloir
     line-height: 1.45;
   }
 
-  /*
-   * L'ISOLOIR : un nœud plus grand, dans la couleur signature, qui déborde du
-   * rail. Le texte reste aligné sur la même colonne que les autres étapes.
-   */
+  /* L'ISOLOIR : la couleur signature, à la même taille que les autres nœuds. */
   .etape--cle .rail-noeud {
-    width: 3.5rem;
-    height: 3.5rem;
-    margin-left: calc((var(--noeud) - 3.5rem) / 2);
     background: var(--couleur-signature);
-  }
-
-  .etape--cle .rail-texte {
-    padding-top: calc(1.75rem - 0.75em);
-  }
-
-  .etape--cle .rail-texte strong {
-    font-size: 1.1875rem;
   }
 </style>

@@ -13,6 +13,7 @@ import { SITE_URL } from "../lib/site";
 import { articlesPublies } from "../lib/comprendre";
 import { DONNEES_MISES_A_JOUR, fiches, pagesThemes } from "../lib/fiches";
 import { MEDIAS_RELEVES_LE } from "../data/medias";
+import { ILLUSTRATIONS } from "../data/illustrations";
 import { MISES_A_JOUR } from "../lib/mises-a-jour";
 
 type SitemapEntry = {
@@ -35,7 +36,11 @@ type SitemapEntry = {
  */
 const PAGES_FIXES: readonly SitemapEntry[] = [
   ...Object.entries(MISES_A_JOUR).map(([path, lastmod]) => ({ path, lastmod })),
-  { path: "/credits-images", lastmod: MEDIAS_RELEVES_LE },
+  /* La page de crédits change avec les portraits ET avec les photographies de scène. */
+  {
+    path: "/credits-images",
+    lastmod: [MEDIAS_RELEVES_LE, ...ILLUSTRATIONS.map((item) => item.releveeLe)].sort().at(-1)!,
+  },
 ];
 
 export const GET: APIRoute = async () => {

@@ -47,10 +47,18 @@ export type Illustration = {
   licenceUrl: string;
   /** Retouches appliquées. Les taire rendrait le crédit incomplet. */
   retouches: string;
+  /** Date du relevé de la licence. Un relevé vieillit : le republier le dit. */
+  releveeLe: string;
 };
 
-/** Date du relevé des licences. Un relevé vieillit : le republier le dit. */
-export const ILLUSTRATIONS_RELEVEES_LE = "2026-09-22";
+/*
+ * LES CARTES « COMPRENDRE » DE L'ACCUEIL. Une photographie par article, sous
+ * l'identifiant de l'article. Elles sont téléchargées et recadrées par
+ * `scripts/recuperer-illustrations.mjs`, qui vérifie la licence au passage et
+ * porte les recadrages par écrit — deux d'entre eux sortent du champ un ruban
+ * et un bandeau tricolores. Un article sans entrée ici a une carte sans image.
+ */
+const RETOUCHES_CARTE = "recadrée au format 16:10, redimensionnée, convertie en WebP";
 
 export const ILLUSTRATIONS: readonly Illustration[] = [
   {
@@ -69,6 +77,111 @@ export const ILLUSTRATIONS: readonly Illustration[] = [
     licence: "CC BY-SA 3.0",
     licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0/deed.fr",
     retouches: "recadrée, luminosité et saturation relevées, convertie en WebP",
+    releveeLe: "2026-09-22",
+  },
+  {
+    id: "pour-qui-voter-en-2027",
+    cheminLarge: "/medias/scenes/pour-qui-voter-en-2027-large.webp",
+    cheminEtroit: "/medias/scenes/pour-qui-voter-en-2027-etroit.webp",
+    largeurLarge: 800,
+    hauteurLarge: 500,
+    largeurEtroit: 480,
+    hauteurEtroit: 300,
+    alt: "Une rangée d'isoloirs aux rideaux bleus ouverts, dans une salle de bureau de vote.",
+    fichierCommons: "Isoloirs J1.jpg",
+    pageCommons: "https://commons.wikimedia.org/wiki/File:Isoloirs_J1.jpg",
+    auteur: "Jamain",
+    licence: "CC BY 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by/4.0/deed.fr",
+    retouches: RETOUCHES_CARTE,
+    releveeLe: "2026-09-24",
+  },
+  {
+    id: "ce-qu-un-president-decide-seul",
+    cheminLarge: "/medias/scenes/ce-qu-un-president-decide-seul-large.webp",
+    cheminEtroit: "/medias/scenes/ce-qu-un-president-decide-seul-etroit.webp",
+    largeurLarge: 800,
+    hauteurLarge: 500,
+    largeurEtroit: 480,
+    hauteurEtroit: 300,
+    alt: "Le texte original de la Constitution de 1958, ouvert sur les pages des signatures.",
+    fichierCommons: "Constitution de 1958.jpg",
+    pageCommons: "https://commons.wikimedia.org/wiki/File:Constitution_de_1958.jpg",
+    auteur: "Tangopaso",
+    licence: "domaine public",
+    licenceUrl: "",
+    retouches: `${RETOUCHES_CARTE} ; le ruban tricolore et le sceau sont laissés hors champ`,
+    releveeLe: "2026-09-24",
+  },
+  {
+    id: "s-inscrire-sur-les-listes-electorales",
+    cheminLarge: "/medias/scenes/s-inscrire-sur-les-listes-electorales-large.webp",
+    cheminEtroit: "/medias/scenes/s-inscrire-sur-les-listes-electorales-etroit.webp",
+    largeurLarge: 800,
+    hauteurLarge: 500,
+    largeurEtroit: 480,
+    hauteurEtroit: 300,
+    alt: "Une carte électorale posée sur des enveloppes de vote.",
+    fichierCommons: "Carte électorale Vote France.JPG",
+    pageCommons: "https://commons.wikimedia.org/wiki/File:Carte_%C3%A9lectorale_Vote_France.JPG",
+    auteur: "Ksiamon",
+    licence: "CC BY-SA 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0/deed.fr",
+    retouches: `${RETOUCHES_CARTE} ; le bandeau tricolore de la carte est laissé hors champ`,
+    releveeLe: "2026-09-24",
+  },
+  {
+    id: "ou-et-comment-voter",
+    cheminLarge: "/medias/scenes/ou-et-comment-voter-large.webp",
+    cheminEtroit: "/medias/scenes/ou-et-comment-voter-etroit.webp",
+    largeurLarge: 800,
+    hauteurLarge: 500,
+    largeurEtroit: 480,
+    hauteurEtroit: 300,
+    alt: "Une urne transparente sur une table de bureau de vote, avant l'arrivée des électeurs.",
+    fichierCommons: "Villemanoche-FR-89-présidentielles 2022-c07.jpg",
+    pageCommons:
+      "https://commons.wikimedia.org/wiki/File:Villemanoche-FR-89-pr%C3%A9sidentielles_2022-c07.jpg",
+    auteur: "François Goglins",
+    licence: "CC BY-SA 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0/deed.fr",
+    retouches: RETOUCHES_CARTE,
+    releveeLe: "2026-09-24",
+  },
+  {
+    id: "qu-est-ce-qu-un-parrainage",
+    cheminLarge: "/medias/scenes/qu-est-ce-qu-un-parrainage-large.webp",
+    cheminEtroit: "/medias/scenes/qu-est-ce-qu-un-parrainage-etroit.webp",
+    largeurLarge: 800,
+    hauteurLarge: 500,
+    largeurEtroit: 480,
+    hauteurEtroit: 300,
+    alt: "La porte du Conseil constitutionnel, surmontée de son nom, entre deux colonnes.",
+    fichierCommons: "Conseil Constitutionnel Paris.jpg",
+    pageCommons: "https://commons.wikimedia.org/wiki/File:Conseil_Constitutionnel_Paris.jpg",
+    auteur: "Jebulon",
+    licence: "CC0",
+    licenceUrl: "https://creativecommons.org/publicdomain/zero/1.0/deed.fr",
+    retouches: RETOUCHES_CARTE,
+    releveeLe: "2026-09-24",
+  },
+  {
+    id: "donner-procuration",
+    cheminLarge: "/medias/scenes/donner-procuration-large.webp",
+    cheminEtroit: "/medias/scenes/donner-procuration-etroit.webp",
+    largeurLarge: 800,
+    hauteurLarge: 500,
+    largeurEtroit: 480,
+    hauteurEtroit: 300,
+    alt: "Une urne remplie d'enveloppes, tenue par les assesseurs d'un bureau de vote.",
+    fichierCommons: "Election presidentielle 2007 Montauban Urne 197.jpg",
+    pageCommons:
+      "https://commons.wikimedia.org/wiki/File:Election_presidentielle_2007_Montauban_Urne_197.jpg",
+    auteur: "Ceridwen",
+    licence: "CC BY-SA 2.0 FR",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0/fr/deed.fr",
+    retouches: RETOUCHES_CARTE,
+    releveeLe: "2026-09-24",
   },
 ];
 
