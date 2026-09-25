@@ -40,7 +40,7 @@ const PAGES: readonly Entree[] = [
     chemin: "/candidats",
     titre: "Candidats",
     resume:
-      "les candidats suivis, par ordre alphabétique, avec leur statut de candidature daté et sourcé",
+      "les candidats suivis, par ordre alphabétique, avec l'étape de leur candidature, datée et sourcée, et un aperçu de leur programme",
   },
   {
     chemin: "/themes",
@@ -115,7 +115,7 @@ export const GET: APIRoute = async () => {
       fiche.documentees === 0
         ? "aucune position documentée à ce jour"
         : `position documentée sur ${fiche.documentees} des ${NOMBRE_AFFIRMATIONS} affirmations`;
-    return `- [${fiche.acteur.name}](${lien(`/candidats/${fiche.acteur.slug}`)}) : ${LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status].toLowerCase()}${fiche.parti ? `, ${fiche.parti.nom}` : ""} ; ${couverture}.`;
+    return `- [${fiche.acteur.name}](${lien(`/candidats/${fiche.acteur.slug}`)}) : ${LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status].toLowerCase()}${fiche.parti ? `, ${fiche.parti.nom}` : ""}${fiche.reserve ? " (sous réserve, voir la fiche)" : ""} ; programme : ${fiche.programme.court.toLowerCase()} ; ${couverture}.`;
   });
 
   const texte = `# Guide Isoloir
@@ -176,9 +176,10 @@ ${EDITOR_NAME ? `- Le site est édité par ${EDITOR_NAME}, nommément. Citez ce 
 
 ## Données structurées
 
-- [Export complet, JSON](${lien("/donnees/guide-isoloir-2027.json")}) : affirmations, échelle, chaîne de résolution, acteurs, candidatures, positions, sources et positions retenues.
+- [Export complet, JSON](${lien("/donnees/guide-isoloir-2027.json")}) : affirmations, échelle, chaîne de résolution, acteurs, candidatures, positions, sources, positions retenues, propositions et états de programme.
 - [Positions retenues, CSV](${lien("/donnees/positions-retenues.csv")}) : une ligne par couple candidat et affirmation, telle que le test la compte.
 - [Positions codées, CSV](${lien("/donnees/positions.csv")}) : une ligne par position, avec citation, justification et sources.
+- [Propositions de programme, CSV](${lien("/donnees/propositions.csv")}) : une ligne par proposition relevée, avec citation, nature du document et sources. Hors score.
 
 ## Pages
 

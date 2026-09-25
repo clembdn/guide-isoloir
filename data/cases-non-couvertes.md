@@ -192,6 +192,50 @@ Le corriger suppose une décision éditoriale — inverser l'ordre des deux mail
 départager par la date de déclaration — qui dépasse une mise à jour de données. À trancher avant
 la prochaine campagne de codage.
 
+## Relevé du 25 septembre 2026
+
+### Les Écologistes (`parti-les-ecologistes`)
+
+Document lu : [Projet 2027, 557 mesures](https://lesecologistes.fr/document/3N4JsAEmq6vsx42IITGNZa/vdef-programme-1.pdf),
+PDF modifié le 25 août 2026, passé au crible des 24 affirmations. 17 cases codées ; les 7
+ci-dessous sont vides.
+
+| questionId                                    | Constat                                                                                                                                                                                       |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `retraites-indexation-esperance-vie`          | Muet. « Espérance de vie » n'apparaît que dans des constats, jamais à propos de l'âge de départ.                                                                                              |
+| `fiscalite-bareme-unique-capital-travail`     | Aborde sans répondre. « Taxer plus fortement le capital que le travail », mais en augmentant la flat tax de 3 points : le prélèvement forfaitaire est gardé, pas remplacé par le barème.      |
+| `chomage-reduction-duree-indemnisation`       | Aborde sans répondre. Le programme abroge « les réformes régressives » et nomme celle du calcul de l'allocation, qui porte sur le montant, pas sur la durée. Coder supposerait une inférence. |
+| `immigration-plafond-titres-sejour`           | Muet sur un plafond. Le programme traite du renouvellement des titres et du regroupement familial, pas d'un nombre annuel.                                                                    |
+| `institutions-elargissement-champ-referendum` | Muet. Le RIC propositionnel ou abrogatif est codé sur l'affirmation voisine ; rien sur l'article 11 ni sur la politique migratoire.                                                           |
+| `europe-controles-frontieres-schengen`        | Muet. Aucune occurrence de Schengen.                                                                                                                                                          |
+| `europe-opposition-parlementaire-traite`      | Muet. Le programme veut réformer les traités, pas permettre au Parlement de s'opposer à leur application.                                                                                     |
+
+### Le conflit de chaîne, tranché pour un seul cas
+
+La section précédente laissait ouvert le conflit entre un contrat de coalition de 2024 et une
+ligne de parti récente. Il est tranché **pour Marine Tondelier seulement**, par une règle écrite
+dans `src/data/acteurs.ts` : un programme de parti publié POUR 2027 passe avant le contrat du NFP.
+Les Écologistes sont le seul parti signataire à en avoir publié un ; leur candidate reprend donc
+d'abord Les Écologistes, puis le NFP pour ce que leur programme ne couvre pas. La position du PS
+sur les 62 ans, rapportée par la presse et non tirée d'un programme, reste non codée : la règle ne
+la débloque pas.
+
+### Candidats ajoutés, et positions tirées des sources de statut
+
+- **Nathalie Arthaud** : le discours du 24 mai 2026 publié par Lutte ouvrière est lisible ; deux
+  cases codées (régularisation, plafond des titres de séjour).
+- **Selma Labib** : trois cases codées, depuis une intervention d'avril 2024 antérieure à sa
+  candidature, signalée comme telle. La recherche préparatoire lui attribuait une intervention de
+  septembre 2026 sur la liberté de circulation : la phrase venait en réalité d'un orateur de
+  Révolution permanente. Non reprise.
+- **Anasse Kazib** : deux cases (retraite à 60 ans, régularisation), depuis le compte rendu de son
+  mouvement. Le SMIC à 2 000 € n'est pas une affirmation du test ; il figure dans ses propositions,
+  sans préciser brut ou net, parce que la source ne le précise pas.
+- **Clara Egger** : la case du RIC passe de la reprise de son parti à son propre programme.
+- **Olivier Becht, Olivier Faure, Jérôme Guedj, Emmanuel Maurel, Ségolène Royal, François
+  Ruffin** : aucune source lue ne répond à l'une des 24 affirmations. Faure et Guedj reprennent le
+  contrat du NFP comme les autres candidats du PS.
+
 ## Ce qui manque encore, par ordre de rendement
 
 État au 20 septembre 2026 : **93 positions, 31 sources, 12 candidats sur 20 documentés**, dont

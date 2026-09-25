@@ -20,26 +20,41 @@ import {
   type SourceInfobulle,
 } from "./questions";
 import {
+  DOMAINES_PROPOSITION,
   positionsPubliables,
   validerActeurs,
   validerCandidatures,
+  validerEtatsProgramme,
   validerPositions,
+  validerPropositions,
   validerSourcesPositions,
   type SourcePosition,
 } from "./acteurs";
 import { positionsServies } from "./previsualisation";
 import { creerResolveur, NIVEAUX_RESOLUTION, type PositionResolue } from "./moteur";
-import { dateAnterieureALaCampagne } from "./seuils";
+import { dateAnterieureALaCampagne, SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT } from "./seuils";
 import {
   trierParNomAlphabetique,
   type Candidate,
+  type EtatProgramme,
   type PoliticalActor,
+  type Proposition,
   type StanceAdequation,
 } from "./modele";
+import {
+  ETAPES_CANDIDATURE,
+  LIBELLES_DOMAINE,
+  LIBELLES_ETAT_PROGRAMME,
+  LIBELLES_ETAT_PROGRAMME_COURT,
+  LIBELLES_NATURE_PROPOSITION,
+  LIBELLES_STATUT_CANDIDATURE,
+  ORDRE_NATURE_PROPOSITION,
+} from "./libelles";
 import { QUESTIONS, SOURCES_INFOBULLES } from "../data/questions";
 import { ACTEURS, CANDIDATURES } from "../data/acteurs";
 import { POSITIONS } from "../data/positions";
 import { SOURCES_POSITIONS } from "../data/sources-positions";
+import { ETATS_PROGRAMME, PROPOSITIONS } from "../data/programmes";
 import { media } from "../data/medias";
 import { THEMES_PUBLIES } from "../data/themes";
 import { ECHELLE } from "./echelle";
@@ -52,10 +67,22 @@ import { ECHELLE } from "./echelle";
 const questions = validerQuestions(QUESTIONS);
 const sourcesInfobulles = validerSourcesInfobulles(SOURCES_INFOBULLES, questions);
 const acteurs = validerActeurs(ACTEURS);
-const candidatures = validerCandidatures(CANDIDATURES, acteurs);
 const sources = validerSourcesPositions(SOURCES_POSITIONS);
+const candidatures = validerCandidatures(CANDIDATURES, acteurs, sources);
 const toutesPositions = validerPositions(POSITIONS, { acteurs, questions, sources });
 const positions = positionsServies(toutesPositions);
+const toutesPropositions = validerPropositions(PROPOSITIONS, {
+  acteurs,
+  sources,
+  seuilCampagne: SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT,
+});
+/*
+ * Même règle que les positions : un brouillon n'est servi qu'en
+ * prévisualisation. `positionsServies` ne regarde que `reviewStatus`, et vaut
+ * donc pour les deux registres.
+ */
+const propositions = positionsServies(toutesPropositions);
+const etatsProgramme = validerEtatsProgramme(ETATS_PROGRAMME, { candidatures, sources });
 
 const resoudre = creerResolveur({ positions, candidatures, annuaire: acteurs });
 const acteurParId = new Map(acteurs.map((acteur) => [acteur.id, acteur]));
@@ -123,10 +150,48 @@ export type EntreeFiche = {
   dateAncienne: string | null;
 };
 
+/** Une proposition prête à afficher : ses sources résolues, ses libellés, sa date. */
+export type PropositionFiche = Proposition & {
+  sources: SourcePosition[];
+  /** Nom du parti quand la proposition vient d'un document du parti, sinon `null`. */
+  auteur: string | null;
+  natureLibelle: string;
+  domaineLibelle: string;
+  /** Date de la source la plus récente : celle qu'on affiche. */
+  date: string;
+  /** Date à signaler si toutes les sources précèdent la campagne. */
+  dateAncienne: string | null;
+};
+
+/** Où en est la candidature : le tag de la liste et de la fiche. */
+export type EtapeFiche = {
+  /** 1 à 4, ou `null` pour une candidature close. */
+  rang: 1 | 2 | 3 | 4 | null;
+  court: string;
+  /** Libellé complet du statut, celui de `LIBELLES_STATUT_CANDIDATURE`. */
+  long: string;
+};
+
 export type Fiche = {
   acteur: PoliticalActor;
   candidature: Candidate;
   statutSources: SourcePosition[];
+  etape: EtapeFiche;
+  reserve: { texte: string; sources: SourcePosition[] } | null;
+  programme: {
+    etat: EtatProgramme["etat"];
+    libelle: string;
+    court: string;
+    texte: string;
+    sources: SourcePosition[];
+  };
+  /** Mesures précises, groupées par domaine dans l'ordre de l'énumération. */
+  mesures: { domaine: string; libelle: string; propositions: PropositionFiche[] }[];
+  orientations: PropositionFiche[];
+  /** Nombre total de propositions affichées, mesures et orientations. */
+  nombrePropositions: number;
+  /** Trois propositions au plus pour l'aperçu de la liste. Règle : `ordrePropositions`. */
+  apercu: PropositionFiche[];
   parti: { nom: string; logo: string | null } | null;
   portrait: string | null;
   /** Affirmations documentées, regroupées par thème dans l'ordre du test. */
@@ -140,6 +205,65 @@ export type Fiche = {
   /** Date de la donnée la plus récente de la fiche. */
   misAJour: string;
 };
+
+const RANG_NATURE = new Map(ORDRE_NATURE_PROPOSITION.map((nature, rang) => [nature, rang]));
+const etatParActeur = new Map(etatsProgramme.map((etat) => [etat.actorId, etat]));
+
+function resoudreSources(ids: readonly string[]): SourcePosition[] {
+  return ids
+    .map((id) => sourceParId.get(id))
+    .filter((source): source is SourcePosition => source !== undefined);
+}
+
+function propositionFiche(proposition: Proposition, candidatId: string): PropositionFiche {
+  const sourcesProposition = resoudreSources(proposition.sourceIds);
+  const dates = sourcesProposition.map((source) => source.dateDeclaration);
+  return {
+    ...proposition,
+    sources: sourcesProposition,
+    auteur:
+      proposition.actorId === candidatId
+        ? null
+        : (acteurParId.get(proposition.actorId)?.name ?? proposition.actorId),
+    natureLibelle: LIBELLES_NATURE_PROPOSITION[proposition.nature],
+    domaineLibelle: LIBELLES_DOMAINE[proposition.domaine],
+    date: dates.reduce((a, b) => (a > b ? a : b)),
+    dateAncienne: dateAnterieureALaCampagne(dates),
+  };
+}
+
+/**
+ * ORDRE DES PROPOSITIONS, et donc de l'aperçu : une règle mécanique, publiée
+ * sur `/methodologie`, jamais un choix de « mesures phares ».
+ *
+ *   1. une mesure avant une orientation ;
+ *   2. la nature la plus engageante pour 2027 d'abord (`ORDRE_NATURE_PROPOSITION`) ;
+ *   3. la plus récente d'abord ;
+ *   4. l'identifiant, pour que l'ordre ne dépende jamais de celui du fichier.
+ */
+export function ordrePropositions(a: PropositionFiche, b: PropositionFiche): number {
+  return (
+    Number(a.portee === "orientation") - Number(b.portee === "orientation") ||
+    (RANG_NATURE.get(a.nature) ?? 99) - (RANG_NATURE.get(b.nature) ?? 99) ||
+    b.date.localeCompare(a.date) ||
+    a.id.localeCompare(b.id)
+  );
+}
+
+/**
+ * Propositions d'un candidat : les siennes, puis celles des acteurs de sa
+ * chaîne de reprise, qui restent nommées comme telles. Un contre-budget de
+ * groupe parlementaire n'est pas un engagement personnel, mais c'est la
+ * matière la plus proche d'un programme dont on dispose pour certains
+ * candidats ; le taire serait aussi trompeur que le leur attribuer.
+ */
+function propositionsDe(candidature: Candidate): PropositionFiche[] {
+  const auteurs = new Set([candidature.actorId, ...candidature.baselineActorIds]);
+  return propositions
+    .filter((proposition) => auteurs.has(proposition.actorId))
+    .map((proposition) => propositionFiche(proposition, candidature.actorId))
+    .sort(ordrePropositions);
+}
 
 function fiche(candidature: Candidate): Fiche {
   const acteur = acteurParId.get(candidature.actorId)!;
@@ -171,14 +295,42 @@ function fiche(candidature: Candidate): Fiche {
   const dates = [
     candidature.statutDepuis,
     ...documentees.map((entree) => entree.resolue!.position.updatedAt),
+    ...propositionsDe(candidature).map((proposition) => proposition.updatedAt),
   ];
+
+  const etatProgramme = etatParActeur.get(acteur.id)!;
+  const toutes = propositionsDe(candidature);
+  const mesures = toutes.filter((proposition) => proposition.portee === "mesure");
 
   return {
     acteur,
     candidature,
-    statutSources: candidature.statutSourceIds
-      .map((id) => sourceParId.get(id))
-      .filter((source): source is SourcePosition => source !== undefined),
+    statutSources: resoudreSources(candidature.statutSourceIds),
+    etape: {
+      ...ETAPES_CANDIDATURE[candidature.status],
+      long: LIBELLES_STATUT_CANDIDATURE[candidature.status],
+    },
+    reserve: candidature.reserve
+      ? {
+          texte: candidature.reserve.texte,
+          sources: resoudreSources(candidature.reserve.sourceIds),
+        }
+      : null,
+    programme: {
+      etat: etatProgramme.etat,
+      libelle: LIBELLES_ETAT_PROGRAMME[etatProgramme.etat],
+      court: LIBELLES_ETAT_PROGRAMME_COURT[etatProgramme.etat],
+      texte: etatProgramme.texte,
+      sources: resoudreSources(etatProgramme.sourceIds),
+    },
+    mesures: DOMAINES_PROPOSITION.map((domaine) => ({
+      domaine,
+      libelle: LIBELLES_DOMAINE[domaine],
+      propositions: mesures.filter((proposition) => proposition.domaine === domaine),
+    })).filter((groupe) => groupe.propositions.length > 0),
+    orientations: toutes.filter((proposition) => proposition.portee === "orientation"),
+    nombrePropositions: toutes.length,
+    apercu: toutes.slice(0, 3),
     parti:
       partiId === null
         ? null
@@ -351,11 +503,15 @@ export const DONNEES_OUVERTES = {
   candidatures,
   sourcesPositions: sources,
   positions: positionsPubliables(toutesPositions),
+  /** Hors score : elles ne servent à aucun calcul, et l'export le dit par son nom. */
+  propositions: positionsPubliables(toutesPropositions),
+  etatsProgramme,
 };
 
 /** Date de la donnée la plus récente de l'export. */
 export const DONNEES_MISES_A_JOUR = [
   ...DONNEES_OUVERTES.positions.map((position) => position.updatedAt),
+  ...DONNEES_OUVERTES.propositions.map((proposition) => proposition.updatedAt),
   ...DONNEES_OUVERTES.candidatures.map((candidature) => candidature.statutDepuis),
 ].reduce((a, b) => (a > b ? a : b));
 

@@ -1,0 +1,89 @@
+---
+/*
+ * Portrait d'un candidat, ou ses initiales à défaut de média libre.
+ *
+ * UN SEUL COMPOSANT, UN SEUL TRAITEMENT. Même cadre carré, même bordure, même
+ * cadrage sur le haut de la photo pour tous : la règle de neutralité des
+ * portraits (`CLAUDE.md`, contrainte 5) ne tient que si personne ne peut la
+ * contourner en écrivant son propre `<img>`. La liste et la fiche passaient
+ * chacune par un balisage recopié ; il n'y en a plus qu'un.
+ *
+ * Les dimensions sont en attributs, pour que la place soit réservée avant le
+ * chargement. Le portrait est décoratif : le nom est toujours écrit à côté.
+ */
+import { initiales } from "../../lib/initiales";
+
+type Props = {
+  nom: string;
+  chemin: string | null;
+  /**
+   * Côté du carré, en pixels. Deux tailles seulement : une classe par taille,
+   * parce que la CSP refuse tout `style=""` en ligne.
+   */
+  taille: 64 | 120;
+  /** La fiche charge son portrait tout de suite ; la liste, au défilement. */
+  differe?: boolean;
+};
+
+const { nom, chemin, taille, differe = true } = Astro.props;
+---
+
+{
+  chemin ? (
+    <img
+      class:list={["portrait", `portrait-${taille}`]}
+      src={chemin}
+      alt=""
+      width={taille}
+      height={taille}
+      loading={differe ? "lazy" : "eager"}
+      decoding="async"
+    />
+  ) : (
+    <span class:list={["portrait", "portrait-absent", `portrait-${taille}`]} aria-hidden="true">
+      {initiales(nom)}
+    </span>
+  )
+}
+
+<style>
+  .portrait {
+    display: block;
+    flex: none;
+    width: 64px;
+    height: 64px;
+    margin: 0;
+    object-fit: cover;
+    object-position: top center;
+    border: 1px solid var(--couleur-trait);
+    background: var(--couleur-trait);
+  }
+
+  .portrait-120 {
+    width: 96px;
+    height: 96px;
+  }
+
+  @media (min-width: 48rem) {
+    .portrait-120 {
+      width: 120px;
+      height: 120px;
+    }
+  }
+
+  .portrait-absent {
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    /*
+     * Fond de surface, pas la teinte des filets : sur `--couleur-trait`, les
+     * initiales en encre faible tombaient à 4,2:1, mesuré par capturer.mjs.
+     */
+    background: var(--couleur-surface);
+    color: var(--couleur-encre-faible);
+  }
+
+  .portrait-absent.portrait-120 {
+    font-size: 1.5rem;
+  }
+</style>

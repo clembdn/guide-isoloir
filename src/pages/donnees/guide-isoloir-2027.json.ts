@@ -29,6 +29,7 @@ export const GET: APIRoute = () => {
       "reviewStatus « reconciled » signifie « publiable ». Le double codage à l'aveugle n'a pas encore eu lieu : voir la méthodologie.",
       "Une position reprise d'un parti ou d'une coalition (repriseDeId renseigné) n'est pas une déclaration du candidat.",
       "Une affirmation sans position retenue est inconnue, pas neutre : le test l'écarte du calcul.",
+      "Les propositions (propositions) et les états de programme (etatsProgramme) n'entrent dans aucun calcul. Une proposition rattachée à un parti n'est pas un engagement personnel du candidat.",
     ],
     echelle: ECHELLE,
     chaineDeResolution: NIVEAUX_RESOLUTION,

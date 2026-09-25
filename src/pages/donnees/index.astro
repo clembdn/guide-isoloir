@@ -55,18 +55,26 @@ const FICHIERS = [
     description: `Une ligne par position codée, partis compris, avec la citation, la justification du codage et les sources. ${DONNEES_OUVERTES.positions.length} lignes.`,
   },
   {
+    chemin: "/donnees/propositions.csv",
+    format: "CSV",
+    type: "text/csv",
+    titre: "Propositions de programme",
+    description: `Une ligne par proposition relevée, avec sa citation, la nature du document et ses sources. Hors score : aucune n'entre dans le calcul du test. ${DONNEES_OUVERTES.propositions.length} lignes.`,
+  },
+  {
     chemin: "/donnees/guide-isoloir-2027.json",
     format: "JSON",
     type: "application/json",
     titre: "Export complet",
     description:
-      "Affirmations, échelle, chaîne de résolution, acteurs, candidatures, positions, sources et positions retenues : de quoi refaire le calcul.",
+      "Affirmations, échelle, chaîne de résolution, acteurs, candidatures, positions, sources, positions retenues, propositions et états de programme : de quoi refaire le calcul.",
   },
 ] as const;
 
 const AVERTISSEMENTS = [
   "Une position reprise d'un parti ou d'une coalition n'est pas une déclaration du candidat. Elle est signalée dans les colonnes reprise_de.",
   "Un couple candidat et affirmation absent des positions retenues est une position inconnue, pas une position neutre. Le test l'écarte du calcul.",
+  "Les propositions de programme n'entrent dans aucun calcul. Une proposition rattachée à un parti est celle du parti, pas un engagement personnel du candidat.",
   "Le statut de relecture « reconciled » signifie « publiable ». Le double codage à l'aveugle n'a pas encore eu lieu.",
   "Les citations restent la propriété de leurs auteurs et sont reproduites au titre du droit de courte citation. La licence couvre le codage, pas les verbatims.",
 ];

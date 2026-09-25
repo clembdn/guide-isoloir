@@ -101,6 +101,14 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "parti-debout",
+    kind: "party",
+    name: "Debout",
+    sortName: "Debout",
+    slug: "debout",
+    status: "active",
+  },
+  {
     id: "parti-equinoxe",
     kind: "party",
     name: "Equinoxe",
@@ -114,6 +122,14 @@ export const ACTEURS = [
     name: "France Libre",
     sortName: "France Libre",
     slug: "france-libre",
+    status: "active",
+  },
+  {
+    id: "parti-gauche-republicaine-et-socialiste",
+    kind: "party",
+    name: "Gauche républicaine et socialiste",
+    sortName: "Gauche républicaine et socialiste",
+    slug: "gauche-republicaine-et-socialiste",
     status: "active",
   },
   {
@@ -170,6 +186,14 @@ export const ACTEURS = [
     name: "Lutte ouvrière",
     sortName: "Lutte ouvrière",
     slug: "lutte-ouvriere",
+    status: "active",
+  },
+  {
+    id: "parti-npa-revolutionnaires",
+    kind: "party",
+    name: "NPA-Révolutionnaires",
+    sortName: "NPA-Révolutionnaires",
+    slug: "npa-revolutionnaires",
     status: "active",
   },
   {
@@ -237,6 +261,14 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "parti-revolution-permanente",
+    kind: "party",
+    name: "Révolution permanente",
+    sortName: "Révolution permanente",
+    slug: "revolution-permanente",
+    status: "active",
+  },
+  {
     id: "parti-solution-democratique",
     kind: "party",
     name: "Solution démocratique",
@@ -287,6 +319,14 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "olivier-becht",
+    kind: "candidate",
+    name: "Olivier Becht",
+    sortName: "Becht, Olivier",
+    slug: "olivier-becht",
+    status: "active",
+  },
+  {
     id: "xavier-bertrand",
     kind: "candidate",
     name: "Xavier Bertrand",
@@ -319,11 +359,43 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "olivier-faure",
+    kind: "candidate",
+    name: "Olivier Faure",
+    sortName: "Faure, Olivier",
+    slug: "olivier-faure",
+    status: "active",
+  },
+  {
     id: "raphael-glucksmann",
     kind: "candidate",
     name: "Raphaël Glucksmann",
     sortName: "Glucksmann, Raphaël",
     slug: "raphael-glucksmann",
+    status: "active",
+  },
+  {
+    id: "jerome-guedj",
+    kind: "candidate",
+    name: "Jérôme Guedj",
+    sortName: "Guedj, Jérôme",
+    slug: "jerome-guedj",
+    status: "active",
+  },
+  {
+    id: "anasse-kazib",
+    kind: "candidate",
+    name: "Anasse Kazib",
+    sortName: "Kazib, Anasse",
+    slug: "anasse-kazib",
+    status: "active",
+  },
+  {
+    id: "selma-labib",
+    kind: "candidate",
+    name: "Selma Labib",
+    sortName: "Labib, Selma",
+    slug: "selma-labib",
     status: "active",
   },
   {
@@ -348,6 +420,14 @@ export const ACTEURS = [
     name: "David Lisnard",
     sortName: "Lisnard, David",
     slug: "david-lisnard",
+    status: "active",
+  },
+  {
+    id: "emmanuel-maurel",
+    kind: "candidate",
+    name: "Emmanuel Maurel",
+    sortName: "Maurel, Emmanuel",
+    slug: "emmanuel-maurel",
     status: "active",
   },
   {
@@ -399,6 +479,22 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "segolene-royal",
+    kind: "candidate",
+    name: "Ségolène Royal",
+    sortName: "Royal, Ségolène",
+    slug: "segolene-royal",
+    status: "active",
+  },
+  {
+    id: "francois-ruffin",
+    kind: "candidate",
+    name: "François Ruffin",
+    sortName: "Ruffin, François",
+    slug: "francois-ruffin",
+    status: "active",
+  },
+  {
     id: "marine-tondelier",
     kind: "candidate",
     name: "Marine Tondelier",
@@ -419,16 +515,35 @@ export const ACTEURS = [
 /**
  * CANDIDATURES.
  *
- * `baselineActorIds` porte le parti de chacun. La liste est un ordre de
- * préférence : une coalition viendrait avant un parti.
+ * `baselineActorIds` porte le parti de chacun. La liste est un ORDRE DE
+ * PRÉFÉRENCE : le moteur s'arrête au premier acteur qui documente une
+ * affirmation.
+ *
+ * RÈGLE D'ORDRE, écrite le 25 septembre 2026 : un programme de parti publié
+ * POUR 2027 passe avant le contrat du Nouveau Front populaire de 2024. Les
+ * Écologistes ont publié le leur (557 mesures, été 2026) : Marine Tondelier
+ * reprend donc d'abord Les Écologistes, puis le NFP pour ce que leur programme
+ * ne couvre pas. Les autres partis signataires du NFP n'ont pas publié de
+ * programme 2027 : leur ordre ne change pas, et changera de la même façon le
+ * jour où ils le feront.
+ *
+ * UNE CHAÎNE VIDE EST UN CHOIX, PAS UN OUBLI. Olivier Becht se dit « sans
+ * étiquette » et Ségolène Royal n'est rattachée à aucun parti par les sources
+ * lues : leur prêter la ligne d'un groupe parlementaire ou d'un parti d'origine
+ * serait leur attribuer des positions qu'ils n'ont pas prises.
+ *
+ * LE NFP N'EST REPRIS QUE PAR LES PARTIS SIGNATAIRES ÉTABLIS (PS, LFI, PCF,
+ * Écologistes ; voir `nfp-contrat-legislature-2024`). Olivier Faure et Jérôme
+ * Guedj (PS) le reprennent ; Emmanuel Maurel (GRS) et François Ruffin (Debout)
+ * non, faute d'avoir pu confirmer la signature de leur mouvement.
  */
 export const CANDIDATURES = [
   {
     actorId: "nathalie-arthaud",
     status: "declared",
     baselineActorIds: ["parti-lutte-ouvriere"],
-    statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutDepuis: "2026-06-10",
+    statutSourceIds: ["lo-arthaud-candidature-2026", "lcp-liste-candidats-2026"],
   },
   {
     actorId: "francois-asselineau",
@@ -445,12 +560,21 @@ export const CANDIDATURES = [
     statutDepuis: "2026-05-22",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
+  // investie par la convention nationale de Génération écologie
   {
     actorId: "delphine-batho",
-    status: "declared",
+    status: "nominated",
     baselineActorIds: ["parti-generation-ecologie"],
-    statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutDepuis: "2026-06-06",
+    statutSourceIds: ["ge-investiture-batho-2026", "lcp-liste-candidats-2026"],
+  },
+  // « Mon parti politique, c'est la France » : aucune chaîne de reprise
+  {
+    actorId: "olivier-becht",
+    status: "declared",
+    baselineActorIds: [],
+    statutDepuis: "2026-09-24",
+    statutSourceIds: ["cnews-becht-candidature-2026", "lcp-liste-candidats-2026"],
   },
   // date donnée par la source
   {
@@ -467,27 +591,60 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
+  // annoncée en meeting le samedi 8 mars 2025
   {
     actorId: "nicolas-dupont-aignan",
     status: "declared",
     baselineActorIds: ["parti-debout-la-france"],
-    statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutDepuis: "2025-03-08",
+    statutSourceIds: ["dlf-nda-candidature-2025", "lcp-liste-candidats-2026"],
   },
   {
     actorId: "clara-egger",
     status: "declared",
     baselineActorIds: ["parti-solution-democratique"],
     statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutSourceIds: ["lcp-liste-candidats-2026", "sd-parrainage-egger-2026"],
   },
-  // candidat à la primaire socialiste, pas encore à la présidentielle
+  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
+  {
+    actorId: "olivier-faure",
+    status: "potential",
+    baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-socialiste"],
+    statutDepuis: "2026-09-16",
+    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+  },
+  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
   {
     actorId: "raphael-glucksmann",
     status: "potential",
     baselineActorIds: ["parti-place-publique"],
     statutDepuis: "2026-08-23",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutSourceIds: ["lcp-primaire-sociale-democrate-2026", "lcp-liste-candidats-2026"],
+  },
+  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
+  {
+    actorId: "jerome-guedj",
+    status: "potential",
+    baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-socialiste"],
+    statutDepuis: "2026-09-16",
+    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+  },
+  // lancement officiel à la Fête de l'Humanité, le samedi 12 septembre 2026
+  {
+    actorId: "anasse-kazib",
+    status: "declared",
+    baselineActorIds: ["parti-revolution-permanente"],
+    statutDepuis: "2026-09-12",
+    statutSourceIds: ["rp-kazib-premieres-mesures-2026"],
+  },
+  // décision du comité politique national du NPA-R des 6 et 7 juin 2026
+  {
+    actorId: "selma-labib",
+    status: "nominated",
+    baselineActorIds: ["parti-npa-revolutionnaires"],
+    statutDepuis: "2026-06-17",
+    statutSourceIds: ["npar-communique-labib-2026"],
   },
   {
     actorId: "francis-lalanne",
@@ -502,7 +659,12 @@ export const CANDIDATURES = [
     status: "declared",
     baselineActorIds: ["parti-rassemblement-national"],
     statutDepuis: "2026-07-07",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutSourceIds: ["lcp-liste-candidats-2026", "touteleurope-le-pen-appel-2026"],
+    reserve: {
+      texte:
+        "Condamnée en appel le 7 juillet 2026 et éligible, elle s'est pourvue en cassation. La Cour de cassation a annoncé statuer avant le premier tour.",
+      sourceIds: ["touteleurope-le-pen-appel-2026"],
+    },
   },
   {
     actorId: "david-lisnard",
@@ -511,6 +673,14 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
+  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
+  {
+    actorId: "emmanuel-maurel",
+    status: "potential",
+    baselineActorIds: ["parti-gauche-republicaine-et-socialiste"],
+    statutDepuis: "2026-09-04",
+    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+  },
   {
     actorId: "jean-luc-melenchon",
     status: "declared",
@@ -518,12 +688,13 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
+  // élu par les adhérents d'Équinoxe au jugement majoritaire
   {
     actorId: "antoine-mikolajczak",
-    status: "declared",
+    status: "nominated",
     baselineActorIds: ["parti-equinoxe"],
-    statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutDepuis: "2026-07-31",
+    statutSourceIds: ["equinoxe-presidentielle-2027", "lcp-liste-candidats-2026"],
   },
   {
     actorId: "edouard-philippe",
@@ -547,19 +718,45 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
-  // validé à 72 % par les militants
+  // validé à 72 % par les militants, résultat publié par le PCF le 6 septembre
   {
     actorId: "fabien-roussel",
     status: "nominated",
     baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-communiste-francais"],
     statutDepuis: "2026-09-06",
-    statutSourceIds: ["lcp-liste-candidats-2026"],
+    statutSourceIds: ["pcf-roussel-designe-2026", "lcp-liste-candidats-2026"],
   },
-  // investie par son parti
+  // candidate à la primaire sociale-démocrate ; aucun parti rattaché par les sources lues
+  {
+    actorId: "segolene-royal",
+    status: "potential",
+    baselineActorIds: [],
+    statutDepuis: "2026-09-16",
+    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+  },
+  /*
+   * Candidature annoncée sous condition — « S'il n'y a pas de primaire, moi j'y
+   * vais » — et la primaire unitaire n'a pas eu lieu. `declared` avec une
+   * réserve qui le dit, plutôt qu'un statut qui ferait croire à une annonce
+   * sans condition, ou à une absence d'annonce.
+   */
+  {
+    actorId: "francois-ruffin",
+    status: "declared",
+    baselineActorIds: ["parti-debout"],
+    statutDepuis: "2026-09-24",
+    statutSourceIds: ["lcp-liste-candidats-2026"],
+    reserve: {
+      texte:
+        "Candidature annoncée sous condition : « S'il n'y a pas de primaire, moi j'y vais ». La primaire unitaire de la gauche n'a pas eu lieu.",
+      sourceIds: ["lcp-liste-candidats-2026"],
+    },
+  },
+  // investie par son parti ; programme des Écologistes avant le contrat du NFP
   {
     actorId: "marine-tondelier",
     status: "nominated",
-    baselineActorIds: ["coalition-nouveau-front-populaire", "parti-les-ecologistes"],
+    baselineActorIds: ["parti-les-ecologistes", "coalition-nouveau-front-populaire"],
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },

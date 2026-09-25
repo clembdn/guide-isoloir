@@ -1,7 +1,7 @@
 ---
 /*
- * Fiche candidat : ce que le candidat a dit sur chacune des affirmations du
- * test, avec la citation, la source et sa date.
+ * Fiche candidat : où en est sa candidature, ce que l'on sait de son
+ * programme, et ce qu'il a dit sur chacune des affirmations du test.
  *
  * UNE PAGE PAR CANDIDAT SUIVI, DOCUMENTÉ OU NON. Ne publier que les fiches
  * remplies donnerait une présence en ligne aux seuls candidats les mieux
@@ -11,7 +11,14 @@
  *
  * HTML STATIQUE, SANS ÎLOT. Beaucoup de robots d'IA n'exécutent pas de
  * JavaScript : une position qui ne se lit qu'après hydratation n'existe pas
- * pour eux, et c'est précisément ce qu'on leur demande de citer.
+ * pour eux, et c'est précisément ce qu'on leur demande de citer. Le seul
+ * script est celui du sommaire, qui ne fait que marquer la section en cours.
+ *
+ * DEUX REGISTRES, DEUX SECTIONS, JAMAIS MÉLANGÉS (25 septembre 2026). « Son
+ * programme » montre les propositions, qui n'entrent dans aucun calcul ; « Ses
+ * positions sur le test » montre les positions, les seules qui comptent dans
+ * le score. Les confondre ferait croire qu'une mesure de programme pèse sur
+ * le résultat, ou qu'une position codée est tout le programme.
  *
  * LA POSITION AFFICHÉE EST CELLE DU MOTEUR, choisie par le même résolveur que
  * le test (voir `src/lib/fiches.ts`). Une reprise de parti est nommée comme
@@ -19,16 +26,15 @@
  *
  * `direction` n'est jamais lu ici : les questions arrivent projetées.
  */
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import PageLecture from "../../layouts/PageLecture.astro";
 import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import Portrait from "../../components/candidats/Portrait.astro";
+import EtapeCandidature from "../../components/candidats/EtapeCandidature.astro";
+import Proposition from "../../components/candidats/Proposition.astro";
+import EtapesCandidature from "../../components/schemas/EtapesCandidature.astro";
 import { fiches, NOMBRE_AFFIRMATIONS, type Fiche } from "../../lib/fiches";
 import { ECHELLE } from "../../lib/echelle";
-import {
-  LIBELLES_ADEQUATION,
-  LIBELLES_CONFIANCE,
-  LIBELLES_STATUT_CANDIDATURE,
-} from "../../lib/libelles";
-import { initiales } from "../../lib/initiales";
+import { LIBELLES_ADEQUATION, LIBELLES_CONFIANCE } from "../../lib/libelles";
 import { formatDateFr } from "../../lib/date";
 import { SITE_NAME, SITE_URL } from "../../lib/site";
 
@@ -67,12 +73,20 @@ const decompte = [
   ...(fiche.inconnues.length > 0 ? [`${fiche.inconnues.length} sans position connue`] : []),
 ];
 
+const sommaire = [
+  { id: "programme", texte: "Son programme" },
+  { id: "positions", texte: "Ses positions sur le test" },
+  ...(fiche.inconnues.length > 0
+    ? [{ id: "sans-position", texte: "Sans position documentée" }]
+    : []),
+];
+
 const url = new URL(`/candidats/${acteur.slug}`, SITE_URL).href;
 
 const description =
-  fiche.documentees === 0
-    ? `${nom}, candidature à l'élection présidentielle de 2027 : statut daté et sourcé. Aucune position n'est encore documentée sur les ${NOMBRE_AFFIRMATIONS} affirmations du test.`
-    : `Ce que ${nom} a déclaré sur les affirmations du test de ${SITE_NAME} : citation exacte, source et date. Position documentée sur ${fiche.documentees} des ${NOMBRE_AFFIRMATIONS}.`;
+  fiche.documentees === 0 && fiche.nombrePropositions === 0
+    ? `${nom}, élection présidentielle de 2027 : où en est sa candidature, datée et sourcée. Aucune proposition ni position n'est encore documentée.`
+    : `${nom}, élection présidentielle de 2027 : où en est sa candidature, ${accorder(fiche.nombrePropositions, "proposition relevée", "propositions relevées")} de son programme, et ses positions sur ${fiche.documentees} des ${NOMBRE_AFFIRMATIONS} affirmations du test, avec citation, source et date.`;
 
 const filAriane = {
   "@context": "https://schema.org",
@@ -104,173 +118,298 @@ const personne = {
 };
 ---
 
-<BaseLayout
-  title={`${nom} : ses positions pour la présidentielle 2027`}
+<PageLecture
+  title={`${nom} : programme et positions pour la présidentielle 2027`}
   description={description}
   updated={fiche.misAJour}
+  teinte="t-violet"
+  sommaire={sommaire}
+  libelleSommaire="Sur cette fiche"
 >
-  <nav class="fil-ariane" aria-label="Fil d'Ariane">
-    <a href="/">{SITE_NAME}</a>
-    <span aria-hidden="true">/</span>
-    <a href="/candidats">Candidats</a>
-  </nav>
+  <Fragment slot="tete">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <a href="/">{SITE_NAME}</a>
+      <span aria-hidden="true">/</span>
+      <a href="/candidats">Candidats</a>
+    </nav>
 
-  {
-    /*
-     * Même cadre carré, même bordure, même taille pour tous : la règle de
-     * neutralité des portraits vaut sur la fiche comme au résultat. Les
-     * dimensions sont en attributs, pour que la place soit réservée avant le
-     * chargement.
-     */
-  }
-  <div class="identite">
-    {
-      fiche.portrait ? (
-        <img class="portrait" src={fiche.portrait} alt="" width="88" height="88" />
-      ) : (
-        <p class="portrait portrait-absent" aria-hidden="true">
-          {initiales(nom)}
-        </p>
-      )
-    }
-    <div>
-      <h1>{nom}</h1>
+    <div class="identite">
+      <Portrait nom={nom} chemin={fiche.portrait} taille={120} differe={false} />
+      <div>
+        <h1>{nom}</h1>
+        {
+          fiche.parti ? (
+            <p class="parti">
+              {fiche.parti.logo && <img class="logo" src={fiche.parti.logo} alt="" height="22" />}
+              <span>{fiche.parti.nom}</span>
+            </p>
+          ) : (
+            <p class="parti">Sans parti rattaché par les sources lues</p>
+          )
+        }
+      </div>
+    </div>
+
+    <DerniereMiseAJour date={fiche.misAJour} />
+
+    <section class="candidature" aria-labelledby="candidature">
+      <h2 id="candidature" class="visuellement-masque">Où en est sa candidature</h2>
       {
-        fiche.parti && (
-          <p class="parti">
-            {fiche.parti.logo && <img class="logo" src={fiche.parti.logo} alt="" height="22" />}
-            <span>{fiche.parti.nom}</span>
+        /*
+         * Le rail des étapes dit déjà où en est la candidature : le tag n'est
+         * affiché ici que pour une candidature close, que le rail ne montre pas.
+         */
+        fiche.etape.rang === null && <EtapeCandidature etape={fiche.etape} />
+      }
+      {
+        fiche.etape.rang !== null && (
+          <EtapesCandidature
+            actuel={fiche.etape.rang}
+            titre={`Où en est la candidature de ${nom}`}
+            titreVisible={false}
+          />
+        )
+      }
+      <p class="statut">
+        {fiche.etape.long}, attestée le{" "}
+        <time datetime={candidature.statutDepuis}>{formatDateFr(candidature.statutDepuis)}</time>
+        {
+          fiche.statutSources.map((source, index) => (
+            <>
+              {index === 0 ? " par " : " et "}
+              <a href={source.url} rel="noreferrer">
+                {source.titre}
+              </a>{" "}
+              ({source.media})
+            </>
+          ))
+        }.
+      </p>
+      {
+        fiche.reserve && (
+          <p class="reserve-candidature">
+            <strong>Réserve :</strong> {fiche.reserve.texte}{" "}
+            {fiche.reserve.sources.map((source) => (
+              <>
+                (
+                <a href={source.url} rel="noreferrer">
+                  {source.media}
+                </a>
+                ,{" "}
+                <time datetime={source.dateDeclaration}>
+                  {formatDateFr(source.dateDeclaration)}
+                </time>
+                )
+              </>
+            ))}
           </p>
         )
       }
-    </div>
-  </div>
+    </section>
 
-  <DerniereMiseAJour date={fiche.misAJour} />
+    <dl class="chiffres">
+      <div>
+        <dt>Programme</dt>
+        <dd>{fiche.programme.court}</dd>
+      </div>
+      <div>
+        <dt>Propositions relevées</dt>
+        <dd>{fiche.nombrePropositions}</dd>
+      </div>
+      <div>
+        <dt>Positions du test</dt>
+        <dd>{fiche.documentees} sur {NOMBRE_AFFIRMATIONS}</dd>
+      </div>
+    </dl>
+  </Fragment>
 
-  <p class="statut">
-    {LIBELLES_STATUT_CANDIDATURE[candidature.status]}, attestée le{" "}
-    <time datetime={candidature.statutDepuis}>{formatDateFr(candidature.statutDepuis)}</time>
+  <section aria-labelledby="programme">
+    <h2 id="programme">Son programme</h2>
+    <p class="etat-programme">
+      <strong>{fiche.programme.libelle}.</strong>{" "}
+      {fiche.programme.texte}{" "}
+      <span class="source-etat">
+        Source :{" "}
+        {
+          fiche.programme.sources.map((source, index) => (
+            <>
+              {index > 0 && " ; "}
+              <a href={source.url} rel="noreferrer">
+                {source.titre}
+              </a>
+              {`, ${source.media}`}
+            </>
+          ))
+        }.
+      </span>
+    </p>
+
     {
-      fiche.statutSources.map((source) => (
+      fiche.nombrePropositions === 0 ? (
+        <p>
+          Aucune proposition de {nom} n'est relevée à ce jour. Rien n'est attribué sans source
+          publique : cette section se remplira quand un programme, une déclaration ou un document de
+          son parti permettra de citer une mesure.
+        </p>
+      ) : (
         <>
-          {" "}
-          par{" "}
-          <a href={source.url} rel="noreferrer">
-            {source.titre}
-          </a>{" "}
-          ({source.media})
-        </>
-      ))
-    }.
-  </p>
-
-  {
-    fiche.documentees === 0 ? (
-      <p class="question">
-        Aucune position de {nom} n'est documentée à ce jour sur les {NOMBRE_AFFIRMATIONS}{" "}
-        affirmations du test. Rien n'est attribué sans source publique : cette fiche se remplira
-        quand des déclarations, un programme ou la plateforme d'un parti permettront de coder une
-        position.
-      </p>
-    ) : (
-      <>
-        <p class="question">
-          Position documentée sur {fiche.documentees} des {NOMBRE_AFFIRMATIONS} affirmations du
-          test.
-        </p>
-        <ul class="decompte">
-          {decompte.map((ligne, index) => (
-            <li>{`${ligne}${index === decompte.length - 1 ? "." : " ;"}`}</li>
-          ))}
-        </ul>
-      </>
-    )
-  }
-
-  <p>
-    Pour comparer ces positions aux vôtres, <a href="/test">faites le test</a> : {
-      NOMBRE_AFFIRMATIONS
-    } affirmations, et un calcul qui reste dans votre navigateur.
-  </p>
-
-  {
-    fiche.parTheme.map((groupe) => (
-      <section aria-labelledby={groupe.theme.slug}>
-        <h2 id={groupe.theme.slug}>{groupe.theme.nom}</h2>
-        <p class="vers-theme">
-          <a href={`/themes/${groupe.theme.slug}`}>Tous les candidats sur ce thème</a>
-        </p>
-        {groupe.entrees.map((entree) => {
-          const { position, heriteDe } = entree.resolue!;
-          return (
-            <article class="position" id={entree.question.id}>
-              <h3>{entree.question.texte}</h3>
-              <p class="valeur">
-                Position retenue : <strong>{LIBELLE_VALEUR.get(position.value)}</strong>
-              </p>
-              {/*
-               * Les espaces explicites entre les lignes ne se voient pas à
-               * l'écran, où chacune est un bloc. Ils comptent pour le texte
-               * brut : sans eux, un robot ou un mode lecture lit
-               * « Déclaration directe.La citation… ».
-               */}
-              <p class="ligne">
-                <span>Origine : {entree.origine}.</span>{" "}
-                {heriteDe !== null && (
-                  <>
-                    <span class="heritage">
-                      Position de {heriteDe}, reprise faute de déclaration personnelle de {nom}.
-                    </span>{" "}
-                  </>
-                )}
-                <span>{LIBELLES_ADEQUATION[position.adequation]}</span>{" "}
-                <span>{LIBELLES_CONFIANCE[position.confidence]}</span>
-              </p>
-              {position.citation && (
-                <blockquote class="citation">« {position.citation} »</blockquote>
-              )}
-              {/*
-               * Une inférence n'a pas de verbatim : son raisonnement est la
-               * seule chose qui la rende contestable, et le schéma l'exige
-               * complet. Il est donc publié, et seulement pour elle.
-               */}
-              {position.provenance === "inference" && (
-                <p class="raisonnement">Raisonnement de l'éditeur : {position.rationale}</p>
-              )}
-              {position.sourcePrimaire && (
-                <p class="ligne">Propos d'origine : {position.sourcePrimaire}.</p>
-              )}
-              {entree.dateAncienne !== null && (
-                <p class="ancienne">
-                  Position tirée d'un document du {formatDateFr(entree.dateAncienne)}, antérieur à
-                  la campagne de 2027. Elle peut avoir changé depuis. Ce codage est provisoire : il
-                  sera remplacé dès la publication du programme présidentiel de cet acteur.
-                </p>
-              )}
-              <ul class="sources">
-                {entree.sources.map((source) => (
-                  <li>
-                    <a href={source.url} rel="noreferrer">
-                      {source.titre}
-                    </a>{" "}
-                    — {source.media},{" "}
-                    <time datetime={source.dateDeclaration}>
-                      {formatDateFr(source.dateDeclaration)}
-                    </time>
-                  </li>
+          <p class="rappel">
+            Ces propositions décrivent un programme. Elles n'entrent pas dans le calcul du test, qui
+            ne compare que les {NOMBRE_AFFIRMATIONS} affirmations de la section suivante. Chacune
+            porte la nature du document d'où elle vient : un programme 2027 n'engage pas comme une
+            proposition de loi ou un texte du parti.
+          </p>
+          {fiche.mesures.map((groupe) => (
+            <section class="domaine" aria-labelledby={`domaine-${groupe.domaine}`}>
+              <h3 id={`domaine-${groupe.domaine}`}>{groupe.libelle}</h3>
+              <div class="propositions">
+                {groupe.propositions.map((proposition) => (
+                  <Proposition proposition={proposition} />
                 ))}
-              </ul>
-              <p class="mise-a-jour">
-                Codage mis à jour le{" "}
-                <time datetime={position.updatedAt}>{formatDateFr(position.updatedAt)}</time>
+              </div>
+            </section>
+          ))}
+          {fiche.orientations.length > 0 && (
+            <section class="domaine" aria-labelledby="orientations">
+              <h3 id="orientations">Grandes orientations</h3>
+              <p class="rappel">
+                Des axes revendiqués, sans mesure précise à ce stade : ils disent où va la campagne,
+                pas ce qu'elle ferait.
               </p>
-            </article>
-          );
-        })}
-      </section>
-    ))
-  }
+              <div class="propositions">
+                {fiche.orientations.map((proposition) => (
+                  <Proposition proposition={proposition} />
+                ))}
+              </div>
+            </section>
+          )}
+        </>
+      )
+    }
+  </section>
+
+  <section aria-labelledby="positions">
+    <h2 id="positions">Ses positions sur le test</h2>
+    {
+      fiche.documentees === 0 ? (
+        <p>
+          Aucune position de {nom} n'est documentée à ce jour sur les {NOMBRE_AFFIRMATIONS}{" "}
+          affirmations du test. Rien n'est attribué sans source publique : cette section se remplira
+          quand des déclarations, un programme ou la plateforme d'un parti permettront de coder une
+          position.
+        </p>
+      ) : (
+        <>
+          <p>
+            Position documentée sur {fiche.documentees} des {NOMBRE_AFFIRMATIONS} affirmations du
+            test :
+          </p>
+          <ul class="decompte">
+            {decompte.map((ligne, index) => (
+              <li>{`${ligne}${index === decompte.length - 1 ? "." : " ;"}`}</li>
+            ))}
+          </ul>
+        </>
+      )
+    }
+
+    <p>
+      Pour comparer ces positions aux vôtres, <a href="/test">faites le test</a> : {
+        NOMBRE_AFFIRMATIONS
+      } affirmations, et un calcul qui reste dans votre navigateur.
+    </p>
+
+    {
+      fiche.parTheme.map((groupe) => (
+        <section class="theme" aria-labelledby={groupe.theme.slug}>
+          <h3 id={groupe.theme.slug}>{groupe.theme.nom}</h3>
+          <p class="vers-theme">
+            <a href={`/themes/${groupe.theme.slug}`}>Tous les candidats sur ce thème</a>
+          </p>
+          {groupe.entrees.map((entree) => {
+            const { position, heriteDe } = entree.resolue!;
+            return (
+              <article class="position" id={entree.question.id}>
+                <h4>{entree.question.texte}</h4>
+                {/*
+                 * L'échelle du test, cinq crans du plein accord au plein
+                 * désaccord, dans l'ordre où le test les pose. Le cran retenu
+                 * est plein, les autres sont des filets : même encre pour tous
+                 * les candidats, seule la place change.
+                 */}
+                <p class="valeur">
+                  <span class="echelle" aria-hidden="true">
+                    {ECHELLE.map((cran) => (
+                      <span class:list={["echelon", { retenu: cran.valeur === position.value }]} />
+                    ))}
+                  </span>
+                  <span>
+                    Position retenue : <strong>{LIBELLE_VALEUR.get(position.value)}</strong>
+                  </span>
+                </p>
+                {/*
+                 * Les espaces explicites entre les lignes ne se voient pas à
+                 * l'écran, où chacune est un bloc. Ils comptent pour le texte
+                 * brut : sans eux, un robot ou un mode lecture lit
+                 * « Déclaration directe.La citation… ».
+                 */}
+                <p class="ligne">
+                  <span>Origine : {entree.origine}.</span>{" "}
+                  {heriteDe !== null && (
+                    <>
+                      <span class="heritage">
+                        Position de {heriteDe}, reprise faute de déclaration personnelle de {nom}.
+                      </span>{" "}
+                    </>
+                  )}
+                  <span>{LIBELLES_ADEQUATION[position.adequation]}</span>{" "}
+                  <span>{LIBELLES_CONFIANCE[position.confidence]}</span>
+                </p>
+                {position.citation && (
+                  <blockquote class="citation">« {position.citation} »</blockquote>
+                )}
+                {/*
+                 * Une inférence n'a pas de verbatim : son raisonnement est la
+                 * seule chose qui la rende contestable, et le schéma l'exige
+                 * complet. Il est donc publié, et seulement pour elle.
+                 */}
+                {position.provenance === "inference" && (
+                  <p class="raisonnement">Raisonnement de l'éditeur : {position.rationale}</p>
+                )}
+                {position.sourcePrimaire && (
+                  <p class="ligne">Propos d'origine : {position.sourcePrimaire}.</p>
+                )}
+                {entree.dateAncienne !== null && (
+                  <p class="ancienne">
+                    Position tirée d'un document du {formatDateFr(entree.dateAncienne)}, antérieur à
+                    la campagne de 2027. Elle peut avoir changé depuis. Ce codage est provisoire :
+                    il sera remplacé dès la publication du programme présidentiel de cet acteur.
+                  </p>
+                )}
+                <ul class="sources">
+                  {entree.sources.map((source) => (
+                    <li>
+                      <a href={source.url} rel="noreferrer">
+                        {source.titre}
+                      </a>
+                      {`, ${source.media}, `}
+                      <time datetime={source.dateDeclaration}>
+                        {formatDateFr(source.dateDeclaration)}
+                      </time>
+                    </li>
+                  ))}
+                </ul>
+                <p class="mise-a-jour">
+                  Codage mis à jour le{" "}
+                  <time datetime={position.updatedAt}>{formatDateFr(position.updatedAt)}</time>
+                </p>
+              </article>
+            );
+          })}
+        </section>
+      ))
+    }
+  </section>
 
   {
     fiche.inconnues.length > 0 && (
@@ -291,55 +430,27 @@ const personne = {
   }
 
   <p class="signature">
-    La <a href="/methodologie">méthodologie</a> explique comment une position est établie et ce que signifient
-    l'origine, l'adéquation et la confiance. Une erreur ? La procédure de signalement est décrite dans
-    la <a href="/charte-editoriale">charte éditoriale</a>, et les corrections déjà publiées dans le <a
-      href="/corrections">registre</a
-    >.
+    La <a href="/methodologie">méthodologie</a> explique comment une position est établie, ce que signifient
+    l'origine, l'adéquation et la confiance, et comment une proposition de programme est relevée. Une
+    erreur ? La procédure de signalement est décrite dans la <a href="/charte-editoriale"
+      >charte éditoriale</a
+    >, et les corrections déjà publiées dans le <a href="/corrections">registre</a>.
   </p>
 
-  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
-  <script type="application/ld+json" set:html={JSON.stringify(personne)} is:inline />
-</BaseLayout>
+  <script slot="apres" type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+  <script slot="apres" type="application/ld+json" set:html={JSON.stringify(personne)} is:inline />
+</PageLecture>
 
 <style>
   .identite {
     display: flex;
     align-items: center;
     gap: var(--pas-3);
-    margin-bottom: var(--pas-3);
+    margin-bottom: var(--pas-2);
   }
 
   .identite h1 {
     margin: 0;
-  }
-
-  /*
-   * Cadre carré, bordure unique, haut de la photo privilégié : le même
-   * traitement qu'au résultat, à une autre échelle.
-   */
-  .portrait {
-    flex: none;
-    width: 88px;
-    height: 88px;
-    margin: 0;
-    object-fit: cover;
-    object-position: top center;
-    border: 1px solid var(--couleur-trait);
-    background: var(--couleur-trait);
-  }
-
-  .portrait-absent {
-    display: grid;
-    place-items: center;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    /*
-     * Fond de surface, pas la teinte des filets : sur `--couleur-trait`, les
-     * initiales en encre faible tombaient à 4,2:1, mesuré par capturer.mjs.
-     */
-    background: var(--couleur-surface);
-    color: var(--couleur-encre-faible);
   }
 
   .parti {
@@ -368,13 +479,85 @@ const personne = {
     border: 1px solid var(--couleur-trait);
   }
 
+  .candidature {
+    margin: var(--pas-3) 0 0;
+  }
+
   .statut {
+    margin: var(--pas-3) 0 0;
     font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+    max-width: var(--mesure);
+  }
+
+  /* En pleine encre et bordée : une réserve se lit avant la suite de la fiche. */
+  .reserve-candidature {
+    margin: var(--pas-2) 0 0;
+    padding-left: var(--pas-2);
+    border-left: 2px solid var(--couleur-encre-faible);
+    font-size: var(--t-petit);
+    max-width: var(--mesure);
+  }
+
+  .chiffres {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--pas-3);
+    margin: var(--pas-4) 0 0;
+    padding: var(--pas-3) 0;
+    border-block: 1px solid var(--couleur-trait);
+  }
+
+  .chiffres dt {
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  .chiffres dd {
+    margin: 4px 0 0;
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.25;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .etat-programme {
+    max-width: var(--mesure);
+  }
+
+  .source-etat {
+    display: block;
+    margin-top: var(--pas-1);
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .rappel {
+    color: var(--couleur-encre-faible);
+    font-size: var(--t-petit);
+  }
+
+  .domaine {
+    margin-top: var(--pas-5);
+  }
+
+  .domaine h3,
+  .theme h3 {
+    margin: 0 0 var(--pas-2);
+  }
+
+  .propositions {
+    display: grid;
+    gap: var(--pas-4);
+  }
+
+  .theme {
+    margin-top: var(--pas-5);
   }
 
   .vers-theme {
     font-size: var(--t-petit);
-    margin-top: calc(-1 * var(--pas-2));
+    margin-top: calc(-1 * var(--pas-1));
   }
 
   .decompte {
@@ -389,17 +572,52 @@ const personne = {
     border-top: 1px solid var(--couleur-trait);
   }
 
-  .position h3 {
-    margin-top: 0;
+  .position h4 {
+    margin: 0 0 var(--pas-2);
+    font-size: 1.0625rem;
+    line-height: 1.35;
   }
 
   .valeur {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--pas-1) var(--pas-2);
     margin: 0 0 var(--pas-1);
+  }
+
+  .echelle {
+    display: inline-grid;
+    grid-template-columns: repeat(5, 0.75rem);
+    gap: 3px;
+    align-items: center;
+  }
+
+  .echelon {
+    height: 0.75rem;
+    border: 2px solid var(--couleur-trait);
+    border-radius: 50%;
+  }
+
+  .echelon.retenu {
+    border-color: var(--couleur-signature);
+    background: var(--couleur-signature);
+  }
+
+  @media (forced-colors: active) {
+    .echelon {
+      border-color: CanvasText;
+    }
+
+    .echelon.retenu {
+      background: CanvasText;
+    }
   }
 
   .ligne {
     color: var(--couleur-encre-faible);
     margin: 0 0 var(--pas-1);
+    font-size: var(--t-petit);
   }
 
   .ligne span {
@@ -416,7 +634,7 @@ const personne = {
 
   .citation {
     margin: var(--pas-2) 0;
-    padding-left: var(--pas-3);
+    padding-left: var(--pas-2);
     border-left: 2px solid var(--couleur-trait);
   }
 
@@ -435,11 +653,14 @@ const personne = {
     margin: var(--pas-2) 0;
     padding-left: var(--pas-2);
     border-left: 2px solid var(--couleur-encre-faible);
+    font-size: var(--t-petit);
   }
 
   .position .sources {
     padding-left: var(--pas-3);
     margin: var(--pas-2) 0 var(--pas-1);
+    font-size: var(--t-petit);
+    overflow-wrap: anywhere;
   }
 
   .position .sources li {

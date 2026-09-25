@@ -1,0 +1,135 @@
+---
+/*
+ * Schéma : les quatre étapes d'une candidature, légende du tag.
+ *
+ * LE RAIL, PAS LA BOÎTE (DESIGN_SYSTEM §7). Sur téléphone, le rail vertical
+ * commun des schémas ; à partir de 48 rem, le même rail couché, les quatre
+ * étapes côte à côte sur une ligne. Aucun fond, aucun cadre.
+ *
+ * DEUX USAGES. Sur `/candidats`, c'est la légende : les quatre nœuds sont
+ * pleins. Sur une fiche, `actuel` marque l'étape où en est la candidature, et
+ * elle seule : les autres nœuds sont évidés. Les étapes ne se franchissent pas
+ * toutes dans l'ordre — une candidature se déclare sans passer par une
+ * primaire —, et remplir les nœuds précédents dirait le contraire. Même encre
+ * pour tous les candidats ; seule la place du nœud plein change.
+ */
+import { LEGENDE_ETAPES } from "../../lib/libelles";
+
+type Props = {
+  /** Étape franchie, sur une fiche. Absent : légende. `null` : candidature close. */
+  actuel?: number | null;
+  titre?: string;
+  /** Titre visible ou seulement lu par les lecteurs d'écran. */
+  titreVisible?: boolean;
+};
+
+const { actuel, titre = "Les quatre étapes d'une candidature", titreVisible = true } = Astro.props;
+const legende = actuel === undefined;
+---
+
+<figure class:list={["schema", "etapes", { legende }]}>
+  <figcaption class:list={["schema-titre", { "visuellement-masque": !titreVisible }]}>
+    {titre}
+  </figcaption>
+  <ol class="rail">
+    {
+      LEGENDE_ETAPES.map((etape) => {
+        const atteinte = legende || etape.rang === actuel;
+        const courante = !legende && etape.rang === actuel;
+        return (
+          <li class:list={{ atteinte, courante }} aria-current={courante ? "step" : undefined}>
+            <span class="rail-noeud" aria-hidden="true">
+              {etape.rang}
+            </span>
+            <div class="rail-texte">
+              <strong>{etape.court}</strong>
+              {legende && <p>{etape.detail}</p>}
+              {courante && <p class="ici">Étape actuelle</p>}
+            </div>
+          </li>
+        );
+      })
+    }
+  </ol>
+  {
+    legende && (
+      <p class="note">
+        Aucune candidature n'est acquise avant la liste officielle : il faut réunir au moins 500
+        présentations d'élus, venues d'au moins 30 départements ou collectivités d'outre-mer.
+      </p>
+    )
+  }
+</figure>
+
+<style>
+  .etapes {
+    margin: var(--pas-4) 0;
+  }
+
+  .etapes:not(.legende) {
+    margin: var(--pas-3) 0 0;
+  }
+
+  .etapes:not(.legende) .rail {
+    --noeud: 1.75rem;
+    --rail-ecart: var(--pas-2);
+  }
+
+  /* Étape pas encore franchie : un nœud évidé, cerclé du filet. */
+  .etapes li:not(.atteinte) .rail-noeud {
+    background: var(--couleur-fond);
+    color: var(--couleur-encre-faible);
+    box-shadow: inset 0 0 0 2px var(--couleur-trait);
+  }
+
+  .etapes li:not(.atteinte) .rail-texte strong {
+    color: var(--couleur-encre-faible);
+    font-weight: 400;
+  }
+
+  .ici {
+    color: var(--couleur-signature);
+    font-weight: 700;
+  }
+
+  .rail-texte p {
+    margin-top: 2px;
+    color: var(--couleur-encre-faible);
+  }
+
+  .note {
+    max-width: var(--mesure);
+    margin: var(--pas-3) 0 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * Grand écran : le rail se couche. Chaque étape trace le trait jusqu'à la
+   * suivante, à la hauteur du centre des nœuds ; la dernière n'en trace pas.
+   */
+  @media (min-width: 48rem) {
+    .etapes .rail {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: var(--pas-3);
+    }
+
+    .etapes .rail > li {
+      grid-template-columns: minmax(0, 1fr);
+      row-gap: var(--pas-2);
+    }
+
+    .etapes .rail > li:not(:last-child)::before {
+      top: calc(var(--noeud) / 2 - 1.5px);
+      bottom: auto;
+      left: var(--noeud);
+      right: calc(-1 * var(--pas-3));
+      width: auto;
+      height: 3px;
+    }
+
+    .etapes .rail-texte {
+      padding-top: 0;
+    }
+  }
+</style>

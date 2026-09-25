@@ -714,6 +714,33 @@ recommandation de vote », l'état de la bascule et la graine. **Aucun portrait*
 exige de créditer l'auteur, ce qu'une image qui circule seule ne fait pas. Partage natif du
 téléphone quand il existe, sinon enregistrement. Images en `blob:` : rien ne sort du navigateur.
 
+## 11 bis. Candidats : liste, tag et fiche (25 septembre 2026)
+
+**`/candidats`** — gabarit libre, largeur `--large`. Titre, date, une phrase ; puis la légende des
+étapes en **rail** (vertical à 375 px, couché à partir de 48 rem) ; puis une **grille sans boîte**
+de une, deux ou trois colonnes (375 px, 48 rem, 72 rem), un filet au-dessus de chaque candidat.
+L'ordre reste alphabétique : ni l'étape ni le nombre de propositions ne trient. Chaque entrée :
+portrait carré de 64 px, nom, parti, **tag**, trois repères (programme, propositions, positions du
+test), et un `<details>` natif « Aperçu du programme » — trois propositions au plus, choisies par
+`ordrePropositions` (mesure avant orientation, nature, date, identifiant).
+
+**Le tag** (`src/components/candidats/EtapeCandidature.astro`) — quatre crans courts dans
+`--couleur-signature`, remplis jusqu'au rang tiré du statut (`ETAPES_CANDIDATURE`), puis le
+libellé. **Même encre pour tous** : seule la longueur du remplissage change (§1.1). Angles droits,
+parce qu'il ne se clique pas (§1.3). Le lecteur d'écran entend « Étape 2 sur 4 : … ». Une réserve
+sourcée ajoute « sous réserve » en texte, jamais en couleur.
+
+**La fiche** — `PageLecture`, teinte violette identique pour tous les candidats, sommaire en trois
+parties. En tête : portrait 120 px, rail des étapes où **seule l'étape actuelle** est pleine (une
+candidature se déclare sans passer par une primaire : remplir les nœuds précédents mentirait),
+statut attesté et sources, réserve en pleine encre bordée, trois repères entre deux filets. Puis
+« Son programme » (propositions groupées par domaine, puis orientations ; nature en pleine encre
+quand ce n'est ni un programme 2027 ni une déclaration personnelle) et « Ses positions sur le
+test », où la valeur s'affiche aussi sur les cinq crans de l'échelle du test, cran retenu plein.
+
+**Portrait** — `src/components/candidats/Portrait.astro` est désormais le seul balisage de
+portrait des pages candidats : une taille par classe (64, 120), puisque la CSP refuse `style=""`.
+
 ## 12. Ce qui reste à faire
 
 - **Illustrations de rubrique** : les cartes de `/comprendre` portent aujourd'hui la couleur et la

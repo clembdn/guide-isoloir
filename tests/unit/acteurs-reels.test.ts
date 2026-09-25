@@ -48,13 +48,49 @@ describe("acteurs et candidatures", () => {
    * Chaque candidat doit avoir une ligne de repli, sinon la reprise de position
    * ne pourra jamais s'appliquer à lui et il restera vide sur toute affirmation
    * qu'il n'a pas commentée personnellement.
+   *
+   * SAUF EXCEPTION ÉCRITE ICI. Depuis le 25 septembre 2026, deux candidats
+   * n'ont aucun parti auquel les sources lues les rattachent : Olivier Becht se
+   * dit « sans étiquette », Ségolène Royal concourt à une primaire sans parti
+   * nommé. Leur prêter une ligne serait leur attribuer des positions. L'exception
+   * est une liste fermée : une chaîne vide qui n'y figure pas reste une erreur,
+   * parce qu'elle est plus souvent un oubli qu'une décision.
    */
-  it("donnent à chaque candidature au moins un acteur de repli, existant", () => {
+  const SANS_CHAINE_DE_REPRISE = new Set(["olivier-becht", "segolene-royal"]);
+
+  it("donnent à chaque candidature au moins un acteur de repli, existant, sauf exception écrite", () => {
     const connus = new Set(ACTEURS.map((acteur) => acteur.id));
     for (const candidature of CANDIDATURES) {
-      expect(candidature.baselineActorIds.length, candidature.actorId).toBeGreaterThan(0);
+      if (!SANS_CHAINE_DE_REPRISE.has(candidature.actorId)) {
+        expect(candidature.baselineActorIds.length, candidature.actorId).toBeGreaterThan(0);
+      }
       for (const repli of candidature.baselineActorIds) {
         expect(connus.has(repli), `${candidature.actorId} reprend ${repli}`).toBe(true);
+      }
+    }
+  });
+
+  it("ne déclarent sans chaîne de reprise que des candidats qui n'en ont vraiment aucune", () => {
+    for (const id of SANS_CHAINE_DE_REPRISE) {
+      const candidature = CANDIDATURES.find((c) => c.actorId === id);
+      expect(candidature, id).toBeDefined();
+      expect(candidature!.baselineActorIds.length, id).toBe(0);
+    }
+  });
+
+  /*
+   * Une réserve est une affirmation sur une candidature : même règle que le
+   * statut, elle ne se publie qu'avec une source existante.
+   */
+  it("sourcent chaque réserve sur une candidature", () => {
+    const acteurs = validerActeurs(ACTEURS);
+    const sources = validerSourcesPositions(SOURCES_POSITIONS);
+    expect(() => validerCandidatures(CANDIDATURES, acteurs, sources)).not.toThrow();
+    const connues = new Set(sources.map((source) => source.id));
+    for (const candidature of CANDIDATURES) {
+      if (!("reserve" in candidature)) continue;
+      for (const id of candidature.reserve.sourceIds) {
+        expect(connues.has(id), `${candidature.actorId} cite ${id}`).toBe(true);
       }
     }
   });

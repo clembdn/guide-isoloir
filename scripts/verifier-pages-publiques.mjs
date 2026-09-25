@@ -57,6 +57,7 @@ const AUTRES_FICHIERS_SERVIS = [
   "donnees/guide-isoloir-2027.json",
   "donnees/positions.csv",
   "donnees/positions-retenues.csv",
+  "donnees/propositions.csv",
 ];
 
 /**

@@ -1,0 +1,99 @@
+---
+/*
+ * LE TAG D'AVANCEMENT D'UNE CANDIDATURE.
+ *
+ * Quatre crans courts, remplis jusqu'à l'étape franchie, puis le libellé.
+ * TOUS LES CANDIDATS DANS LA MÊME ENCRE : seule la longueur du remplissage
+ * change, jamais l'intensité ni la teinte (DESIGN_SYSTEM §1.1). Le rang vient
+ * du statut, par `ETAPES_CANDIDATURE` : aucun jugement n'y entre.
+ *
+ * Angles droits : le tag ne se clique pas, il n'a donc pas la forme d'une
+ * pilule, réservée à ce qui est actionnable (DESIGN_SYSTEM §1.3).
+ *
+ * Le lecteur d'écran entend « Étape 3 sur 4 : Investiture par un parti » ; les
+ * crans, décoratifs, lui sont masqués.
+ */
+import { CRANS_CANDIDATURE } from "../../lib/libelles";
+import type { EtapeFiche } from "../../lib/fiches";
+
+type Props = {
+  etape: EtapeFiche;
+  /** Ajoute « sous réserve » quand une réserve sourcée existe. */
+  reserve?: boolean;
+};
+
+const { etape, reserve = false } = Astro.props;
+const crans = Array.from({ length: CRANS_CANDIDATURE }, (_, index) => index + 1);
+---
+
+<p class="etape">
+  {
+    etape.rang !== null && (
+      <span class="crans" aria-hidden="true">
+        {crans.map((cran) => (
+          <span class:list={["cran", { plein: cran <= etape.rang! }]} />
+        ))}
+      </span>
+    )
+  }
+  <span class="etape-libelle">
+    {
+      etape.rang !== null && (
+        <span class="visuellement-masque">
+          Étape {etape.rang} sur {CRANS_CANDIDATURE} :{" "}
+        </span>
+      )
+    }
+    {etape.court}
+  </span>
+  {reserve && <span class="etape-reserve">, sous réserve</span>}
+</p>
+
+<style>
+  .etape {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--pas-1);
+    margin: 0;
+    font-size: var(--t-petit);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--couleur-encre);
+  }
+
+  .crans {
+    display: inline-grid;
+    grid-template-columns: repeat(4, 0.875rem);
+    gap: 3px;
+  }
+
+  /*
+   * Un cran vide est un filet, pas un fond pastel : il se lit comme une étape
+   * pas encore franchie, sans rien colorer.
+   */
+  .cran {
+    height: 5px;
+    background: var(--couleur-trait);
+  }
+
+  .cran.plein {
+    background: var(--couleur-signature);
+  }
+
+  .etape-reserve {
+    margin-left: calc(-1 * var(--pas-1));
+    font-weight: 400;
+  }
+
+  @media (forced-colors: active) {
+    .cran {
+      border: 1px solid CanvasText;
+      background: Canvas;
+    }
+
+    .cran.plein {
+      background: CanvasText;
+    }
+  }
+</style>

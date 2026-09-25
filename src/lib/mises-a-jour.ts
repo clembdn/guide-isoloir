@@ -16,7 +16,7 @@ export const MISES_A_JOUR = {
   "/": "2026-09-24",
   "/comprendre": "2026-09-14",
   "/a-propos": "2026-09-23",
-  "/methodologie": "2026-09-21",
+  "/methodologie": "2026-09-25",
   "/charte-editoriale": "2026-09-14",
   "/corrections": "2026-09-14",
   "/financement": "2026-09-14",

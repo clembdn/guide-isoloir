@@ -6,7 +6,7 @@
  * été prise explicitement, et elle doit être lisible ici plutôt que devinée :
  * `reconciled` signifiait « confronté par deux relecteurs puis réconcilié » ;
  * il signifie maintenant « publiable ». Le double codage à l'aveugle n'a PAS eu
- * lieu sur ces trente positions. `/methodologie` l'écrit noir sur blanc, et le
+ * lieu sur ces positions. `/methodologie` l'écrit noir sur blanc, et le
  * taux d'accord publié y reste vide tant que la campagne de double codage n'a
  * pas eu lieu — un site dont l'argument est la vérifiabilité ne peut pas
  * emprunter la crédibilité d'un protocole qu'il n'a pas appliqué.
@@ -41,8 +41,8 @@
  * plafond, le codage le moins établi pèserait sur le score autant que le mieux
  * établi.
  *
- * CE QUI N'EST PAS CODÉ COMPTE ENCORE PLUS QUE CE QUI L'EST. Trente positions
- * pour 20 candidats et 24 affirmations, soit 480 couples possibles : la
+ * CE QUI N'EST PAS CODÉ COMPTE ENCORE PLUS QUE CE QUI L'EST. Au 25 septembre
+ * 2026, 28 candidats et 24 affirmations, soit 672 couples possibles : la
  * couverture reste très basse, et deux acteurs seulement dépassent le seuil de
  * publication du classement. Les cases où la source ne dit pas ce que demande
  * l'affirmation restent vides — position inconnue — plutôt que remplies par une
@@ -1665,5 +1665,474 @@ export const POSITIONS = [
       "Le parti nomme la réunion de ces deux outils « référendum d'initiative citoyenne constituant (RICC) » et en fait l'intégralité de son programme présidentiel. C'est la mesure exactement posée par l'affirmation, portée sans condition ni réserve. Une seule case, et c'est tout ce que ce parti documente : les vingt-trois autres restent vides parce qu'il ne se prononce pas dessus, pas parce qu'on ne l'a pas cherché.",
     reviewStatus: "reconciled",
     updatedAt: "2026-09-20",
+  },
+  /*
+   * RELEVÉ DU 25 SEPTEMBRE 2026.
+   *
+   * Programme des Écologistes (557 mesures, été 2026) passé au crible des
+   * vingt-quatre affirmations, et positions tirées des sources vérifiées pour
+   * les statuts de candidature. Sept affirmations restent vides pour Les
+   * Écologistes : le programme n'y répond pas (voir `data/cases-non-couvertes.md`).
+   */
+  {
+    id: "parti-les-ecologistes--retraites-age-legal-60",
+    actorId: "parti-les-ecologistes",
+    questionId: "retraites-age-legal-60",
+    value: 1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "revenir immédiatement à un âge minimum à 62 ans et viser une retraite à 60 ans en priorisant / réinstaurer la retraite à 60 ans pour les personnes ayant travaillé tôt et dans des conditions pénibles",
+    adequation: "partielle",
+    rationale:
+      "Le retour à 60 ans est un objectif, atteint d'abord pour les carrières longues et pénibles ; l'âge minimum immédiat visé est 62 ans. Adéquation partielle, valeur plafonnée à 1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--retraites-abrogation-reforme-2023",
+    actorId: "parti-les-ecologistes",
+    questionId: "retraites-abrogation-reforme-2023",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation: "Abroger l'âge légal de départ à la retraite à 64 ans (réforme Borne)",
+    adequation: "directe",
+    rationale:
+      "La réforme Borne est la réforme des retraites de 2023, et son âge légal à 64 ans en est la mesure centrale. Le programme en demande l'abrogation sans condition : c'est la mesure posée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--retraites-part-capitalisation",
+    actorId: "parti-les-ecologistes",
+    questionId: "retraites-part-capitalisation",
+    value: -2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Refuser toute forme d'évolution vers une retraite par capitalisation en particulier la retraite à points",
+    adequation: "directe",
+    rationale:
+      "Refus explicite de toute part de capitalisation : désaccord complet avec la mesure posée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--fiscalite-impot-fortune",
+    actorId: "parti-les-ecologistes",
+    questionId: "fiscalite-impot-fortune",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Rétablir l'Impôt sur la Fortune (ISF) en lui ajoutant une composante climatique pour orienter le patrimoine vers des actifs verts",
+    adequation: "directe",
+    rationale:
+      "Rétablissement d'un impôt sur la fortune, assorti d'un volet climatique qui n'en change pas le principe : la mesure posée, exactement.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--budget-reduction-dette-par-depenses",
+    actorId: "parti-les-ecologistes",
+    questionId: "budget-reduction-dette-par-depenses",
+    value: -1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Stabiliser le niveau de la dette publique. Assurer une trajectoire stable et prévisible en privilégiant une logique de justice fiscale qui améliore la progressivité de l'impôt",
+    adequation: "partielle",
+    rationale:
+      "Le programme vise une stabilisation, pas une réduction, et la fait passer par la fiscalité plutôt que par la dépense. Il ne répond pas exactement à l'affirmation, qui porte sur la réduction : adéquation partielle, -1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--nationalite-suppression-droit-du-sol",
+    actorId: "parti-les-ecologistes",
+    questionId: "nationalite-suppression-droit-du-sol",
+    value: -2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Garantir l'application du droit du sol pour les enfants nés en France indépendamment de la situation des parents",
+    adequation: "directe",
+    rationale:
+      "Garantir le droit du sol, c'est refuser sa suppression, sans condition : désaccord complet.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--immigration-regularisation-par-le-travail",
+    actorId: "parti-les-ecologistes",
+    questionId: "immigration-regularisation-par-le-travail",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Régulariser les travailleur·ses, les étudiant·es et les parents d'enfants scolarisés sur la base de critères objectifs",
+    adequation: "directe",
+    rationale:
+      "La régularisation des travailleurs sans papiers est explicitement prévue ; les critères évoqués (durée de résidence, activité) sont ceux que l'affirmation suppose. Même codage que le contrat du NFP, qui porte une formule très proche.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--vote-etrangers-elections-municipales",
+    actorId: "parti-les-ecologistes",
+    questionId: "vote-etrangers-elections-municipales",
+    value: 1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Étendre le droit de vote aux étranger·es extra-communautaires pour les élections locales (municipales, intercommunales, départementales et régionales) après cinq années de résidence en France",
+    adequation: "partielle",
+    rationale:
+      "Accord sur le principe, mais sous une condition de cinq ans de résidence que l'affirmation ne pose pas. Adéquation partielle, valeur plafonnée à 1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--agriculture-renforcement-normes-environnementales",
+    actorId: "parti-les-ecologistes",
+    questionId: "agriculture-renforcement-normes-environnementales",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Planifier une sortie progressive des pesticides de synthèse et des engrais azotés à l'horizon 2050",
+    adequation: "directe",
+    rationale:
+      "Une sortie programmée des pesticides de synthèse est un renforcement des obligations environnementales pesant sur l'agriculture française, qui est la mesure posée. Le même chapitre prévoit d'interdire immédiatement les pesticides classés cancérigènes, mutagènes ou toxiques.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--energie-nouveaux-parcs-eoliens",
+    actorId: "parti-les-ecologistes",
+    questionId: "energie-nouveaux-parcs-eoliens",
+    value: 1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Soutenir fiscalement et réglementairement ces entreprises de la fabrication des composants à la maintenance dans les secteurs stratégiques des parcs éoliens offshore et terrestre",
+    adequation: "partielle",
+    rationale:
+      "Le programme soutient la filière éolienne terrestre et en mer, ce qui suppose de nouveaux parcs, sans énoncer d'objectif d'installation. Il exclut par ailleurs les parcs naturels. Adéquation partielle, 1 : même codage que le contrat du NFP.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--transport-suppression-zfe",
+    actorId: "parti-les-ecologistes",
+    questionId: "transport-suppression-zfe",
+    value: -1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Améliorer la qualité de l'air en modifiant les conditions des ZFE (Zones à Faibles Émissions)",
+    adequation: "directe",
+    rationale:
+      "Le programme maintient les ZFE en en modifiant les conditions, avec des dérogations pour les petits rouleurs et les professionnels : désaccord avec leur suppression, mais pas rejet sans nuance du dispositif actuel. -1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--energie-nouveaux-reacteurs-nucleaires",
+    actorId: "parti-les-ecologistes",
+    questionId: "energie-nouveaux-reacteurs-nucleaires",
+    value: -2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Planifier la sortie du nucléaire. Mettre fin aux nouveaux programmes EPR-2 et SMR extrêmement dispendieux.",
+    adequation: "directe",
+    rationale:
+      "Arrêt des nouveaux programmes de réacteurs et sortie planifiée du nucléaire : désaccord complet avec la mesure posée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--institutions-proportionnelle-legislatives",
+    actorId: "parti-les-ecologistes",
+    questionId: "institutions-proportionnelle-legislatives",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Instaurer la proportionnelle intégrale sans prime majoritaire aux élections législatives",
+    adequation: "directe",
+    rationale: "Élection des députés à la proportionnelle intégrale : la mesure posée, exactement.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--institutions-referendum-initiative-citoyenne",
+    actorId: "parti-les-ecologistes",
+    questionId: "institutions-referendum-initiative-citoyenne",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Renforcer la démocratie directe par la mise en œuvre du Référendum d'Initiative Citoyenne (RIC) propositionnel ou abrogatif",
+    adequation: "directe",
+    rationale:
+      "Le RIC permet aux citoyens de déclencher un référendum par pétition ; le contrôle de constitutionnalité préalable que le programme ajoute relève du juge, pas du gouvernement ni du Parlement. La mesure posée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--institutions-maintien-article-49-3",
+    actorId: "parti-les-ecologistes",
+    questionId: "institutions-maintien-article-49-3",
+    value: -1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Assurer que le Parlement dispose d'un meilleur contrôle de son ordre du jour et ne soit plus limité par les actuels articles 34 ou par l'article 49-3",
+    adequation: "partielle",
+    rationale:
+      "Le programme veut que le Parlement ne soit plus limité par le 49-3, ce qui s'oppose à son maintien, sans en écrire explicitement la suppression. Adéquation partielle, -1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--europe-decisions-majorite-qualifiee",
+    actorId: "parti-les-ecologistes",
+    questionId: "europe-decisions-majorite-qualifiee",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Remplacer les droits de veto nationaux par une majorité qualifiée en matière de protection des droits fondamentaux, de protection sociale et d'intégration fiscale européenne et la politique étrangère et de sécurité commune",
+    adequation: "directe",
+    rationale:
+      "Passage de l'unanimité à la majorité qualifiée dans quatre domaines, dont la politique étrangère : davantage de décisions à la majorité, la mesure posée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "parti-les-ecologistes--international-financement-soutien-ukraine",
+    actorId: "parti-les-ecologistes",
+    questionId: "international-financement-soutien-ukraine",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["eco-programme-2027"],
+    citation:
+      "Soutenir militairement l'Ukraine. Fournir du matériel militaire, y compris de capacités de frappe à longue portée et des moyens de défense antiaérienne pour protéger le ciel ukrainien.",
+    adequation: "directe",
+    rationale:
+      "Le programme prévoit la fourniture de matériel militaire et le financement du fonds bilatéral de soutien à l'Ukraine : la mesure posée.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "anasse-kazib--retraites-age-legal-60",
+    actorId: "anasse-kazib",
+    questionId: "retraites-age-legal-60",
+    value: 2,
+    provenance: "direct-statement",
+    confidence: "medium",
+    sourceIds: ["rp-kazib-premieres-mesures-2026"],
+    citation:
+      "le candidat a posé comme revendications centrales la semaine de 28 heures et la retraite à 60 ans, 55 ans pour les métiers pénibles, sans condition d'annuités",
+    adequation: "directe",
+    rationale:
+      "Retraite à 60 ans pour tous, et plus tôt pour les métiers pénibles : la mesure posée, au moins. La phrase est celle du compte rendu publié par le mouvement du candidat, au style indirect : confiance moyenne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "anasse-kazib--immigration-regularisation-par-le-travail",
+    actorId: "anasse-kazib",
+    questionId: "immigration-regularisation-par-le-travail",
+    value: 2,
+    provenance: "direct-statement",
+    confidence: "medium",
+    sourceIds: ["rp-kazib-premieres-mesures-2026"],
+    citation:
+      "sur celui du racisme, avec la régularisation de tous les sans-papiers et la liberté de circulation et d'installation",
+    adequation: "directe",
+    rationale:
+      "La régularisation de TOUS les sans-papiers inclut celle des travailleurs employés depuis plusieurs années : l'affirmation est entièrement couverte. Phrase du compte rendu publié par le mouvement du candidat, qui présente ce point comme un axe de la campagne : confiance moyenne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "selma-labib--immigration-regularisation-par-le-travail",
+    actorId: "selma-labib",
+    questionId: "immigration-regularisation-par-le-travail",
+    value: 2,
+    provenance: "direct-statement",
+    confidence: "high",
+    sourceIds: ["npar-labib-frontieres-2024"],
+    citation:
+      "il va falloir se battre pour que tous les travailleurs et toutes les travailleuses aient les mêmes droits, à commencer par la régularisation de tous les sans-papiers",
+    adequation: "directe",
+    rationale:
+      "Ses mots, dans une intervention d'avril 2024, avant sa candidature : l'écran le signale. La régularisation de tous les sans-papiers couvre entièrement celle des travailleurs.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "selma-labib--vote-etrangers-elections-municipales",
+    actorId: "selma-labib",
+    questionId: "vote-etrangers-elections-municipales",
+    value: 2,
+    provenance: "direct-statement",
+    confidence: "high",
+    sourceIds: ["npar-labib-frontieres-2024"],
+    citation:
+      "à commencer par la régularisation de tous les sans-papiers, et le droit de vote pour les étrangers",
+    adequation: "directe",
+    rationale:
+      "Le droit de vote des étrangers, sans restriction à un type d'élection, couvre les municipales. Intervention d'avril 2024, antérieure à la campagne : l'écran le signale.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "selma-labib--immigration-plafond-titres-sejour",
+    actorId: "selma-labib",
+    questionId: "immigration-plafond-titres-sejour",
+    value: -1,
+    provenance: "direct-statement",
+    confidence: "high",
+    sourceIds: ["npar-labib-frontieres-2024"],
+    citation:
+      "il va falloir se battre pour la liberté de circulation et d'installation de tous et toutes",
+    adequation: "partielle",
+    rationale:
+      "La liberté d'installation pour tous s'oppose à tout plafond de titres de séjour, sans que la question des titres soit posée en ces termes. Adéquation partielle, -1 : même codage que les autres positions de principe sur la liberté de circulation.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "nathalie-arthaud--immigration-regularisation-par-le-travail",
+    actorId: "nathalie-arthaud",
+    questionId: "immigration-regularisation-par-le-travail",
+    value: 2,
+    provenance: "direct-statement",
+    confidence: "high",
+    sourceIds: ["lo-arthaud-manifeste-2026"],
+    citation:
+      "régularisation de tous les sans-papiers, liberté de circulation et d'installation pour chaque être humain de cette planète !",
+    adequation: "directe",
+    rationale:
+      "Discours du 24 mai 2026 publié par son parti. La régularisation de tous les sans-papiers couvre entièrement celle des travailleurs.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "nathalie-arthaud--immigration-plafond-titres-sejour",
+    actorId: "nathalie-arthaud",
+    questionId: "immigration-plafond-titres-sejour",
+    value: -1,
+    provenance: "direct-statement",
+    confidence: "high",
+    sourceIds: ["lo-arthaud-manifeste-2026"],
+    citation:
+      "régularisation de tous les sans-papiers, liberté de circulation et d'installation pour chaque être humain de cette planète !",
+    adequation: "partielle",
+    rationale:
+      "La liberté d'installation pour chacun s'oppose à tout plafond de titres de séjour, sans que la question soit posée en ces termes. Adéquation partielle, -1.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "jean-luc-melenchon--immigration-regularisation-par-le-travail",
+    actorId: "jean-luc-melenchon",
+    questionId: "immigration-regularisation-par-le-travail",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2027-chapitre-16"],
+    citation:
+      "Faciliter l'accès aux visas, régulariser les travailleurs, étudiants, parents d'enfants scolarisés et instituer la carte de séjour de dix ans comme titre de séjour de référence",
+    adequation: "directe",
+    rationale:
+      "Mesure listée parmi celles « déjà présentes dans le programme » : c'est le programme du candidat qui parle, pas une contribution. Elle remplace la reprise du contrat du NFP, qui disait la même chose.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "jean-luc-melenchon--immigration-plafond-titres-sejour",
+    actorId: "jean-luc-melenchon",
+    questionId: "immigration-plafond-titres-sejour",
+    value: -1,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2027-chapitre-16"],
+    citation: "instituer la carte de séjour de dix ans comme titre de séjour de référence",
+    adequation: "partielle",
+    rationale:
+      "Faire du titre de dix ans la référence et faciliter les visas va à l'inverse d'un plafonnement, sans en parler directement. Adéquation partielle, -1 : même codage que le contrat du NFP, qui porte la même phrase.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "bruno-retailleau--institutions-elargissement-champ-referendum",
+    actorId: "bruno-retailleau",
+    questionId: "institutions-elargissement-champ-referendum",
+    value: 2,
+    provenance: "press-report",
+    confidence: "medium",
+    sourceIds: ["publicsenat-retailleau-constitution-2026"],
+    citation:
+      "Il souhaite notamment que le référendum législatif puisse porter sur l'ensemble du domaine de la loi.",
+    adequation: "directe",
+    sourcePrimaire: "Entretien de Bruno Retailleau au Figaro, début septembre 2026",
+    rationale:
+      "Un référendum ouvert à tout le domaine de la loi permet de soumettre la politique migratoire au vote, et l'article cite l'immigration en premier exemple. La phrase est celle du journaliste, qui rapporte un entretien au Figaro : confiance moyenne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "clara-egger--institutions-referendum-initiative-citoyenne",
+    actorId: "clara-egger",
+    questionId: "institutions-referendum-initiative-citoyenne",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["sd-parrainage-egger-2026", "sd-programme-2027"],
+    citation:
+      "S'agissant d'une initiative citoyenne, elle est exemptée d'un examen et d'un vote par le Parlement",
+    adequation: "directe",
+    rationale:
+      "Programme de la candidate, limité à deux réformes : l'initiative citoyenne constituante se déclenche par signatures, sans vote du Parlement. La mesure posée. La position du parti, identique, reste en dessous dans la chaîne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
+  },
+  {
+    id: "nicolas-dupont-aignan--institutions-referendum-initiative-citoyenne",
+    actorId: "nicolas-dupont-aignan",
+    questionId: "institutions-referendum-initiative-citoyenne",
+    value: 2,
+    provenance: "direct-statement",
+    confidence: "medium",
+    sourceIds: ["dlf-nda-candidature-2025"],
+    citation: "Instauration du RIC (Référendum d'Initiative Citoyenne).",
+    adequation: "directe",
+    rationale:
+      "Mesure « phare » annoncée par le candidat le jour de sa déclaration, rapportée en liste par son parti : confiance moyenne. Le RIC est la mesure posée. Déclaration de mars 2025, antérieure au seuil de campagne : l'écran le signale.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-09-25",
   },
 ] as const satisfies readonly Stance[];

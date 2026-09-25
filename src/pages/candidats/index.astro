@@ -6,16 +6,29 @@
  * c'est la règle publiée sur `/charte-editoriale`. Trier par nombre de positions
  * documentées mettrait en tête les candidats les mieux couverts par la presse,
  * et une liste en tête de laquelle figure toujours le même nom se lit comme un
- * classement.
+ * classement. Ni l'étape de candidature ni le nombre de propositions ne
+ * décident de l'ordre : ils s'affichent, ils ne trient pas.
  *
  * Chaque entrée reçoit exactement le même traitement : même cadre, même taille,
- * mêmes lignes. La couverture est affichée pour tous, zéro compris.
+ * mêmes lignes. La couverture et les propositions sont affichées pour tous,
+ * zéro compris.
+ *
+ * GRILLE PLEINE LARGEUR, SANS BOÎTE (25 septembre 2026). La colonne étroite
+ * laissait de grands vides latéraux sur ordinateur ; chaque candidat est
+ * désormais une entrée sous un filet, une à trois par ligne selon la largeur.
+ * Un filet sépare deux candidats : il ne décore pas.
+ *
+ * L'APERÇU SE DÉPLIE SANS JAVASCRIPT. `<details>` natif : son contenu est
+ * dans le HTML servi, lisible par un robot qui n'exécute rien, et le bouton
+ * est accessible au clavier sans une ligne de script.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import Portrait from "../../components/candidats/Portrait.astro";
+import EtapeCandidature from "../../components/candidats/EtapeCandidature.astro";
+import EtapesCandidature from "../../components/schemas/EtapesCandidature.astro";
+import Icone from "../../components/Icone.astro";
 import { fiches, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
-import { LIBELLES_STATUT_CANDIDATURE } from "../../lib/libelles";
-import { initiales } from "../../lib/initiales";
 import { SITE_NAME, SITE_URL, ELECTION } from "../../lib/site";
 import { formatDateFr } from "../../lib/date";
 
@@ -31,12 +44,6 @@ const retirees = toutes.filter((fiche) => RETRAITS.has(fiche.candidature.status)
 
 /** La liste change quand une fiche change : sa date est celle de la plus récente. */
 const UPDATED = toutes.map((fiche) => fiche.misAJour).reduce((a, b) => (a > b ? a : b));
-
-function couverture(documentees: number): string {
-  return documentees === 0
-    ? "Aucune position documentée à ce jour"
-    : `Position documentée sur ${documentees} des ${NOMBRE_AFFIRMATIONS} affirmations`;
-}
 
 const filAriane = {
   "@context": "https://schema.org",
@@ -55,138 +62,347 @@ const filAriane = {
 
 <BaseLayout
   title="Candidats à l'élection présidentielle 2027"
-  description={`Les ${enLice.length} candidats suivis pour l'élection présidentielle de 2027, par ordre alphabétique. Pour chacun : statut de candidature daté et sourcé, et ses positions sur les ${NOMBRE_AFFIRMATIONS} affirmations du test.`}
+  description={`Les ${enLice.length} personnes suivies pour l'élection présidentielle de 2027, par ordre alphabétique. Pour chacune : où en est sa candidature, ce que l'on sait de son programme, et ses positions sur les ${NOMBRE_AFFIRMATIONS} affirmations du test, avec leurs sources.`}
   updated={UPDATED}
+  gabarit="libre"
 >
-  <nav class="fil-ariane" aria-label="Fil d'Ariane">
-    <a href="/">{SITE_NAME}</a>
-  </nav>
+  <div class="enveloppe-large page">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <a href="/">{SITE_NAME}</a>
+    </nav>
 
-  <h1>Candidats à l'élection présidentielle 2027</h1>
-  <DerniereMiseAJour date={UPDATED} />
+    <header class="tete">
+      <h1>Candidats à l'élection présidentielle 2027</h1>
+      <DerniereMiseAJour date={UPDATED} />
+      <p class="question">
+        {enLice.length} personnes suivies pour les scrutins du {formatDateFr(ELECTION.round1)} et du{
+          " "
+        }
+        {formatDateFr(ELECTION.round2)}, par ordre alphabétique. L'ordre n'exprime aucune
+        préférence.
+      </p>
+    </header>
 
-  <p class="question">
-    {enLice.length} candidats suivis pour les scrutins du {formatDateFr(ELECTION.round1)} et du{" "}
-    {formatDateFr(ELECTION.round2)}, par ordre alphabétique. L'ordre n'exprime aucune préférence.
-  </p>
+    <EtapesCandidature titre="Où en est chaque candidature" />
 
-  <ul class="candidats">
+    <h2 class="visuellement-masque" id="liste">Les candidatures en cours</h2>
+    <ul class="candidats" aria-labelledby="liste">
+      {
+        enLice.map((fiche) => (
+          <li class="candidat">
+            <div class="identite">
+              <Portrait nom={fiche.acteur.name} chemin={fiche.portrait} taille={64} />
+              <div>
+                <h3 class="nom">
+                  <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a>
+                </h3>
+                <p class="parti">{fiche.parti ? fiche.parti.nom : "Sans parti rattaché"}</p>
+              </div>
+            </div>
+
+            <EtapeCandidature etape={fiche.etape} reserve={fiche.reserve !== null} />
+
+            <dl class="chiffres">
+              <div>
+                <dt>Programme</dt>
+                <dd>{fiche.programme.court}</dd>
+              </div>
+              <div>
+                <dt>Propositions</dt>
+                <dd>{fiche.nombrePropositions}</dd>
+              </div>
+              <div>
+                <dt>Positions du test</dt>
+                <dd>
+                  {fiche.documentees} sur {NOMBRE_AFFIRMATIONS}
+                </dd>
+              </div>
+            </dl>
+
+            <details class="apercu">
+              <summary>
+                <Icone nom="caret-right" graisse="bold" class="chevron" />
+                Aperçu du programme
+              </summary>
+              <div class="apercu-corps">
+                <p class="etat">{fiche.programme.texte}</p>
+                {fiche.apercu.length > 0 ? (
+                  <ul class="mesures">
+                    {fiche.apercu.map((proposition) => (
+                      <li>
+                        <span class="mesure">{proposition.intitule}</span>
+                        <span class="mesure-origine">
+                          {proposition.natureLibelle}
+                          {proposition.auteur && `, ${proposition.auteur}`}
+                          {", "}
+                          <time datetime={proposition.date}>{formatDateFr(proposition.date)}</time>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p class="vide">Aucune proposition relevée à ce jour.</p>
+                )}
+                <p class="vers-fiche">
+                  <a href={`/candidats/${fiche.acteur.slug}`}>
+                    Voir la fiche de {fiche.acteur.name}
+                  </a>
+                </p>
+              </div>
+            </details>
+          </li>
+        ))
+      }
+    </ul>
+
     {
-      enLice.map((fiche) => (
-        <li>
-          {fiche.portrait ? (
-            <img
-              class="portrait"
-              src={fiche.portrait}
-              alt=""
-              width="56"
-              height="56"
-              loading="lazy"
-              decoding="async"
-            />
-          ) : (
-            <p class="portrait portrait-absent" aria-hidden="true">
-              {initiales(fiche.acteur.name)}
-            </p>
-          )}
-          <div>
-            <h2>
-              <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a>
-            </h2>
-            {fiche.parti && <p>{fiche.parti.nom}</p>}
-            <p>{LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status]}</p>
-            <p>{couverture(fiche.documentees)}</p>
-          </div>
-        </li>
-      ))
+      retirees.length > 0 && (
+        <section aria-labelledby="retraits" class="retraits">
+          <h2 id="retraits">Candidatures retirées ou éliminées</h2>
+          <p>Leurs fiches restent en ligne, avec leur statut et l'historique de leurs positions.</p>
+          <ul>
+            {retirees.map((fiche) => (
+              <li>
+                <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a> :{" "}
+                {fiche.etape.long}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
     }
-  </ul>
 
-  {
-    retirees.length > 0 && (
-      <section aria-labelledby="retraits">
-        <h2 id="retraits">Candidatures retirées ou éliminées</h2>
-        <p>Leurs fiches restent en ligne, avec leur statut et l'historique de leurs positions.</p>
-        <ul class="retraits">
-          {retirees.map((fiche) => (
-            <li>
-              <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a> —{" "}
-              {LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status]}
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  <p>
-    Un candidat entre dans cette liste sur un acte public et daté : une déclaration de candidature,
-    ou une désignation par son parti. Ni un sondage ni une rumeur de presse ne suffisent. Les règles
-    sont décrites dans la <a href="/charte-editoriale">charte éditoriale</a>.
-  </p>
-
-  <p class="signature">
-    Pour comparer ces positions aux vôtres, <a href="/test">faites le test</a>. La{" "}
-    <a href="/methodologie">méthodologie</a> explique comment une position est établie, et pourquoi certains
-    candidats ne sont pas encore classés.
-  </p>
+    <div class="regles">
+      <p>
+        Une personne entre dans cette liste sur un acte public et daté : une déclaration de
+        candidature, une candidature à une primaire, ou une désignation par son parti. Ni un sondage
+        ni une rumeur de presse ne suffisent. L'étape affichée découle de cet acte, pas d'une
+        appréciation. Les règles sont décrites dans la <a href="/charte-editoriale"
+          >charte éditoriale</a
+        >.
+      </p>
+      <p>
+        L'aperçu montre au plus trois propositions, choisies par une règle fixe : une mesure avant
+        une orientation, un programme 2027 avant une déclaration, puis la plus récente. Leur nombre
+        dépend de ce que chaque campagne a publié, pas de la qualité d'un programme.
+      </p>
+      <p class="signature">
+        Pour comparer ces positions aux vôtres, <a href="/test">faites le test</a>. La <a
+          href="/methodologie">méthodologie</a
+        > explique comment une position est établie, et pourquoi certains candidats ne sont pas encore
+        classés.
+      </p>
+    </div>
+  </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
 </BaseLayout>
 
 <style>
-  .candidats {
-    list-style: none;
-    padding: 0;
-    margin: var(--pas-5) 0 0;
+  .page {
+    padding-top: var(--pas-4);
+    padding-bottom: var(--pas-5);
   }
 
-  .candidats > li {
-    display: flex;
-    align-items: flex-start;
-    gap: var(--pas-3);
-    padding-block: var(--pas-3);
+  .tete {
+    max-width: 46rem;
+  }
+
+  .tete h1 {
+    margin-bottom: var(--pas-2);
+  }
+
+  /*
+   * LA GRILLE. Une colonne à 375 px, deux à partir de 48 rem, trois à partir
+   * de 72 rem. `align-items: start` : un aperçu déplié allonge sa seule entrée,
+   * pas toute la rangée.
+   */
+  .candidats {
+    list-style: none;
+    margin: var(--pas-5) 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: var(--pas-5);
+    align-items: start;
+  }
+
+  @media (min-width: 48rem) {
+    .candidats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 72rem) {
+    .candidats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .candidat {
+    display: grid;
+    gap: var(--pas-2);
+    padding: var(--pas-3) 0 var(--pas-4);
     border-top: 1px solid var(--couleur-trait);
   }
 
-  .candidats h2 {
-    font-size: var(--t-h3);
-    margin: 0 0 var(--pas-1);
+  .identite {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
   }
 
-  .candidats p:not(.portrait) {
+  .nom {
     margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+  }
+
+  /* Le nom entier est la cible : 44 px de haut sans bouger la mise en page. */
+  .nom a {
+    display: inline-block;
+    padding-block: 10px;
+    margin-block: -10px;
+    color: var(--couleur-encre);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.2em;
+  }
+
+  .nom a:hover {
+    color: var(--couleur-signature);
+  }
+
+  .parti {
+    margin: 2px 0 0;
     font-size: var(--t-petit);
     color: var(--couleur-encre-faible);
   }
 
-  /* Même cadre que le résultat et la fiche : un carré, une bordure. */
-  .portrait {
-    flex: none;
-    width: 56px;
-    height: 56px;
-    margin: 0;
-    object-fit: cover;
-    object-position: top center;
-    border: 1px solid var(--couleur-trait);
-    background: var(--couleur-trait);
-  }
-
-  .portrait-absent {
+  /*
+   * TROIS CHIFFRES, TROIS COLONNES, AUCUN FOND. L'intitulé en petit au-dessus,
+   * la valeur en dessous : un repère qu'on balaie des yeux, pas un tableau.
+   */
+  .chiffres {
     display: grid;
-    place-items: center;
-    font-size: var(--t-petit);
-    font-weight: 600;
-    letter-spacing: 0.04em;
-    /*
-     * Fond de surface, pas la teinte des filets : sur `--couleur-trait`, les
-     * initiales en encre faible tombaient à 4,2:1, mesuré par capturer.mjs.
-     */
-    background: var(--couleur-surface);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--pas-2);
+    margin: var(--pas-1) 0 0;
+  }
+
+  .chiffres div {
+    min-width: 0;
+  }
+
+  .chiffres dt {
+    font-size: 0.8125rem;
     color: var(--couleur-encre-faible);
+  }
+
+  .chiffres dd {
+    margin: 2px 0 0;
+    font-size: var(--t-petit);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.3;
+  }
+
+  /*
+   * L'APERÇU. Même idiome que les dépliants du résultat : un intitulé en
+   * signature, un chevron qui pivote, aucun cadre autour.
+   */
+  .apercu {
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .apercu summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-1);
+    min-height: 44px;
+    color: var(--couleur-signature);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .apercu summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .apercu summary :global(.chevron) {
+    width: 1rem;
+    height: 1rem;
+    flex: none;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .apercu summary :global(.chevron) {
+      transition: transform var(--duree) var(--sortie);
+    }
+  }
+
+  .apercu[open] summary :global(.chevron) {
+    transform: rotate(90deg);
+  }
+
+  .apercu-corps {
+    padding-bottom: var(--pas-1);
+    font-size: var(--t-petit);
+  }
+
+  .etat {
+    margin: 0 0 var(--pas-2);
+    color: var(--couleur-encre-faible);
+  }
+
+  .mesures {
+    list-style: none;
+    margin: 0 0 var(--pas-2);
+    padding: 0;
+    display: grid;
+    gap: var(--pas-2);
+  }
+
+  .mesures li {
+    display: grid;
+    gap: 2px;
+  }
+
+  .mesure {
+    font-weight: 700;
+    color: var(--couleur-encre);
+  }
+
+  .mesure-origine,
+  .vide {
+    color: var(--couleur-encre-faible);
+  }
+
+  .vide {
+    margin: 0 0 var(--pas-2);
+  }
+
+  .vers-fiche {
+    margin: 0;
+  }
+
+  .vers-fiche a {
+    display: inline-block;
+    padding-block: 12px;
+    margin-block: -12px;
+  }
+
+  .retraits {
+    margin-top: var(--pas-5);
+    max-width: var(--mesure);
   }
 
   .retraits li {
     margin-bottom: var(--pas-2);
+  }
+
+  .regles {
+    margin-top: var(--pas-5);
+    max-width: 46rem;
   }
 </style>

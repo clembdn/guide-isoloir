@@ -97,6 +97,14 @@ export const CandidateSchema = z
     statutDepuis: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
     /** Un statut sans source n'est pas un fait, c'est une rumeur. */
     statutSourceIds: z.array(IdentifiantSchema).min(1),
+    /** Même règle pour la réserve : une phrase, et au moins une source. */
+    reserve: z
+      .object({
+        texte: z.string().min(20).max(300),
+        sourceIds: z.array(IdentifiantSchema).min(1),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 
@@ -195,8 +203,10 @@ export function validerActeurs(brut: unknown) {
 export function validerCandidatures(
   brut: unknown,
   acteurs: readonly { id: string; kind: string }[],
+  sourcesConnues?: readonly { id: string }[],
 ) {
   const candidatures = z.array(CandidateSchema).parse(brut);
+  const sources = sourcesConnues && new Set(sourcesConnues.map((source) => source.id));
 
   const parId = new Map(acteurs.map((acteur) => [acteur.id, acteur]));
   const vus = new Set<string>();
@@ -215,6 +225,14 @@ export function validerCandidatures(
       throw new Error(
         `Candidature rattachée à un acteur de type « ${acteur.kind} » : ${candidature.actorId}`,
       );
+    }
+
+    for (const sourceId of candidature.reserve?.sourceIds ?? []) {
+      if (sources !== undefined && !sources.has(sourceId)) {
+        throw new Error(
+          `La réserve de ${candidature.actorId} cite une source inconnue : ${sourceId}`,
+        );
+      }
     }
 
     for (const baseline of candidature.baselineActorIds) {
@@ -301,4 +319,153 @@ export function positionsPubliables<T extends { reviewStatus: string }>(
   return positions.filter(
     (position) => position.reviewStatus === "reconciled" || position.reviewStatus === "published",
   );
+}
+
+export const NATURES_PROPOSITION = [
+  "programme-2027",
+  "declaration-personnelle",
+  "document-parti",
+  "travail-parlementaire",
+  "programme-anterieur",
+] as const;
+
+export const DOMAINES_PROPOSITION = [
+  "travail-retraites",
+  "economie-salaires",
+  "fiscalite",
+  "immigration",
+  "ecologie",
+  "institutions",
+  "europe-international",
+  "securite-justice",
+  "sante-grand-age",
+  "education-jeunesse",
+  "famille-societe",
+] as const;
+
+/**
+ * Proposition de programme. Mêmes exigences qu'une position — source, verbatim,
+ * date — sans valeur ni adéquation : elle n'entre dans aucun calcul.
+ */
+export const PropositionSchema = z
+  .object({
+    id: IdentifiantSchema,
+    actorId: IdentifiantSchema,
+    domaine: z.enum(DOMAINES_PROPOSITION),
+    portee: z.enum(["mesure", "orientation"]),
+    intitule: z.string().min(10).max(120),
+    /** Le verbatim, jamais vide : c'est lui qui se vérifie, pas l'intitulé. */
+    citation: z.string().trim().min(10).max(320),
+    nature: z.enum(NATURES_PROPOSITION),
+    precisions: z.string().min(10).max(300).optional(),
+    sourceIds: z.array(IdentifiantSchema).min(1),
+    reviewStatus: z.enum(["draft", "double-coded", "reconciled", "published"]),
+    updatedAt: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
+  })
+  .strict();
+
+export const EtatProgrammeSchema = z
+  .object({
+    actorId: IdentifiantSchema,
+    etat: z.enum(["publie", "en-construction", "non-publie"]),
+    texte: z.string().min(20).max(300),
+    sourceIds: z.array(IdentifiantSchema).min(1),
+  })
+  .strict();
+
+/**
+ * Valide les propositions contre les acteurs et les sources, ou lève.
+ *
+ * DEUX RÈGLES DE DATE, parce que la nature d'une proposition est une
+ * affirmation sur le temps :
+ *
+ *   - « programme 2027 » ne peut s'appuyer que sur des documents datés de la
+ *     campagne. Un programme de 2022 toujours en ligne n'en devient pas un ;
+ *   - « programme antérieur » exige l'inverse : une source d'avant la campagne.
+ *     Étiqueter ainsi un texte de 2026 le ferait passer pour périmé.
+ *
+ * Le seuil est celui qui déclenche l'avertissement d'ancienneté des positions :
+ * une seule frontière entre « avant » et « pendant » la campagne sur tout le site.
+ */
+export function validerPropositions(
+  brut: unknown,
+  reference: {
+    acteurs: readonly { id: string }[];
+    sources: readonly { id: string; dateDeclaration: string }[];
+    seuilCampagne: string;
+  },
+) {
+  const propositions = z.array(PropositionSchema).parse(brut);
+
+  const acteursConnus = new Set(reference.acteurs.map((acteur) => acteur.id));
+  const dateParSource = new Map(reference.sources.map((s) => [s.id, s.dateDeclaration]));
+
+  const vus = new Set<string>();
+  for (const proposition of propositions) {
+    if (vus.has(proposition.id)) throw new Error(`Proposition en double : ${proposition.id}`);
+    vus.add(proposition.id);
+
+    if (!acteursConnus.has(proposition.actorId)) {
+      throw new Error(`Proposition rattachée à un acteur inconnu : ${proposition.id}`);
+    }
+    const dates = proposition.sourceIds.map((id) => {
+      const date = dateParSource.get(id);
+      if (date === undefined) {
+        throw new Error(`Proposition ${proposition.id} cite une source inconnue : ${id}`);
+      }
+      return date;
+    });
+
+    const plusRecente = dates.reduce((a, b) => (a > b ? a : b));
+    if (proposition.nature === "programme-2027" && dates.some((d) => d < reference.seuilCampagne)) {
+      throw new Error(
+        `${proposition.id} est présentée comme « programme 2027 » mais cite une source d'avant la campagne.`,
+      );
+    }
+    if (proposition.nature === "programme-anterieur" && plusRecente >= reference.seuilCampagne) {
+      throw new Error(
+        `${proposition.id} est présentée comme « programme antérieur » mais sa source date de la campagne.`,
+      );
+    }
+  }
+
+  return propositions;
+}
+
+/**
+ * Valide les états de programme, ou lève.
+ *
+ * UN ÉTAT PAR CANDIDAT, NI PLUS NI MOINS. Un candidat sans état aurait une
+ * fiche muette sur son programme ; deux états rendraient l'affichage dépendant
+ * de l'ordre du tableau.
+ */
+export function validerEtatsProgramme(
+  brut: unknown,
+  reference: {
+    candidatures: readonly { actorId: string }[];
+    sources: readonly { id: string }[];
+  },
+) {
+  const etats = z.array(EtatProgrammeSchema).parse(brut);
+  const sourcesConnues = new Set(reference.sources.map((source) => source.id));
+  const attendus = new Set(reference.candidatures.map((c) => c.actorId));
+
+  const vus = new Set<string>();
+  for (const etat of etats) {
+    if (vus.has(etat.actorId)) throw new Error(`Deux états de programme pour ${etat.actorId}`);
+    vus.add(etat.actorId);
+    if (!attendus.has(etat.actorId)) {
+      throw new Error(`État de programme pour un acteur sans candidature : ${etat.actorId}`);
+    }
+    for (const id of etat.sourceIds) {
+      if (!sourcesConnues.has(id)) {
+        throw new Error(`L'état de programme de ${etat.actorId} cite une source inconnue : ${id}`);
+      }
+    }
+  }
+  for (const id of attendus) {
+    if (!vus.has(id)) throw new Error(`Aucun état de programme pour le candidat ${id}`);
+  }
+
+  return etats;
 }

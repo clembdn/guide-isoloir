@@ -59,21 +59,29 @@ const LARGEUR_LOGO = 250;
  * recherche automatique attribuerait un jour le logo du Parti socialiste
  * portugais au Parti socialiste français, ou la photo de Xavier Bertrand au
  * parti Nous France — ce que l'API a effectivement renvoyé lors du relevé.
- * Chaque ligne a été ouverte et vérifiée le 20 septembre 2026.
+ * Chaque ligne a été ouverte et vérifiée le 20 septembre 2026, et les sept
+ * portraits ajoutés le 25 septembre 2026 (licence lue sur Commons ce jour-là).
  */
 const PORTRAITS = {
   "nathalie-arthaud": "Nathalie Arthaud (LO) 19-05-2024.jpg",
   "francois-asselineau": "François ASSELINEAU.jpg",
   "gabriel-attal": "Gabriel Attal 2025 (close crop).jpg",
   "delphine-batho": "Delphine Batho (cropped-2).png",
+  "olivier-becht": "Olivier Becht 2023 (cropped).jpg",
   "xavier-bertrand": "Xavier Bertrand - 2025 (cropped).jpg",
   "karim-bouamrane": "Karim Bouamrane en 2026 (cropped).jpg",
   "nicolas-dupont-aignan": "Nicolas Dupont-Aignan, homme politique français.jpg",
   "clara-egger": "Clara Egger.jpg",
+  "olivier-faure": "Olivier Faure PSE-CARCA--1194 (cropped).jpg",
   "raphael-glucksmann": "1720448398743_20240708_GLUCKSMANN_Raphael_FR_006.jpg",
+  "jerome-guedj": "Jérôme Guedj 2010 (cropped).jpg",
+  "anasse-kazib": "Anasse Kazib, décembre 2021 (resseré).jpg",
+  // `selma-labib` : aucune photo sous licence libre sur Commons au
+  // 25 septembre 2026. L'interface affiche ses initiales.
   "francis-lalanne": "Lalanne 2021 (cropped).jpg",
   "marine-le-pen": "Marine Le Pen 2025 (cropped).jpg",
   "david-lisnard": "David Lisnard - 2013.jpg",
+  "emmanuel-maurel": "Emmanuel Maurel en 2016.jpg",
   "jean-luc-melenchon": "Mélenchon 2027 - 55261894422 (cropped).jpg",
   // `antoine-mikolajczak` : aucune photo sous licence libre sur Commons au
   // 20 septembre 2026. L'interface affiche ses initiales. Ne pas prendre une
@@ -82,6 +90,8 @@ const PORTRAITS = {
   "florian-philippot": "2022-04-16 16-49-26 MAM-Paris 02.jpg",
   "bruno-retailleau": "Bruno Retailleau - Ministre de l'Intérieur français (cropped).jpg",
   "fabien-roussel": "Roussel Fabien 1.jpg",
+  "segolene-royal": "Ségolène Royal (435608096) (cropped).jpg",
+  "francois-ruffin": "François Ruffin répondant à un journaliste à Longueau (cropped).jpg",
   "marine-tondelier": "20210819_tondelier.m-cr3.jpg",
   "eric-zemmour": "Portrait d'Éric Zemmour, avril 2022.jpg",
 };

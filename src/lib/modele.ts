@@ -60,6 +60,102 @@ export type Candidate = {
    */
   statutDepuis: string;
   statutSourceIds: string[];
+  /**
+   * Réserve factuelle sur la candidature, sourcée et datée comme le statut.
+   *
+   * Un statut dit où en est la candidature ; il ne dit pas ce qui pourrait la
+   * faire tomber. Une condamnation frappée de pourvoi, par exemple, laisse le
+   * statut intact mais change ce qu'un lecteur doit savoir. La réserve s'écrit
+   * en une phrase factuelle, sans pronostic, et ne se publie qu'avec sa source.
+   */
+  reserve?: { texte: string; sourceIds: string[] } | undefined;
+};
+
+/**
+ * Nature du document qui porte une proposition de programme.
+ *
+ * Elle dit CE QUE VAUT la proposition pour 2027, pas seulement d'où elle
+ * vient. Un chiffre tiré d'une proposition de loi de 2023 et le même chiffre
+ * dans un programme présidentiel publié ne s'engagent pas de la même façon, et
+ * l'écran doit le dire avant que le lecteur ne le suppose.
+ *
+ *   - `programme-2027`          : programme publié pour cette élection ;
+ *   - `declaration-personnelle` : le candidat lui-même, en meeting, en entretien,
+ *                                 sur son site ;
+ *   - `document-parti`          : texte du parti ou de son groupe, pas
+ *                                 nécessairement repris mot pour mot par le candidat ;
+ *   - `travail-parlementaire`   : proposition de loi, amendement, contre-budget ;
+ *   - `programme-anterieur`     : programme d'une élection précédente.
+ */
+export type NatureProposition =
+  | "programme-2027"
+  | "declaration-personnelle"
+  | "document-parti"
+  | "travail-parlementaire"
+  | "programme-anterieur";
+
+/**
+ * Domaine d'une proposition. ÉNUMÉRATION FERMÉE : un domaine libre finirait en
+ * vingt variantes du même mot, et la fiche groupe les mesures par domaine.
+ */
+export type DomaineProposition =
+  | "travail-retraites"
+  | "economie-salaires"
+  | "fiscalite"
+  | "immigration"
+  | "ecologie"
+  | "institutions"
+  | "europe-international"
+  | "securite-justice"
+  | "sante-grand-age"
+  | "education-jeunesse"
+  | "famille-societe";
+
+/**
+ * Proposition de programme : ce qu'un candidat propose, HORS DES AFFIRMATIONS
+ * DU TEST.
+ *
+ * DEUXIÈME REGISTRE, À NE PAS CONFONDRE AVEC `Stance`. Une position répond à
+ * une affirmation posée à tous et entre dans le score ; une proposition décrit
+ * un programme et n'entre dans aucun calcul. La plupart des mesures d'une
+ * campagne — un couvre-feu numérique, un fonds d'investissement, un état
+ * d'urgence contre le narcotrafic — ne correspondent à aucune affirmation :
+ * sans ce registre, la fiche d'un candidat ne dirait rien de son programme.
+ *
+ * `portee` distingue une mesure précise d'une orientation. « Décider
+ * collectivement » est un axe revendiqué, pas une mesure : le présenter comme
+ * tel serait lui prêter une précision que la source n'a pas.
+ */
+export type Proposition = {
+  id: string;
+  /** Candidat, ou parti quand la proposition vient d'un document du parti. */
+  actorId: string;
+  domaine: DomaineProposition;
+  portee: "mesure" | "orientation";
+  /** Reformulation neutre et courte, écrite par l'éditeur. Jamais un slogan. */
+  intitule: string;
+  /** Verbatim relevé dans la source. Obligatoire : il est ce qui se vérifie. */
+  citation: string;
+  nature: NatureProposition;
+  /** Conditions, exceptions, zones d'ombre de la source : « brut ou net non précisé ». */
+  precisions?: string | undefined;
+  sourceIds: string[];
+  reviewStatus: "draft" | "double-coded" | "reconciled" | "published";
+  updatedAt: string;
+};
+
+/**
+ * Où en est le programme présidentiel d'un candidat.
+ *
+ * UNE ENTRÉE PAR CANDIDAT, zéro proposition compris : « aucun programme
+ * publié » est une information datée, pas une case vide.
+ */
+export type EtatProgramme = {
+  actorId: string;
+  etat: "publie" | "en-construction" | "non-publie";
+  /** Une ou deux phrases factuelles, sans jugement sur le contenu. */
+  texte: string;
+  sourceIds: string[];
 };
 
 export type StanceValue = -2 | -1 | 0 | 1 | 2;

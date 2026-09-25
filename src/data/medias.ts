@@ -11,7 +11,7 @@
  * nommer la licence, et une image libre dont on tait l'auteur est une image
  * utilisée sans droit.
  *
- * Absents de ce fichier, faute de média sous licence libre au 2026-09-20 :
+ * Absents de ce fichier, faute de média sous licence libre au 2026-09-25 :
  * Antoine Mikolajczak, et les logos de France Libre, Génération écologie,
  * Les Patriotes et Place publique. L'interface affiche alors des initiales.
  * Ne pas compléter depuis un site de parti : un logo pris là n'est pas libre.
@@ -33,7 +33,7 @@ export type Media = {
 };
 
 /** Date du relevé des licences. Un relevé vieillit : le republier le dit. */
-export const MEDIAS_RELEVES_LE = "2026-09-20";
+export const MEDIAS_RELEVES_LE = "2026-09-25";
 
 export const MEDIAS: readonly Media[] = [
   {
@@ -77,6 +77,16 @@ export const MEDIAS: readonly Media[] = [
     licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
   },
   {
+    actorId: "olivier-becht",
+    genre: "portrait",
+    chemin: "/medias/portraits/olivier-becht.jpg",
+    fichierCommons: "Olivier Becht 2023 (cropped).jpg",
+    pageCommons: "https://commons.wikimedia.org/wiki/File:Olivier_Becht_2023_(cropped).jpg",
+    auteur: "Palácio do Planalto from Brasilia, Brasil",
+    licence: "CC BY 2.0",
+    licenceUrl: "https://creativecommons.org/licenses/by/2.0",
+  },
+  {
     actorId: "xavier-bertrand",
     genre: "portrait",
     chemin: "/medias/portraits/xavier-bertrand.jpg",
@@ -118,6 +128,17 @@ export const MEDIAS: readonly Media[] = [
     licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
   },
   {
+    actorId: "olivier-faure",
+    genre: "portrait",
+    chemin: "/medias/portraits/olivier-faure.jpg",
+    fichierCommons: "Olivier Faure PSE-CARCA--1194 (cropped).jpg",
+    pageCommons:
+      "https://commons.wikimedia.org/wiki/File:Olivier_Faure_PSE-CARCA--1194_(cropped).jpg",
+    auteur: "PES Group Committee of the Regions",
+    licence: "CC BY 2.0",
+    licenceUrl: "https://creativecommons.org/licenses/by/2.0",
+  },
+  {
     actorId: "raphael-glucksmann",
     genre: "portrait",
     chemin: "/medias/portraits/raphael-glucksmann.jpg",
@@ -127,6 +148,28 @@ export const MEDIAS: readonly Media[] = [
     auteur: "European Union 2024 - Source : EP",
     licence: "European Parliament",
     licenceUrl: "https://www.europarl.europa.eu/legal-notice/",
+  },
+  {
+    actorId: "jerome-guedj",
+    genre: "portrait",
+    chemin: "/medias/portraits/jerome-guedj.jpg",
+    fichierCommons: "Jérôme Guedj 2010 (cropped).jpg",
+    pageCommons:
+      "https://commons.wikimedia.org/wiki/File:J%C3%A9r%C3%B4me_Guedj_2010_(cropped).jpg",
+    auteur: "Audrey AK",
+    licence: "CC BY-SA 2.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
+  },
+  {
+    actorId: "anasse-kazib",
+    genre: "portrait",
+    chemin: "/medias/portraits/anasse-kazib.jpg",
+    fichierCommons: "Anasse Kazib, décembre 2021 (resseré).jpg",
+    pageCommons:
+      "https://commons.wikimedia.org/wiki/File:Anasse_Kazib,_d%C3%A9cembre_2021_(resser%C3%A9).jpg",
+    auteur: "PabloMorao27",
+    licence: "CC BY-SA 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
   },
   {
     actorId: "francis-lalanne",
@@ -157,6 +200,16 @@ export const MEDIAS: readonly Media[] = [
     auteur: "Frantogian",
     licence: "CC BY-SA 3.0",
     licenceUrl: "https://creativecommons.org/licenses/by-sa/3.0",
+  },
+  {
+    actorId: "emmanuel-maurel",
+    genre: "portrait",
+    chemin: "/medias/portraits/emmanuel-maurel.jpg",
+    fichierCommons: "Emmanuel Maurel en 2016.jpg",
+    pageCommons: "https://commons.wikimedia.org/wiki/File:Emmanuel_Maurel_en_2016.jpg",
+    auteur: "Echwander",
+    licence: "CC BY-SA 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
   },
   {
     actorId: "jean-luc-melenchon",
@@ -207,6 +260,28 @@ export const MEDIAS: readonly Media[] = [
     fichierCommons: "Roussel Fabien 1.jpg",
     pageCommons: "https://commons.wikimedia.org/wiki/File:Roussel_Fabien_1.jpg",
     auteur: "Zouhair NAKARA",
+    licence: "CC BY-SA 4.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+  },
+  {
+    actorId: "segolene-royal",
+    genre: "portrait",
+    chemin: "/medias/portraits/segolene-royal.jpg",
+    fichierCommons: "Ségolène Royal (435608096) (cropped).jpg",
+    pageCommons:
+      "https://commons.wikimedia.org/wiki/File:S%C3%A9gol%C3%A8ne_Royal_(435608096)_(cropped).jpg",
+    auteur: "manuel | MC from Nantes / Paris, France",
+    licence: "CC BY-SA 2.0",
+    licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
+  },
+  {
+    actorId: "francois-ruffin",
+    genre: "portrait",
+    chemin: "/medias/portraits/francois-ruffin.jpg",
+    fichierCommons: "François Ruffin répondant à un journaliste à Longueau (cropped).jpg",
+    pageCommons:
+      "https://commons.wikimedia.org/wiki/File:Fran%C3%A7ois_Ruffin_r%C3%A9pondant_%C3%A0_un_journaliste_%C3%A0_Longueau_(cropped).jpg",
+    auteur: "BB 22385",
     licence: "CC BY-SA 4.0",
     licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
   },

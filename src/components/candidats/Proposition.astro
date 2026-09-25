@@ -1,0 +1,115 @@
+---
+/*
+ * Une proposition de programme, telle qu'une fiche l'affiche.
+ *
+ * L'ORDRE DE LECTURE EST CELUI DE LA VÉRIFICATION : ce qui est proposé (la
+ * reformulation de l'éditeur), d'où ça vient et quand, puis les mots exacts
+ * de la source, puis la source elle-même. Le verbatim porte le filet des
+ * citations, comme sur les positions : c'est la parole du candidat ou de son
+ * parti, jamais celle de l'éditeur.
+ *
+ * LA NATURE EST EN PLEINE ENCRE quand elle n'est ni un programme 2027 ni une
+ * déclaration personnelle : « Travail parlementaire, 4 avril 2023 » est
+ * précisément ce qui empêche de lire une proposition de loi comme une promesse
+ * de campagne.
+ *
+ * UNE PAGE SANS DATE NE S'INVENTE PAS DE DATE. Quand une source n'est pas
+ * datée, sa date de déclaration est celle de la consultation, et l'écran le
+ * dit : « page non datée, consultée le… ».
+ */
+import { formatDateFr } from "../../lib/date";
+import type { PropositionFiche } from "../../lib/fiches";
+
+type Props = {
+  proposition: PropositionFiche;
+  /** Niveau du titre : 3 dans l'aperçu, 4 sous un domaine de la fiche. */
+  niveau?: 3 | 4;
+};
+
+const { proposition, niveau = 4 } = Astro.props;
+const Titre = `h${niveau}` as "h3" | "h4";
+const faible =
+  proposition.nature !== "programme-2027" && proposition.nature !== "declaration-personnelle";
+const nonDatee = proposition.sources.every(
+  (source) => source.dateDeclaration === source.consulteLe,
+);
+---
+
+<article class="proposition" id={proposition.id}>
+  <Titre class="intitule">{proposition.intitule}</Titre>
+  <p class="origine">
+    <span class:list={{ faible }}>{proposition.natureLibelle}</span>
+    {proposition.auteur && <span>{`, ${proposition.auteur}`}</span>}
+    {", "}
+    {
+      nonDatee ? (
+        <span>
+          page non datée, consultée le{" "}
+          <time datetime={proposition.date}>{formatDateFr(proposition.date)}</time>
+        </span>
+      ) : (
+        <time datetime={proposition.date}>{formatDateFr(proposition.date)}</time>
+      )
+    }
+  </p>
+  <blockquote class="citation">« {proposition.citation} »</blockquote>
+  {proposition.precisions && <p class="precisions">{proposition.precisions}</p>}
+  <p class="sources">
+    Source :{" "}
+    {
+      proposition.sources.map((source, index) => (
+        <>
+          {index > 0 && " ; "}
+          <a href={source.url} rel="noreferrer">
+            {source.titre}
+          </a>
+          {`, ${source.media}`}
+        </>
+      ))
+    }
+  </p>
+</article>
+
+<style>
+  .proposition {
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .intitule {
+    margin: 0 0 4px;
+    font-size: 1.0625rem;
+    line-height: 1.35;
+  }
+
+  .origine {
+    margin: 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .origine .faible {
+    color: var(--couleur-encre);
+    font-weight: 700;
+  }
+
+  .citation {
+    margin: var(--pas-2) 0;
+    padding-left: var(--pas-2);
+    border-left: 2px solid var(--couleur-trait);
+    max-width: var(--mesure);
+  }
+
+  .precisions {
+    margin: 0 0 var(--pas-1);
+    max-width: var(--mesure);
+    font-size: var(--t-petit);
+  }
+
+  .sources {
+    margin: 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+    overflow-wrap: anywhere;
+  }
+</style>
