@@ -88,8 +88,21 @@ test.describe("fiche candidat", () => {
     await expect(page.locator("section:has(> h2#positions)")).toContainText("Aucune position");
   });
 
-  test("conserve les ancres des affirmations, que les pages de thème ciblent", async ({ page }) => {
+  test("ouvre la question qu'une page de thème vise par son ancre", async ({ page }) => {
     await page.goto("/candidats/jean-luc-melenchon#retraites-age-legal-60");
-    await expect(page.locator("article#retraites-age-legal-60")).toBeVisible();
+    const ligne = page.locator("details#retraites-age-legal-60");
+    await expect(ligne).toHaveAttribute("open", "");
+    await expect(ligne.locator(".sources a").first()).toBeVisible();
+  });
+
+  test("montre la question avant le verdict, et déplie le détail au clavier", async ({ page }) => {
+    await page.goto("/candidats/jean-luc-melenchon");
+    const ligne = page.locator("details.position").first();
+    await expect(ligne).not.toHaveAttribute("open", "");
+    await expect(ligne.locator("summary h4")).toBeVisible();
+    await expect(ligne.locator(".position-verdict")).toContainText(/Pour|Contre|Ni pour ni contre/);
+    await ligne.locator("summary").focus();
+    await page.keyboard.press("Enter");
+    await expect(ligne).toHaveAttribute("open", "");
   });
 });

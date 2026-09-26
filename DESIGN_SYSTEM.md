@@ -767,7 +767,19 @@ candidature se déclare sans passer par une primaire : remplir les nœuds préc�
 statut attesté et sources, réserve en pleine encre bordée, trois repères entre deux filets. Puis
 « Son programme » (propositions groupées par domaine, puis orientations ; nature en pleine encre
 quand ce n'est ni un programme 2027 ni une déclaration personnelle) et « Ses positions sur le
-test », où la valeur s'affiche aussi sur les cinq crans de l'échelle du test, cran retenu plein.
+test ».
+
+**Positions de la fiche dans le code des thèmes (27 septembre 2026).** En tête de « Ses positions
+sur le test », un **bilan** d'une seule rangée : pastille, compte et libellé pour Pour, Contre,
+Ni pour ni contre (s'il y en a) et Pas de position connue. Puis, par thème, un **bandeau** à sa
+teinte (pictogramme, nom, lien vers la page du thème), et **une ligne dépliable par question** :
+en surface, la pastille, la question en gras, et le verdict en petit dessous (« Plutôt pour ·
+reprise : Rassemblement national ») ; au dépli, l'échelle à cinq crans (cran retenu à la couleur
+du sens, valeur exacte en toutes lettres), l'origine, la citation et les sources. La question
+passe avant le verdict : une première version mettait « Plutôt pour » en grand sur fond vert, et
+c'est lui qu'on lisait en défilant, pas ce sur quoi il portait. `<details>` natif, contenu dans
+le HTML servi ; un script de quelques lignes ouvre la ligne visée par une ancre venue d'une page
+de thème. Les affirmations sans position portent la pastille « ? » en pointillé.
 
 **Portrait** — `src/components/candidats/Portrait.astro` est désormais le seul balisage de
 portrait des pages candidats : une taille par classe (64, 120), puisque la CSP refuse `style=""`.

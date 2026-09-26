@@ -247,7 +247,7 @@ export type Fiche = {
   parti: { nom: string; logo: string | null } | null;
   portrait: string | null;
   /** Affirmations documentées, regroupées par thème dans l'ordre du test. */
-  parTheme: { theme: { nom: string; slug: string }; entrees: EntreeFiche[] }[];
+  parTheme: { theme: HabillageTheme; entrees: EntreeFiche[] }[];
   /** Affirmations sans aucune position, dans l'ordre du test. */
   inconnues: Pick<Question, "id" | "texte" | "theme">[];
   documentees: number;

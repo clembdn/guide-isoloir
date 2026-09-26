@@ -31,9 +31,11 @@ import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
 import Portrait from "../../components/candidats/Portrait.astro";
 import EtapeCandidature from "../../components/candidats/EtapeCandidature.astro";
 import Proposition from "../../components/candidats/Proposition.astro";
+import MarquePosition from "../../components/themes/MarquePosition.astro";
+import Icone from "../../components/Icone.astro";
 import EtapesCandidature from "../../components/schemas/EtapesCandidature.astro";
 import { fiches, NOMBRE_AFFIRMATIONS, type Fiche } from "../../lib/fiches";
-import { ECHELLE } from "../../lib/echelle";
+import { ECHELLE, LIBELLES_SENS, nuanceDe, sensDe, type Sens } from "../../lib/echelle";
 import { LIBELLES_ADEQUATION, LIBELLES_CONFIANCE } from "../../lib/libelles";
 import { formatDateFr } from "../../lib/date";
 import { SITE_NAME, SITE_URL } from "../../lib/site";
@@ -48,6 +50,33 @@ const { acteur, candidature } = fiche;
 const nom = acteur.name;
 
 const LIBELLE_VALEUR = new Map(ECHELLE.map((cran) => [cran.valeur, cran.libelle]));
+
+/*
+ * Verdict d'une position, dans le code des pages de thème : « Pour »,
+ * « Plutôt contre », « Ni pour ni contre ». La valeur exacte de l'échelle du
+ * test reste affichée juste à côté, en toutes lettres : le verdict la range,
+ * il ne la remplace pas.
+ */
+function verdict(valeur: (typeof ECHELLE)[number]["valeur"]): string {
+  const sens = LIBELLES_SENS[sensDe(valeur)];
+  const nuance = nuanceDe(valeur);
+  return nuance ? `${nuance} ${sens.toLowerCase()}` : sens;
+}
+
+/*
+ * Bilan en pastilles, en tête des positions : combien de pour, de contre, de
+ * « ni l'un ni l'autre », et combien sans position connue. Même code que le
+ * sommaire des pages de thème.
+ */
+const valeurs = fiche.parTheme.flatMap((groupe) =>
+  groupe.entrees.map((entree) => entree.resolue!.position.value),
+);
+const bilan: { sens: Sens | "inconnu"; nombre: number }[] = [
+  { sens: "pour" as const, nombre: valeurs.filter((v) => sensDe(v) === "pour").length },
+  { sens: "contre" as const, nombre: valeurs.filter((v) => sensDe(v) === "contre").length },
+  { sens: "neutre" as const, nombre: valeurs.filter((v) => sensDe(v) === "neutre").length },
+  { sens: "inconnu" as const, nombre: fiche.inconnues.length },
+].filter((ligne) => ligne.sens !== "neutre" || ligne.nombre > 0);
 
 /** « 1 affirmation », « 2 affirmations ». Zéro prend le singulier en français. */
 function accorder(nombre: number, singulier: string, pluriel: string): string {
@@ -309,6 +338,15 @@ const personne = {
               <li>{`${ligne}${index === decompte.length - 1 ? "." : " ;"}`}</li>
             ))}
           </ul>
+          <ul class="bilan" aria-label="Bilan des positions">
+            {bilan.map((ligne) => (
+              <li>
+                <MarquePosition sens={ligne.sens} taille="grande" />
+                <span class="bilan-nombre">{ligne.nombre}</span>
+                <span class="bilan-libelle">{LIBELLES_SENS[ligne.sens]}</span>
+              </li>
+            ))}
+          </ul>
         </>
       )
     }
@@ -322,88 +360,122 @@ const personne = {
     {
       fiche.parTheme.map((groupe) => (
         <section class="theme" aria-labelledby={groupe.theme.slug}>
-          <h3 id={groupe.theme.slug}>{groupe.theme.nom}</h3>
-          <p class="vers-theme">
-            <a href={`/themes/${groupe.theme.slug}`}>Tous les candidats sur ce thème</a>
-          </p>
+          {/*
+           * Le thème d'abord : un bandeau à sa teinte, comme sur /themes. C'est
+           * le repère qu'on cherche en défilant, pas le verdict d'une ligne.
+           */}
+          <header class={`theme-tete t-${groupe.theme.teinte}`}>
+            <span class="theme-pictogramme" aria-hidden="true">
+              <Icone nom={groupe.theme.icone} graisse="fill" />
+            </span>
+            <h3 id={groupe.theme.slug}>{groupe.theme.nom}</h3>
+            <a class="vers-theme" href={`/themes/${groupe.theme.slug}`}>
+              Tous les candidats<span class="visuellement-masque"> sur ce thème</span>
+            </a>
+          </header>
           {groupe.entrees.map((entree) => {
             const { position, heriteDe } = entree.resolue!;
+            const sens = sensDe(position.value);
             return (
-              <article class="position" id={entree.question.id}>
-                <h4>{entree.question.texte}</h4>
-                {/*
-                 * L'échelle du test, cinq crans du plein accord au plein
-                 * désaccord, dans l'ordre où le test les pose. Le cran retenu
-                 * est plein, les autres sont des filets : même encre pour tous
-                 * les candidats, seule la place change.
-                 */}
-                <p class="valeur">
-                  <span class="echelle" aria-hidden="true">
-                    {ECHELLE.map((cran) => (
-                      <span class:list={["echelon", { retenu: cran.valeur === position.value }]} />
-                    ))}
+              /*
+               * UNE LIGNE PAR QUESTION, QUI SE DÉPLIE (27 septembre 2026).
+               * En surface : la pastille, la QUESTION en gras, puis le
+               * verdict en petit — c'est la question qu'on lit en défilant.
+               * Au dépli : l'échelle, l'origine, la citation, les sources.
+               * `<details>` natif : le contenu replié est dans le HTML servi,
+               * lu par les robots, et s'ouvre au clavier sans script. Le
+               * script en bas de page ne fait qu'ouvrir la ligne visée par
+               * une ancre venue d'une page de thème.
+               */
+              <details class={`position position--${sens}`} id={entree.question.id}>
+                <summary>
+                  <MarquePosition sens={sens} taille="grande" />
+                  <span class="position-tete">
+                    <h4>{entree.question.texte}</h4>
+                    <span class="position-verdict">
+                      <strong>{verdict(position.value)}</strong>
+                      {heriteDe !== null && <span> · reprise : {heriteDe}</span>}
+                    </span>
                   </span>
-                  <span>
-                    Position retenue : <strong>{LIBELLE_VALEUR.get(position.value)}</strong>
+                  <span class="deplier" aria-hidden="true">
+                    <Icone nom="caret-down" graisse="bold" />
                   </span>
-                </p>
-                {/*
-                 * Les espaces explicites entre les lignes ne se voient pas à
-                 * l'écran, où chacune est un bloc. Ils comptent pour le texte
-                 * brut : sans eux, un robot ou un mode lecture lit
-                 * « Déclaration directe.La citation… ».
-                 */}
-                <p class="ligne">
-                  <span>Origine : {entree.origine}.</span>{" "}
-                  {heriteDe !== null && (
-                    <>
-                      <span class="heritage">
-                        Position de {heriteDe}, reprise faute de déclaration personnelle de {nom}.
-                      </span>{" "}
-                    </>
-                  )}
-                  <span>{LIBELLES_ADEQUATION[position.adequation]}</span>{" "}
-                  <span>{LIBELLES_CONFIANCE[position.confidence]}</span>
-                </p>
-                {position.citation && (
-                  <blockquote class="citation">« {position.citation} »</blockquote>
-                )}
-                {/*
-                 * Une inférence n'a pas de verbatim : son raisonnement est la
-                 * seule chose qui la rende contestable, et le schéma l'exige
-                 * complet. Il est donc publié, et seulement pour elle.
-                 */}
-                {position.provenance === "inference" && (
-                  <p class="raisonnement">Raisonnement de l'éditeur : {position.rationale}</p>
-                )}
-                {position.sourcePrimaire && (
-                  <p class="ligne">Propos d'origine : {position.sourcePrimaire}.</p>
-                )}
-                {entree.dateAncienne !== null && (
-                  <p class="ancienne">
-                    Position tirée d'un document du {formatDateFr(entree.dateAncienne)}, antérieur à
-                    la campagne de 2027. Elle peut avoir changé depuis. Ce codage est provisoire :
-                    il sera remplacé dès la publication du programme présidentiel de cet acteur.
+                </summary>
+                <div class="position-detail">
+                  {/*
+                   * L'échelle du test, cinq crans du plein accord au plein
+                   * désaccord, dans l'ordre où le test les pose. Le cran
+                   * retenu prend la couleur du sens : même traitement pour
+                   * tous les candidats.
+                   */}
+                  <p class="echelle-ligne">
+                    <span class="echelle" aria-hidden="true">
+                      {ECHELLE.map((cran) => (
+                        <span
+                          class:list={["echelon", { retenu: cran.valeur === position.value }]}
+                        />
+                      ))}
+                    </span>
+                    <span>Position retenue : {LIBELLE_VALEUR.get(position.value)}</span>
                   </p>
-                )}
-                <ul class="sources">
-                  {entree.sources.map((source) => (
-                    <li>
-                      <a href={source.url} rel="noreferrer">
-                        {source.titre}
-                      </a>
-                      {`, ${source.media}, `}
-                      <time datetime={source.dateDeclaration}>
-                        {formatDateFr(source.dateDeclaration)}
-                      </time>
-                    </li>
-                  ))}
-                </ul>
-                <p class="mise-a-jour">
-                  Codage mis à jour le{" "}
-                  <time datetime={position.updatedAt}>{formatDateFr(position.updatedAt)}</time>
-                </p>
-              </article>
+                  {/*
+                   * Les espaces explicites entre les lignes ne se voient pas à
+                   * l'écran, où chacune est un bloc. Ils comptent pour le texte
+                   * brut : sans eux, un robot ou un mode lecture lit
+                   * « Déclaration directe.La citation… ».
+                   */}
+                  <p class="ligne">
+                    <span>Origine : {entree.origine}.</span>{" "}
+                    {heriteDe !== null && (
+                      <>
+                        <span class="heritage">
+                          Position de {heriteDe}, reprise faute de déclaration personnelle de {nom}.
+                        </span>{" "}
+                      </>
+                    )}
+                    <span>{LIBELLES_ADEQUATION[position.adequation]}</span>{" "}
+                    <span>{LIBELLES_CONFIANCE[position.confidence]}</span>
+                  </p>
+                  {position.citation && (
+                    <blockquote class="citation">« {position.citation} »</blockquote>
+                  )}
+                  {/*
+                   * Une inférence n'a pas de verbatim : son raisonnement est la
+                   * seule chose qui la rende contestable, et le schéma l'exige
+                   * complet. Il est donc publié, et seulement pour elle.
+                   */}
+                  {position.provenance === "inference" && (
+                    <p class="raisonnement">Raisonnement de l'éditeur : {position.rationale}</p>
+                  )}
+                  {position.sourcePrimaire && (
+                    <p class="ligne">Propos d'origine : {position.sourcePrimaire}.</p>
+                  )}
+                  {entree.dateAncienne !== null && (
+                    <p class="ancienne">
+                      Position tirée d'un document du {formatDateFr(entree.dateAncienne)}, antérieur
+                      à la campagne de 2027. Elle peut avoir changé depuis. Ce codage est provisoire
+                      : il sera remplacé dès la publication du programme présidentiel de cet acteur.
+                    </p>
+                  )}
+                  <ul class="sources">
+                    {entree.sources.map((source) => (
+                      <li>
+                        <a href={source.url} rel="noreferrer">
+                          {source.titre}
+                        </a>
+                        {`, ${source.media}, `}
+                        <time datetime={source.dateDeclaration}>
+                          {formatDateFr(source.dateDeclaration)}
+                        </time>
+                      </li>
+                    ))}
+                  </ul>
+                  <p class="mise-a-jour">
+                    Codage mis à jour le{" "}
+                    <time datetime={position.updatedAt}>{formatDateFr(position.updatedAt)}</time>
+                  </p>
+                </div>
+              </details>
             );
           })}
         </section>
@@ -422,7 +494,10 @@ const personne = {
         </p>
         <ul class="inconnues">
           {fiche.inconnues.map((question) => (
-            <li id={question.id}>{question.texte}</li>
+            <li id={question.id}>
+              <MarquePosition sens="inconnu" taille="petite" />
+              <span>{question.texte}</span>
+            </li>
           ))}
         </ul>
       </section>
@@ -438,6 +513,23 @@ const personne = {
   </p>
 
   <script slot="apres" type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+
+  <script>
+    /*
+     * OUVRE LA QUESTION VISÉE PAR UNE ANCRE. Les pages de thème lient chaque
+     * visage à `/candidats/{slug}#{question}` ; la question est une ligne
+     * repliée, et le lecteur doit tomber sur l'explication, pas sur un titre
+     * fermé. Amélioration progressive : sans script, l'ancre mène à la ligne,
+     * qu'un clic déplie. Aucune requête, le script ne lit que la page.
+     */
+    function ouvrirCible() {
+      const id = decodeURIComponent(location.hash.slice(1));
+      const cible = id ? document.getElementById(id) : null;
+      if (cible instanceof HTMLDetailsElement) cible.open = true;
+    }
+    ouvrirCible();
+    window.addEventListener("hashchange", ouvrirCible);
+  </script>
   <script slot="apres" type="application/ld+json" set:html={JSON.stringify(personne)} is:inline />
 </PageLecture>
 
@@ -541,9 +633,64 @@ const personne = {
     margin-top: var(--pas-5);
   }
 
-  .domaine h3,
-  .theme h3 {
+  .domaine h3 {
     margin: 0 0 var(--pas-2);
+  }
+
+  /*
+   * Bandeau de thème : pictogramme, nom, lien vers la page du thème. Il est à
+   * la teinte du thème, comme les tuiles de /themes : c'est le repère qu'on
+   * cherche en défilant.
+   */
+  .theme-tete {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 0.25rem var(--pas-2);
+    padding: var(--pas-2) var(--pas-3) var(--pas-2) var(--pas-2);
+    border-radius: var(--rayon-carte);
+    background: var(--pastel);
+  }
+
+  .theme-tete h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .theme-pictogramme {
+    display: grid;
+    place-items: center;
+    grid-row: 1 / 3;
+    flex: none;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 12px;
+    background: var(--couleur-surface);
+    color: var(--vif);
+  }
+
+  .theme-pictogramme :global(.icone) {
+    display: block;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .vers-theme {
+    font-size: var(--t-petit);
+    font-weight: 600;
+    color: var(--couleur-encre);
+  }
+
+  @media (min-width: 30rem) {
+    .theme-tete {
+      grid-template-columns: auto 1fr auto;
+    }
+
+    .theme-pictogramme {
+      grid-row: auto;
+    }
   }
 
   .propositions {
@@ -555,35 +702,165 @@ const personne = {
     margin-top: var(--pas-5);
   }
 
-  .vers-theme {
-    font-size: var(--t-petit);
-    margin-top: calc(-1 * var(--pas-1));
-  }
-
   .decompte {
     padding-left: var(--pas-3);
     margin-top: calc(-1 * var(--pas-2));
   }
 
-  /* Un filet par affirmation : il sépare deux positions, il ne décore pas. */
+  /*
+   * Bilan en pastilles : le décompte ci-dessus dit d'où viennent les
+   * positions, celui-ci dit de quel côté elles tombent.
+   *
+   * Une seule rangée à toutes les largeurs, une case par compteur : trois ou
+   * quatre cases selon qu'il y a des « ni pour ni contre ». En deux colonnes,
+   * un nombre impair laissait une case vide.
+   */
+  .bilan {
+    list-style: none;
+    padding: 0;
+    margin: var(--pas-3) 0;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: 1px;
+    background: var(--couleur-trait);
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-carte);
+    overflow: clip;
+  }
+
+  /* Pastille et chiffre sur la première ligne, libellé dessous : les chiffres s'alignent d'une case à l'autre. */
+  .bilan li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-content: start;
+    align-items: center;
+    gap: 0.4rem var(--pas-1);
+    margin: 0;
+    padding: var(--pas-2);
+    background: var(--couleur-surface);
+  }
+
+  @media (min-width: 30rem) {
+    .bilan li {
+      gap: 0.4rem var(--pas-2);
+      padding: var(--pas-3);
+    }
+  }
+
+  .bilan-libelle {
+    grid-column: 1 / -1;
+  }
+
+  .bilan-nombre {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bilan-libelle {
+    font-size: 0.8125rem;
+    line-height: 1.25;
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * UNE LIGNE PAR QUESTION. La question en gras, la pastille à gauche, le
+   * verdict en petit dessous : on lit de quoi il s'agit avant de lire le
+   * sens, et le détail attend qu'on le demande. Un filet entre deux lignes :
+   * il sépare deux questions, il ne décore pas.
+   */
   .position {
-    padding-top: var(--pas-3);
-    margin-top: var(--pas-4);
-    border-top: 1px solid var(--couleur-trait);
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  .position:first-of-type {
+    margin-top: var(--pas-2);
+  }
+
+  .position summary {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: start;
+    gap: var(--pas-2);
+    padding: var(--pas-3) var(--pas-1) var(--pas-3) 0;
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--rayon-carte);
+    transition: background-color var(--duree) var(--sortie);
+  }
+
+  .position summary::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .position summary:hover {
+      background: var(--couleur-surface-2);
+    }
+  }
+
+  .position summary :global(.marque) {
+    margin-top: 0.1rem;
+  }
+
+  .position-tete {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
   }
 
   .position h4 {
-    margin: 0 0 var(--pas-2);
+    margin: 0;
     font-size: 1.0625rem;
     line-height: 1.35;
+    text-wrap: pretty;
   }
 
-  .valeur {
+  .position-verdict {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .position-verdict strong {
+    color: var(--couleur-encre);
+  }
+
+  .deplier {
+    display: grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-top: 0.2rem;
+    border-radius: 50%;
+    color: var(--couleur-signature);
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .deplier :global(.icone) {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .position[open] .deplier {
+    transform: rotate(180deg);
+  }
+
+  /* Le détail s'aligne sur la question, pas sur la pastille. */
+  .position-detail {
+    padding: 0 0 var(--pas-3) calc(2.25rem + var(--pas-2));
+  }
+
+  .echelle-ligne {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--pas-1) var(--pas-2);
-    margin: 0 0 var(--pas-1);
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-2);
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
   }
 
   .echelle {
@@ -593,15 +870,27 @@ const personne = {
     align-items: center;
   }
 
+  /* Contour tiré de l'encre : le trait seul se perdait sur les fonds teintés. */
   .echelon {
     height: 0.75rem;
-    border: 2px solid var(--couleur-trait);
+    border: 2px solid color-mix(in srgb, var(--couleur-encre) 28%, transparent);
     border-radius: 50%;
   }
 
+  /* Le cran retenu prend la couleur du sens : vert, rouge, ou l'encre faible au centre. */
   .echelon.retenu {
-    border-color: var(--couleur-signature);
-    background: var(--couleur-signature);
+    border-color: var(--couleur-encre-faible);
+    background: var(--couleur-encre-faible);
+  }
+
+  .position--pour .echelon.retenu {
+    border-color: var(--pour);
+    background: var(--pour);
+  }
+
+  .position--contre .echelon.retenu {
+    border-color: var(--contre);
+    background: var(--contre);
   }
 
   @media (forced-colors: active) {
@@ -667,7 +956,19 @@ const personne = {
     margin-bottom: var(--pas-1);
   }
 
+  .inconnues {
+    list-style: none;
+    padding: 0;
+  }
+
   .inconnues li {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-2);
     margin-bottom: var(--pas-2);
+  }
+
+  .inconnues li :global(.marque) {
+    margin-top: 0.2rem;
   }
 </style>
