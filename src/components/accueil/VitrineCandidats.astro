@@ -1,0 +1,411 @@
+---
+/*
+ * Vitrine des candidats, sur l'accueil : « Ou partez des candidats ».
+ *
+ * LA MOSAÏQUE QUI SE RANGE. Les visages des candidats en lice arrivent
+ * éparpillés, de biais, depuis le bas, et c'est le défilement qui les met en
+ * place : quand la mosaïque atteint le milieu de l'écran, elle est une grille
+ * alphabétique. Au survol ou au focus, un visage monte, son nom et son parti
+ * s'affichent sur une plaque, et les autres s'estompent.
+ *
+ * NEUTRALITÉ. Ordre alphabétique (`sortName`), celui de `/candidats`. Même
+ * carré, même rayon, même plaque pour tous. L'éparpillement dépend de la PLACE
+ * dans la grille (`nth-child`), jamais de la personne, et tout le monde finit
+ * au même endroit en même temps. Rien ne bouge seul, rien n'est mis en avant
+ * sans que le visiteur l'ait pointé.
+ *
+ * UN LIEN PAR VISAGE, vers sa fiche : vingt-huit liens internes, et un nom
+ * accessible complet (nom, puis parti) porté par la plaque, qui est dans le
+ * HTML servi. Le portrait est décoratif. Sans animation liée au défilement,
+ * ou avec « réduire les animations », la grille est simplement en place.
+ */
+import Icone from "../Icone.astro";
+import Portrait from "../candidats/Portrait.astro";
+import { fiches, estEnLice } from "../../lib/fiches";
+
+/* Un candidat retiré garde sa fiche, mais n'est plus montré parmi ceux qu'on compare. */
+const enLice = fiches().filter((fiche) => estEnLice(fiche.candidature));
+---
+
+<section class="section vitrine" aria-labelledby="vitrine-candidats-titre">
+  <div class="enveloppe-large">
+    <div class="section-tete revele">
+      <h2 id="vitrine-candidats-titre">Ou partez des candidats</h2>
+      <p class="section-chapo">
+        {enLice.length} personnes suivies, par ordre alphabétique&nbsp;: leur programme et leurs positions,
+        chacune avec sa source.
+      </p>
+    </div>
+
+    <ul class="visages">
+      {
+        enLice.map((fiche) => (
+          <li class="visage">
+            <a href={`/candidats/${fiche.acteur.slug}`}>
+              <Portrait nom={fiche.acteur.name} chemin={fiche.portrait} taille="mosaique" />
+              <span class="plaque">
+                <span class="plaque-nom">{fiche.acteur.name}</span>{" "}
+                <span class="plaque-parti">
+                  {fiche.parti ? fiche.parti.nom : "Sans parti rattaché"}
+                </span>
+              </span>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="tous">
+      <a href="/candidats">
+        Voir les {enLice.length} candidats
+        <Icone nom="arrow-right" graisse="bold" />
+      </a>
+    </p>
+  </div>
+</section>
+
+<style>
+  /*
+   * « Ou partez des candidats » prolonge « Comparez sans faire le test » : la
+   * section suit la précédente de près. `clip` rogne les visages éparpillés au
+   * bord de l'écran sans créer de défilement horizontal.
+   */
+  .vitrine {
+    padding-top: var(--pas-3);
+    overflow-x: clip;
+  }
+
+  /*
+   * Six visages par rangée à 375 px (51 px chacun : sept, à 44 px, faisaient
+   * des cibles trop petites sous le doigt), dix dès 40 rem, quatorze dès
+   * 64 rem (74 px à 1280). Vingt-huit candidats : cinq rangées, trois, deux.
+   */
+  .visages {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 7px;
+    view-timeline-name: --mosaique;
+  }
+
+  @media (min-width: 40rem) {
+    .visages {
+      grid-template-columns: repeat(10, minmax(0, 1fr));
+      gap: 8px;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .visages {
+      grid-template-columns: repeat(14, minmax(0, 1fr));
+    }
+  }
+
+  .visage {
+    position: relative;
+    margin: 0;
+  }
+
+  /* Le visage pointé passe devant ses voisins, plaque comprise. */
+  .visage:hover,
+  .visage:focus-within {
+    z-index: 2;
+  }
+
+  .visage a {
+    display: block;
+    border-radius: 12px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .visage a:focus-visible {
+    outline-offset: 3px;
+  }
+
+  .visage :global(.portrait) {
+    border-radius: 12px;
+    transition:
+      transform 200ms var(--sortie),
+      opacity 200ms var(--sortie);
+  }
+
+  @media (min-width: 48rem) {
+    .visage a,
+    .visage :global(.portrait) {
+      border-radius: 14px;
+    }
+  }
+
+  /*
+   * LA PLAQUE, au-dessus du visage : l'aplat violet et son texte, les deux
+   * valeurs mesurées du système (8,2:1 en clair, 7,8:1 en sombre). Centrée
+   * sur le visage, sauf dans les colonnes de bord, où elle s'aligne sur lui
+   * pour ne pas sortir de l'écran.
+   */
+  .plaque {
+    --plaque-x: -50%;
+
+    position: absolute;
+    bottom: calc(100% + 10px);
+    left: 50%;
+    z-index: 1;
+    display: grid;
+    gap: 1px;
+    padding: 0.45rem 0.8rem;
+    border-radius: var(--rayon-carte);
+    background: var(--couleur-aplat);
+    color: var(--couleur-sur-aplat);
+    box-shadow: var(--ombre-2);
+    white-space: nowrap;
+    text-align: center;
+    pointer-events: none;
+    opacity: 0;
+    translate: var(--plaque-x) 6px;
+    transition:
+      opacity 160ms var(--sortie),
+      translate 200ms var(--sortie);
+  }
+
+  .plaque-nom {
+    font-size: 0.875rem;
+    font-weight: 700;
+    line-height: 1.25;
+  }
+
+  .plaque-parti {
+    font-size: 0.75rem;
+    line-height: 1.25;
+  }
+
+  /* Colonnes de bord : six par rangée, puis dix, puis quatorze. */
+  .visage:nth-child(6n + 1) .plaque {
+    --plaque-x: 0%;
+    left: 0;
+    text-align: left;
+  }
+
+  .visage:nth-child(6n) .plaque {
+    --plaque-x: 0%;
+    left: auto;
+    right: 0;
+    text-align: right;
+  }
+
+  @media (min-width: 40rem) {
+    .visage:nth-child(n) .plaque {
+      --plaque-x: -50%;
+      left: 50%;
+      right: auto;
+      text-align: center;
+    }
+
+    .visage:nth-child(10n + 1) .plaque,
+    .visage:nth-child(10n + 2) .plaque {
+      --plaque-x: 0%;
+      left: 0;
+      text-align: left;
+    }
+
+    .visage:nth-child(10n + 9) .plaque,
+    .visage:nth-child(10n) .plaque {
+      --plaque-x: 0%;
+      left: auto;
+      right: 0;
+      text-align: right;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .visage:nth-child(n) .plaque {
+      --plaque-x: -50%;
+      left: 50%;
+      right: auto;
+      text-align: center;
+    }
+
+    .visage:nth-child(14n + 1) .plaque,
+    .visage:nth-child(14n + 2) .plaque {
+      --plaque-x: 0%;
+      left: 0;
+      text-align: left;
+    }
+
+    .visage:nth-child(14n + 13) .plaque,
+    .visage:nth-child(14n) .plaque {
+      --plaque-x: 0%;
+      left: auto;
+      right: 0;
+      text-align: right;
+    }
+  }
+
+  /*
+   * LE SURVOL : le visage monte, sa plaque apparaît, les autres s'estompent.
+   * Pointeur fin seulement : au doigt, l'état resterait collé après l'appui.
+   * Le visage pointé s'agrandit — c'est le visiteur qui le désigne, pas le
+   * site —, et une image qui revient à sa taille au repos se redessine nette.
+   */
+  @media (hover: hover) and (pointer: fine) {
+    .visage a:hover :global(.portrait) {
+      transform: translateY(-6px) scale(1.1);
+    }
+
+    .visage a:hover .plaque {
+      opacity: 1;
+      translate: var(--plaque-x) 0;
+    }
+
+    .visages:has(a:hover) .visage a:not(:hover) :global(.portrait) {
+      opacity: 0.35;
+    }
+  }
+
+  /* Au clavier, la plaque, instantanée : aucune animation sur une action clavier. */
+  .visage a:focus-visible .plaque {
+    opacity: 1;
+    translate: var(--plaque-x) 0;
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .visage :global(.portrait),
+    .plaque {
+      transition: opacity 160ms var(--sortie);
+    }
+
+    .visage a:hover :global(.portrait) {
+      transform: none;
+    }
+  }
+
+  .tous {
+    margin: var(--pas-2) 0 0;
+  }
+
+  .tous a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .tous :global(.icone) {
+    width: 1.1rem;
+    height: 1.1rem;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .tous a:hover {
+      text-decoration: underline;
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    .tous a:hover :global(.icone) {
+      transform: translateX(3px);
+    }
+  }
+
+  /*
+   * ─── L'ÉPARPILLEMENT ─────────────────────────────────────────────────────
+   *
+   * Chaque visage part d'un décalage tiré de trois motifs de périodes
+   * différentes (5, 4 et 3) : soixante combinaisons avant qu'une ne se répète,
+   * de quoi paraître au hasard sans un octet de script ni un `style=""`, que la
+   * CSP refuse. Tous suivent la chronologie de la GRILLE : ils partent quand
+   * elle entre par le bas de l'écran et sont en place quand elle atteint le
+   * milieu. `translate` et `rotate` seulement, jamais l'opacité (les initiales
+   * sont du texte) ni l'échelle (un texte qui grandit au défilement sort flou
+   * sur Safari).
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .visage {
+        --dx: 0;
+        --dy: 0;
+        --rot: 0deg;
+      }
+
+      /*
+       * C'est le PORTRAIT qui voyage, jamais le lien : chaque lien garde sa
+       * case dans la grille. Éparpillés, les liens se chevauchaient, et un
+       * audit qui lit la page avant tout défilement les comptait comme des
+       * cibles masquées (Lighthouse, accessibilité 96).
+       */
+      .visage :global(.portrait) {
+        animation-name: visage-arrive;
+        animation-duration: auto;
+        animation-timing-function: var(--sortie);
+        animation-fill-mode: both;
+        animation-timeline: --mosaique;
+        animation-range: entry 0% cover 50%;
+      }
+
+      .visage:nth-child(5n + 1) {
+        --dx: -34vw;
+      }
+
+      .visage:nth-child(5n + 2) {
+        --dx: 22vw;
+      }
+
+      .visage:nth-child(5n + 3) {
+        --dx: -10vw;
+      }
+
+      .visage:nth-child(5n + 4) {
+        --dx: 36vw;
+      }
+
+      .visage:nth-child(5n) {
+        --dx: -22vw;
+      }
+
+      .visage:nth-child(4n + 1) {
+        --dy: 14rem;
+      }
+
+      .visage:nth-child(4n + 2) {
+        --dy: 6rem;
+      }
+
+      .visage:nth-child(4n + 3) {
+        --dy: 20rem;
+      }
+
+      .visage:nth-child(4n) {
+        --dy: 10rem;
+      }
+
+      .visage:nth-child(3n + 1) {
+        --rot: -24deg;
+      }
+
+      .visage:nth-child(3n + 2) {
+        --rot: 16deg;
+      }
+
+      .visage:nth-child(3n) {
+        --rot: -6deg;
+      }
+
+      @keyframes visage-arrive {
+        from {
+          translate: var(--dx) var(--dy);
+          rotate: var(--rot);
+        }
+
+        to {
+          translate: none;
+          rotate: none;
+        }
+      }
+    }
+  }
+</style>

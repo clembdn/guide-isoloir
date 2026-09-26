@@ -29,6 +29,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 /* `sharp` est celui d'Astro, déjà installé : aucune dépendance ajoutée. */
 import sharp from "sharp";
+import { genererVignettes } from "./generer-vignettes.mjs";
 
 const RACINE = path.resolve(import.meta.dirname, "..");
 const AGENT = "guide-isoloir/0.1 (https://github.com/ ; clemboudon06@gmail.com)";
@@ -426,3 +427,6 @@ await writeFile(destination, rendre([...portraits, ...logos], releveLe), "utf8")
 process.stdout.write(
   `\n${portraits.length + logos.length} médias, manifeste écrit dans ${destination}\n`,
 );
+
+/* Les vignettes suivent les portraits : un portrait remplacé ne garde pas l'ancienne. */
+await genererVignettes();

@@ -10,8 +10,14 @@
  *
  * Les dimensions sont en attributs, pour que la place soit réservée avant le
  * chargement. Le portrait est décoratif : le nom est toujours écrit à côté.
+ *
+ * DEUX FICHIERS PAR VISAGE, CHOISIS PAR LA TAILLE, JAMAIS PAR LE CANDIDAT. Le
+ * portrait de 330 px pour la fiche et la carte de `/candidats` ; sa vignette de
+ * 192 px pour tout ce qui est petit — pages de thème, mosaïque de l'accueil.
+ * Vingt-huit visages de 40 px chargeaient 1 Mo ; ils en chargent 150 ko.
  */
 import { initiales } from "../../lib/initiales";
+import { vignetteDe } from "../../lib/vignettes";
 
 type Props = {
   nom: string;
@@ -21,7 +27,7 @@ type Props = {
    * tout `style=""` en ligne. 32 et 40 servent aux pages de thème : le tableau
    * récapitulatif et les visages des candidats sans position connue.
    */
-  taille: 32 | 40 | 64 | 120 | "carte";
+  taille: 32 | 40 | 64 | 120 | "carte" | "mosaique";
   /** La fiche charge son portrait tout de suite ; la liste, au défilement. */
   differe?: boolean;
 };
@@ -29,18 +35,20 @@ type Props = {
 const { nom, chemin, taille, differe = true } = Astro.props;
 
 /*
- * « carte » : le portrait remplit la largeur de sa carte, au carré. Les
- * attributs réservent la place avant le chargement (330, la largeur du
+ * « carte » et « mosaique » : le portrait remplit la largeur de sa case, au
+ * carré. Les attributs réservent la place avant le chargement (la largeur du
  * fichier servi) ; la CSS fixe la taille réelle.
  */
-const cote = taille === "carte" ? 330 : taille;
+const petit = taille === "mosaique" || (typeof taille === "number" && taille <= 64);
+const source = chemin && petit ? vignetteDe(chemin) : chemin;
+const cote = taille === "carte" ? 330 : taille === "mosaique" ? 192 : taille;
 ---
 
 {
-  chemin ? (
+  source ? (
     <img
       class:list={["portrait", `portrait-${taille}`]}
-      src={chemin}
+      src={source}
       alt=""
       width={cote}
       height={cote}
@@ -114,6 +122,16 @@ const cote = taille === "carte" ? 330 : taille;
   .portrait-absent.portrait-carte {
     font-size: clamp(1.75rem, 1rem + 4vw, 2.75rem);
     letter-spacing: 0.02em;
+  }
+
+  .portrait-mosaique {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .portrait-absent.portrait-mosaique {
+    font-size: clamp(0.75rem, 0.55rem + 0.8vw, 1.0625rem);
   }
 
   .portrait-absent.portrait-32,

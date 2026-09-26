@@ -1,0 +1,495 @@
+---
+/*
+ * Vitrine des thèmes, sur l'accueil : « Comparez sans faire le test ».
+ *
+ * LES RIDEAUX. Chaque thème est une ligne de texte géant, précédée de son
+ * pictogramme à la teinte du thème. Au survol ou au focus, deux demi-rideaux
+ * de cette teinte se ferment derrière elle depuis ses bords — le motif du logo
+ * et du menu —, le pictogramme bascule et les quatre questions du thème
+ * apparaissent. Sur un écran tactile, qui ne survole rien, c'est le
+ * DÉFILEMENT qui ferme le rideau : la ligne qui passe au milieu de l'écran
+ * s'habille, puis se rouvre en le quittant.
+ *
+ * TOUT EST DANS LE HTML. Noms, questions et liens sont servis statiques : un
+ * moteur, un assistant ou un lecteur d'écran lit la liste entière sans rien
+ * survoler. Sur téléphone, les questions sont toujours visibles, une par
+ * ligne ; seul le rideau y dépend du défilement. Sur ordinateur, elles
+ * apparaissent avec le rideau, au survol. Sans animation liée au défilement,
+ * ou avec « réduire les animations », il n'y a ni rideau ni glissement.
+ *
+ * UN SEUL LIEN PAR THÈME, celui du nom, étendu à toute la ligne par un
+ * `::after` : un arrêt de tabulation, et le nom du thème pour nom accessible.
+ *
+ * La teinte est un repère de navigation : elle ne touche aucun candidat.
+ */
+import Icone from "../Icone.astro";
+import { QUESTIONS } from "../../data/questions";
+import { THEMES_PUBLIES, THEMES_PROPOSITIONS } from "../../data/themes";
+import { THEMES } from "../../lib/fiches";
+
+const ordonnees = [...QUESTIONS].sort((a, b) => a.ordre - b.ordre);
+
+/* Ordre du test ; les intitulés courts dans l'ordre des questions. */
+const rangees = THEMES.map((theme) => {
+  const courts: Record<string, string> = THEMES_PUBLIES.find((t) => t.nom === theme.nom)!.courts;
+  return {
+    ...theme,
+    sujets: ordonnees
+      .filter((question) => question.theme === theme.nom)
+      .map((question) => courts[question.id]!),
+  };
+});
+
+const nombreThemes = THEMES.length + THEMES_PROPOSITIONS.length;
+---
+
+<section class="section vitrine" aria-labelledby="vitrine-themes-titre">
+  <div class="enveloppe-large">
+    <div class="section-tete revele">
+      <h2 id="vitrine-themes-titre">Comparez sans faire le test</h2>
+      <p class="section-chapo">
+        Choisissez un sujet&nbsp;: pour chaque question, qui est pour, qui est contre, sources à
+        l'appui.
+      </p>
+    </div>
+
+    <ol class="rideaux">
+      {
+        rangees.map((theme) => (
+          <li class:list={["rangee", `t-${theme.teinte}`]}>
+            <span class="pictogramme" aria-hidden="true">
+              <Icone nom={theme.icone} graisse="fill" />
+            </span>
+            <div class="corps">
+              <h3 class="nom">
+                <a href={`/themes/${theme.slug}`}>{theme.nom}</a>
+              </h3>
+              <ul class="sujets">
+                {theme.sujets.map((sujet) => (
+                  <li>{sujet}</li>
+                ))}
+              </ul>
+            </div>
+            <span class="fleche" aria-hidden="true">
+              <Icone nom="arrow-right" graisse="bold" />
+            </span>
+          </li>
+        ))
+      }
+    </ol>
+
+    <p class="tous">
+      <a href="/themes">Voir les {nombreThemes} thèmes, dont ceux hors test</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  /*
+   * Les lignes arrivent de côté : `clip` rogne ce qui dépasse de l'écran sans
+   * créer de défilement horizontal ni de conteneur de défilement (voir
+   * l'accueil : `hidden` figerait les animations liées au défilement).
+   */
+  .vitrine {
+    overflow-x: clip;
+  }
+
+  .rideaux {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  /*
+   * UNE LIGNE : pictogramme, nom et questions, flèche. Sur grand écran, les
+   * questions passent dans une colonne à droite du nom.
+   */
+  .rangee {
+    /*
+     * Sur téléphone, le pictogramme et la flèche se calent sur la PREMIÈRE
+     * ligne du nom : les questions, toujours visibles, allongent la ligne.
+     */
+    --taille-nom: clamp(1.75rem, 1rem + 3.2vw, 3.5rem);
+    --ligne-nom: calc(var(--taille-nom) * 1.02);
+
+    position: relative;
+    isolation: isolate;
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    column-gap: var(--pas-2);
+    align-items: start;
+    margin: 0;
+    padding: var(--pas-3) var(--pas-2);
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  @media (min-width: 48rem) {
+    .rangee {
+      grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+      column-gap: var(--pas-3);
+      padding: var(--pas-4) var(--pas-3);
+    }
+  }
+
+  /*
+   * LES DEUX DEMI-RIDEAUX, comme ceux du menu : chacun part de son bord,
+   * arrondi côté extérieur, droit côté intérieur. Fermés, ils ne font plus
+   * qu'une bande. Un demi-pixel de recouvrement évite la couture au centre.
+   * Des formes vides : leur échelle peut changer sans rien rendre flou.
+   */
+  .rangee::before,
+  .rangee::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    z-index: -1;
+    width: calc(50% + 0.5px);
+    background: var(--pastel);
+    transform: scaleX(0);
+    transition: transform 240ms var(--sortie);
+  }
+
+  .rangee::before {
+    left: 0;
+    transform-origin: left center;
+    border-radius: var(--rayon-carte) 0 0 var(--rayon-carte);
+  }
+
+  .rangee::after {
+    right: 0;
+    transform-origin: right center;
+    border-radius: 0 var(--rayon-carte) var(--rayon-carte) 0;
+  }
+
+  /*
+   * Le pictogramme, toujours là, à la teinte du thème : un repère qu'on lit
+   * sans lire. Rideau fermé, il bascule — une forme vide de texte, que ni la
+   * rotation ni l'échelle ne rendent floue.
+   */
+  .pictogramme {
+    display: grid;
+    place-items: center start;
+    height: var(--ligne-nom);
+    color: var(--vif);
+  }
+
+  .pictogramme :global(.icone) {
+    width: 2rem;
+    height: 2rem;
+    transition: transform 240ms var(--sortie);
+  }
+
+  @media (min-width: 48rem) {
+    .pictogramme :global(.icone) {
+      width: 3rem;
+      height: 3rem;
+    }
+  }
+
+  .corps {
+    display: grid;
+    gap: var(--pas-1);
+  }
+
+  @media (min-width: 64rem) {
+    .corps {
+      grid-template-columns: minmax(0, 1fr) 17rem;
+      align-items: center;
+      column-gap: var(--pas-4);
+    }
+  }
+
+  .nom {
+    margin: 0;
+    font-size: var(--taille-nom);
+    line-height: 1.02;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+
+  /* Le lien du nom couvre toute la ligne : un seul arrêt de tabulation par thème. */
+  .nom a {
+    color: var(--couleur-encre);
+    text-decoration: none;
+    transition: color 240ms var(--sortie);
+  }
+
+  .nom a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+  }
+
+  .nom a:focus-visible {
+    outline: none;
+  }
+
+  .rangee:has(.nom a:focus-visible) {
+    outline: 2px solid var(--couleur-signature);
+    outline-offset: 2px;
+    border-radius: var(--rayon-carte);
+  }
+
+  /* Les quatre questions : une ligne qui passe à la ligne sur téléphone, une colonne à droite sur grand écran. */
+  /*
+   * Les quatre questions, une par ligne : sous le nom sur téléphone, dans une
+   * colonne à droite sur grand écran. Toujours visibles au doigt, même rideau
+   * ouvert — l'éditeur a préféré les lire sans attendre le rideau.
+   */
+  .sujets {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--couleur-encre-faible);
+  }
+
+  .sujets li {
+    margin: 0;
+  }
+
+  @media (min-width: 64rem) {
+    .sujets {
+      gap: 0.2rem;
+      font-size: 0.9375rem;
+    }
+  }
+
+  .fleche {
+    display: grid;
+    place-items: center;
+    height: var(--ligne-nom);
+    color: var(--couleur-encre-faible);
+    transition:
+      transform 240ms var(--sortie),
+      color 240ms var(--sortie);
+  }
+
+  .fleche :global(.icone) {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  @media (min-width: 48rem) {
+    .fleche :global(.icone) {
+      width: 2rem;
+      height: 2rem;
+    }
+  }
+
+  /*
+   * Grand écran : le nom et ses questions tiennent sur une ligne de la grille ;
+   * pictogramme et flèche se centrent sur elle, pas sur la première ligne du nom.
+   */
+  @media (min-width: 64rem) {
+    .rangee {
+      align-items: center;
+    }
+
+    .pictogramme,
+    .fleche {
+      height: auto;
+    }
+  }
+
+  .tous {
+    margin: var(--pas-3) 0 0;
+    font-size: var(--t-petit);
+  }
+
+  .tous a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    font-weight: 600;
+  }
+
+  /*
+   * ─── RIDEAU FERMÉ ────────────────────────────────────────────────────────
+   *
+   * Un état, trois déclencheurs : le survol (pointeur fin seulement — au doigt,
+   * il resterait collé), le focus clavier, et sur écran tactile le passage au
+   * milieu de l'écran (plus bas).
+   */
+  @media (hover: hover) and (pointer: fine) {
+    /*
+     * Sur grand écran, les questions n'apparaissent qu'avec le rideau : au
+     * repos, la liste n'est que six noms en grand. Leur place est réservée, la
+     * ligne ne change pas de hauteur.
+     */
+    .sujets {
+      opacity: 0;
+      transform: translateX(0.75rem);
+      transition:
+        opacity 160ms var(--sortie),
+        transform 240ms var(--sortie);
+    }
+
+    .rangee:hover::before,
+    .rangee:hover::after {
+      transform: scaleX(1);
+    }
+
+    .rangee:hover .pictogramme :global(.icone) {
+      transform: rotate(-10deg) scale(1.15);
+    }
+
+    .rangee:hover .sujets {
+      opacity: 1;
+      transform: none;
+      transition-delay: 90ms;
+    }
+
+    .rangee:hover .fleche {
+      color: var(--vif);
+      transform: translateX(6px);
+    }
+
+    /*
+     * Le projecteur, comme pour les visages : les autres lignes passent à
+     * l'encre faible. Deux teintes qui passent AA : aucun nom ne devient
+     * illisible.
+     */
+    .rideaux:has(.rangee:hover) .rangee:not(:hover) .nom a {
+      color: var(--couleur-encre-faible);
+    }
+  }
+
+  /* Au clavier, le même état, instantané : aucune animation sur une action clavier. */
+  .rangee:has(.nom a:focus-visible)::before,
+  .rangee:has(.nom a:focus-visible)::after {
+    transform: scaleX(1);
+    transition: none;
+  }
+
+  .rangee:has(.nom a:focus-visible) .pictogramme :global(.icone) {
+    transform: rotate(-10deg) scale(1.15);
+    transition: none;
+  }
+
+  .rangee:has(.nom a:focus-visible) .sujets {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .rangee:has(.nom a:focus-visible) .fleche {
+    color: var(--vif);
+    transition: none;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .rangee::before,
+    .rangee::after,
+    .pictogramme :global(.icone),
+    .sujets,
+    .fleche {
+      transition: none;
+    }
+  }
+
+  /*
+   * ─── DÉFILEMENT ──────────────────────────────────────────────────────────
+   *
+   * Mêmes filets que l'accueil : `no-preference`, `@supports`, état par défaut
+   * visible, propriétés détaillées (le minifieur fond le raccourci `animation`
+   * avec `animation-timeline` en une valeur que Chrome rejette). Le texte ne
+   * bouge que par `translate` et ne perd jamais d'opacité au défilement.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      /*
+       * Chaque ligne arrive de côté, en alternance : la liste se tisse. Par
+       * `translate`, qui s'ajoute au `transform` des rideaux sans l'écraser.
+       */
+      .rangee {
+        --depart: -12vw;
+        view-timeline-name: --rangee;
+        animation-name: rangee-arrive;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 0% entry 90%;
+      }
+
+      .rangee:nth-child(even) {
+        --depart: 12vw;
+      }
+
+      /*
+       * Au doigt, le rideau suit l'écran : fermé quand la ligne passe au
+       * milieu, rouvert en haut et en bas. Le pictogramme bascule au même
+       * moment.
+       */
+      @media (hover: none) {
+        .rangee::before,
+        .rangee::after {
+          transition: none;
+          animation-name: rideau-defile;
+          animation-duration: auto;
+          animation-timing-function: linear;
+          animation-fill-mode: both;
+          animation-timeline: --rangee;
+          animation-range: cover 28% cover 72%;
+        }
+
+        .pictogramme :global(.icone) {
+          transition: none;
+          animation-name: pictogramme-defile;
+          animation-duration: auto;
+          animation-timing-function: linear;
+          animation-fill-mode: both;
+          animation-timeline: --rangee;
+          animation-range: cover 28% cover 72%;
+        }
+      }
+
+      @keyframes rangee-arrive {
+        from {
+          translate: var(--depart) 0;
+        }
+
+        to {
+          translate: none;
+        }
+      }
+
+      /*
+       * Rampes courtes : une ligne est presque toujours ouverte ou fermée.
+       * Plus longues, on s'arrêtait souvent sur un rideau à demi tiré, deux
+       * bandes de couleur de part et d'autre du texte.
+       */
+      @keyframes rideau-defile {
+        0%,
+        100% {
+          transform: scaleX(0);
+        }
+
+        18%,
+        82% {
+          transform: scaleX(1);
+        }
+      }
+
+      @keyframes pictogramme-defile {
+        0%,
+        100% {
+          transform: none;
+        }
+
+        18%,
+        82% {
+          transform: rotate(-10deg) scale(1.15);
+        }
+      }
+    }
+  }
+</style>

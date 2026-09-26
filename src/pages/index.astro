@@ -22,6 +22,8 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import CompteARebours from "../components/CompteARebours.astro";
 import Icone from "../components/Icone.astro";
+import VitrineThemes from "../components/accueil/VitrineThemes.astro";
+import VitrineCandidats from "../components/accueil/VitrineCandidats.astro";
 import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import { SITE_NAME, SITE_URL, SITE_TAGLINE, EDITOR_NAME } from "../lib/site";
 import { articlesPublies, TEINTES_RUBRIQUE } from "../lib/comprendre";
@@ -370,6 +372,15 @@ const articlesLd = {
   </section>
 
   {
+    /*
+     * LA VITRINE, en deux temps : par sujet, puis par personne. On peut
+     * comparer sans faire le test. Voir `src/components/accueil/`.
+     */
+  }
+  <VitrineThemes />
+  <VitrineCandidats />
+
+  {
     articles.length > 0 && (
       <section class="section">
         <div class="enveloppe-large">
@@ -467,8 +478,15 @@ const articlesLd = {
     )
   }
 
+  {
+    /*
+     * LES PREUVES. Sur grand écran, le titre reste épinglé à gauche pendant
+     * que les trois preuves défilent à droite. Chacune s'imprime comme un
+     * tampon : son filet se trace, son icône tombe sur la page.
+     */
+  }
   <section class="section">
-    <div class="enveloppe-large">
+    <div class="enveloppe-large verifier">
       <div class="section-tete revele">
         <h2>Pourquoi vous pouvez vérifier ce site</h2>
         <p class="section-chapo">
@@ -485,7 +503,10 @@ const articlesLd = {
               </span>
               <h3>{preuve.titre}</h3>
               <p>{preuve.texte}</p>
-              <a href={preuve.lien}>{preuve.libelle}</a>
+              <a href={preuve.lien}>
+                {preuve.libelle}
+                <Icone nom="arrow-right" graisse="bold" />
+              </a>
             </li>
           ))
         }
@@ -493,38 +514,74 @@ const articlesLd = {
     </div>
   </section>
 
-  <section class="section">
-    <div class="enveloppe-large">
-      <div class="promesse revele">
-        <h2>C'est anonyme. Vos réponses ne sont enregistrées nulle part.</h2>
-        <p>
-          Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un
-          identifiant. Le calcul s'effectue exclusivement dans votre navigateur. Il n'y a ni compte,
-          ni inscription, ni bandeau de consentement, parce qu'il n'y a rien à consentir.
-        </p>
+  {
+    /*
+     * L'ISOLOIR, EN FINALE. La promesse d'anonymat et l'appel au test ne font
+     * plus qu'un bloc, sur l'aplat violet : on entre dans l'isoloir. Au
+     * défilement, le bloc s'élargit jusqu'aux bords de l'écran, comme la photo
+     * d'accroche, et sur grand écran l'isoloir dessiné ferme ses rideaux —
+     * vous y êtes seul, vos réponses aussi. Puis l'appel : « Commencer le
+     * test ».
+     *
+     * La promesse garde MOT POUR MOT la formulation publique de `CLAUDE.md`.
+     * Sans animation, le bloc est à la largeur de la page, rideaux fermés.
+     */
+  }
+  <div class="isoloir">
+    <div class="isoloir-cadre">
+      <div class="enveloppe-large isoloir-grille">
+        <svg class="isoloir-dessin" viewBox="0 0 200 224" aria-hidden="true">
+          <g class="isoloir-rideau isoloir-rideau--gauche">
+            <path
+              class="rideau-pan"
+              d="M26 22 H100 V188 Q91 196 82 188 Q72 196 63 188 Q54 196 45 188 Q35 196 26 188 Z"
+            ></path>
+            <path class="rideau-pli" d="M44 26 V186 M63 26 V186 M82 26 V186"></path>
+          </g>
+          <g class="isoloir-rideau isoloir-rideau--droit">
+            <path
+              class="rideau-pan"
+              d="M100 22 H174 V188 Q165 196 155 188 Q146 196 137 188 Q128 196 118 188 Q109 196 100 188 Z"
+            ></path>
+            <path class="rideau-pli" d="M118 26 V186 M137 26 V186 M156 26 V186"></path>
+          </g>
+          <path class="isoloir-bati" d="M16 220 V14 H184 V220"></path>
+        </svg>
+
+        <div class="isoloir-texte">
+          <section class="promesse revele" aria-labelledby="promesse-titre">
+            <h2 id="promesse-titre">
+              C'est anonyme. Vos réponses ne sont enregistrées nulle part.
+            </h2>
+            <p>
+              Vos réponses et vos résultats ne sont jamais envoyés, enregistrés ou associés à un
+              identifiant. Le calcul s'effectue exclusivement dans votre navigateur. Il n'y a ni
+              compte, ni inscription, ni bandeau de consentement, parce qu'il n'y a rien à
+              consentir.
+            </p>
+          </section>
+
+          <section class="final revele" aria-labelledby="final-titre">
+            <h2 id="final-titre">Prêt à voir où vous vous situez&nbsp;?</h2>
+            <p>{QUESTIONS.length} affirmations. Aucune inscription, rien à installer.</p>
+            <p><a class="action action--grand" href="/test">Commencer le test</a></p>
+          </section>
+        </div>
       </div>
     </div>
-  </section>
 
-  <section class="final">
-    <div class="enveloppe-large">
-      <h2>Prêt à voir où vous vous situez&nbsp;?</h2>
-      <p>{QUESTIONS.length} affirmations. Aucune inscription, rien à installer.</p>
-      <p><a class="action action--grand" href="/test">Commencer le test</a></p>
-
-      <nav class="plus-loin" aria-label="Aller plus loin">
-        <ul>
-          {
-            PLUS_LOIN.map((lien) => (
-              <li>
-                <a href={lien.href}>{lien.libelle}</a>
-              </li>
-            ))
-          }
-        </ul>
-      </nav>
-    </div>
-  </section>
+    <nav class="enveloppe-large plus-loin" aria-label="Aller plus loin">
+      <ul>
+        {
+          PLUS_LOIN.map((lien) => (
+            <li>
+              <a href={lien.href}>{lien.libelle}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
 
   <script>
     import { monterSceneUrne } from "../lib/demo-urne";
@@ -1590,6 +1647,39 @@ const articlesLd = {
     transition: transform 250ms var(--sortie);
   }
 
+  /*
+   * LE RIDEAU DE CHAQUE PHOTO, sur grand écran. Deux pans à la teinte vive de
+   * la rubrique couvrent la photo et s'ouvrent vers les bords quand la carte
+   * arrive : le geste de l'accroche, rejoué à chaque article. Des formes
+   * vides, sans texte. Par défaut ouverts — sur téléphone, et sans animation
+   * liée au défilement, la photo est simplement là.
+   */
+  .carte-image {
+    position: relative;
+  }
+
+  .carte-image::before,
+  .carte-image::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    z-index: 1;
+    width: calc(50% + 0.5px);
+    background: var(--vif, var(--couleur-aplat));
+    transform: scaleX(0);
+    pointer-events: none;
+  }
+
+  .carte-image::before {
+    left: 0;
+    transform-origin: left center;
+  }
+
+  .carte-image::after {
+    right: 0;
+    transform-origin: right center;
+  }
+
   .carte-texte {
     display: flex;
     flex-direction: column;
@@ -1650,34 +1740,54 @@ const articlesLd = {
 
   /* ─── Preuves de confiance ─────────────────────────────────────────────── */
 
+  /*
+   * Sur grand écran, deux colonnes : le titre épinglé à gauche, les preuves
+   * qui défilent à droite. Sur téléphone, l'un sous l'autre.
+   */
+  @media (min-width: 62rem) {
+    .verifier {
+      display: grid;
+      grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+      column-gap: var(--pas-6);
+      align-items: start;
+    }
+
+    .verifier .section-tete {
+      position: sticky;
+      top: calc(5.5rem + var(--pas-4));
+      margin-bottom: 0;
+    }
+  }
+
   .preuves {
     list-style: none;
     padding: 0;
     margin: 0;
     display: grid;
-    gap: var(--pas-4);
-  }
-
-  @media (min-width: 62rem) {
-    .preuves {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: var(--pas-4);
-    }
+    gap: var(--pas-5);
   }
 
   /*
-   * Le trait, pas la boîte : un filet au-dessus de chaque preuve, comme les
-   * schémas de /comprendre. Sur téléphone, l'icône à gauche du texte ; en
-   * colonnes, au-dessus.
+   * Le trait, pas la boîte : un filet au-dessus de chaque preuve, qui se trace
+   * au défilement (voir DÉFILEMENT). L'icône à gauche du texte, toujours.
    */
   .preuves li {
+    position: relative;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    column-gap: var(--pas-2);
+    column-gap: var(--pas-3);
     align-content: start;
     margin: 0;
-    padding-top: var(--pas-3);
-    border-top: 1px solid var(--couleur-trait);
+    padding-top: var(--pas-4);
+  }
+
+  .preuves li::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 1px;
+    background: var(--couleur-trait);
+    transform-origin: left center;
   }
 
   .preuves li > :not(.preuve-puce) {
@@ -1685,42 +1795,39 @@ const articlesLd = {
   }
 
   .preuve-puce {
+    grid-row: 1 / span 3;
     display: inline-grid;
     place-items: center;
-    width: 2.5rem;
-    height: 2.5rem;
-    border-radius: var(--rayon-actionnable);
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
     background: var(--pastel, var(--pastel-violet));
     color: var(--vif, var(--couleur-signature));
   }
 
-  .preuve-puce {
-    grid-row: 1 / span 3;
-  }
-
-  @media (min-width: 62rem) {
-    .preuves li {
-      grid-template-columns: minmax(0, 1fr);
-    }
-
-    .preuves li > :not(.preuve-puce) {
-      grid-column: 1;
-    }
-
-    .preuve-puce {
-      grid-row: auto;
-      margin-bottom: var(--pas-2);
-    }
-  }
-
   .preuve-puce :global(svg) {
-    width: 1.35rem;
-    height: 1.35rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    transition: transform 240ms var(--sortie);
+  }
+
+  @media (min-width: 48rem) {
+    .preuve-puce {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+
+    .preuve-puce :global(svg) {
+      width: 2.2rem;
+      height: 2.2rem;
+    }
   }
 
   .preuves h3 {
-    margin: 0.35rem 0 0.4rem;
-    font-size: var(--t-h3);
+    margin: 0.2rem 0 0.4rem;
+    font-size: clamp(1.25rem, 1.05rem + 0.9vw, 1.75rem);
+    line-height: 1.15;
+    letter-spacing: -0.025em;
   }
 
   .preuves p {
@@ -1728,6 +1835,7 @@ const articlesLd = {
     color: var(--couleur-encre-faible);
     font-size: 0.9375rem;
     line-height: 1.5;
+    max-width: 38rem;
   }
 
   /* Zone de confort tactile : la cible grandit, la mise en page ne bouge pas. */
@@ -1735,6 +1843,7 @@ const articlesLd = {
     justify-self: start;
     display: inline-flex;
     align-items: center;
+    gap: 0.35rem;
     min-height: 44px;
     margin-block: -0.4rem;
     padding-block: 0.4rem;
@@ -1742,74 +1851,204 @@ const articlesLd = {
     font-size: 0.9375rem;
   }
 
-  /* ─── Promesse d'anonymat ──────────────────────────────────────────────── */
+  .preuves a :global(svg) {
+    width: 1rem;
+    height: 1rem;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  /* Survol : l'icône bascule dans son disque, la flèche avance. */
+  @media (hover: hover) and (pointer: fine) {
+    .preuves li:hover .preuve-puce :global(svg) {
+      transform: rotate(-12deg) scale(1.12);
+    }
+
+    .preuves a:hover :global(svg) {
+      transform: translateX(3px);
+    }
+  }
+
+  /* ─── L'isoloir : promesse d'anonymat et appel final ───────────────────── */
+
+  .isoloir {
+    padding-top: var(--pas-5);
+  }
 
   /*
-   * Sans icône : posée au-dessus du titre, elle ajoutait une ligne entière pour
-   * un pictogramme de 48 px. Sur grand écran, titre et texte côte à côte : un
-   * bloc large et bas plutôt qu'une colonne étroite au milieu d'un grand vide.
+   * LE BLOC, PLEINE LARGEUR. L'élément fait toute la largeur de l'écran ; un
+   * `clip-path` n'en montre d'abord que la largeur de la page, arrondie, et le
+   * défilement l'ouvre jusqu'aux bords — le geste de la photo d'accroche.
+   * `--retrait` retombe sur la gouttière de `.enveloppe-large`.
    */
-  .promesse {
+  .isoloir-cadre {
+    --retrait: max(var(--gouttiere), calc(50% - var(--large) / 2 + var(--gouttiere)));
+    padding-block: var(--pas-6);
+    background: var(--couleur-aplat);
+    color: var(--couleur-sur-aplat);
+    clip-path: inset(0 var(--retrait) round var(--rayon-carte-l));
+  }
+
+  /* Le texte garde de l'air à l'intérieur du cadre, même avant son ouverture. */
+  .isoloir-grille {
     display: grid;
-    gap: var(--pas-3);
-    background: var(--couleur-surface-2);
-    border-radius: var(--rayon-carte-l);
-    padding: var(--pas-5) var(--pas-3);
+    gap: var(--pas-5);
+    padding-inline: calc(var(--gouttiere) + var(--pas-3));
   }
 
   @media (min-width: 48rem) {
-    .promesse {
-      padding: var(--pas-5);
+    .isoloir-grille {
+      padding-inline: calc(var(--gouttiere) + var(--pas-5));
     }
   }
 
   @media (min-width: 62rem) {
-    .promesse {
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      align-items: center;
+    .isoloir-cadre {
+      padding-block: calc(var(--pas-6) * 1.5);
+    }
+
+    .isoloir-grille {
+      grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
       column-gap: var(--pas-6);
-      padding: var(--pas-6) var(--pas-5);
+      align-items: center;
     }
   }
 
+  /*
+   * L'ISOLOIR DESSINÉ, aux couleurs de l'aplat : bâti en trait, rideaux
+   * translucides. Les rideaux, fermés par défaut, s'ouvrent vers les bords
+   * avant que le bloc n'arrive, et se ferment en défilant. `non-scaling-stroke`
+   * garde les plis nets pendant que les pans changent de largeur.
+   */
+  /*
+   * Sur grand écran seulement, en face du texte. Sur téléphone, empilé
+   * au-dessus, il repoussait la promesse d'un écran pour une animation que le
+   * bloc qui s'élargit suffit à porter (décision de l'éditeur, 27 septembre
+   * 2026).
+   */
+  .isoloir-dessin {
+    display: none;
+  }
+
+  @media (min-width: 62rem) {
+    .isoloir-dessin {
+      display: block;
+      width: 100%;
+      max-width: 21rem;
+      height: auto;
+      justify-self: center;
+      overflow: visible;
+    }
+  }
+
+  .isoloir-bati {
+    fill: none;
+    stroke: var(--couleur-sur-aplat);
+    stroke-width: 9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .rideau-pan {
+    fill: var(--couleur-sur-aplat);
+    fill-opacity: 0.22;
+  }
+
+  .rideau-pli {
+    fill: none;
+    stroke: var(--couleur-sur-aplat);
+    stroke-opacity: 0.4;
+    stroke-width: 2;
+    vector-effect: non-scaling-stroke;
+  }
+
+  .isoloir-rideau {
+    transform-box: fill-box;
+  }
+
+  .isoloir-rideau--gauche {
+    transform-origin: left center;
+  }
+
+  .isoloir-rideau--droit {
+    transform-origin: right center;
+  }
+
+  .isoloir-texte {
+    display: grid;
+    gap: var(--pas-5);
+  }
+
   .promesse h2 {
-    margin: 0;
-    max-width: 22ch;
+    margin: 0 0 var(--pas-3);
+    max-width: 20ch;
+    font-size: clamp(1.75rem, 1.2rem + 2.4vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
   }
 
   .promesse p {
     margin: 0;
-    color: var(--couleur-encre-faible);
-    max-width: 54ch;
+    max-width: 52ch;
+    line-height: 1.6;
   }
 
-  /* ─── Appel final ──────────────────────────────────────────────────────── */
-
+  /*
+   * Un filet entre la promesse et l'appel : la teinte du texte mêlée à
+   * l'aplat, `in srgb` pour que `capturer.mjs` sache la lire.
+   */
   .final {
-    text-align: center;
-    padding-block: var(--pas-6);
+    padding-top: var(--pas-5);
+    border-top: 1px solid color-mix(in srgb, var(--couleur-sur-aplat) 40%, var(--couleur-aplat));
   }
 
   .final h2 {
-    margin-top: 0;
-    margin-inline: auto;
-    max-width: 20ch;
+    margin: 0 0 var(--pas-2);
+    font-size: var(--t-h2);
+    text-wrap: balance;
   }
 
   .final p {
-    margin: 0 auto var(--pas-4);
-    max-width: 40ch;
-    color: var(--couleur-encre-faible);
+    margin: 0 0 var(--pas-4);
   }
 
+  .final p:last-child {
+    margin-bottom: 0;
+  }
+
+  .isoloir h2,
+  .isoloir p {
+    color: var(--couleur-sur-aplat);
+  }
+
+  /*
+   * L'action, inversée sur l'aplat : fond de la teinte du texte, texte de la
+   * teinte du fond. Même bouton, mêmes deux valeurs mesurées. L'anneau de
+   * focus prend la teinte du texte : violet sur violet, il ne se verrait pas.
+   */
+  .isoloir .action {
+    background: var(--couleur-sur-aplat);
+    color: var(--couleur-aplat);
+    box-shadow: none;
+  }
+
+  .isoloir :focus-visible {
+    outline-color: var(--couleur-sur-aplat);
+    outline-offset: 3px;
+  }
+
+  /*
+   * « Aller plus loin » : des pilules qui tirent leurs deux demi-rideaux au
+   * survol, comme les liens du menu.
+   */
   .plus-loin ul {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: var(--pas-1) var(--pas-4);
+    gap: var(--pas-1) var(--pas-2);
     list-style: none;
-    margin: var(--pas-5) 0 0;
-    padding: 0;
+    margin: 0;
+    padding: var(--pas-5) 0 var(--pas-6);
   }
 
   .plus-loin li {
@@ -1817,10 +2056,45 @@ const articlesLd = {
   }
 
   .plus-loin a {
+    position: relative;
+    isolation: isolate;
     display: inline-flex;
     align-items: center;
     min-height: 44px;
+    padding-inline: 1.1rem;
     font-weight: 600;
+    text-decoration: none;
+  }
+
+  .plus-loin a::before,
+  .plus-loin a::after {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    z-index: -1;
+    width: calc(50% + 0.5px);
+    background: var(--couleur-surface-2);
+    transform: scaleX(0);
+    transition: transform 220ms var(--sortie);
+  }
+
+  .plus-loin a::before {
+    left: 0;
+    transform-origin: left center;
+    border-radius: var(--rayon-actionnable) 0 0 var(--rayon-actionnable);
+  }
+
+  .plus-loin a::after {
+    right: 0;
+    transform-origin: right center;
+    border-radius: 0 var(--rayon-actionnable) var(--rayon-actionnable) 0;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .plus-loin a:hover::before,
+    .plus-loin a:hover::after {
+      transform: scaleX(1);
+    }
   }
 
   /*
@@ -1965,10 +2239,9 @@ const articlesLd = {
         }
       }
 
-      /* Grille : les cartes et les preuves montent en cascade. */
+      /* Grille : les cartes montent en cascade. */
       @media (min-width: 46rem) {
-        .cartes li,
-        .preuves li {
+        .cartes li {
           animation-name: accueil-monte;
           animation-duration: auto;
           animation-timing-function: linear;
@@ -1977,15 +2250,95 @@ const articlesLd = {
           animation-range: entry 0% entry 55%;
         }
 
-        .cartes li:nth-child(3n + 2),
-        .preuves li:nth-child(2) {
+        .cartes li:nth-child(3n + 2) {
           animation-range: entry 10% entry 65%;
         }
 
-        .cartes li:nth-child(3n),
-        .preuves li:nth-child(3) {
+        .cartes li:nth-child(3n) {
           animation-range: entry 20% entry 75%;
         }
+      }
+
+      /*
+       * Les rideaux des photos s'ouvrent, sur grand écran seulement : chaque
+       * carte suit sa propre chronologie, d'où la cascade des colonnes. Sur
+       * téléphone, le carrousel porte déjà le mouvement (défilement, carte
+       * mise en avant, photo qui avance) : un rideau de plus n'y ajoutait
+       * rien, décision de l'éditeur du 27 septembre 2026.
+       */
+      @media (min-width: 46rem) {
+        .carte-image {
+          view-timeline-name: --photo;
+        }
+
+        .carte-image::before,
+        .carte-image::after {
+          animation-name: accueil-rideau-photo;
+          animation-duration: auto;
+          animation-timing-function: var(--sortie);
+          animation-fill-mode: both;
+          animation-timeline: --photo;
+          animation-range: entry 40% cover 45%;
+        }
+      }
+
+      /*
+       * LES PREUVES S'IMPRIMENT. Chaque preuve porte sa chronologie : son
+       * filet se trace de gauche à droite, puis son icône tombe dans son
+       * disque comme un tampon — de haut, de biais, et se pose. Formes et
+       * icônes seulement : le texte ne bouge pas et ne pâlit jamais.
+       */
+      .preuves li {
+        view-timeline-name: --preuve;
+      }
+
+      .preuves li::before {
+        animation-name: accueil-filet;
+        animation-duration: auto;
+        animation-timing-function: var(--sortie);
+        animation-fill-mode: both;
+        animation-timeline: --preuve;
+        animation-range: entry 10% cover 35%;
+      }
+
+      .preuve-puce {
+        animation-name: accueil-tampon;
+        animation-duration: auto;
+        animation-timing-function: var(--sortie);
+        animation-fill-mode: both;
+        animation-timeline: --preuve;
+        animation-range: entry 45% cover 40%;
+      }
+
+      /*
+       * L'ISOLOIR. Le bloc s'ouvre jusqu'aux bords de l'écran ; les rideaux du
+       * dessin, écartés à l'arrivée, se ferment pendant qu'on défile.
+       */
+      .isoloir-cadre {
+        animation-name: accueil-isoloir;
+        animation-duration: auto;
+        animation-timing-function: linear;
+        animation-fill-mode: both;
+        animation-timeline: view();
+        animation-range: entry 20% cover 45%;
+      }
+
+      /*
+       * Les rideaux suivent le DESSIN, pas le bloc : sur téléphone, le bloc
+       * fait deux écrans de haut, et le dessin, en tête, était déjà sorti
+       * quand le bloc atteignait le milieu. Fermés quand le dessin y arrive.
+       */
+      .isoloir-dessin {
+        view-timeline-name: --dessin;
+      }
+
+      .isoloir-rideau {
+        animation-name: accueil-rideau-isoloir;
+        animation-duration: auto;
+        animation-timing-function: var(--sortie);
+        animation-fill-mode: both;
+        animation-timeline: --dessin;
+        animation-range: entry 40% cover 50%;
       }
 
       @keyframes accueil-photo {
@@ -2034,6 +2387,62 @@ const articlesLd = {
         40%,
         60% {
           opacity: 1;
+        }
+      }
+
+      @keyframes accueil-rideau-photo {
+        from {
+          transform: scaleX(1);
+        }
+
+        to {
+          transform: scaleX(0);
+        }
+      }
+
+      @keyframes accueil-filet {
+        from {
+          transform: scaleX(0);
+        }
+
+        to {
+          transform: none;
+        }
+      }
+
+      @keyframes accueil-tampon {
+        from {
+          opacity: 0;
+          transform: translateY(-1.5rem) rotate(-24deg) scale(1.6);
+        }
+
+        60% {
+          opacity: 1;
+        }
+
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+
+      @keyframes accueil-isoloir {
+        from {
+          clip-path: inset(0 var(--retrait) round var(--rayon-carte-l));
+        }
+
+        to {
+          clip-path: inset(0 0 round 0);
+        }
+      }
+
+      @keyframes accueil-rideau-isoloir {
+        from {
+          transform: scaleX(0.16);
+        }
+
+        to {
+          transform: none;
         }
       }
 

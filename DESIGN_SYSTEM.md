@@ -3,9 +3,11 @@
 Direction **« Clair »**, arrêtée le 22 septembre 2026 après le rejet de quatre directions
 successives rendues sur du contenu réel à 375 px et à 1280 px.
 
-Ce document est la référence. `src/styles/base.css` l'implémente, il ne le définit pas. **Une
-valeur qui apparaît dans le CSS sans exister ici est une décision prise en douce.** Pour changer
-le système, on change ce fichier d'abord.
+Ce document décrit l'état **réel** du système. `src/styles/base.css` et les styles scopés des pages
+l'implémentent. Depuis le 23 septembre 2026, sur décision de l'éditeur, on ne passe plus par ce
+fichier avant de coder : une demande d'interface s'implémente dans le style en place, se vérifie
+(contrastes, 375 et 1280 px, clavier), **puis** s'écrit ici. Une valeur présente dans le CSS mais
+absente d'ici est donc une documentation en retard, à rattraper dans le même lot.
 
 Le brief d'origine reste `docs/BRIEF-DESIGN.md`. **Sa section 9 ne survit plus intégralement à ce
 document** : voir la section 8, qui dit lesquels de ses refus ont été levés, par qui et pourquoi.
@@ -36,7 +38,11 @@ voile sombre, refusée pour le fond noir et la longueur sur téléphone. « Clai
 | Cibles tactiles sous 44 px          | 11        | 0                  |
 
 Le 24 septembre 2026, avant la refonte de l'accueil, la hauteur était remontée à 6 358 px. Elle
-est redescendue à ~5 300 px, avec six cartes illustrées au lieu de cinq.
+est redescendue à ~5 300 px, avec six cartes illustrées au lieu de cinq. Le 27 septembre 2026,
+la vitrine des thèmes et des candidats, puis la refonte du bas de page (preuves agrandies, finale
+« L'isoloir »), l'ont portée à 7 557 px, puis à 7 278 px une fois le dessin de l'isoloir
+retiré sur téléphone (mesuré avec « réduire les
+animations », donc sans la piste de la scène de l'urne).
 
 ---
 
@@ -558,8 +564,8 @@ sommaire reste une liste de liens d'ancre** : contenu, ordre, titres, ancres et 
 `.section-tete` `.section-chapo` `.revele`, les cinq teintes `.t-*`, plus les balises de contenu.
 
 Ce qui n'appartient qu'à l'accueil — accroche, décompte, manifeste, démo, cartes, preuves,
-promesse, appel final — vit dans le style scopé de `src/pages/index.astro` depuis le
-24 septembre 2026. La pastille de crédit posée sur la photo d'accroche a été retirée : le crédit
+isoloir final — vit dans le style scopé de `src/pages/index.astro` depuis le 24 septembre 2026 ;
+la vitrine vit dans `src/components/accueil/`. La pastille de crédit posée sur la photo d'accroche a été retirée : le crédit
 figure sur `/credits-images`, lié depuis le pied de chaque page.
 
 ### Cartes « Comprendre » de l'accueil (24 septembre 2026)
@@ -584,16 +590,107 @@ points. Grille 2 puis 3 colonnes au-delà de 46 et 66 rem, immobile. L'image est
 
 Les preuves de confiance passent de quatre à trois (l'éditeur n'est plus mis en avant) et
 suivent la règle « le trait, pas la boîte » : un filet au-dessus, une icône Phosphor à la place
-du numéro.
+du numéro. Refaites le 27 septembre 2026 : voir « Le bas de l'accueil » plus bas.
 
-La promesse d'anonymat n'a plus d'icône (posée au-dessus du titre, elle coûtait une ligne pour
-un pictogramme) ; sur grand écran, titre et texte côte à côte.
+### Vitrine de l'accueil : « Rideaux » (27 septembre 2026)
+
+Deux sections entre « Comment ça marche » et « Comprendre avant de comparer », dans
+`src/components/accueil/`. Le constat de départ : `/themes` et `/candidats` étaient devenues les
+pages les plus visuelles du site, mais l'accueil n'y menait que par deux liens texte. Une première
+version en tuiles et mosaïque statique a été jugée « trop linéaire, pas assez originale ».
+L'éditeur a choisi, parmi trois directions (rideaux, défilé horizontal épinglé, pile de cartes),
+celle qui reprend le motif du logo et du menu.
+
+**`VitrineThemes` — « Comparez sans faire le test ».** Les six thèmes du test forment une table
+en texte géant (`clamp(1.75rem, 1rem + 3.2vw, 3.5rem)`) entre des filets, chaque nom précédé de
+son pictogramme `fill` à la teinte du thème. La numérotation 01 à 06 des premiers essais a été
+retirée à la demande de l'éditeur : le pictogramme suffit. Sur téléphone, pictogramme et flèche se
+calent sur la première ligne du nom ; à partir de 64 rem, ils se centrent sur la ligne entière.
+
+- **Survol ou focus** : deux demi-rideaux à la teinte du thème se ferment derrière la ligne depuis
+  ses bords. Ce sont des formes vides en `scaleX`, 240 ms, `--sortie`, les mêmes que le menu. Le
+  pictogramme bascule (`rotate(-10deg) scale(1.15)`, une forme sans texte), et les quatre
+  intitulés courts apparaissent dans une colonne à droite (à partir de 64 rem). La flèche prend la
+  teinte et avance. Les autres lignes passent à l'encre faible, un projecteur entre deux teintes
+  qui passent AA.
+- **Sur écran tactile** (`hover: none`), c'est le **défilement** qui ferme le rideau : la ligne qui
+  passe au milieu de l'écran s'habille puis se rouvre. La chronologie est `view-timeline` par
+  ligne, avec des rampes courtes (18 % / 82 %) pour ne pas s'arrêter sur un rideau à demi tiré.
+  Au téléphone, les questions restent **toujours visibles**, une par ligne : essayées masquées
+  rideau ouvert puis coulées en phrase, l'éditeur a préféré les lire sans attendre.
+- **Arrivée** : les lignes glissent de ±12vw depuis des bords alternés, par `translate`, qui
+  s'ajoute au `transform` des rideaux sans l'écraser.
+- Un seul lien par thème, celui du nom en `h3`, étendu à la ligne par un `::after`. Au clavier, le
+  même état, instantané.
+
+**`VitrineCandidats` — « Ou partez des candidats ».** La mosaïque des visages en lice, dans
+l'ordre de `/candidats` : six par rangée à 375 px (51 px, cinq rangées), dix à partir de 40 rem,
+quatorze à partir de 64 rem. Sept par rangée donnaient des visages de 44 px, jugés trop petits
+sous le doigt.
+
+- **Elle se range au défilement** : chaque portrait part d'un décalage (translation et rotation)
+  tiré de trois motifs `nth-child` de périodes 5, 4 et 3, soit soixante combinaisons, sans script
+  ni `style=""`. Tous suivent la chronologie de la grille (`--mosaique`) et sont en place quand
+  elle atteint le milieu de l'écran. **C'est le portrait qui voyage, jamais le lien** : éparpillés,
+  les liens se chevauchaient, et Lighthouse les comptait comme des cibles masquées (accessibilité
+  tombée à 96).
+- **Un lien par visage**, vers sa fiche : vingt-huit liens internes, choix de l'éditeur malgré
+  vingt-huit arrêts de tabulation.
+- **Survol ou focus** : le visage monte et grandit (`scale(1.1)` en transition, qui se redessine
+  net au repos). Une plaque sur l'aplat violet donne son nom et son parti (8,2:1 en clair, 7,8:1 en
+  sombre), les autres visages s'estompent à 0,35. La plaque est centrée, sauf dans les colonnes de
+  bord, où elle s'aligne pour ne pas sortir de l'écran. Son texte est dans le HTML servi et fait
+  le nom accessible du lien (« Nom Parti »).
+- Neutralité : même carré, même plaque pour tous. L'éparpillement dépend de la place, pas de la
+  personne, et tout le monde arrive en même temps.
+
+Trois garde-fous, comme le reste de l'accueil : `no-preference`, `@supports`, état par défaut en
+place ; les propriétés d'animation sont détaillées ; le texte ne perd jamais d'opacité au
+défilement. Aucun octet de JavaScript. Mesures : `capturer.mjs --strict` sans aucun couple sous
+son seuil ; Lighthouse mobile sur `/` : 100 / 100 / 100 / 100, LCP 1,9 s (photo d'accroche), CLS
+0,001 (le décompte, pas la vitrine) ; aucun défilement horizontal à 375 px.
+
+### Le bas de l'accueil : rideaux, tampons, isoloir (27 septembre 2026)
+
+La même énergie que la vitrine, étendue au bas de l'accueil à la demande de l'éditeur. Le haut
+(rideau de l'accroche, décompte, manifeste, urne) avait déjà son mouvement ; le bas était statique.
+
+- **Comprendre**, sur grand écran : un **rideau** à la teinte vive de la rubrique couvre chaque
+  photo et s'ouvre vers les bords quand la carte arrive, le geste de l'accroche rejoué à chaque
+  article. Ce sont des pseudo-éléments vides en `scaleX`, et chaque photo suit sa propre
+  chronologie (`--photo`), d'où la cascade par colonne. **Pas sur téléphone** : le carrousel y
+  porte déjà le mouvement, et le rideau n'ajoutait rien (décision de l'éditeur). Par défaut,
+  rideaux ouverts.
+- **Preuves** : sur grand écran, deux colonnes, le titre **épinglé** à gauche (`sticky`) pendant
+  que les trois preuves défilent à droite. Chaque preuve **s'imprime** : son filet se trace de
+  gauche à droite (`scaleX`), puis son icône tombe dans son disque **comme un tampon** (de haut,
+  de biais, de 1,6 à 1). Titres agrandis, disques de 4,5 rem, flèche Phosphor séparée du texte des
+  liens. Au survol, l'icône bascule et la flèche avance.
+- **L'isoloir, en finale** : la promesse d'anonymat et l'appel au test ne font plus qu'un bloc, sur
+  l'aplat violet. Au défilement, le bloc s'ouvre jusqu'aux bords de l'écran (`clip-path`, le geste
+  de la photo d'accroche). Sur grand écran (62 rem et plus), un isoloir dessiné en SVG (bâti en
+  trait, rideaux translucides à plis en `non-scaling-stroke`) **ferme ses rideaux** quand il
+  atteint le milieu de l'écran : on y est seul, ses réponses aussi. Les rideaux suivent le dessin
+  (`--dessin`), pas le bloc. **Pas de dessin sur téléphone** : empilé au-dessus du texte, il
+  repoussait la promesse d'un écran, et le bloc qui s'élargit suffit (décision de l'éditeur). La
+  promesse garde mot pour mot la formulation publique de `CLAUDE.md`. Le texte est en
+  `--couleur-sur-aplat` (8,2:1 en clair, 7,8:1 en sombre). Le bouton est **inversé** sur l'aplat
+  (fond `--couleur-sur-aplat`, texte `--couleur-aplat`) et l'anneau de focus prend la teinte du
+  texte : violet sur violet, il ne se verrait pas. Un filet mêlé `in srgb` sépare la promesse de
+  l'appel. Sans animation : bloc à la largeur de la page, arrondi, rideaux fermés.
+- **« Aller plus loin »** : des pilules qui tirent leurs deux demi-rideaux au survol, comme les
+  liens du menu.
+
+Mesures, la page entière refaite : `capturer.mjs --strict` sans aucun couple sous son seuil ;
+Lighthouse mobile sur `/` : 99 à 100 / 100 / 100 / 100 selon le passage, LCP 1,9 à 2,0 s ; aucun
+défilement horizontal ; aucun JavaScript ajouté.
 
 ### Boutons
 
 **`.action` est le seul bouton plein du site, et un écran n'en porte qu'un** — hors le rappel de
 l'en-tête et l'appel final de l'accueil, qui sont le même appel répété, pas deux appels
-concurrents. Il dit ce qui se passe (« Commencer le test »), jamais « Valider », et ne porte pas
+concurrents. Sur l'aplat de l'isoloir final, il s'inverse (fond de la teinte du texte), sans
+devenir un second bouton. Il dit ce qui se passe (« Commencer le test »), jamais « Valider », et ne porte pas
 de flèche collée au texte.
 
 `.action--grand` passe pleine largeur sous 30 rem : sur téléphone, la cible doit être évidente.
@@ -787,6 +884,16 @@ de thème. Les affirmations sans position portent la pastille « ? » en pointil
 
 **Portrait** — `src/components/candidats/Portrait.astro` est désormais le seul balisage de
 portrait des pages candidats : une taille par classe (64, 120), puisque la CSP refuse `style=""`.
+
+**Vignettes (27 septembre 2026).** Chaque visage existe en deux fichiers, et c'est la **taille**
+qui choisit, jamais le candidat. Le portrait de 330 px sert la carte de `/candidats` et la fiche
+(120). Une vignette WebP de 192 × 192 sert tout ce qui est petit : 32, 40 et 64 px sur les pages de
+thème, et la taille `mosaique` de l'accueil. Elle est cadrée comme le CSS (`cover`, haut centré).
+Les vignettes sont dérivées des portraits, sans réseau, par `scripts/generer-vignettes.mjs`, que
+`scripts/recuperer-medias.mjs` rappelle après chaque relevé. `src/lib/vignettes.ts` arrête le
+build si l'une manque. Une page de thème chargeait 26 fichiers de 330 px (environ 1 Mo) pour des
+visages de 40 px ; elle charge 147 ko. Le crédit reste celui du portrait : c'est le même fichier,
+réduit.
 
 ## 11 ter. Thèmes (26 septembre 2026)
 
