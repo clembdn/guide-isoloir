@@ -68,7 +68,11 @@ const ROUTES = [
   { chemin: "/candidats", nom: "Candidats" },
   /* La fiche la plus fournie : citations, reprises, avertissement d'ancienneté. */
   { chemin: "/candidats/marine-le-pen", nom: "Fiche candidat" },
+  { chemin: "/themes", nom: "Thèmes" },
+  /* Pastilles vertes et rouges, colonnes teintées, tableau récapitulatif. */
   { chemin: "/themes/travail-et-retraites", nom: "Thème" },
+  /* Thème hors test : propositions seules, sans pour ni contre. */
+  { chemin: "/themes/economie-et-salaires", nom: "Thème hors test" },
   { chemin: "/donnees", nom: "Données" },
   /* Article à schémas : cartes, cadre tireté, frise hachurée. */
   { chemin: "/comprendre/ou-et-comment-voter", nom: "Article à schémas" },

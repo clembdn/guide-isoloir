@@ -1,0 +1,121 @@
+---
+/*
+ * Ce que les candidats proposent sur un domaine — le second registre, hors
+ * score.
+ *
+ * DIT HORS SCORE, À L'ÉCRAN. Une proposition décrit un programme ; elle ne
+ * répond à aucune affirmation et n'entre dans aucun calcul. Le lecteur doit
+ * le lire avant de comparer deux listes de longueurs différentes : le nombre
+ * de propositions relevées dépend de ce que chaque campagne a publié, pas de
+ * la qualité d'un programme.
+ *
+ * Seul l'intitulé est repris, avec sa nature et sa date. Le verbatim et la
+ * source vivent sur la fiche, où ce composant renvoie par l'ancre du domaine.
+ * Une proposition d'un document de parti reste attribuée au parti.
+ */
+import Portrait from "../candidats/Portrait.astro";
+import { formatDateFr } from "../../lib/date";
+import type { PropositionsCandidat } from "../../lib/fiches";
+
+type Props = {
+  parCandidat: PropositionsCandidat[];
+  domaine: string;
+};
+
+const { parCandidat, domaine } = Astro.props;
+---
+
+<ul class="propositions">
+  {
+    parCandidat.map((entree) => (
+      <li class="candidat">
+        <a class="identite" href={`/candidats/${entree.slug}#domaine-${domaine}`}>
+          <Portrait nom={entree.nom} chemin={entree.portrait} taille={40} />
+          <span class="nom">{entree.nom}</span>
+        </a>
+        <ul class="mesures">
+          {entree.propositions.map((proposition) => (
+            <li>
+              <span class="intitule">{proposition.intitule}</span>
+              <span class="origine">
+                {proposition.natureLibelle}
+                {proposition.auteur && `, ${proposition.auteur}`}
+                {", "}
+                <time datetime={proposition.date}>{formatDateFr(proposition.date)}</time>
+              </span>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .propositions {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--pas-4) var(--pas-5);
+  }
+
+  @media (min-width: 56rem) {
+    .propositions {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  .candidat {
+    margin: 0;
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .identite {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-2);
+    min-height: 44px;
+    color: var(--couleur-encre);
+    text-decoration: none;
+    font-weight: 700;
+  }
+
+  .identite :global(.portrait) {
+    border-radius: 10px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .identite:hover .nom {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  .mesures {
+    list-style: none;
+    padding: 0;
+    margin: var(--pas-2) 0 0;
+    display: grid;
+    gap: var(--pas-2);
+  }
+
+  .mesures li {
+    display: grid;
+    gap: 0.125rem;
+    margin: 0;
+    padding-left: var(--pas-2);
+    border-left: 2px solid var(--couleur-trait);
+  }
+
+  .intitule {
+    font-weight: 600;
+    line-height: 1.35;
+  }
+
+  .origine {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+</style>

@@ -17,10 +17,11 @@ type Props = {
   nom: string;
   chemin: string | null;
   /**
-   * Côté du carré, en pixels. Deux tailles seulement : une classe par taille,
-   * parce que la CSP refuse tout `style=""` en ligne.
+   * Côté du carré, en pixels. Une classe par taille, parce que la CSP refuse
+   * tout `style=""` en ligne. 32 et 40 servent aux pages de thème : le tableau
+   * récapitulatif et les visages des candidats sans position connue.
    */
-  taille: 64 | 120;
+  taille: 32 | 40 | 64 | 120;
   /** La fiche charge son portrait tout de suite ; la liste, au défilement. */
   differe?: boolean;
 };
@@ -59,6 +60,16 @@ const { nom, chemin, taille, differe = true } = Astro.props;
     background: var(--couleur-trait);
   }
 
+  .portrait-32 {
+    width: 32px;
+    height: 32px;
+  }
+
+  .portrait-40 {
+    width: 40px;
+    height: 40px;
+  }
+
   .portrait-120 {
     width: 96px;
     height: 96px;
@@ -85,5 +96,10 @@ const { nom, chemin, taille, differe = true } = Astro.props;
 
   .portrait-absent.portrait-120 {
     font-size: 1.5rem;
+  }
+
+  .portrait-absent.portrait-32,
+  .portrait-absent.portrait-40 {
+    font-size: 0.75rem;
   }
 </style>

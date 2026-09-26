@@ -1,0 +1,367 @@
+---
+/*
+ * Une affirmation du test et qui est de quel côté.
+ *
+ * LECTURE EN TROIS SECONDES, dans cet ordre : la question (titre), la réponse
+ * en une phrase (« En bref »), puis le tableau — Pour et Contre côte à côte,
+ * dès 375 px, pour que la comparaison se fasse d'un coup d'œil. La définition
+ * sourcée est repliée dans un `<details>` natif : présente dans le HTML servi,
+ * lisible par un robot qui n'exécute rien, dépliable au clavier.
+ *
+ * LES CANDIDATS SANS POSITION CONNUE SONT MONTRÉS, PAS OMIS : les taire
+ * laisserait croire qu'ils ne sont pas en lice. Ils sont souvent les plus
+ * nombreux tant que les programmes ne sont pas publiés ; leurs visages sont
+ * donc plus petits et sans légende, pour que l'absence reste visible sans
+ * occuper plus de place que ce qu'on sait. Leurs noms sont dans le nom
+ * accessible de chaque lien, et en toutes lettres dans le tableau
+ * récapitulatif de la page.
+ *
+ * La teinte du thème n'entre pas ici : un fond sarcelle à côté du vert de
+ * « Pour » se lirait comme un sens.
+ */
+import Icone from "../Icone.astro";
+import Portrait from "../candidats/Portrait.astro";
+import CandidatPosition from "./CandidatPosition.astro";
+import MarquePosition from "./MarquePosition.astro";
+import { LIBELLES_SENS, type Sens } from "../../lib/echelle";
+import type { AffirmationTheme, CandidatCite } from "../../lib/fiches";
+
+type Props = {
+  affirmation: AffirmationTheme;
+};
+
+const { affirmation } = Astro.props;
+const id = affirmation.question.id;
+
+const colonnes: { sens: Sens; cites: CandidatCite[] }[] = [
+  { sens: "pour", cites: affirmation.pour },
+  { sens: "contre", cites: affirmation.contre },
+];
+---
+
+<section class="plateau" id={id} aria-labelledby={`${id}-titre`}>
+  <h2 id={`${id}-titre`}>
+    {affirmation.court} : qui est pour, qui est contre ?
+  </h2>
+  <p class="affirmation">
+    <span class="visuellement-masque">L'affirmation du test :</span>
+    « {affirmation.question.texte} »
+  </p>
+
+  <details class="definition">
+    <summary>
+      <Icone nom="caret-right" graisse="bold" class="chevron" />
+      Ce que ça veut dire
+    </summary>
+    <p>
+      {affirmation.question.infobulle} Source :{" "}
+      <a href={affirmation.definitionSource.url} rel="noreferrer">
+        {affirmation.definitionSource.titre}
+      </a>, {affirmation.definitionSource.editeur}.
+    </p>
+  </details>
+
+  <div class="colonnes">
+    {
+      colonnes.map(({ sens, cites }) => (
+        <div class:list={["colonne", `colonne--${sens}`]}>
+          <h3 class="colonne-tete">
+            <MarquePosition sens={sens} taille="grande" />
+            <span class="colonne-libelle">{LIBELLES_SENS[sens]}</span>
+            <span class="colonne-compte">{cites.length}</span>
+          </h3>
+          {cites.length === 0 ? (
+            <p class="vide">Aucun candidat</p>
+          ) : (
+            <ul class="grille">
+              {cites.map((cite) => (
+                <CandidatPosition cite={cite} sens={sens} questionId={id} />
+              ))}
+            </ul>
+          )}
+        </div>
+      ))
+    }
+  </div>
+
+  {
+    affirmation.neutre.length > 0 && (
+      <div class="colonne colonne--neutre">
+        <h3 class="colonne-tete">
+          <MarquePosition sens="neutre" taille="grande" />
+          <span class="colonne-libelle">{LIBELLES_SENS.neutre}</span>
+          <span class="colonne-compte">{affirmation.neutre.length}</span>
+        </h3>
+        <ul class="grille">
+          {affirmation.neutre.map((cite) => (
+            <CandidatPosition cite={cite} sens="neutre" questionId={id} />
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  {
+    affirmation.inconnus.length > 0 && (
+      <div class="inconnus">
+        <h3 class="inconnus-tete">
+          <MarquePosition sens="inconnu" />
+          {LIBELLES_SENS.inconnu}
+          <span class="inconnus-compte">{affirmation.inconnus.length}</span>
+        </h3>
+        <ul class="visages">
+          {affirmation.inconnus.map((cite) => (
+            <li>
+              <a href={`/candidats/${cite.slug}#${id}`} title={cite.nom}>
+                <Portrait nom={cite.nom} chemin={cite.portrait} taille={40} />
+                <span class="visuellement-masque">{cite.nom}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+
+  <p class="en-bref"><strong>En bref.</strong> {affirmation.enBref}</p>
+</section>
+
+<style>
+  .plateau {
+    position: relative;
+    background: var(--couleur-surface);
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-carte-l);
+    box-shadow: var(--ombre-1);
+    padding: var(--pas-4) var(--pas-2) var(--pas-3);
+    scroll-margin-top: 5rem;
+  }
+
+  /*
+   * À 375 px, le plateau gagne la moitié de la gouttière de chaque côté :
+   * 20 px de plus pour les deux colonnes, c'est ce qui fait tenir « Bouamrane »
+   * ou « Glucksmann » sur une ligne sous un portrait.
+   */
+  @media (max-width: 29.99rem) {
+    .plateau {
+      margin-inline: calc(var(--gouttiere) / -2);
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .plateau {
+      padding: var(--pas-5) var(--pas-5) var(--pas-4);
+    }
+  }
+
+  h2,
+  .affirmation,
+  .definition,
+  .en-bref,
+  .inconnus {
+    margin-inline: var(--pas-1);
+  }
+
+  @media (min-width: 48rem) {
+    h2,
+    .affirmation,
+    .definition,
+    .en-bref,
+    .inconnus {
+      margin-inline: 0;
+    }
+  }
+
+  h2 {
+    margin-block: 0;
+    font-size: clamp(1.375rem, 1.1rem + 1.2vw, 2rem);
+    line-height: 1.15;
+    text-wrap: balance;
+  }
+
+  .affirmation {
+    margin-block: var(--pas-2) 0;
+    font-size: var(--t-corps);
+    max-width: 44rem;
+  }
+
+  .definition {
+    margin-top: var(--pas-2);
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .definition summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--couleur-signature);
+    list-style: none;
+  }
+
+  .definition summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .definition :global(.chevron) {
+    width: 0.9rem;
+    height: 0.9rem;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .definition[open] :global(.chevron) {
+    transform: rotate(90deg);
+  }
+
+  .definition {
+    margin-bottom: var(--pas-3);
+  }
+
+  .definition p {
+    margin: 0 0 var(--pas-2);
+    max-width: 44rem;
+  }
+
+  .en-bref {
+    margin-block: var(--pas-3) 0;
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+    color: var(--couleur-encre-faible);
+    font-size: var(--t-petit);
+    max-width: 48rem;
+  }
+
+  /* Pour et Contre côte à côte à toutes les largeurs : c'est la comparaison. */
+  .colonnes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+
+  .colonne {
+    border-radius: var(--rayon-carte);
+    padding: var(--pas-2) 0.25rem;
+    min-width: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .colonnes {
+      gap: var(--pas-3);
+    }
+
+    .colonne {
+      padding: var(--pas-3);
+    }
+  }
+
+  /*
+   * `in srgb` et non `in oklab` : Chromium sérialise un mélange oklab en
+   * `oklab(…)`, que scripts/capturer.mjs ne sait pas lire — il retombait sur un
+   * fond blanc et annonçait 1,2:1 en mode sombre. Mesure fausse, donc
+   * mélange changé ; à 9 %, les deux espaces donnent la même teinte à l'œil.
+   */
+  .colonne--pour {
+    background: color-mix(in srgb, var(--pour) 9%, var(--couleur-surface));
+  }
+
+  .colonne--contre {
+    background: color-mix(in srgb, var(--contre) 8%, var(--couleur-surface));
+  }
+
+  .colonne--neutre {
+    margin-top: var(--pas-2);
+    background: var(--couleur-surface-2);
+  }
+
+  .colonne-tete {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-2);
+    padding-inline: var(--pas-1);
+    font-size: var(--t-corps);
+  }
+
+  .colonne-libelle {
+    flex: 1;
+  }
+
+  .colonne-compte {
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  .grille {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(4rem, 1fr));
+    gap: var(--pas-2) 0.25rem;
+  }
+
+  @media (min-width: 48rem) {
+    .grille {
+      grid-template-columns: repeat(auto-fill, minmax(5.75rem, 1fr));
+      gap: var(--pas-3) var(--pas-1);
+    }
+  }
+
+  .vide {
+    margin: 0;
+    padding: var(--pas-2) var(--pas-1);
+    color: var(--couleur-encre-faible);
+    font-size: var(--t-petit);
+  }
+
+  .inconnus {
+    margin-block-start: var(--pas-3);
+    padding-top: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .inconnus-tete {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-2);
+    font-size: var(--t-petit);
+    font-weight: 600;
+    color: var(--couleur-encre-faible);
+  }
+
+  .inconnus-compte {
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--couleur-encre);
+  }
+
+  .visages {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .visages li {
+    margin: 0;
+  }
+
+  /* 44 px de cible pour un visage de 40 : la marge compte dans la zone tactile. */
+  .visages a {
+    display: block;
+    padding: 2px;
+    border-radius: 12px;
+  }
+
+  .visages :global(.portrait) {
+    border-radius: 10px;
+  }
+</style>

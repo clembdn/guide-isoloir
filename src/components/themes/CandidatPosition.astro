@@ -1,0 +1,162 @@
+---
+/*
+ * Un candidat dans une colonne Pour, Contre ou Ni pour ni contre : son visage,
+ * sa pastille, son nom, et les mentions qui changent la lecture du cran.
+ *
+ * MÊME TRAITEMENT POUR TOUS : même cadre, même taille, même pastille dans une
+ * même colonne. Le lien mène à la position détaillée et sourcée sur la fiche,
+ * par l'ancre de l'affirmation ; la citation n'est jamais répétée ici.
+ *
+ * Le nom accessible dit tout, mentions développées comprises (« plutôt pour,
+ * position reprise : Rassemblement national, citation partielle ») : sous un
+ * portrait de 64 px, l'écran n'a place que pour des mots courts, mais un
+ * lecteur d'écran n'a pas à deviner ce que « Reprise » abrège.
+ */
+import Portrait from "../candidats/Portrait.astro";
+import MarquePosition from "./MarquePosition.astro";
+import type { CandidatCite } from "../../lib/fiches";
+import type { Sens } from "../../lib/echelle";
+
+type Props = {
+  cite: CandidatCite;
+  sens: Sens;
+  questionId: string;
+};
+
+const { cite, sens, questionId } = Astro.props;
+
+const MENTION_ADEQUATION: Record<string, { court: string; long: string }> = {
+  partielle: { court: "Partielle", long: "citation partielle" },
+  deduite: { court: "Déduite", long: "valeur déduite" },
+};
+const adequation = cite.adequation ? MENTION_ADEQUATION[cite.adequation] : undefined;
+
+const courtes = [cite.nuance, cite.heriteDe ? "Reprise" : null, adequation?.court ?? null].filter(
+  (mention) => mention !== null,
+);
+
+const SENS_LONG: Record<Sens, string> = {
+  pour: "pour",
+  contre: "contre",
+  neutre: "ni pour ni contre",
+};
+const longue = [
+  cite.nuance ? `${cite.nuance.toLowerCase()} ${SENS_LONG[sens]}` : SENS_LONG[sens],
+  cite.heriteDe ? `position reprise : ${cite.heriteDe}` : null,
+  adequation?.long ?? null,
+]
+  .filter((mention) => mention !== null)
+  .join(", ");
+---
+
+<li class="candidat">
+  <a href={`/candidats/${cite.slug}#${questionId}`}>
+    <span class="visage">
+      <Portrait nom={cite.nom} chemin={cite.portrait} taille={64} />
+      <MarquePosition sens={sens} taille="petite" class="visage-marque" />
+    </span>
+    <span class="nom">{cite.nom}</span>
+    <span class="visuellement-masque">, {longue}</span>
+    {
+      courtes.length > 0 && (
+        <span class="mentions" aria-hidden="true">
+          {courtes.join(", ")}
+        </span>
+      )
+    }
+  </a>
+</li>
+
+<style>
+  .candidat {
+    margin: 0;
+    min-width: 0;
+  }
+
+  a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+    padding: var(--pas-1) 0.125rem;
+    border-radius: var(--rayon-carte);
+    color: var(--couleur-encre);
+    text-decoration: none;
+    text-align: center;
+    min-height: 44px;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      transform: translateY(-2px);
+    }
+
+    a:hover .nom {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  a:active {
+    transform: scale(0.97);
+  }
+
+  .visage {
+    position: relative;
+    display: block;
+  }
+
+  /*
+   * Filet du portrait tiré de l'encre, et non de `--couleur-trait` : sur le
+   * fond vert ou rouge d'une colonne, le trait tombait à 1,4:1, sous le
+   * plancher de 1,5:1 mesuré par scripts/capturer.mjs. Même filet pour tous.
+   */
+  .visage :global(.portrait) {
+    border-radius: 14px;
+    border-color: color-mix(in srgb, var(--couleur-encre) 28%, transparent);
+  }
+
+  /* À 375 px, deux visages par colonne : 56 px, pas 64. */
+  @media (max-width: 29.99rem) {
+    .visage :global(.portrait) {
+      width: 56px;
+      height: 56px;
+    }
+  }
+
+  /* La pastille mord sur le coin du portrait : on lit le sens sans quitter le visage. */
+  .visage :global(.visage-marque) {
+    position: absolute;
+    right: -0.4rem;
+    bottom: -0.4rem;
+    box-shadow: 0 0 0 2px var(--couleur-surface);
+  }
+
+  /*
+   * Ni `overflow-wrap: anywhere`, qui coupait « Mélencho/n », ni la césure
+   * automatique, qui coupait « Da-vid » : un nom se coupe à ses espaces et à
+   * ses traits d'union. `break-word` ne tranche un mot que s'il ne tient pas
+   * seul sur sa ligne — le plateau est dimensionné pour que ça n'arrive pas.
+   */
+  .nom {
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+    max-width: 100%;
+  }
+
+  @media (min-width: 30rem) {
+    .nom {
+      font-size: 0.8125rem;
+    }
+  }
+
+  .mentions {
+    font-size: 0.75rem;
+    line-height: 1.2;
+    color: var(--couleur-encre-faible);
+  }
+</style>

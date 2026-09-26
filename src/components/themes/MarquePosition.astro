@@ -1,0 +1,83 @@
+---
+/*
+ * Pastille de position : coche, croix, tiret ou point d'interrogation.
+ *
+ * LA FORME PORTE LE SENS, LA COULEUR LE CONFIRME. Vert et rouge sont la levée
+ * bornée de la règle 1.1 du design system (26 septembre 2026) : ils marquent le
+ * sens d'une position, jamais un candidat, et ne sont jamais seuls. Un lecteur
+ * daltonien lit la coche et la croix ; un lecteur d'écran lit le mot écrit à
+ * côté, puisque la pastille est décorative (`aria-hidden`).
+ *
+ * Glyphe en graisse `bold` sur un disque plein : c'est la forme qu'on
+ * reconnaît à 16 px sur un téléphone en plein jour, là où un contour fin se
+ * perd.
+ */
+import Icone from "../Icone.astro";
+import type { Sens } from "../../lib/echelle";
+
+type Props = {
+  sens: Sens | "inconnu";
+  taille?: "petite" | "moyenne" | "grande";
+  class?: string;
+};
+
+const { sens, taille = "moyenne", class: classe } = Astro.props;
+
+const GLYPHE: Record<Props["sens"], string> = {
+  pour: "check",
+  contre: "x",
+  neutre: "minus",
+  inconnu: "question",
+};
+---
+
+<span class:list={["marque", `marque--${sens}`, `marque--${taille}`, classe]} aria-hidden="true">
+  <Icone nom={GLYPHE[sens]} graisse="bold" />
+</span>
+
+<style>
+  .marque {
+    display: inline-grid;
+    place-items: center;
+    flex: none;
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: 50%;
+    color: var(--sur-position);
+  }
+
+  .marque :global(.icone) {
+    width: 62%;
+    height: 62%;
+  }
+
+  .marque--petite {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .marque--grande {
+    width: 2.25rem;
+    height: 2.25rem;
+  }
+
+  .marque--pour {
+    background: var(--pour);
+  }
+
+  .marque--contre {
+    background: var(--contre);
+  }
+
+  /* Ni pour ni contre, et l'inconnu : aucune teinte, parce qu'aucun sens. */
+  .marque--neutre {
+    background: var(--couleur-encre-faible);
+    color: var(--couleur-surface);
+  }
+
+  .marque--inconnu {
+    background: var(--couleur-surface);
+    color: var(--couleur-encre-faible);
+    box-shadow: inset 0 0 0 1.5px var(--couleur-trait);
+  }
+</style>

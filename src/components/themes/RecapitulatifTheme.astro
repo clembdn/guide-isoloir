@@ -1,0 +1,225 @@
+---
+/*
+ * Tableau récapitulatif d'un thème : une ligne par candidat en lice, une
+ * colonne par affirmation.
+ *
+ * UN VRAI `<table>`, avec `caption` et en-têtes `scope`. C'est la forme qu'un
+ * lecteur d'écran parcourt cellule par cellule, et celle qu'un moteur ou un
+ * assistant lit sans deviner : chaque cellule porte son sens en toutes lettres,
+ * masqué à l'œil (« plutôt pour », « pas de position connue »), à côté d'une
+ * pastille qui le dit à l'œil.
+ *
+ * Ordre alphabétique des fiches, le même partout sur le site. Aucune ligne
+ * n'est triée par nombre de positions : ce serait mettre en tête les candidats
+ * les mieux couverts.
+ *
+ * À 375 px, les en-têtes se réduisent au numéro de l'affirmation — ils sont
+ * repris en toutes lettres dans le sommaire et au-dessus de chaque tableau de
+ * la page — et le tableau défile dans son conteneur, jamais la page.
+ */
+import Portrait from "../candidats/Portrait.astro";
+import MarquePosition from "./MarquePosition.astro";
+import { LIBELLES_SENS, sensDe } from "../../lib/echelle";
+import type { AffirmationTheme, CandidatCite } from "../../lib/fiches";
+
+type Props = {
+  nom: string;
+  /** Candidats en lice, dans l'ordre des fiches. */
+  candidats: { nom: string; slug: string; portrait: string | null }[];
+  affirmations: AffirmationTheme[];
+};
+
+const { nom, candidats, affirmations } = Astro.props;
+
+const parAffirmation = affirmations.map(
+  (affirmation) =>
+    new Map<string, CandidatCite>(
+      [
+        ...affirmation.pour,
+        ...affirmation.contre,
+        ...affirmation.neutre,
+        ...affirmation.inconnus,
+      ].map((cite) => [cite.slug, cite]),
+    ),
+);
+
+function libelle(cite: CandidatCite | undefined): string {
+  if (!cite || cite.valeur === null) return LIBELLES_SENS.inconnu;
+  const sens = LIBELLES_SENS[sensDe(cite.valeur)];
+  return cite.nuance ? `${cite.nuance} ${sens.toLowerCase()}` : sens;
+}
+---
+
+<div class="recap" tabindex="0" role="region" aria-labelledby="recapitulatif-titre">
+  <table>
+    <caption id="recapitulatif-titre">
+      {nom} : la position de chaque candidat, affirmation par affirmation
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Candidat</th>
+        {
+          affirmations.map((affirmation, index) => (
+            <th scope="col" class="colonne">
+              <a href={`#${affirmation.question.id}`}>
+                <span class="numero" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <span class="intitule">{affirmation.court}</span>
+              </a>
+            </th>
+          ))
+        }
+      </tr>
+    </thead>
+    <tbody>
+      {
+        candidats.map((candidat) => (
+          <tr>
+            <th scope="row">
+              <a href={`/candidats/${candidat.slug}`} class="candidat">
+                <Portrait nom={candidat.nom} chemin={candidat.portrait} taille={32} />
+                <span>{candidat.nom}</span>
+              </a>
+            </th>
+            {parAffirmation.map((index) => {
+              const cite = index.get(candidat.slug);
+              const sens = cite && cite.valeur !== null ? sensDe(cite.valeur) : "inconnu";
+              return (
+                <td>
+                  <MarquePosition sens={sens} taille="petite" />
+                  <span class="visuellement-masque">{libelle(cite)}</span>
+                </td>
+              );
+            })}
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .recap {
+    overflow-x: auto;
+    border-radius: var(--rayon-carte);
+  }
+
+  .recap:focus-visible {
+    outline-offset: 4px;
+  }
+
+  table {
+    margin: 0;
+    min-width: 18rem;
+  }
+
+  caption {
+    text-align: left;
+    font-weight: 700;
+    font-size: var(--t-h3);
+    padding-bottom: var(--pas-3);
+    text-wrap: balance;
+  }
+
+  th,
+  td {
+    vertical-align: middle;
+    padding: 0.45rem 0.25rem;
+  }
+
+  thead th {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--couleur-encre-faible);
+    vertical-align: bottom;
+  }
+
+  .colonne {
+    text-align: center;
+    width: 3rem;
+  }
+
+  .colonne a {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    color: inherit;
+    text-decoration: none;
+    min-height: 44px;
+    justify-content: flex-end;
+  }
+
+  .numero {
+    display: inline-grid;
+    place-items: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: var(--couleur-surface-2);
+    color: var(--couleur-signature);
+    font-weight: 700;
+    font-size: var(--t-petit);
+  }
+
+  /* L'intitulé reste dans l'arbre accessible à toutes les largeurs ; il ne s'affiche qu'avec la place. */
+  .intitule {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 48rem) {
+    .colonne {
+      width: 9rem;
+    }
+
+    .intitule {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+      text-wrap: balance;
+      line-height: 1.25;
+    }
+  }
+
+  td {
+    text-align: center;
+  }
+
+  tbody th {
+    font-weight: 600;
+  }
+
+  .candidat {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    color: var(--couleur-encre);
+    text-decoration: none;
+    min-height: 44px;
+    line-height: 1.2;
+  }
+
+  .candidat :global(.portrait) {
+    border-radius: 8px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .candidat:hover span {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    tbody tr:hover {
+      background: var(--couleur-surface-2);
+    }
+  }
+</style>

@@ -54,7 +54,15 @@ en n'ayant **qu'une** couleur. « Clair » en a six, et garantit la même chose 
 les barres partagent une seule teinte à opacité constante et ne diffèrent que par le rang et par
 la longueur. Jamais par l'intensité, jamais par la couleur.
 
-Les cinq teintes de rubrique ne servent qu'aux contenus **pédagogiques** de `/comprendre`, qui
+**Exception bornée, décidée le 26 septembre 2026 : Pour et Contre.** Sur les pages de thème, une
+position est marquée d'une coche sur disque vert (`--pour`) ou d'une croix sur disque rouge
+(`--contre`), parce que c'est le code qu'un primo-votant lit sans lire. Le cadre ne se négocie pas :
+la couleur dit un **sens**, jamais un candidat (même pastille pour tous dans une même colonne) ; elle
+n'est **jamais seule** (la forme ✓ / ✗ et le mot l'accompagnent toujours, la colonne aussi) ; le
+**texte reste à l'encre** ; et elle ne sort pas des pages de thème — `/resultat` garde sa teinte
+unique. La paire est validée au script de la skill `dataviz` pour la deutéranopie (voir §2).
+
+Les teintes de rubrique ne servent qu'aux contenus **pédagogiques** de `/comprendre`, qui
 expliquent comment on vote. Ce sont des repères de navigation, pas un jugement sur un acteur.
 
 **Bleu, rouge, rose, vert et orange restent exclus du site entier.** Ce sont les familles occupées
@@ -118,7 +126,7 @@ son seuil WCAG ou un filet sous 1,5:1. Ces tables sont sa sortie, pas une estima
 **L'inversion du texte d'action en mode sombre est voulue, pas un oubli.** Le violet s'éclaircit
 pour rester lisible sur fond sombre ; du blanc dessus ne passerait pas. Seul un texte sombre passe.
 
-### Les cinq teintes de rubrique
+### Les six teintes de rubrique
 
 Un **vif** pour l'étiquette, un **pastel** pour le fond de carte. Elles ne servent qu'à
 `/comprendre`. Contraste du vif sur son pastel, puis de l'encre sur ce même pastel.
@@ -130,9 +138,30 @@ Un **vif** pour l'étiquette, un **pastel** pour le fond de carte. Elles ne serv
 | Sarcelle | `#0d6d64`   | `#d8f2ee`      | 5,3:1        | 15,3:1         |
 | Cyan     | `#0e7490`   | `#dcf0f6`      | 4,6:1        | 15,3:1         |
 | Prune    | `#a21caf`   | `#fae4f7`      | 5,3:1        | 15,0:1         |
+| Ardoise  | `#475569`   | `#e9ecf2`      | 6,4:1        | 15,2:1         |
 
 En sombre, les pastels deviennent des fonds profonds (`#271f45`, `#1f2245`, `#10302e`, `#122934`,
-`#33163a`) et les vifs s'éclaircissent (`#c4b5fd`, `#a5b4fc`, `#5eead4`, `#7dd3fc`, `#f0abfc`).
+`#33163a`) et les vifs s'éclaircissent (`#c4b5fd`, `#a5b4fc`, `#5eead4`, `#7dd3fc`, `#f0abfc`). L'ardoise, ajoutée le 26 septembre 2026 pour que les six thèmes du test aient chacun
+leur teinte, passe à `#cbd5e1` sur `#1e2430`.
+
+Depuis le 26 septembre 2026, ces teintes habillent aussi les **thèmes** (tuiles de `/themes`,
+bandeau d'en-tête de chaque page de thème). Un thème n'est pas un acteur : la teinte repère un
+sujet. Elle s'arrête au bord du tableau des positions, pour qu'un fond sarcelle ne se lise jamais
+comme le vert de « Pour ».
+
+### Pour et Contre
+
+| Rôle   | Clair     | Sombre    | Glyphe sur le disque |
+| ------ | --------- | --------- | -------------------- |
+| Pour   | `#16a34a` | `#199a52` | `--sur-position`     |
+| Contre | `#991b1b` | `#ef4f63` | `--sur-position`     |
+
+Validées par `scripts/validate_palette.js` de la skill `dataviz` (simulation Machado 2009) : en
+clair, deutéranopie ΔE 17,2, vision normale ΔE 34,3 ; en sombre, deutéranopie ΔE 6,3 — dans la bande
+plancher, légale **uniquement** avec un second codage, que la forme et le mot fournissent. Le vert est
+plus clair et le rouge plus sombre en mode clair (l'inverse en sombre) : c'est l'écart de
+luminosité qui les sépare pour un daltonien, pas la teinte. La première paire essayée
+(`#15803d` / `#b91c1c`) tombait à ΔE 4,2 en deutéranopie et a été refusée par le script.
 
 ### Le risque de teinte, enregistré
 
@@ -593,10 +622,12 @@ enregistrée ici pour qu'elle reste traçable.
 | Dégradés décoratifs            | **Un seul** dégradé sur le site : le halo de l'accroche. Aucun autre.                  |
 | Entrées en fondu-glissé        | Autorisées, en **CSS pur**, avec plancher d'opacité à 0,3. Voir §5.                    |
 | Accent unique sous 2 %         | Six teintes, avec la frontière de la règle 1.1 : **jamais sur du politique**.          |
+| Vert et rouge (26/09/2026)     | Pour et Contre seulement, sur les pages de thème, forme et mot obligatoires (§1.1).    |
 
 ### Refus maintenus
 
-- **Aucune couleur de parti, nulle part.** Bleu, rouge, rose, vert, orange restent exclus.
+- **Aucune couleur de parti, nulle part.** Bleu, rouge, rose, vert, orange restent exclus de
+  l'interface, à la seule exception de la pastille Pour / Contre des pages de thème (§1.1).
 - **Aucune teinte sur un candidat, une position ou un score.** Les barres de `/resultat` gardent
   une seule couleur et une seule opacité, portée par un attribut `width`, jamais par un style.
 - **Aucune apparence officielle.** Pas de bleu-blanc-rouge, pas de Marianne. Le palais de l'Élysée
@@ -740,6 +771,45 @@ test », où la valeur s'affiche aussi sur les cinq crans de l'échelle du test,
 
 **Portrait** — `src/components/candidats/Portrait.astro` est désormais le seul balisage de
 portrait des pages candidats : une taille par classe (64, 120), puisque la CSP refuse `style=""`.
+
+## 11 ter. Thèmes (26 septembre 2026)
+
+**`/themes`** — gabarit libre. Titre, une phrase, la légende des quatre pastilles. Puis **deux
+formes pour deux familles** : les six thèmes du test en grandes tuiles à leur teinte (pictogramme
+Phosphor `fill`, nom, intitulés courts des affirmations en pastilles), sur une grille asymétrique
+7 + 5 / 5 + 7 qui alterne **par position**, jamais par thème ; les cinq thèmes hors test en rangées
+compactes, parce qu'ils ne proposent pas de tableau pour/contre et ne doivent pas en avoir l'air.
+Chaque tuile est un seul lien, étendu à toute la carte par un `::after`.
+
+**Page d'un thème du test** — bandeau à la teinte du thème, pictogramme en grand et en filigrane
+(l'illustration, sans photographie), sommaire en pastilles numérotées. Puis un **plateau** par
+affirmation : titre « {intitulé court} : qui est pour, qui est contre ? », l'affirmation entière,
+la définition sourcée dans un `<details>`, puis **Pour et Contre côte à côte dès 375 px** —
+visages de 56 px (64 à partir de 30 rem), pastille mordant le coin du portrait, nom, et une ligne
+de mentions (« Plutôt », « Reprise », « Partielle », « Déduite ») développées dans le nom
+accessible. « Ni pour ni contre » n'apparaît que s'il compte quelqu'un. Les candidats **sans
+position connue** sont des visages de 40 px sans légende : l'absence reste visible sans occuper
+plus de place que ce qu'on sait, et leurs noms sont dans le nom accessible et dans le tableau.
+Chaque plateau finit par la phrase **« En bref »**, générée, qui nomme tout le monde et regroupe
+les positions reprises par parti : c'est elle que lisent les moteurs et les assistants.
+
+Sous les plateaux : un **tableau récapitulatif** (`<table>`, une ligne par candidat dans l'ordre
+des fiches, une pastille par affirmation, le sens en toutes lettres masqué à l'œil), puis « Ce
+qu'ils proposent » (second registre, dit hors score), l'appel au test et les autres thèmes.
+
+**Page d'un thème hors test** — même bandeau, un encadré qui dit qu'aucune question n'y porte,
+les propositions groupées par candidat, et les candidats sans proposition nommés en pastilles.
+Sous trois propositions, la page est servie en `noindex` et reste hors du sitemap.
+
+**Composants** — `src/components/themes/` : `MarquePosition`, `LegendePositions`,
+`CandidatPosition`, `PlateauAffirmation`, `RecapitulatifTheme`, `PropositionsDuTheme`,
+`TuileTheme`, `EnTeteTheme`, `AutresThemes`. `Portrait` gagne les tailles 32 et 40.
+
+**Mesures** — `scripts/capturer.mjs` mesure `/themes`, un thème du test et un thème hors test :
+aucun couple sous son seuil. Le filet des portraits est tiré de l'encre dans les colonnes, où le
+trait tombait à 1,4:1 sur le fond vert. Les fonds de colonne sont mélangés `in srgb`, que le
+script sait lire ; `in oklab` lui faisait mesurer un fond blanc. Lighthouse mobile : 100 dans les
+quatre catégories sur l'index, un thème du test et un thème hors test.
 
 ## 12. Ce qui reste à faire
 

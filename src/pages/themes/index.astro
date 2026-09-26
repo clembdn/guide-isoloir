@@ -1,19 +1,38 @@
 ---
 /*
- * Liste des thèmes, dans l'ordre où le test les pose.
+ * Index des thèmes : choisir un sujet, sans avoir à lire.
  *
- * Chaque thème liste ses affirmations en clair : c'est ce qui permet de savoir,
- * avant de cliquer, sur quoi exactement les candidats sont comparés. Un titre
- * de thème seul ne dit pas si « retraites » veut dire l'âge légal, la durée de
- * cotisation ou la capitalisation.
+ * REFAIT LE 26 SEPTEMBRE 2026. L'ancienne page listait six titres et vingt-
+ * quatre phrases ; un primo-votant n'y voyait pas ce qu'il allait trouver.
+ * Chaque thème est désormais une tuile à sa teinte, avec son pictogramme et
+ * les intitulés courts de ses affirmations.
+ *
+ * DEUX GROUPES, DEUX FORMES. Les thèmes du test, qui disent qui est pour et
+ * qui est contre, en grandes tuiles sur une grille asymétrique. Les thèmes
+ * hors test, qui ne montrent que des propositions, en rangées compactes : ils
+ * ne doivent pas avoir l'air de promettre un tableau qu'ils n'ont pas.
+ *
+ * Ordre du test pour les premiers, ordre des domaines de programme pour les
+ * seconds. Aucun thème n'est mis en avant ; la grille alterne les largeurs
+ * par position, pas par thème.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
-import { pagesThemes, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
+import LegendePositions from "../../components/themes/LegendePositions.astro";
+import TuileTheme from "../../components/themes/TuileTheme.astro";
+import { pagesThemes, pagesThemesPropositions, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
 import { SITE_NAME, SITE_URL } from "../../lib/site";
 
-const themes = pagesThemes();
-const UPDATED = themes.map((theme) => theme.misAJour).reduce((a, b) => (a > b ? a : b));
+const duTest = pagesThemes();
+const horsTest = pagesThemesPropositions();
+const tous = [...duTest, ...horsTest];
+const UPDATED = tous.map((theme) => theme.misAJour).reduce((a, b) => (a > b ? a : b));
+const enLice = duTest[0]!.enLice;
+
+function piedPropositions(nombre: number): string {
+  if (nombre === 0) return "Aucune proposition relevée";
+  return `${nombre} ${nombre === 1 ? "proposition relevée" : "propositions relevées"}`;
+}
 
 const filAriane = {
   "@context": "https://schema.org",
@@ -23,66 +42,201 @@ const filAriane = {
     { "@type": "ListItem", position: 2, name: "Thèmes", item: new URL("/themes", SITE_URL).href },
   ],
 };
+
+const liste = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Thèmes de l'élection présidentielle 2027",
+  numberOfItems: tous.length,
+  itemListElement: tous.map((theme, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: theme.nom,
+    url: new URL(`/themes/${theme.slug}`, SITE_URL).href,
+  })),
+};
 ---
 
 <BaseLayout
-  title="Les thèmes de l'élection présidentielle 2027"
-  description={`Les ${themes.length} thèmes et ${NOMBRE_AFFIRMATIONS} affirmations sur lesquels ${SITE_NAME} compare les candidats à l'élection présidentielle de 2027, avec la position de chacun.`}
+  title="Thèmes de la présidentielle 2027 : qui est pour, qui est contre ?"
+  description={`Retraites, impôts, immigration, écologie, institutions, Europe : pour chacune des ${NOMBRE_AFFIRMATIONS} affirmations du test, les ${enLice} candidats à la présidentielle 2027 rangés en pour, contre ou sans position connue, avec leurs sources.`}
   updated={UPDATED}
+  gabarit="libre"
+  webPage={{ "@type": "CollectionPage" }}
 >
-  <nav class="fil-ariane" aria-label="Fil d'Ariane">
-    <a href="/">{SITE_NAME}</a>
-  </nav>
+  <div class="enveloppe-large page-themes">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <a href="/">{SITE_NAME}</a>
+    </nav>
 
-  <h1>Les thèmes de l'élection présidentielle 2027</h1>
-  <DerniereMiseAJour date={UPDATED} />
+    <header class="tete">
+      <h1>Les thèmes de la présidentielle 2027</h1>
+      <p class="chapo">Choisissez un sujet : vous voyez qui est pour, qui est contre.</p>
+      <DerniereMiseAJour date={UPDATED} />
+      <LegendePositions mentions={false} />
+    </header>
 
-  <p class="question">
-    {themes.length} thèmes, {NOMBRE_AFFIRMATIONS} affirmations. Pour chacune, la position de chaque candidat
-    en lice, et le lien vers sa source.
-  </p>
+    <section class="groupe" aria-labelledby="dans-le-test">
+      <h2 id="dans-le-test">Dans le test</h2>
+      <p class="groupe-chapo">
+        {duTest.length} thèmes, {NOMBRE_AFFIRMATIONS} questions, {enLice} candidats rangés question par
+        question.
+      </p>
+      <ul class="bento">
+        {
+          duTest.map((theme) => (
+            <TuileTheme
+              nom={theme.nom}
+              slug={theme.slug}
+              icone={theme.icone}
+              teinte={theme.teinte}
+              format="grande"
+              sujets={theme.affirmations.map((affirmation) => affirmation.court)}
+              pied={`${theme.affirmations.length} questions`}
+            />
+          ))
+        }
+      </ul>
+    </section>
 
-  <p>
-    Les affirmations portent sur des décisions qui relèvent du président ou de la majorité qu'il
-    cherche à former. Les règles de sélection sont décrites dans la{" "}
-    <a href="/charte-editoriale">charte éditoriale</a>.
-  </p>
+    <section class="groupe" aria-labelledby="hors-test">
+      <h2 id="hors-test">Dans les programmes, hors test</h2>
+      <p class="groupe-chapo">
+        Aucune question du test ne les couvre encore. Ces pages montrent ce que les candidats
+        proposent, sans les ranger en pour ou contre.
+      </p>
+      <ul class="rangees">
+        {
+          horsTest.map((theme) => (
+            <TuileTheme
+              nom={theme.nom}
+              slug={theme.slug}
+              icone={theme.icone}
+              teinte={theme.teinte}
+              format="ligne"
+              pied={piedPropositions(theme.nombrePropositions)}
+            />
+          ))
+        }
+      </ul>
+    </section>
 
-  {
-    themes.map((theme) => (
-      <section class="theme" aria-labelledby={theme.slug}>
-        <h2 id={theme.slug}>
-          <a href={`/themes/${theme.slug}`}>{theme.nom}</a>
-        </h2>
-        <ul>
-          {theme.affirmations.map((affirmation) => (
-            <li>
-              <a href={`/themes/${theme.slug}#${affirmation.question.id}`}>
-                {affirmation.question.texte}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ))
-  }
+    <section class="appel" aria-labelledby="appel-titre">
+      <h2 id="appel-titre">Et vous, vous êtes plutôt pour ou contre ?</h2>
+      <p>
+        Répondez aux {NOMBRE_AFFIRMATIONS} questions et voyez de quels candidats vous êtes proche.
+      </p>
+      <a class="action action--grand" href="/test">Commencer le test</a>
+    </section>
+  </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+  <script type="application/ld+json" set:html={JSON.stringify(liste)} is:inline />
 </BaseLayout>
 
 <style>
-  .theme {
-    margin-top: var(--pas-5);
-    padding-top: var(--pas-3);
-    border-top: 1px solid var(--couleur-trait);
+  .page-themes {
+    padding-block: var(--pas-4) var(--pas-6);
   }
 
-  .theme h2 {
-    font-size: var(--t-h3);
-    margin-top: 0;
+  .tete {
+    max-width: 44rem;
+    margin-bottom: var(--pas-5);
   }
 
-  .theme li {
-    margin-bottom: var(--pas-2);
+  .tete h1 {
+    margin-top: var(--pas-2);
+    text-wrap: balance;
+  }
+
+  .chapo {
+    font-size: clamp(1.125rem, 1rem + 0.6vw, 1.375rem);
+    margin: var(--pas-2) 0 var(--pas-1);
+    text-wrap: pretty;
+  }
+
+  .tete :global(.legende) {
+    margin-top: var(--pas-3);
+  }
+
+  .groupe + .groupe {
+    margin-top: var(--pas-6);
+  }
+
+  .groupe h2 {
+    margin: 0;
+  }
+
+  .groupe-chapo {
+    margin: var(--pas-1) 0 var(--pas-4);
+    color: var(--couleur-encre-faible);
+    max-width: 40rem;
+  }
+
+  .bento,
+  .rangees {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  /*
+   * Grille asymétrique à partir de 48 rem : les largeurs alternent par
+   * POSITION (7 + 5, puis 5 + 7), jamais par thème. Aucun thème n'est plus
+   * grand qu'un autre pour une autre raison que sa place dans l'ordre du test.
+   */
+  @media (min-width: 48rem) {
+    .bento {
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    .bento > :global(li) {
+      grid-column: span 6;
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .bento > :global(li:nth-child(4n + 1)),
+    .bento > :global(li:nth-child(4n + 4)) {
+      grid-column: span 7;
+    }
+
+    .bento > :global(li:nth-child(4n + 2)),
+    .bento > :global(li:nth-child(4n + 3)) {
+      grid-column: span 5;
+    }
+  }
+
+  @media (min-width: 40rem) {
+    .rangees {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .rangees {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  .appel {
+    margin-top: var(--pas-6);
+    padding: var(--pas-5) var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface-2);
+    text-align: center;
+  }
+
+  .appel h2 {
+    margin: 0 auto;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+
+  .appel p {
+    margin: var(--pas-2) auto var(--pas-4);
+    max-width: 32rem;
   }
 </style>

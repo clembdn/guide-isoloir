@@ -1,0 +1,103 @@
+---
+/*
+ * Légende des pastilles : le code appris une fois, en tête de page.
+ *
+ * Les trois mentions qui peuvent suivre un nom sont expliquées ici, pas sous
+ * chaque visage : sous un portrait de 64 px, il n'y a place que pour un mot.
+ */
+import MarquePosition from "./MarquePosition.astro";
+import { LIBELLES_SENS } from "../../lib/echelle";
+
+type Props = {
+  /** Sans les mentions, pour l'index des thèmes, où aucun nom n'apparaît. */
+  mentions?: boolean;
+};
+
+const { mentions = true } = Astro.props;
+
+const SENS = ["pour", "contre", "neutre", "inconnu"] as const;
+---
+
+<div class="legende">
+  <ul class="legende-marques" aria-label="Légende">
+    {
+      SENS.map((sens) => (
+        <li>
+          <MarquePosition sens={sens} />
+          {LIBELLES_SENS[sens]}
+        </li>
+      ))
+    }
+  </ul>
+  {
+    mentions && (
+      <dl class="legende-mentions">
+        <div>
+          <dt>Plutôt</dt>
+          <dd>d'accord ou pas d'accord, sans aller jusqu'au bout de l'affirmation.</dd>
+        </div>
+        <div>
+          <dt>Reprise</dt>
+          <dd>
+            aucune déclaration personnelle trouvée : c'est la position de son parti ou de sa
+            coalition.
+          </dd>
+        </div>
+        <div>
+          <dt>Partielle, déduite</dt>
+          <dd>la citation ne porte que sur une partie de la mesure, ou sur aucune.</dd>
+        </div>
+      </dl>
+    )
+  }
+</div>
+
+<style>
+  .legende-marques {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-2) var(--pas-3);
+    font-weight: 600;
+  }
+
+  .legende-marques li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0;
+  }
+
+  .legende-mentions {
+    display: grid;
+    gap: var(--pas-1);
+    margin: var(--pas-3) 0 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  @media (min-width: 48rem) {
+    .legende-mentions {
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--pas-3);
+    }
+  }
+
+  .legende-mentions dt {
+    display: inline;
+    font-weight: 700;
+    color: var(--couleur-encre);
+    margin: 0;
+  }
+
+  .legende-mentions dt::after {
+    content: " : ";
+  }
+
+  .legende-mentions dd {
+    display: inline;
+    margin: 0;
+  }
+</style>

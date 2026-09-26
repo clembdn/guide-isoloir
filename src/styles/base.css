@@ -168,6 +168,28 @@
   --pastel-cyan: #dcf0f6;
   --vif-prune: #a21caf;
   --pastel-prune: #fae4f7;
+  /* Sixième teinte, ajoutée pour les thèmes (26 septembre 2026). */
+  --vif-ardoise: #475569;
+  --pastel-ardoise: #e9ecf2;
+
+  /*
+   * POUR ET CONTRE — levée bornée de la règle 1.1, décidée le 26 septembre 2026.
+   *
+   * Le vert et le rouge ne marquent QUE le sens d'une position sur une
+   * affirmation, jamais un candidat : chacun reçoit la même pastille quand il
+   * est dans la même colonne. La couleur n'est jamais seule — la forme (coche,
+   * croix) et le mot l'accompagnent toujours, et la colonne elle-même dit le
+   * sens.
+   *
+   * Paire VALIDÉE au script de la skill dataviz (simulation Machado 2009) :
+   * deutéranopie ΔE 17,2, vision normale ΔE 34,3, ≥ 3:1 sur la surface. Le vert
+   * plus clair et le rouge plus sombre : c'est l'écart de LUMINOSITÉ qui les
+   * sépare pour un daltonien, pas la teinte. Le texte ne prend jamais ces
+   * couleurs : il reste à l'encre.
+   */
+  --pour: #16a34a;
+  --contre: #991b1b;
+  --sur-position: #ffffff;
 
   --police-texte:
     "Bricolage Grotesque", "Bricolage repli", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -245,6 +267,13 @@
     --pastel-cyan: #122934;
     --vif-prune: #f0abfc;
     --pastel-prune: #33163a;
+    --vif-ardoise: #cbd5e1;
+    --pastel-ardoise: #1e2430;
+
+    /* Validée sur la surface sombre : deutéranopie ΔE 6,3, couvert par la forme et le mot. */
+    --pour: #199a52;
+    --contre: #ef4f63;
+    --sur-position: #12101c;
 
     --ombre-1: 0 1px 2px rgb(0 0 0 / 0.4);
     --ombre-2: 0 18px 40px -18px rgb(0 0 0 / 0.7);
@@ -862,12 +891,13 @@ hr {
 }
 
 /*
- * Teintes de rubrique — /comprendre et ses schémas.
+ * Teintes de rubrique — /comprendre, ses schémas, et les thèmes.
  *
- * Cinq teintes, une par article. Elles ne touchent aucun contenu politique :
- * ce sont des repères de navigation dans une rubrique pédagogique, pas un
- * jugement sur un acteur. Aucune n'entre sur /resultat, et aucune
- * n'appartient à une famille politique française.
+ * Six teintes. Elles repèrent une rubrique ou un thème, jamais un acteur :
+ * aucune n'entre sur /resultat, aucune ne touche un candidat ni une position,
+ * et aucune n'appartient à une famille politique française. Sur une page de
+ * thème, la teinte habille l'en-tête et s'arrête au bord du tableau des
+ * positions, pour ne jamais se confondre avec le vert de « Pour ».
  */
 
 .t-violet {
@@ -893,6 +923,11 @@ hr {
 .t-prune {
   --pastel: var(--pastel-prune);
   --vif: var(--vif-prune);
+}
+
+.t-ardoise {
+  --pastel: var(--pastel-ardoise);
+  --vif: var(--vif-ardoise);
 }
 
 /*

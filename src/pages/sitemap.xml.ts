@@ -11,7 +11,7 @@
 import type { APIRoute } from "astro";
 import { SITE_URL } from "../lib/site";
 import { articlesPublies } from "../lib/comprendre";
-import { DONNEES_MISES_A_JOUR, fiches, pagesThemes } from "../lib/fiches";
+import { DONNEES_MISES_A_JOUR, fiches, pagesThemes, pagesThemesPropositions } from "../lib/fiches";
 import { MEDIAS_RELEVES_LE } from "../data/medias";
 import { ILLUSTRATIONS } from "../data/illustrations";
 import { MISES_A_JOUR } from "../lib/mises-a-jour";
@@ -47,7 +47,12 @@ export const GET: APIRoute = async () => {
   const articles = await articlesPublies();
 
   const toutesFiches = fiches();
-  const themes = pagesThemes();
+  /*
+   * Les thèmes hors test n'entrent qu'au-dessus du seuil de propositions : une
+   * page de deux lignes est servie, mais pas proposée aux moteurs. Elle porte
+   * alors `noindex`, et le sitemap ne doit pas la contredire.
+   */
+  const themes = [...pagesThemes(), ...pagesThemesPropositions().filter((t) => t.indexable)];
   const plusRecente = (dates: readonly string[]) => dates.reduce((a, b) => (a > b ? a : b));
 
   const entrees: SitemapEntry[] = [

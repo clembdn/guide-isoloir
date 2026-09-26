@@ -1,0 +1,187 @@
+---
+/*
+ * En-tête d'une page de thème : un bandeau à la teinte du thème, son
+ * pictogramme en grand, le titre, une phrase, et le sommaire en pastilles.
+ *
+ * Le grand pictogramme en filigrane déborde du bandeau à droite : c'est
+ * l'illustration du thème, sans photographie (celles essayées sur le site ont
+ * été jugées amateur) et sans un octet de plus qu'un SVG en ligne. Décoratif,
+ * donc hors de l'arbre accessible.
+ */
+import Icone from "../Icone.astro";
+import DerniereMiseAJour from "../DerniereMiseAJour.astro";
+import { SITE_NAME } from "../../lib/site";
+import type { Teinte } from "../../data/themes";
+
+type Props = {
+  nom: string;
+  icone: string;
+  teinte: Teinte;
+  chapo: string;
+  misAJour: string;
+  /** Ancres vers les affirmations, pour les thèmes du test. */
+  sommaire?: { id: string; court: string }[];
+};
+
+const { nom, icone, teinte, chapo, misAJour, sommaire = [] } = Astro.props;
+---
+
+<header class:list={["bandeau", `t-${teinte}`]}>
+  <span class="filigrane" aria-hidden="true">
+    <Icone nom={icone} graisse="fill" />
+  </span>
+  <div class="enveloppe-large interieur">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <a href="/">{SITE_NAME}</a>
+      <span aria-hidden="true">/</span>
+      <a href="/themes">Thèmes</a>
+    </nav>
+
+    <span class="pictogramme" aria-hidden="true">
+      <Icone nom={icone} graisse="fill" />
+    </span>
+    <h1>{nom}</h1>
+    <p class="chapo">{chapo}</p>
+    <DerniereMiseAJour date={misAJour} />
+
+    {
+      sommaire.length > 0 && (
+        <nav class="sommaire" aria-label="Les affirmations du thème">
+          <ol>
+            {sommaire.map((entree, index) => (
+              <li>
+                <a href={`#${entree.id}`}>
+                  <span class="numero" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  {entree.court}
+                </a>
+              </li>
+            ))}
+          </ol>
+        </nav>
+      )
+    }
+  </div>
+</header>
+
+<style>
+  .bandeau {
+    position: relative;
+    overflow: clip;
+    background: var(--pastel);
+    padding-block: var(--pas-3) var(--pas-4);
+  }
+
+  @media (min-width: 48rem) {
+    .bandeau {
+      padding-block: var(--pas-4) var(--pas-5);
+    }
+  }
+
+  .interieur {
+    position: relative;
+  }
+
+  .filigrane {
+    position: absolute;
+    right: -3rem;
+    bottom: -4rem;
+    width: 16rem;
+    height: 16rem;
+    color: var(--vif);
+    opacity: 0.1;
+    pointer-events: none;
+  }
+
+  @media (min-width: 48rem) {
+    .filigrane {
+      right: 4%;
+      bottom: -5rem;
+      width: 24rem;
+      height: 24rem;
+    }
+  }
+
+  .filigrane :global(.icone),
+  .pictogramme :global(.icone) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .pictogramme {
+    display: block;
+    width: 3.5rem;
+    height: 3.5rem;
+    margin-top: var(--pas-3);
+    color: var(--vif);
+  }
+
+  h1 {
+    margin: var(--pas-2) 0 0;
+    max-width: 18ch;
+    text-wrap: balance;
+  }
+
+  .chapo {
+    margin: var(--pas-2) 0 var(--pas-1);
+    font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+    max-width: 36rem;
+    text-wrap: pretty;
+  }
+
+  .sommaire {
+    margin-top: var(--pas-3);
+  }
+
+  .sommaire ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1);
+  }
+
+  .sommaire li {
+    margin: 0;
+  }
+
+  .sommaire a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0.35rem 0.9rem 0.35rem 0.4rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    color: var(--couleur-encre);
+    font-size: var(--t-petit);
+    font-weight: 600;
+    text-decoration: none;
+    box-shadow: var(--ombre-1);
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .sommaire a:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  .sommaire a:active {
+    transform: scale(0.97);
+  }
+
+  .numero {
+    display: inline-grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    background: var(--pastel);
+    color: var(--vif);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+</style>

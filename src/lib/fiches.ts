@@ -38,8 +38,10 @@ import {
   type Candidate,
   type EtatProgramme,
   type PoliticalActor,
+  type DomaineProposition,
   type Proposition,
   type StanceAdequation,
+  type StanceValue,
 } from "./modele";
 import {
   ETAPES_CANDIDATURE,
@@ -56,8 +58,8 @@ import { POSITIONS } from "../data/positions";
 import { SOURCES_POSITIONS } from "../data/sources-positions";
 import { ETATS_PROGRAMME, PROPOSITIONS } from "../data/programmes";
 import { media } from "../data/medias";
-import { THEMES_PUBLIES } from "../data/themes";
-import { ECHELLE } from "./echelle";
+import { THEMES_PROPOSITIONS, THEMES_PUBLIES, type Teinte } from "../data/themes";
+import { ECHELLE, LIBELLES_SENS, nuanceDe, sensDe, type Sens } from "./echelle";
 
 /*
  * Validation au build, référentielle : une position rattachée à un acteur, une
@@ -109,14 +111,64 @@ for (const theme of THEMES_PUBLIES) {
     throw new Error(`src/data/themes.ts déclare « ${theme.nom} », absent du questionnaire.`);
   }
 }
-if (new Set(THEMES_PUBLIES.map((t) => t.slug)).size !== THEMES_PUBLIES.length) {
+const tousLesSlugs = [...THEMES_PUBLIES, ...THEMES_PROPOSITIONS].map((t) => t.slug);
+if (new Set(tousLesSlugs).size !== tousLesSlugs.length) {
   throw new Error("Deux thèmes partagent un slug dans src/data/themes.ts.");
 }
 
-/** Thèmes dans l'ordre où le test les pose, avec leur adresse. */
-export const THEMES: readonly { nom: string; slug: string }[] = [
+/*
+ * Chaque affirmation a son intitulé court, et seulement dans son thème. Un
+ * intitulé manquant laisserait un titre vide ; un intitulé rangé sous le
+ * mauvais thème, un en-tête de tableau qui ne correspond à rien.
+ */
+const courtParQuestion = new Map<string, string>();
+for (const theme of THEMES_PUBLIES) {
+  for (const [id, court] of Object.entries(theme.courts)) {
+    const question = questions.find((q) => q.id === id);
+    if (!question || question.theme !== theme.nom) {
+      throw new Error(
+        `Intitulé court « ${court} » : ${id} n'est pas une affirmation de « ${theme.nom} ».`,
+      );
+    }
+    courtParQuestion.set(id, court);
+  }
+}
+for (const question of questions) {
+  if (!courtParQuestion.has(question.id)) {
+    throw new Error(
+      `L'affirmation ${question.id} n'a pas d'intitulé court dans src/data/themes.ts.`,
+    );
+  }
+}
+
+/*
+ * Chaque domaine de programme appartient à un thème, et à un seul : sinon une
+ * proposition apparaîtrait sur deux pages, ou sur aucune.
+ */
+const domainesRattaches = [...THEMES_PUBLIES, ...THEMES_PROPOSITIONS].map((t) => t.domaine);
+for (const domaine of DOMAINES_PROPOSITION) {
+  const nombre = domainesRattaches.filter((d) => d === domaine).length;
+  if (nombre !== 1) {
+    throw new Error(
+      `Le domaine « ${domaine} » est rattaché à ${nombre} thèmes dans src/data/themes.ts.`,
+    );
+  }
+}
+
+/** Habillage d'un thème : son pictogramme Phosphor et sa teinte. */
+export type HabillageTheme = { nom: string; slug: string; icone: string; teinte: Teinte };
+
+const themeTestParNom = new Map<string, (typeof THEMES_PUBLIES)[number]>(
+  THEMES_PUBLIES.map((t) => [t.nom, t]),
+);
+
+/** Thèmes dans l'ordre où le test les pose, avec leur adresse et leur habillage. */
+export const THEMES: readonly HabillageTheme[] = [
   ...new Set(questionsOrdonnees.map((q) => q.theme)),
-].map((nom) => ({ nom, slug: slugParTheme.get(nom)! }));
+].map((nom) => {
+  const theme = themeTestParNom.get(nom)!;
+  return { nom, slug: theme.slug, icone: theme.icone, teinte: theme.teinte };
+});
 
 export const NOMBRE_AFFIRMATIONS = questions.length;
 
@@ -382,96 +434,302 @@ export function estEnLice(candidature: Pick<Candidate, "status">): boolean {
 export type CandidatCite = {
   nom: string;
   slug: string;
+  /** Chemin du portrait libre, ou `null` : le composant affiche alors les initiales. */
+  portrait: string | null;
+  /** Valeur retenue par le moteur, `null` pour un candidat sans position. */
+  valeur: StanceValue | null;
+  /** « Plutôt » pour ±1 : la seule nuance que le regroupement pour/contre efface. */
+  nuance: string | null;
   /** Acteur d'origine quand la position est reprise, sinon `null`. */
   heriteDe: string | null;
   /**
    * Adéquation de la citation, `null` pour un candidat sans position.
    *
-   * Remontée jusqu'à la page de thème, où elle est la seule nuance affichée à
-   * côté du nom : « plutôt d'accord » sur une citation partielle ne se lit pas
-   * comme « plutôt d'accord » sur la mesure exacte, et un résumé automatique de
-   * la page ne verrait pas la différence si elle n'était pas écrite.
+   * Remontée jusqu'à la page de thème, où elle est affichée sous le nom :
+   * « plutôt pour » sur une citation partielle ne se lit pas comme « plutôt
+   * pour » sur la mesure exacte, et un résumé automatique de la page ne verrait
+   * pas la différence si elle n'était pas écrite.
    */
   adequation: StanceAdequation | null;
 };
 
 export type AffirmationTheme = {
   question: Pick<Question, "id" | "texte" | "infobulle">;
+  /** Intitulé court, saisi dans `src/data/themes.ts`. */
+  court: string;
   definitionSource: SourceInfobulle;
-  /** Un groupe par cran de l'échelle, dans l'ordre du test ; vides compris. */
-  groupes: { libelle: string; candidats: CandidatCite[] }[];
+  pour: CandidatCite[];
+  contre: CandidatCite[];
+  neutre: CandidatCite[];
   inconnus: CandidatCite[];
+  /**
+   * La réponse en une phrase, en texte visible : c'est elle qu'un moteur ou un
+   * assistant extrait. Générée depuis les mêmes groupes que le tableau, elle ne
+   * peut pas le contredire.
+   */
+  enBref: string;
 };
 
-export type PageTheme = {
+/** Propositions d'un candidat sur un domaine, pour la section « Ce qu'ils proposent ». */
+export type PropositionsCandidat = {
   nom: string;
   slug: string;
-  affirmations: AffirmationTheme[];
+  portrait: string | null;
+  propositions: PropositionFiche[];
+};
+
+type BaseTheme = HabillageTheme & {
+  domaine: DomaineProposition;
+  /** Nombre de candidats en lice : le dénominateur de chaque compte de la page. */
+  enLice: number;
+  /** Candidats en lice, dans l'ordre alphabétique des fiches (`sortName`). */
+  candidats: { nom: string; slug: string; portrait: string | null }[];
+  /** Propositions du domaine, groupées par candidat dans l'ordre alphabétique. */
+  parCandidat: PropositionsCandidat[];
+  nombrePropositions: number;
   /**
-   * Date du codage le plus récent du thème. Tant que rien n'y est codé, date
-   * de la plus récente candidature listée : c'est la dernière fois que le
-   * contenu de la page a changé.
+   * Date de la donnée la plus récente du thème. Tant que rien n'y est codé,
+   * date de la plus récente candidature listée : c'est la dernière fois que
+   * le contenu de la page a changé.
    */
   misAJour: string;
 };
 
+export type PageTheme = BaseTheme & {
+  type: "test";
+  affirmations: AffirmationTheme[];
+};
+
+export type PageThemePropositions = BaseTheme & {
+  type: "propositions";
+  /** Candidats en lice sans aucune proposition relevée sur ce domaine : nommés, pas omis. */
+  sansProposition: { nom: string; slug: string; portrait: string | null }[];
+  /**
+   * `false` sous `SEUIL_INDEXATION` propositions. La page existe et se lit,
+   * mais une page de deux lignes n'a rien à faire dans un moteur ; elle entre
+   * seule dans le sitemap quand les relevés s'étoffent.
+   */
+  indexable: boolean;
+};
+
+export type ThemeQuelconque = PageTheme | PageThemePropositions;
+
+/** En dessous, une page de propositions reste hors de l'index. */
+export const SEUIL_INDEXATION = 3;
+
+/** « A », « A et B », « A, B et C ». */
+function enumerer(noms: readonly string[]): string {
+  if (noms.length <= 1) return noms.join("");
+  return `${noms.slice(0, -1).join(", ")} et ${noms.at(-1)}`;
+}
+
+function nomAvecNuance(cite: CandidatCite): string {
+  return cite.nuance ? `${cite.nom} (${cite.nuance.toLowerCase()})` : cite.nom;
+}
+
 /**
- * Pages de thème : pour chaque affirmation, qui en est où.
+ * Une colonne en une phrase : d'abord les positions personnelles, puis les
+ * positions reprises, regroupées par parti ou coalition d'origine. Regroupées,
+ * parce que « position reprise : Nouveau Front populaire » répété six fois
+ * noyait la réponse ; nommées, parce qu'une ligne de parti n'est pas une
+ * déclaration du candidat et qu'un résumé automatique doit pouvoir le dire.
+ */
+function phraseColonne(libelle: string, cites: readonly CandidatCite[]): string {
+  if (cites.length === 0) return `${libelle} : aucun.`;
+  const personnelles = cites.filter((cite) => cite.heriteDe === null).map(nomAvecNuance);
+  const origines = [...new Set(cites.map((cite) => cite.heriteDe).filter((o) => o !== null))];
+  const reprises = origines.map(
+    (origine) =>
+      `${enumerer(cites.filter((cite) => cite.heriteDe === origine).map(nomAvecNuance))} [${origine}]`,
+  );
+  if (reprises.length === 0) return `${libelle} : ${enumerer(personnelles)}.`;
+  /* Point-virgule entre deux origines : « A et B [NFP] et C [LR] » ne dirait plus qui reprend quoi. */
+  const partReprise = `par la position reprise d'un parti ou d'une coalition, ${reprises.join(" ; ")}`;
+  return personnelles.length === 0
+    ? `${libelle}, ${partReprise}.`
+    : `${libelle} : ${enumerer(personnelles)}, ainsi que, ${partReprise}.`;
+}
+
+/**
+ * Phrase « En bref » d'une affirmation. Pour et contre sont toujours dits, même
+ * vides (« aucun ») : les taire laisserait croire qu'on a oublié de chercher.
+ * « Ni pour ni contre » n'est dit que s'il compte quelqu'un, comme la colonne
+ * du tableau : c'est le cran le plus rare, et « aucun » répété sous chaque
+ * affirmation noierait la réponse.
+ */
+export function phraseEnBref(
+  groupes: Pick<AffirmationTheme, "pour" | "contre" | "neutre" | "inconnus">,
+): string {
+  const connus = groupes.pour.length + groupes.contre.length + groupes.neutre.length;
+  const total = connus + groupes.inconnus.length;
+  if (connus === 0) {
+    return `Aucune position connue parmi les ${total} candidats en lice.`;
+  }
+  const inconnus =
+    groupes.inconnus.length === 0
+      ? ""
+      : ` ${groupes.inconnus.length} ${groupes.inconnus.length === 1 ? "candidat" : "candidats"} sans position connue.`;
+  return [
+    phraseColonne(LIBELLES_SENS.pour, groupes.pour),
+    phraseColonne(LIBELLES_SENS.contre, groupes.contre),
+    groupes.neutre.length > 0 ? phraseColonne(LIBELLES_SENS.neutre, groupes.neutre) : null,
+  ]
+    .filter((phrase) => phrase !== null)
+    .join(" ")
+    .concat(inconnus);
+}
+
+/*
+ * Dans une colonne, la position nette avant la nuancée : « tout à fait » avant
+ * « plutôt », de part et d'autre, comme l'échelle du test lue depuis ses
+ * extrémités. C'est l'ordre des crans, pas un classement des personnes : le tri
+ * est stable, et à cran égal l'ordre alphabétique des fiches est conservé.
+ */
+function parNettete(a: CandidatCite, b: CandidatCite): number {
+  return Math.abs(b.valeur ?? 0) - Math.abs(a.valeur ?? 0);
+}
+
+function identite(fiche: Fiche): { nom: string; slug: string; portrait: string | null } {
+  return { nom: fiche.acteur.name, slug: fiche.acteur.slug, portrait: fiche.portrait };
+}
+
+function candidatsEnLice(): Fiche[] {
+  return fiches().filter((fiche) => estEnLice(fiche.candidature));
+}
+
+/** Propositions du domaine pour les candidats en lice, et la date la plus récente. */
+function propositionsDuDomaine(
+  enLice: readonly Fiche[],
+  domaine: DomaineProposition,
+): { parCandidat: PropositionsCandidat[]; nombre: number; dates: string[] } {
+  const parCandidat = enLice
+    .map((fiche) => ({
+      nom: fiche.acteur.name,
+      slug: fiche.acteur.slug,
+      portrait: fiche.portrait,
+      propositions: propositionsDe(fiche.candidature).filter((p) => p.domaine === domaine),
+    }))
+    .filter((entree) => entree.propositions.length > 0);
+  const toutes = parCandidat.flatMap((entree) => entree.propositions);
+  return {
+    parCandidat,
+    /* Une proposition de parti reprise par deux candidats se compte une fois. */
+    nombre: new Set(toutes.map((p) => p.id)).size,
+    dates: toutes.map((p) => p.updatedAt),
+  };
+}
+
+/**
+ * Pages de thème du test : pour chaque affirmation, qui est pour, qui est
+ * contre, qui n'est ni l'un ni l'autre, et pour qui on ne sait pas.
  *
  * AUCUNE CITATION ICI. Le verbatim, la source et le niveau de confiance vivent
  * sur la fiche du candidat, et la page de thème y renvoie par une ancre. Les
  * répéter produirait deux pages au contenu identique, ce que le cahier des
  * charges interdit et que les moteurs sanctionnent.
  *
- * GROUPES DANS L'ORDRE DE L'ÉCHELLE, du plein accord au plein désaccord, le
- * même que celui du test. À l'intérieur d'un groupe, l'ordre alphabétique : un
- * candidat n'est jamais placé avant un autre pour une autre raison.
+ * ORDRE. Dans chaque colonne, le cran de l'échelle (« tout à fait » puis
+ * « plutôt »), puis l'ordre alphabétique : un candidat n'est jamais placé
+ * avant un autre pour une autre raison.
  */
 export function pagesThemes(): PageTheme[] {
-  const enLice = fiches().filter((fiche) => estEnLice(fiche.candidature));
+  const enLice = candidatsEnLice();
   const sourceParIdInfobulle = new Map(sourcesInfobulles.map((source) => [source.id, source]));
 
-  return THEMES.map((theme) => {
+  return THEMES.map((theme): PageTheme => {
     const dates: string[] = enLice.map((fiche) => fiche.candidature.statutDepuis);
+    const domaine = themeTestParNom.get(theme.nom)!.domaine;
 
     const affirmations = questionsOrdonnees
       .filter((question) => question.theme === theme.nom)
       .map((question): AffirmationTheme => {
-        const cites = enLice.map((fiche) => ({
-          cite: {
+        const cites: CandidatCite[] = enLice.map((fiche) => {
+          const resolue = resoudre(fiche.acteur.id, question.id);
+          if (resolue) dates.push(resolue.position.updatedAt);
+          return {
             nom: fiche.acteur.name,
             slug: fiche.acteur.slug,
-            heriteDe: null as string | null,
-            adequation: null as StanceAdequation | null,
-          },
-          resolue: resoudre(fiche.acteur.id, question.id),
-        }));
+            portrait: fiche.portrait,
+            valeur: resolue?.position.value ?? null,
+            nuance: resolue ? nuanceDe(resolue.position.value) : null,
+            heriteDe: resolue?.heriteDe ?? null,
+            adequation: resolue?.position.adequation ?? null,
+          };
+        });
 
-        for (const { resolue } of cites) if (resolue) dates.push(resolue.position.updatedAt);
+        const dansLeSens = (sens: Sens) =>
+          cites.filter((c) => c.valeur !== null && sensDe(c.valeur) === sens).sort(parNettete);
+        const groupes = {
+          pour: dansLeSens("pour"),
+          contre: dansLeSens("contre"),
+          neutre: dansLeSens("neutre"),
+          inconnus: cites.filter((c) => c.valeur === null),
+        };
 
         return {
           question: { id: question.id, texte: question.texte, infobulle: question.infobulle },
+          court: courtParQuestion.get(question.id)!,
           definitionSource: sourceParIdInfobulle.get(question.infobulleSourceId)!,
-          groupes: ECHELLE.map((cran) => ({
-            libelle: cran.libelle,
-            candidats: cites
-              .filter(({ resolue }) => resolue?.position.value === cran.valeur)
-              .map(({ cite, resolue }) => ({
-                ...cite,
-                heriteDe: resolue!.heriteDe,
-                adequation: resolue!.position.adequation,
-              })),
-          })),
-          inconnus: cites.filter(({ resolue }) => resolue === null).map(({ cite }) => cite),
+          ...groupes,
+          enBref: phraseEnBref(groupes),
         };
       });
 
+    const propositionsTheme = propositionsDuDomaine(enLice, domaine);
+    dates.push(...propositionsTheme.dates);
+
     return {
+      type: "test",
       ...theme,
+      domaine,
+      enLice: enLice.length,
+      candidats: enLice.map(identite),
       affirmations,
+      parCandidat: propositionsTheme.parCandidat,
+      nombrePropositions: propositionsTheme.nombre,
       misAJour: dates.reduce((a, b) => (a > b ? a : b)),
     };
   });
+}
+
+/**
+ * Pages des thèmes hors test : ce que les candidats proposent sur un domaine
+ * qu'aucune affirmation ne couvre encore.
+ *
+ * NI POUR NI CONTRE ICI. Sans affirmation, il n'y a rien à quoi être pour ou
+ * contre ; la page liste des propositions sourcées, attribuées, datées, et
+ * nomme les candidats pour qui rien n'a été relevé.
+ */
+export function pagesThemesPropositions(): PageThemePropositions[] {
+  const enLice = candidatsEnLice();
+  return THEMES_PROPOSITIONS.map((theme): PageThemePropositions => {
+    const { parCandidat, nombre, dates } = propositionsDuDomaine(enLice, theme.domaine);
+    const avecProposition = new Set(parCandidat.map((entree) => entree.slug));
+    return {
+      type: "propositions",
+      nom: theme.nom,
+      slug: theme.slug,
+      icone: theme.icone,
+      teinte: theme.teinte,
+      domaine: theme.domaine,
+      enLice: enLice.length,
+      candidats: enLice.map(identite),
+      parCandidat,
+      nombrePropositions: nombre,
+      sansProposition: enLice
+        .filter((fiche) => !avecProposition.has(fiche.acteur.slug))
+        .map(identite),
+      indexable: nombre >= SEUIL_INDEXATION,
+      misAJour: [...enLice.map((fiche) => fiche.candidature.statutDepuis), ...dates].reduce(
+        (a, b) => (a > b ? a : b),
+      ),
+    };
+  });
+}
+
+/** Tous les thèmes : ceux du test dans l'ordre du test, puis les autres. */
+export function tousLesThemes(): ThemeQuelconque[] {
+  return [...pagesThemes(), ...pagesThemesPropositions()];
 }
 
 /**

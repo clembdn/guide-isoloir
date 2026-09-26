@@ -57,6 +57,12 @@ type Props = {
    * quiz est plafonné à 25 par `tests/e2e/quiz-clavier.spec.ts`.
    */
   actionEntete?: boolean;
+  /**
+   * Propriétés ajoutées au balisage `WebPage` de la page : `about`,
+   * `isBasedOn`… Elles complètent le balisage commun, elles ne le remplacent
+   * pas : `name`, `url` et `isPartOf` restent ceux du gabarit.
+   */
+  webPage?: Record<string, unknown>;
 };
 
 const {
@@ -66,6 +72,7 @@ const {
   noindex = false,
   gabarit = "colonne",
   actionEntete = true,
+  webPage = {},
 } = Astro.props;
 
 const libre = gabarit === "libre";
@@ -107,6 +114,7 @@ const jsonLd = {
   // Aucun `publisher` tant que l'éditeur n'est pas nommé : un balisage
   // `Person` sans nom vaut moins qu'une absence de balisage.
   ...(EDITOR_NAME ? { publisher: { "@type": "Person", name: EDITOR_NAME } } : {}),
+  ...webPage,
 };
 ---
 

@@ -1,0 +1,236 @@
+---
+/*
+ * Tuile d'un thème, sur l'index. Cliquable en entier : un seul lien, qui porte
+ * le nom du thème, et dont la zone couvre toute la carte.
+ *
+ * DEUX FORMATS, pas une carte répétée onze fois.
+ *
+ *   - `grande` : les thèmes du test. Fond pastel de la teinte, pictogramme en
+ *     grand, et les intitulés courts de ses affirmations : on sait sur quoi
+ *     porte le thème sans ouvrir la page.
+ *   - `ligne` : les thèmes hors test. Une rangée compacte — pictogramme, nom,
+ *     nombre de propositions — parce qu'ils ne proposent pas de tableau
+ *     pour/contre et ne doivent pas en avoir l'air.
+ *
+ * La teinte est un repère de navigation : elle ne touche aucun candidat.
+ */
+import Icone from "../Icone.astro";
+import type { Teinte } from "../../data/themes";
+
+type Props = {
+  nom: string;
+  slug: string;
+  icone: string;
+  teinte: Teinte;
+  format: "grande" | "ligne";
+  /** Intitulés courts des affirmations, pour le format `grande`. */
+  sujets?: readonly string[];
+  /** Ligne de pied : « 4 questions », « 12 propositions relevées ». */
+  pied: string;
+};
+
+const { nom, slug, icone, teinte, format, sujets = [], pied } = Astro.props;
+---
+
+<li class:list={["tuile", `tuile--${format}`, `t-${teinte}`]}>
+  <span class="pictogramme">
+    <Icone nom={icone} graisse={format === "grande" ? "fill" : "bold"} />
+  </span>
+  <div class="corps">
+    <h3 class="nom">
+      <a href={`/themes/${slug}`}>{nom}</a>
+    </h3>
+    {
+      sujets.length > 0 && (
+        <ul class="sujets">
+          {sujets.map((sujet) => (
+            <li>{sujet}</li>
+          ))}
+        </ul>
+      )
+    }
+    <p class="tuile-pied">{pied}</p>
+  </div>
+  <span class="fleche" aria-hidden="true">
+    <Icone nom="arrow-right" graisse="bold" />
+  </span>
+</li>
+
+<style>
+  .tuile {
+    position: relative;
+    display: grid;
+    margin: 0;
+    background: var(--pastel);
+    border-radius: var(--rayon-carte-l);
+    transition:
+      transform var(--duree) var(--sortie),
+      box-shadow var(--duree) var(--sortie);
+  }
+
+  /*
+   * Le lien du titre couvre la tuile entière : un seul arrêt de tabulation par
+   * thème, et le nom du thème comme nom accessible.
+   */
+  .nom a {
+    color: var(--couleur-encre);
+    text-decoration: none;
+  }
+
+  .nom a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .nom a:focus-visible {
+    outline: none;
+  }
+
+  .tuile:has(a:focus-visible) {
+    outline: 2px solid var(--couleur-signature);
+    outline-offset: 3px;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .tuile:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--ombre-2);
+    }
+
+    .tuile:hover .fleche {
+      transform: translateX(3px);
+    }
+  }
+
+  .tuile:active {
+    transform: scale(0.985);
+  }
+
+  .pictogramme {
+    display: grid;
+    place-items: center;
+    color: var(--vif);
+  }
+
+  .pictogramme :global(.icone) {
+    width: 100%;
+    height: 100%;
+  }
+
+  .fleche {
+    color: var(--vif);
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .fleche :global(.icone) {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .nom {
+    margin: 0;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+
+  .tuile-pied {
+    margin: 0;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    color: var(--couleur-encre-faible);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Grande tuile : pictogramme en haut, nom, sujets, pied. */
+  .tuile--grande {
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto 1fr;
+    gap: var(--pas-3);
+    padding: var(--pas-4) var(--pas-3) var(--pas-3);
+  }
+
+  .tuile--grande .pictogramme {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+
+  .tuile--grande .fleche {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: start;
+  }
+
+  .tuile--grande .corps {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--pas-2);
+  }
+
+  .tuile--grande .nom {
+    font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  }
+
+  .tuile--grande .tuile-pied {
+    margin-top: auto;
+  }
+
+  .sujets {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.375rem;
+  }
+
+  .sujets li {
+    margin: 0;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+
+  @media (min-width: 48rem) {
+    .tuile--grande {
+      padding: var(--pas-4);
+      min-height: 17rem;
+    }
+
+    .tuile--grande .pictogramme {
+      width: 4.5rem;
+      height: 4.5rem;
+    }
+  }
+
+  /* Tuile en ligne : pictogramme, nom et pied, flèche. */
+  .tuile--ligne {
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--pas-2);
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte);
+  }
+
+  .tuile--ligne .pictogramme {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0.6rem;
+    border-radius: 50%;
+    background: var(--couleur-surface);
+  }
+
+  .tuile--ligne .nom {
+    font-size: var(--t-h3);
+  }
+
+  .tuile--ligne .corps {
+    display: grid;
+    gap: 0.125rem;
+  }
+</style>

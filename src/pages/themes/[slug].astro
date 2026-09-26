@@ -1,216 +1,325 @@
 ---
 /*
- * Page de thème : pour chaque affirmation du thème, la position de chaque
- * candidat en lice.
+ * Page de thème : « qui est pour, qui est contre ? », affirmation par
+ * affirmation — ou, pour un thème hors test, ce que chacun propose.
+ *
+ * REFAITE LE 26 SEPTEMBRE 2026 pour se lire sans lire : visages des candidats,
+ * colonnes Pour et Contre côte à côte, coche verte et croix rouge. Le vert et
+ * le rouge sont la levée bornée de la règle 1.1 du design system : ils disent
+ * un sens, jamais un candidat, et ne sont jamais seuls (forme et mot).
  *
  * ELLE RÉPOND À « QUE PENSENT LES CANDIDATS DE X ? », pas à « que pense Y ? » —
- * c'est la fiche candidat. Aucune citation n'est donc répétée ici : chaque nom
- * renvoie, par une ancre, à la position détaillée et sourcée sur la fiche.
- * Deux pages au contenu identique se feraient concurrence dans les moteurs, et
- * le cahier des charges l'interdit.
+ * c'est la fiche candidat. Aucune citation n'est donc répétée ici : chaque
+ * visage renvoie, par une ancre, à la position détaillée et sourcée sur la
+ * fiche. Deux pages au contenu identique se feraient concurrence dans les
+ * moteurs, et le cahier des charges l'interdit.
  *
- * NEUTRALITÉ : les groupes suivent l'échelle du test, du plein accord au plein
- * désaccord, et les noms l'ordre alphabétique. Aucun candidat n'est mis en
- * avant, et un groupe vide est affiché comme tel plutôt que masqué, pour que
- * l'échelle reste lisible entière. Les candidats sans position sont nommés :
- * les omettre laisserait croire qu'ils ne sont pas en lice.
+ * TOUT EST DANS LE HTML SERVI. Aucun îlot, aucun script : la phrase « En
+ * bref », les colonnes et le tableau récapitulatif se lisent sans JavaScript,
+ * y compris par les robots d'IA qui n'en exécutent pas.
  *
  * `direction` n'est jamais lu ici : les questions arrivent projetées.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
-import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
-import { pagesThemes, type CandidatCite, type PageTheme } from "../../lib/fiches";
+import EnTeteTheme from "../../components/themes/EnTeteTheme.astro";
+import LegendePositions from "../../components/themes/LegendePositions.astro";
+import PlateauAffirmation from "../../components/themes/PlateauAffirmation.astro";
+import RecapitulatifTheme from "../../components/themes/RecapitulatifTheme.astro";
+import PropositionsDuTheme from "../../components/themes/PropositionsDuTheme.astro";
+import AutresThemes from "../../components/themes/AutresThemes.astro";
+import Portrait from "../../components/candidats/Portrait.astro";
+import Icone from "../../components/Icone.astro";
+import { tousLesThemes, NOMBRE_AFFIRMATIONS, type ThemeQuelconque } from "../../lib/fiches";
 import { SITE_NAME, SITE_URL } from "../../lib/site";
 
 export function getStaticPaths() {
-  return pagesThemes().map((theme) => ({ params: { slug: theme.slug }, props: { theme } }));
+  const themes = tousLesThemes();
+  return themes.map((theme) => ({
+    params: { slug: theme.slug },
+    props: {
+      theme,
+      habillages: themes.map(({ nom, slug, icone, teinte }) => ({ nom, slug, icone, teinte })),
+    },
+  }));
 }
 
-type Props = { theme: PageTheme };
-const { theme } = Astro.props;
-
-const UPDATED = theme.misAJour;
+type Props = {
+  theme: ThemeQuelconque;
+  habillages: { nom: string; slug: string; icone: string; teinte: ThemeQuelconque["teinte"] }[];
+};
+const { theme, habillages } = Astro.props;
 
 const url = new URL(`/themes/${theme.slug}`, SITE_URL).href;
+const duTest = theme.type === "test";
 
-/*
- * Nuances affichées à côté du nom, et seulement celles qui changent la lecture
- * du cran : une reprise de parti, une citation partielle, une valeur déduite.
- * La confiance dans la source reste sur la fiche, où elle s'explique.
- */
-const NUANCE_ADEQUATION: Record<string, string> = {
-  partielle: "citation partielle",
-  deduite: "valeur déduite",
-};
+const title = duTest
+  ? `${theme.nom} : qui est pour, qui est contre ? Présidentielle 2027`
+  : `${theme.nom} : ce que proposent les candidats à la présidentielle 2027`;
 
-function nuances(cite: CandidatCite): string {
-  return [
-    cite.heriteDe !== null ? `position de ${cite.heriteDe}, reprise` : null,
-    cite.adequation !== null ? (NUANCE_ADEQUATION[cite.adequation] ?? null) : null,
-  ]
-    .filter((nuance) => nuance !== null)
-    .join(" ; ");
-}
+const description = duTest
+  ? `${theme.affirmations.map((a) => a.court).join(", ")} : la position des ${theme.enLice} candidats à la présidentielle 2027, rangés en pour, contre ou sans position connue, avec un lien vers chaque citation sourcée et datée.`
+  : `Les propositions des candidats à la présidentielle 2027 sur le thème « ${theme.nom} » : ${theme.nombrePropositions} relevées, chacune attribuée, datée et sourcée. Ce thème n'entre pas encore dans le test.`;
 
-function lien(cite: CandidatCite, questionId: string): string {
-  return `/candidats/${cite.slug}#${questionId}`;
-}
+const chapo = duTest
+  ? `Qui est pour, qui est contre ? ${theme.affirmations.length} questions, ${theme.enLice} candidats en lice.`
+  : `Ce que proposent les candidats, un par un, avec la date et la nature de chaque proposition.`;
 
 const filAriane = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
     { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
-    {
-      "@type": "ListItem",
-      position: 2,
-      name: "Thèmes",
-      item: new URL("/themes", SITE_URL).href,
-    },
+    { "@type": "ListItem", position: 2, name: "Thèmes", item: new URL("/themes", SITE_URL).href },
     { "@type": "ListItem", position: 3, name: theme.nom, item: url },
   ],
+};
+
+/*
+ * Balisage de la page : son sujet, et la table brute dont elle est tirée. Un
+ * assistant qui veut vérifier ou citer une position sait où la trouver.
+ */
+const webPage = {
+  about: {
+    "@type": "Thing",
+    name: `${theme.nom} dans l'élection présidentielle française de 2027`,
+  },
+  isBasedOn: new URL(
+    duTest ? "/donnees/positions-retenues.csv" : "/donnees/propositions.csv",
+    SITE_URL,
+  ).href,
 };
 ---
 
 <BaseLayout
-  title={`${theme.nom} : les positions des candidats à la présidentielle 2027`}
-  description={`Ce que disent les candidats à l'élection présidentielle de 2027 sur ${theme.affirmations.length} affirmations du thème « ${theme.nom} », avec le lien vers chaque citation sourcée et datée.`}
-  updated={UPDATED}
+  title={title}
+  description={description}
+  updated={theme.misAJour}
+  gabarit="libre"
+  noindex={theme.type === "propositions" && !theme.indexable}
+  webPage={webPage}
 >
-  <nav class="fil-ariane" aria-label="Fil d'Ariane">
-    <a href="/">{SITE_NAME}</a>
-    <span aria-hidden="true">/</span>
-    <a href="/themes">Thèmes</a>
-  </nav>
+  <EnTeteTheme
+    nom={theme.nom}
+    icone={theme.icone}
+    teinte={theme.teinte}
+    chapo={chapo}
+    misAJour={theme.misAJour}
+    sommaire={duTest ? theme.affirmations.map((a) => ({ id: a.question.id, court: a.court })) : []}
+  />
 
-  <h1>{theme.nom}</h1>
-  <DerniereMiseAJour date={UPDATED} />
+  <div class="enveloppe-large corps">
+    {
+      theme.type === "test" && (
+        <>
+          <div class="legende-bloc">
+            <LegendePositions />
+          </div>
 
-  <p class="question">
-    Les {theme.affirmations.length} affirmations du test sur ce thème, et la position de chaque candidat
-    en lice. Chaque nom mène à la citation, à sa source et à sa date.
-  </p>
+          <div class="plateaux">
+            {theme.affirmations.map((affirmation) => (
+              <PlateauAffirmation affirmation={affirmation} />
+            ))}
+          </div>
 
-  <p>
-    Une position reprise du parti faute de déclaration personnelle, une citation qui ne porte que
-    sur une partie de l'affirmation et une valeur déduite sont signalées à côté du nom. Pour situer
-    vos propres réponses, <a href="/test">faites le test</a>.
-  </p>
+          <section class="section-page" aria-labelledby="recapitulatif-titre">
+            <RecapitulatifTheme
+              nom={theme.nom}
+              candidats={theme.candidats}
+              affirmations={theme.affirmations}
+            />
+          </section>
 
-  {
-    theme.affirmations.map((affirmation) => (
-      <section class="affirmation" aria-labelledby={affirmation.question.id}>
-        <h2 id={affirmation.question.id}>{affirmation.question.texte}</h2>
-        <p class="definition">
-          {affirmation.question.infobulle} Source :{" "}
-          <a href={affirmation.definitionSource.url} rel="noreferrer">
-            {affirmation.definitionSource.titre}
-          </a>
-          , {affirmation.definitionSource.editeur}.
-        </p>
-        <dl class="groupes">
-          {affirmation.groupes.map((groupe) => (
-            <>
-              <dt>{groupe.libelle}</dt>
-              <dd>
-                {groupe.candidats.length === 0 ? (
-                  <span class="vide">Aucun candidat</span>
-                ) : (
-                  <ul>
-                    {groupe.candidats.map((cite) => (
-                      <li>
-                        <a href={lien(cite, affirmation.question.id)}>{cite.nom}</a>
-                        {nuances(cite) && <span class="nuance"> — {nuances(cite)}</span>}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </dd>
-            </>
-          ))}
-          <dt>Position inconnue</dt>
-          <dd>
-            {affirmation.inconnus.length === 0 ? (
-              <span class="vide">Aucun candidat</span>
+          {theme.parCandidat.length > 0 && (
+            <section class="section-page" aria-labelledby="propositions">
+              <h2 id="propositions">Ce qu'ils proposent sur ce thème</h2>
+              <p class="hors-score">
+                <Icone nom="info" graisse="bold" />
+                Ces propositions viennent des programmes et des déclarations. Elles ne comptent pas
+                dans le test : elles décrivent, elles ne rangent pas.
+              </p>
+              <PropositionsDuTheme parCandidat={theme.parCandidat} domaine={theme.domaine} />
+            </section>
+          )}
+        </>
+      )
+    }
+
+    {
+      theme.type === "propositions" && (
+        <>
+          <p class="hors-score encadre">
+            <Icone nom="info" graisse="bold" />
+            Aucune question du test ne porte encore sur ce thème. Personne n'est donc rangé pour ou
+            contre : la page liste ce que chaque candidat propose, avec sa source sur sa fiche.
+          </p>
+
+          <section class="section-page" aria-labelledby="propositions">
+            <h2 id="propositions">
+              {theme.nombrePropositions === 0
+                ? "Aucune proposition relevée"
+                : `${theme.nombrePropositions} ${theme.nombrePropositions === 1 ? "proposition relevée" : "propositions relevées"}`}
+            </h2>
+            {theme.parCandidat.length > 0 ? (
+              <PropositionsDuTheme parCandidat={theme.parCandidat} domaine={theme.domaine} />
             ) : (
-              <ul class="inconnus">
-                {affirmation.inconnus.map((cite) => (
+              <p class="vide">Aucune proposition n'a encore été relevée sur ce thème.</p>
+            )}
+          </section>
+
+          {theme.sansProposition.length > 0 && (
+            <section class="section-page" aria-labelledby="sans-proposition">
+              <h2 id="sans-proposition" class="titre-discret">
+                Aucune proposition relevée pour {theme.sansProposition.length} candidats
+              </h2>
+              <ul class="noms">
+                {theme.sansProposition.map((candidat) => (
                   <li>
-                    <a href={lien(cite, affirmation.question.id)}>{cite.nom}</a>
+                    <a href={`/candidats/${candidat.slug}`}>
+                      <Portrait nom={candidat.nom} chemin={candidat.portrait} taille={32} />
+                      {candidat.nom}
+                    </a>
                   </li>
                 ))}
               </ul>
-            )}
-          </dd>
-        </dl>
-      </section>
-    ))
-  }
+            </section>
+          )}
+        </>
+      )
+    }
 
-  <p class="signature">
-    La <a href="/methodologie">méthodologie</a> explique comment une position est établie. Un candidat
-    sans position documentée n'est ni pour ni contre : on ne sait pas encore, et le test l'écarte du calcul
-    sur cette affirmation. Une erreur ? La procédure de signalement est décrite dans la{" "}
-    <a href="/charte-editoriale">charte éditoriale</a>.
-  </p>
+    <section class="appel" aria-labelledby="appel-titre">
+      <h2 id="appel-titre">Et vous, où vous situez-vous ?</h2>
+      <p>
+        Répondez aux {NOMBRE_AFFIRMATIONS} questions du test et voyez de quels candidats vous êtes proche.
+      </p>
+      <a class="action action--grand" href="/test">Commencer le test</a>
+    </section>
+
+    <p class="methode">
+      Comment une position est établie : la <a href="/methodologie">méthodologie</a>. Un candidat
+      sans position connue n'est ni pour ni contre : on ne sait pas encore, et le test l'écarte du
+      calcul sur cette question. Une erreur ? La procédure de signalement est décrite dans la{" "}
+      <a href="/charte-editoriale">charte éditoriale</a>.
+    </p>
+
+    <AutresThemes themes={habillages} courant={theme.slug} />
+  </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
 </BaseLayout>
 
 <style>
-  /* Un filet par affirmation : il sépare deux questions, il ne décore pas. */
-  .affirmation {
-    margin-top: var(--pas-5);
-    padding-top: var(--pas-3);
-    border-top: 1px solid var(--couleur-trait);
+  .corps {
+    padding-block: var(--pas-4) var(--pas-6);
   }
 
-  .affirmation h2 {
-    font-size: var(--t-h3);
-    margin-top: 0;
+  .legende-bloc {
+    padding-bottom: var(--pas-4);
   }
 
-  .definition {
+  .plateaux {
+    display: grid;
+    gap: var(--pas-4);
+  }
+
+  .section-page {
+    margin-top: var(--pas-6);
+  }
+
+  .section-page h2 {
+    margin: 0 0 var(--pas-2);
+    text-wrap: balance;
+  }
+
+  .hors-score {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-4);
+    max-width: 44rem;
     font-size: var(--t-petit);
     color: var(--couleur-encre-faible);
   }
 
-  .groupes {
-    margin: var(--pas-3) 0 0;
+  .hors-score :global(.icone) {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.15rem;
+    color: var(--couleur-signature);
   }
 
-  .groupes dt {
-    font-weight: 600;
-    margin-top: var(--pas-3);
+  .encadre {
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte);
+    background: var(--couleur-surface-2);
+    color: var(--couleur-encre);
+    font-size: var(--t-corps);
   }
 
-  .groupes dd {
-    margin: var(--pas-1) 0 0;
+  .titre-discret {
+    font-size: var(--t-h3);
   }
 
-  .groupes ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-
-  .groupes li {
-    margin-bottom: var(--pas-1);
-  }
-
-  .vide,
-  .nuance {
+  .vide {
     color: var(--couleur-encre-faible);
   }
 
-  /*
-   * Les candidats sans position forment la liste la plus longue tant que les
-   * programmes ne sont pas publiés. En ligne plutôt qu'en colonne, pour que
-   * l'absence reste nommée sans occuper plus de place que ce qu'on sait.
-   */
-  .inconnus {
+  .noms {
+    list-style: none;
+    padding: 0;
+    margin: 0;
     display: flex;
     flex-wrap: wrap;
-    column-gap: var(--pas-3);
+    gap: var(--pas-1);
+  }
+
+  .noms li {
+    margin: 0;
+  }
+
+  .noms a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-1);
+    min-height: 44px;
+    padding: 0.25rem 0.8rem 0.25rem 0.3rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    border: 1px solid var(--couleur-trait);
+    color: var(--couleur-encre);
+    font-size: var(--t-petit);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .noms :global(.portrait) {
+    border-radius: 50%;
+  }
+
+  .appel {
+    margin-top: var(--pas-6);
+    padding: var(--pas-5) var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface-2);
+    text-align: center;
+  }
+
+  .appel h2 {
+    margin: 0 auto;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+
+  .appel p {
+    margin: var(--pas-2) auto var(--pas-4);
+    max-width: 32rem;
+  }
+
+  .methode {
+    margin: var(--pas-5) 0;
+    max-width: 44rem;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
   }
 </style>

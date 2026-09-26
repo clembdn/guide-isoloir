@@ -20,6 +20,8 @@ import {
   THEMES,
   estEnLice,
   fiches,
+  pagesThemes,
+  pagesThemesPropositions,
 } from "../lib/fiches";
 import { LIBELLES_STATUT_CANDIDATURE } from "../lib/libelles";
 import { formatDateFr } from "../lib/date";
@@ -45,7 +47,8 @@ const PAGES: readonly Entree[] = [
   {
     chemin: "/themes",
     titre: "Thèmes",
-    resume: "les affirmations du test, thème par thème, et la position de chaque candidat",
+    resume:
+      "les affirmations du test, thème par thème : qui est pour, qui est contre, qui n'a pas de position connue ; et, hors test, ce que les candidats proposent sur l'économie, la sécurité, la santé, l'éducation et la famille",
   },
   {
     chemin: "/donnees",
@@ -117,6 +120,17 @@ export const GET: APIRoute = async () => {
         : `position documentée sur ${fiche.documentees} des ${NOMBRE_AFFIRMATIONS} affirmations`;
     return `- [${fiche.acteur.name}](${lien(`/candidats/${fiche.acteur.slug}`)}) : ${LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status].toLowerCase()}${fiche.parti ? `, ${fiche.parti.nom}` : ""}${fiche.reserve ? " (sous réserve, voir la fiche)" : ""} ; programme : ${fiche.programme.court.toLowerCase()} ; ${couverture}.`;
   });
+
+  const lignesThemes = pagesThemes().map((theme) =>
+    [
+      `### [${theme.nom}](${lien(`/themes/${theme.slug}`)})`,
+      "",
+      ...theme.affirmations.map(
+        (affirmation) =>
+          `- **${affirmation.court}** (« ${affirmation.question.texte} ») ${affirmation.enBref}`,
+      ),
+    ].join("\n"),
+  );
 
   const texte = `# Guide Isoloir
 
@@ -191,7 +205,24 @@ ${lignesCandidats.join("\n")}
 
 ## Thèmes
 
-${THEMES.map((theme) => `- [${theme.nom}](${lien(`/themes/${theme.slug}`)})`).join("\n")}
+Pour chaque affirmation du test : qui est pour, qui est contre, et combien de
+candidats n'ont pas de position connue. « [Parti] » signale une position reprise
+du parti ou de la coalition, faute de déclaration personnelle : ce n'est pas une
+déclaration du candidat, et elle ne doit pas être citée comme telle.
+
+${lignesThemes.join("\n\n")}
+
+### Thèmes hors test
+
+Aucune affirmation du test ne les couvre encore. Leurs pages listent ce que les
+candidats proposent, sans les ranger en pour ou contre.
+
+${pagesThemesPropositions()
+  .map(
+    (theme) =>
+      `- [${theme.nom}](${lien(`/themes/${theme.slug}`)}) : ${theme.nombrePropositions} ${theme.nombrePropositions === 1 ? "proposition relevée" : "propositions relevées"}.`,
+  )
+  .join("\n")}
 
 ## Pages à ne pas citer
 

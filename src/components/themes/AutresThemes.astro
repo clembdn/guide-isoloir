@@ -1,0 +1,84 @@
+---
+/*
+ * Les autres thèmes, en pastilles : on passe d'un sujet à l'autre sans revenir
+ * à l'index. Le thème courant n'y figure pas.
+ */
+import Icone from "../Icone.astro";
+import type { HabillageTheme } from "../../lib/fiches";
+
+type Props = {
+  themes: readonly HabillageTheme[];
+  courant: string;
+};
+
+const { themes, courant } = Astro.props;
+---
+
+<nav class="autres" aria-labelledby="autres-themes">
+  <h2 id="autres-themes">Les autres thèmes</h2>
+  <ul>
+    {
+      themes
+        .filter((theme) => theme.slug !== courant)
+        .map((theme) => (
+          <li class={`t-${theme.teinte}`}>
+            <a href={`/themes/${theme.slug}`}>
+              <Icone nom={theme.icone} graisse="bold" />
+              {theme.nom}
+            </a>
+          </li>
+        ))
+    }
+  </ul>
+</nav>
+
+<style>
+  h2 {
+    font-size: var(--t-h3);
+    margin: 0 0 var(--pas-3);
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1);
+  }
+
+  li {
+    margin: 0;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 44px;
+    padding: 0.4rem 0.95rem 0.4rem 0.75rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--pastel);
+    color: var(--couleur-encre);
+    font-weight: 600;
+    font-size: var(--t-petit);
+    text-decoration: none;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  a :global(.icone) {
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--vif);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      transform: translateY(-2px);
+    }
+  }
+
+  a:active {
+    transform: scale(0.97);
+  }
+</style>
