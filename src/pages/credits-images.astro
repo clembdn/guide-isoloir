@@ -155,7 +155,8 @@ const nommer = (acteurs: readonly { id: string; name: string; sortName: string }
           ) : (
             media.licence
           )}
-          .{media.reserve && <span class="reserve-media">{media.reserve}</span>}
+          .{media.retouches && <span class="reserve-media">Image {media.retouches}.</span>}
+          {media.reserve && <span class="reserve-media">{media.reserve}</span>}
         </li>
       ))
     }

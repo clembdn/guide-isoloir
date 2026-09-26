@@ -11,7 +11,7 @@
  * nommer la licence, et une image libre dont on tait l'auteur est une image
  * utilisée sans droit.
  *
- * Absents de ce fichier, faute de média sous licence libre au 2026-09-25 :
+ * Absents de ce fichier, faute de média sous licence libre au 2026-09-26 :
  * Antoine Mikolajczak, et les logos de France Libre, Génération écologie,
  * Les Patriotes et Place publique. L'interface affiche alors des initiales.
  * Ne pas compléter depuis un site de parti : un logo pris là n'est pas libre.
@@ -30,10 +30,12 @@ export type Media = {
   licenceUrl: string;
   /** Réserve relevée sur la page Commons du fichier, s'il y en a une. */
   reserve?: string;
+  /** Modifications apportées à l'image. Les taire rendrait le crédit incomplet. */
+  retouches?: string;
 };
 
 /** Date du relevé des licences. Un relevé vieillit : le republier le dit. */
-export const MEDIAS_RELEVES_LE = "2026-09-25";
+export const MEDIAS_RELEVES_LE = "2026-09-26";
 
 export const MEDIAS: readonly Media[] = [
   {
@@ -164,12 +166,12 @@ export const MEDIAS: readonly Media[] = [
     actorId: "anasse-kazib",
     genre: "portrait",
     chemin: "/medias/portraits/anasse-kazib.jpg",
-    fichierCommons: "Anasse Kazib, décembre 2021 (resseré).jpg",
-    pageCommons:
-      "https://commons.wikimedia.org/wiki/File:Anasse_Kazib,_d%C3%A9cembre_2021_(resser%C3%A9).jpg",
+    fichierCommons: "Anasse Kazib, décembre 2021.jpg",
+    pageCommons: "https://commons.wikimedia.org/wiki/File:Anasse_Kazib,_d%C3%A9cembre_2021.jpg",
     auteur: "PabloMorao27",
     licence: "CC BY-SA 4.0",
     licenceUrl: "https://creativecommons.org/licenses/by-sa/4.0",
+    retouches: "recadrée au carré et redimensionnée",
   },
   {
     actorId: "francis-lalanne",
@@ -267,12 +269,13 @@ export const MEDIAS: readonly Media[] = [
     actorId: "segolene-royal",
     genre: "portrait",
     chemin: "/medias/portraits/segolene-royal.jpg",
-    fichierCommons: "Ségolène Royal (435608096) (cropped).jpg",
+    fichierCommons: "Antti Rinne & Ségolène Royal (49141293827).jpg",
     pageCommons:
-      "https://commons.wikimedia.org/wiki/File:S%C3%A9gol%C3%A8ne_Royal_(435608096)_(cropped).jpg",
-    auteur: "manuel | MC from Nantes / Paris, France",
-    licence: "CC BY-SA 2.0",
-    licenceUrl: "https://creativecommons.org/licenses/by-sa/2.0",
+      "https://commons.wikimedia.org/wiki/File:Antti_Rinne_%26_S%C3%A9gol%C3%A8ne_Royal_(49141293827).jpg",
+    auteur: "FinnishGovernment",
+    licence: "CC BY 2.0",
+    licenceUrl: "https://creativecommons.org/licenses/by/2.0",
+    retouches: "recadrée au carré et redimensionnée",
   },
   {
     actorId: "francois-ruffin",

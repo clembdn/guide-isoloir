@@ -35,7 +35,7 @@ import MarquePosition from "../../components/themes/MarquePosition.astro";
 import Icone from "../../components/Icone.astro";
 import EtapesCandidature from "../../components/schemas/EtapesCandidature.astro";
 import { fiches, NOMBRE_AFFIRMATIONS, type Fiche } from "../../lib/fiches";
-import { ECHELLE, LIBELLES_SENS, nuanceDe, sensDe, type Sens } from "../../lib/echelle";
+import { ECHELLE, LIBELLES_SENS, nuanceDe, sensDe } from "../../lib/echelle";
 import { LIBELLES_ADEQUATION, LIBELLES_CONFIANCE } from "../../lib/libelles";
 import { formatDateFr } from "../../lib/date";
 import { SITE_NAME, SITE_URL } from "../../lib/site";
@@ -66,17 +66,12 @@ function verdict(valeur: (typeof ECHELLE)[number]["valeur"]): string {
 /*
  * Bilan en pastilles, en tête des positions : combien de pour, de contre, de
  * « ni l'un ni l'autre », et combien sans position connue. Même code que le
- * sommaire des pages de thème.
+ * sommaire des pages de thème ; le calcul vit dans `fiches.ts`, partagé avec
+ * la liste des candidats.
  */
-const valeurs = fiche.parTheme.flatMap((groupe) =>
-  groupe.entrees.map((entree) => entree.resolue!.position.value),
-);
-const bilan: { sens: Sens | "inconnu"; nombre: number }[] = [
-  { sens: "pour" as const, nombre: valeurs.filter((v) => sensDe(v) === "pour").length },
-  { sens: "contre" as const, nombre: valeurs.filter((v) => sensDe(v) === "contre").length },
-  { sens: "neutre" as const, nombre: valeurs.filter((v) => sensDe(v) === "neutre").length },
-  { sens: "inconnu" as const, nombre: fiche.inconnues.length },
-].filter((ligne) => ligne.sens !== "neutre" || ligne.nombre > 0);
+const bilan = (["pour", "contre", "neutre", "inconnu"] as const)
+  .map((sens) => ({ sens, nombre: fiche.bilan[sens] }))
+  .filter((ligne) => ligne.sens !== "neutre" || ligne.nombre > 0);
 
 /** « 1 affirmation », « 2 affirmations ». Zéro prend le singulier en français. */
 function accorder(nombre: number, singulier: string, pluriel: string): string {

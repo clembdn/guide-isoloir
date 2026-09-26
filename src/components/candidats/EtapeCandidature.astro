@@ -45,8 +45,14 @@ const crans = Array.from({ length: CRANS_CANDIDATURE }, (_, index) => index + 1)
       )
     }
     {etape.court}
+    {
+      /*
+       * Dans le libellé, pas à côté : en élément séparé du flex, la mention
+       * passait seule à la ligne, virgule en tête, dès que la place manquait.
+       */
+    }
+    {reserve && <span class="etape-reserve">, sous réserve</span>}
   </span>
-  {reserve && <span class="etape-reserve">, sous réserve</span>}
 </p>
 
 <style>
@@ -82,7 +88,6 @@ const crans = Array.from({ length: CRANS_CANDIDATURE }, (_, index) => index + 1)
   }
 
   .etape-reserve {
-    margin-left: calc(-1 * var(--pas-1));
     font-weight: 400;
   }
 

@@ -21,12 +21,19 @@ type Props = {
    * tout `style=""` en ligne. 32 et 40 servent aux pages de thème : le tableau
    * récapitulatif et les visages des candidats sans position connue.
    */
-  taille: 32 | 40 | 64 | 120;
+  taille: 32 | 40 | 64 | 120 | "carte";
   /** La fiche charge son portrait tout de suite ; la liste, au défilement. */
   differe?: boolean;
 };
 
 const { nom, chemin, taille, differe = true } = Astro.props;
+
+/*
+ * « carte » : le portrait remplit la largeur de sa carte, au carré. Les
+ * attributs réservent la place avant le chargement (330, la largeur du
+ * fichier servi) ; la CSS fixe la taille réelle.
+ */
+const cote = taille === "carte" ? 330 : taille;
 ---
 
 {
@@ -35,8 +42,8 @@ const { nom, chemin, taille, differe = true } = Astro.props;
       class:list={["portrait", `portrait-${taille}`]}
       src={chemin}
       alt=""
-      width={taille}
-      height={taille}
+      width={cote}
+      height={cote}
       loading={differe ? "lazy" : "eager"}
       decoding="async"
     />
@@ -96,6 +103,17 @@ const { nom, chemin, taille, differe = true } = Astro.props;
 
   .portrait-absent.portrait-120 {
     font-size: 1.5rem;
+  }
+
+  .portrait-carte {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .portrait-absent.portrait-carte {
+    font-size: clamp(1.75rem, 1rem + 4vw, 2.75rem);
+    letter-spacing: 0.02em;
   }
 
   .portrait-absent.portrait-32,

@@ -1,34 +1,34 @@
 ---
 /*
- * Liste des candidats suivis.
+ * Liste des candidats suivis : un trombinoscope.
+ *
+ * REFAITE LE 27 SEPTEMBRE 2026. L'ancienne liste montrait un portrait de
+ * 64 px, trois étiquettes grises et un aperçu déplié, vingt-huit fois de
+ * suite : près de dix mille pixels de haut sur un téléphone, et rien qui
+ * ressemble aux pages de thème. Chaque candidat est désormais une carte à
+ * grand portrait — deux par ligne à 375 px, trois puis quatre sur ordinateur —
+ * avec son parti, l'étape de sa candidature et le même bilan ✓ / ✗ / ? que
+ * sa fiche. Le programme détaillé et l'aperçu des propositions vivent sur la
+ * fiche ; la carte y mène tout entière.
  *
  * ORDRE ALPHABÉTIQUE PAR `sortName`, jamais par couverture ni par notoriété :
- * c'est la règle publiée sur `/charte-editoriale`. Trier par nombre de positions
- * documentées mettrait en tête les candidats les mieux couverts par la presse,
- * et une liste en tête de laquelle figure toujours le même nom se lit comme un
- * classement. Ni l'étape de candidature ni le nombre de propositions ne
- * décident de l'ordre : ils s'affichent, ils ne trient pas.
+ * c'est la règle publiée sur `/charte-editoriale`. Ni l'étape, ni le nombre de
+ * propositions, ni le bilan ne décident de l'ordre : ils s'affichent, ils ne
+ * trient pas.
  *
- * Chaque entrée reçoit exactement le même traitement : même cadre, même taille,
- * mêmes lignes. La couverture et les propositions sont affichées pour tous,
- * zéro compris.
- *
- * GRILLE PLEINE LARGEUR, SANS BOÎTE (25 septembre 2026). La colonne étroite
- * laissait de grands vides latéraux sur ordinateur ; chaque candidat est
- * désormais une entrée sous un filet, une à trois par ligne selon la largeur.
- * Un filet sépare deux candidats : il ne décore pas.
- *
- * L'APERÇU SE DÉPLIE SANS JAVASCRIPT. `<details>` natif : son contenu est
- * dans le HTML servi, lisible par un robot qui n'exécute rien, et le bouton
- * est accessible au clavier sans une ligne de script.
+ * MÊME CARTE POUR TOUS : même cadre, même taille de portrait, mêmes lignes.
+ * Un candidat sans photo libre a ses initiales, au même format. Le bilan est
+ * affiché pour tous, zéro compris : une carte sans position connue le dit.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
 import Portrait from "../../components/candidats/Portrait.astro";
 import EtapeCandidature from "../../components/candidats/EtapeCandidature.astro";
 import EtapesCandidature from "../../components/schemas/EtapesCandidature.astro";
+import MarquePosition from "../../components/themes/MarquePosition.astro";
 import Icone from "../../components/Icone.astro";
 import { fiches, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
+import { CRANS_CANDIDATURE, LEGENDE_ETAPES } from "../../lib/libelles";
 import { SITE_NAME, SITE_URL, ELECTION } from "../../lib/site";
 import { formatDateFr } from "../../lib/date";
 
@@ -45,6 +45,20 @@ const retirees = toutes.filter((fiche) => RETRAITS.has(fiche.candidature.status)
 /** La liste change quand une fiche change : sa date est celle de la plus récente. */
 const UPDATED = toutes.map((fiche) => fiche.misAJour).reduce((a, b) => (a > b ? a : b));
 
+/*
+ * Combien de candidatures à chaque étape. Un compte, pas un classement : il
+ * dit où en est la campagne, pas qui a le plus de chances.
+ */
+const parEtape = LEGENDE_ETAPES.map((etape) => ({
+  ...etape,
+  nombre: enLice.filter((fiche) => fiche.etape.rang === etape.rang).length,
+}));
+const crans = Array.from({ length: CRANS_CANDIDATURE }, (_, index) => index + 1);
+
+function accorder(nombre: number, singulier: string, pluriel: string): string {
+  return `${nombre} ${nombre > 1 ? pluriel : singulier}`;
+}
+
 const filAriane = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -58,6 +72,20 @@ const filAriane = {
     },
   ],
 };
+
+const liste = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "Candidats suivis pour l'élection présidentielle 2027",
+  numberOfItems: enLice.length,
+  itemListOrder: "https://schema.org/ItemListOrderAscending",
+  itemListElement: enLice.map((fiche, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    name: fiche.acteur.name,
+    url: new URL(`/candidats/${fiche.acteur.slug}`, SITE_URL).href,
+  })),
+};
 ---
 
 <BaseLayout
@@ -65,91 +93,88 @@ const filAriane = {
   description={`Les ${enLice.length} personnes suivies pour l'élection présidentielle de 2027, par ordre alphabétique. Pour chacune : où en est sa candidature, ce que l'on sait de son programme, et ses positions sur les ${NOMBRE_AFFIRMATIONS} affirmations du test, avec leurs sources.`}
   updated={UPDATED}
   gabarit="libre"
+  webPage={{ "@type": "CollectionPage" }}
 >
-  <div class="enveloppe-large page">
+  <div class="enveloppe-large page-candidats">
     <nav class="fil-ariane" aria-label="Fil d'Ariane">
       <a href="/">{SITE_NAME}</a>
     </nav>
 
     <header class="tete">
-      <h1>Candidats à l'élection présidentielle 2027</h1>
-      <DerniereMiseAJour date={UPDATED} />
-      <p class="question">
+      <h1>Les candidats à la présidentielle 2027</h1>
+      <p class="chapo">
         {enLice.length} personnes suivies pour les scrutins du {formatDateFr(ELECTION.round1)} et du{
           " "
         }
         {formatDateFr(ELECTION.round2)}, par ordre alphabétique. L'ordre n'exprime aucune
         préférence.
       </p>
+      <DerniereMiseAJour date={UPDATED} />
     </header>
 
-    <EtapesCandidature titre="Où en est chaque candidature" />
+    <section class="etapes" aria-labelledby="etapes-titre">
+      <h2 id="etapes-titre">Où en sont les candidatures</h2>
+      <ol class="etapes-comptes">
+        {
+          parEtape.map((etape) => (
+            <li>
+              <span class="crans" aria-hidden="true">
+                {crans.map((cran) => (
+                  <span class:list={["cran", { plein: cran <= etape.rang }]} />
+                ))}
+              </span>
+              <span class="etape-nombre">{etape.nombre}</span>
+              <span class="etape-libelle">{etape.court}</span>
+            </li>
+          ))
+        }
+      </ol>
+      <details class="etapes-detail">
+        <summary>
+          <Icone nom="caret-right" graisse="bold" class="chevron" />
+          Ce que veut dire chaque étape
+        </summary>
+        <EtapesCandidature titre="Les quatre étapes d'une candidature" titreVisible={false} />
+      </details>
+    </section>
 
     <h2 class="visuellement-masque" id="liste">Les candidatures en cours</h2>
-    <ul class="candidats" aria-labelledby="liste">
+    <ul class="trombinoscope" aria-labelledby="liste">
       {
         enLice.map((fiche) => (
           <li class="candidat">
-            <div class="identite">
-              <Portrait nom={fiche.acteur.name} chemin={fiche.portrait} taille={64} />
-              <div>
-                <h3 class="nom">
-                  <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a>
-                </h3>
-                <p class="parti">{fiche.parti ? fiche.parti.nom : "Sans parti rattaché"}</p>
-              </div>
-            </div>
-
-            <EtapeCandidature etape={fiche.etape} reserve={fiche.reserve !== null} />
-
-            <dl class="chiffres">
-              <div>
-                <dt>Programme</dt>
-                <dd>{fiche.programme.court}</dd>
-              </div>
-              <div>
-                <dt>Propositions</dt>
-                <dd>{fiche.nombrePropositions}</dd>
-              </div>
-              <div>
-                <dt>Positions du test</dt>
-                <dd>
-                  {fiche.documentees} sur {NOMBRE_AFFIRMATIONS}
-                </dd>
-              </div>
-            </dl>
-
-            <details class="apercu">
-              <summary>
-                <Icone nom="caret-right" graisse="bold" class="chevron" />
-                Aperçu du programme
-              </summary>
-              <div class="apercu-corps">
-                <p class="etat">{fiche.programme.texte}</p>
-                {fiche.apercu.length > 0 ? (
-                  <ul class="mesures">
-                    {fiche.apercu.map((proposition) => (
-                      <li>
-                        <span class="mesure">{proposition.intitule}</span>
-                        <span class="mesure-origine">
-                          {proposition.natureLibelle}
-                          {proposition.auteur && `, ${proposition.auteur}`}
-                          {", "}
-                          <time datetime={proposition.date}>{formatDateFr(proposition.date)}</time>
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p class="vide">Aucune proposition relevée à ce jour.</p>
-                )}
-                <p class="vers-fiche">
-                  <a href={`/candidats/${fiche.acteur.slug}`}>
-                    Voir la fiche de {fiche.acteur.name}
-                  </a>
+            <Portrait nom={fiche.acteur.name} chemin={fiche.portrait} taille="carte" />
+            <div class="corps">
+              <h3 class="nom">
+                <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a>
+              </h3>
+              <p class="parti">{fiche.parti ? fiche.parti.nom : "Sans parti rattaché"}</p>
+              <EtapeCandidature etape={fiche.etape} reserve={fiche.reserve !== null} />
+              <div class="pied-carte">
+                <ul class="bilan" aria-hidden="true">
+                  <li>
+                    <MarquePosition sens="pour" taille="petite" />
+                    {fiche.bilan.pour}
+                  </li>
+                  <li>
+                    <MarquePosition sens="contre" taille="petite" />
+                    {fiche.bilan.contre}
+                  </li>
+                  <li>
+                    <MarquePosition sens="inconnu" taille="petite" />
+                    {fiche.bilan.inconnu}
+                  </li>
+                </ul>
+                <p class="visuellement-masque">
+                  {`Sur les ${NOMBRE_AFFIRMATIONS} affirmations du test : ${fiche.bilan.pour} pour, ${fiche.bilan.contre} contre${fiche.bilan.neutre > 0 ? `, ${fiche.bilan.neutre} ni pour ni contre` : ""}, ${fiche.bilan.inconnu} sans position connue.`}
+                </p>
+                <p class="programme">
+                  {fiche.programme.libelle}
+                  {fiche.nombrePropositions > 0 &&
+                    `, ${accorder(fiche.nombrePropositions, "proposition", "propositions")}`}
                 </p>
               </div>
-            </details>
+            </div>
           </li>
         ))
       }
@@ -160,17 +185,30 @@ const filAriane = {
         <section aria-labelledby="retraits" class="retraits">
           <h2 id="retraits">Candidatures retirées ou éliminées</h2>
           <p>Leurs fiches restent en ligne, avec leur statut et l'historique de leurs positions.</p>
-          <ul>
+          <ul class="retraits-liste">
             {retirees.map((fiche) => (
               <li>
-                <a href={`/candidats/${fiche.acteur.slug}`}>{fiche.acteur.name}</a> :{" "}
-                {fiche.etape.long}
+                <a href={`/candidats/${fiche.acteur.slug}`}>
+                  <Portrait nom={fiche.acteur.name} chemin={fiche.portrait} taille={40} />
+                  <span>
+                    <strong>{fiche.acteur.name}</strong>
+                    <span class="retrait-statut">{fiche.etape.long}</span>
+                  </span>
+                </a>
               </li>
             ))}
           </ul>
         </section>
       )
     }
+
+    <section class="appel" aria-labelledby="appel-titre">
+      <h2 id="appel-titre">De qui êtes-vous le plus proche ?</h2>
+      <p>
+        Répondez aux {NOMBRE_AFFIRMATIONS} questions du test : le calcul reste dans votre navigateur.
+      </p>
+      <a class="action action--grand" href="/test">Commencer le test</a>
+    </section>
 
     <div class="regles">
       <p>
@@ -182,227 +220,376 @@ const filAriane = {
         >.
       </p>
       <p>
-        L'aperçu montre au plus trois propositions, choisies par une règle fixe : une mesure avant
-        une orientation, un programme 2027 avant une déclaration, puis la plus récente. Leur nombre
-        dépend de ce que chaque campagne a publié, pas de la qualité d'un programme.
-      </p>
-      <p class="signature">
-        Pour comparer ces positions aux vôtres, <a href="/test">faites le test</a>. La <a
-          href="/methodologie">méthodologie</a
-        > explique comment une position est établie, et pourquoi certains candidats ne sont pas encore
-        classés.
+        Les pastilles comptent les positions de chaque candidat sur les {NOMBRE_AFFIRMATIONS} affirmations
+        du test : pour, contre, et sans position connue. Leur nombre dépend de ce que chaque campagne
+        a déclaré ou publié, pas de la qualité d'un programme. La <a href="/methodologie"
+          >méthodologie</a
+        > explique comment une position est établie.
       </p>
     </div>
   </div>
 
   <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+  <script type="application/ld+json" set:html={JSON.stringify(liste)} is:inline />
 </BaseLayout>
 
 <style>
-  .page {
-    padding-top: var(--pas-4);
-    padding-bottom: var(--pas-5);
+  .page-candidats {
+    padding-block: var(--pas-4) var(--pas-6);
   }
 
   .tete {
-    max-width: 46rem;
+    max-width: 44rem;
   }
 
   .tete h1 {
-    margin-bottom: var(--pas-2);
+    margin-top: var(--pas-2);
+    text-wrap: balance;
+  }
+
+  .chapo {
+    font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+    margin: var(--pas-2) 0 var(--pas-1);
+    text-wrap: pretty;
   }
 
   /*
-   * LA GRILLE. Une colonne à 375 px, deux à partir de 48 rem, trois à partir
-   * de 72 rem. `align-items: start` : un aperçu déplié allonge sa seule entrée,
-   * pas toute la rangée.
+   * ÉTAPES : QUATRE COMPTES, PAS UNE LÉGENDE. On voit d'un coup d'œil où en
+   * est la campagne ; l'explication de chaque étape est repliée dessous,
+   * présente dans le HTML servi. Même panneau que le bilan de la fiche :
+   * filets d'un pixel peints par le fond de la liste.
    */
-  .candidats {
+  .etapes {
+    margin-block: var(--pas-5);
+  }
+
+  .etapes h2 {
+    font-size: var(--t-h3);
+    margin: 0 0 var(--pas-2);
+  }
+
+  .etapes-comptes {
     list-style: none;
-    margin: var(--pas-5) 0 0;
     padding: 0;
+    margin: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    column-gap: var(--pas-5);
-    align-items: start;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: var(--couleur-trait);
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-carte);
+    overflow: clip;
   }
 
   @media (min-width: 48rem) {
-    .candidats {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+    .etapes-comptes {
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 
-  @media (min-width: 72rem) {
-    .candidats {
+  .etapes-comptes li {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
+    margin: 0;
+    padding: var(--pas-3);
+    background: var(--couleur-surface);
+  }
+
+  .crans {
+    display: inline-grid;
+    grid-template-columns: repeat(4, 1rem);
+    gap: 3px;
+  }
+
+  .cran {
+    height: 5px;
+    background: var(--couleur-trait);
+  }
+
+  .cran.plein {
+    background: var(--couleur-signature);
+  }
+
+  .etape-nombre {
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .etape-libelle {
+    font-size: var(--t-petit);
+    line-height: 1.3;
+    color: var(--couleur-encre-faible);
+  }
+
+  .etapes-detail {
+    margin-top: var(--pas-2);
+  }
+
+  .etapes-detail summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 44px;
+    cursor: pointer;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    color: var(--couleur-signature);
+    list-style: none;
+  }
+
+  .etapes-detail summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .etapes-detail :global(.chevron) {
+    width: 0.9rem;
+    height: 0.9rem;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .etapes-detail[open] :global(.chevron) {
+    transform: rotate(90deg);
+  }
+
+  /*
+   * TROMBINOSCOPE. Deux cartes par ligne à 375 px, trois à 48 rem, quatre à
+   * 64 rem. Toutes identiques : même portrait carré, mêmes lignes, et le pied
+   * de carte collé en bas pour que les bilans s'alignent d'une carte à
+   * l'autre, quelle que soit la longueur d'un nom ou d'un parti.
+   */
+  .trombinoscope {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pas-2);
+  }
+
+  @media (min-width: 48rem) {
+    .trombinoscope {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: var(--pas-3);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .trombinoscope {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
 
   .candidat {
-    display: grid;
-    gap: var(--pas-2);
-    padding: var(--pas-3) 0 var(--pas-4);
-    border-top: 1px solid var(--couleur-trait);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    background: var(--couleur-surface);
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-carte-l);
+    overflow: clip;
+    transition:
+      transform var(--duree) var(--sortie),
+      box-shadow var(--duree) var(--sortie);
   }
 
-  .identite {
+  /* Sans photo libre, les initiales sur le fond secondaire : même carré, même place. */
+  .candidat :global(.portrait-absent) {
+    background: var(--couleur-surface-2);
+  }
+
+  /* Le portrait ne bouge pas au survol : c'est la carte qui se soulève, pas l'image. */
+  .candidat :global(.portrait) {
+    border: 0;
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .candidat:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--ombre-2);
+    }
+
+    .candidat:hover .nom a {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  .candidat:active {
+    transform: scale(0.985);
+  }
+
+  .candidat:has(.nom a:focus-visible) {
+    outline: 2px solid var(--couleur-signature);
+    outline-offset: 3px;
+  }
+
+  .corps {
+    flex: 1;
     display: flex;
-    align-items: center;
-    gap: var(--pas-2);
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: var(--pas-2) var(--pas-2) var(--pas-3);
+  }
+
+  @media (min-width: 48rem) {
+    .corps {
+      padding: var(--pas-3);
+    }
   }
 
   .nom {
     margin: 0;
-    font-size: 1.25rem;
+    font-size: 1rem;
     line-height: 1.2;
+    text-wrap: balance;
   }
 
-  /* Le nom entier est la cible : 44 px de haut sans bouger la mise en page. */
+  @media (min-width: 48rem) {
+    .nom {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* Le lien du nom couvre toute la carte : un seul arrêt de tabulation par candidat. */
   .nom a {
-    display: inline-block;
-    padding-block: 10px;
-    margin-block: -10px;
     color: var(--couleur-encre);
-    text-decoration-thickness: 1px;
-    text-underline-offset: 0.2em;
+    text-decoration: none;
   }
 
-  .nom a:hover {
-    color: var(--couleur-signature);
+  .nom a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .nom a:focus-visible {
+    outline: none;
   }
 
   .parti {
-    margin: 2px 0 0;
-    font-size: var(--t-petit);
+    margin: 0;
+    font-size: 0.8125rem;
+    line-height: 1.3;
     color: var(--couleur-encre-faible);
   }
 
-  /*
-   * TROIS CHIFFRES, TROIS COLONNES, AUCUN FOND. L'intitulé en petit au-dessus,
-   * la valeur en dessous : un repère qu'on balaie des yeux, pas un tableau.
-   */
-  .chiffres {
+  /* Quand le libellé passe sous les crans, un interligne les sépare. */
+  .candidat :global(.etape) {
+    font-size: 0.75rem;
+    margin-top: 0.15rem;
+    row-gap: 0.3rem;
+  }
+
+  .pied-carte {
+    margin-top: auto;
+    padding-top: var(--pas-2);
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+
+  .bilan {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem var(--pas-2);
+    font-size: var(--t-petit);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .bilan li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    margin: 0;
+  }
+
+  .programme {
+    margin: 0;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--couleur-encre-faible);
+  }
+
+  .retraits {
+    margin-top: var(--pas-6);
+  }
+
+  .retraits h2 {
+    font-size: var(--t-h3);
+    margin: 0 0 var(--pas-1);
+  }
+
+  .retraits-liste {
+    list-style: none;
+    padding: 0;
+    margin: var(--pas-3) 0 0;
+    display: flex;
+    flex-wrap: wrap;
     gap: var(--pas-2);
-    margin: var(--pas-1) 0 0;
   }
 
-  .chiffres div {
-    min-width: 0;
+  .retraits-liste li {
+    margin: 0;
   }
 
-  .chiffres dt {
+  .retraits-liste a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-2);
+    min-height: 44px;
+    padding: 0.3rem 1rem 0.3rem 0.3rem;
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-actionnable);
+    color: var(--couleur-encre);
+    text-decoration: none;
+  }
+
+  .retraits-liste :global(.portrait) {
+    border-radius: 50%;
+  }
+
+  .retraits-liste a > span {
+    display: grid;
+    line-height: 1.25;
+  }
+
+  .retrait-statut {
     font-size: 0.8125rem;
     color: var(--couleur-encre-faible);
   }
 
-  .chiffres dd {
-    margin: 2px 0 0;
-    font-size: var(--t-petit);
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
-    line-height: 1.3;
+  .appel {
+    margin-top: var(--pas-6);
+    padding: var(--pas-5) var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface-2);
+    text-align: center;
   }
 
-  /*
-   * L'APERÇU. Même idiome que les dépliants du résultat : un intitulé en
-   * signature, un chevron qui pivote, aucun cadre autour.
-   */
-  .apercu {
-    border-top: 1px solid var(--couleur-trait);
+  .appel h2 {
+    margin: 0 auto;
+    max-width: 22ch;
+    text-wrap: balance;
   }
 
-  .apercu summary {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--pas-1);
-    min-height: 44px;
-    color: var(--couleur-signature);
-    font-weight: 700;
-    cursor: pointer;
-    list-style: none;
-  }
-
-  .apercu summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .apercu summary :global(.chevron) {
-    width: 1rem;
-    height: 1rem;
-    flex: none;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .apercu summary :global(.chevron) {
-      transition: transform var(--duree) var(--sortie);
-    }
-  }
-
-  .apercu[open] summary :global(.chevron) {
-    transform: rotate(90deg);
-  }
-
-  .apercu-corps {
-    padding-bottom: var(--pas-1);
-    font-size: var(--t-petit);
-  }
-
-  .etat {
-    margin: 0 0 var(--pas-2);
-    color: var(--couleur-encre-faible);
-  }
-
-  .mesures {
-    list-style: none;
-    margin: 0 0 var(--pas-2);
-    padding: 0;
-    display: grid;
-    gap: var(--pas-2);
-  }
-
-  .mesures li {
-    display: grid;
-    gap: 2px;
-  }
-
-  .mesure {
-    font-weight: 700;
-    color: var(--couleur-encre);
-  }
-
-  .mesure-origine,
-  .vide {
-    color: var(--couleur-encre-faible);
-  }
-
-  .vide {
-    margin: 0 0 var(--pas-2);
-  }
-
-  .vers-fiche {
-    margin: 0;
-  }
-
-  .vers-fiche a {
-    display: inline-block;
-    padding-block: 12px;
-    margin-block: -12px;
-  }
-
-  .retraits {
-    margin-top: var(--pas-5);
-    max-width: var(--mesure);
-  }
-
-  .retraits li {
-    margin-bottom: var(--pas-2);
+  .appel p {
+    margin: var(--pas-2) auto var(--pas-4);
+    max-width: 32rem;
   }
 
   .regles {
     margin-top: var(--pas-5);
-    max-width: 46rem;
+    max-width: 44rem;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
   }
 </style>

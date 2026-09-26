@@ -1,5 +1,5 @@
 /**
- * La liste des candidats et leurs fiches : ordre, tag, aperçu, programme.
+ * La liste des candidats et leurs fiches : ordre, tag, cartes, programme.
  *
  * CE QUE CE TEST PROTÈGE.
  *
@@ -7,8 +7,9 @@
  *      nombre de propositions, ni la couverture ne doivent le déranger.
  *   2. LE TAG, présent pour chaque candidat, avec son étape lisible par un
  *      lecteur d'écran (« Étape 2 sur 4 »).
- *   3. L'APERÇU, qui doit s'ouvrir au clavier ET sans JavaScript : son contenu
- *      est dans le HTML servi, c'est ce que lisent les robots.
+ *   3. LES CARTES : un seul lien par candidat, atteignable au clavier ; un
+ *      portrait servi par ce site ou des initiales, jamais un cadre vide ; et
+ *      le bilan des positions écrit en toutes lettres dans le HTML servi.
  *   4. LA SÉPARATION DES DEUX REGISTRES sur la fiche : le programme et les
  *      positions du test ont chacun leur section, et le programme dit qu'il
  *      n'entre pas dans le calcul.
@@ -39,25 +40,42 @@ test.describe("/candidats", () => {
     await expect(tags.first()).toContainText(/Étape \d sur 4/);
   });
 
-  test("ouvre l'aperçu du programme au clavier", async ({ page }) => {
+  test("fait de chaque carte un seul lien vers la fiche, au clavier", async ({ page }) => {
     await page.goto("/candidats");
-    const apercu = page.locator("details.apercu").first();
-    const resume = apercu.locator("summary");
-    await resume.focus();
+    const carte = page.locator(".trombinoscope > li").first();
+    const lien = carte.locator(".nom a");
+    await expect(carte.locator("a")).toHaveCount(1);
+    const cible = await lien.getAttribute("href");
+    await lien.focus();
     await page.keyboard.press("Enter");
-    await expect(apercu).toHaveAttribute("open", "");
-    await expect(apercu.locator(".vers-fiche a")).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`${cible}$`));
   });
 });
 
 test.describe("/candidats sans JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("sert l'aperçu du programme dans le HTML, et il s'ouvre", async ({ page }) => {
+  test("donne à chaque candidat un portrait ou ses initiales, et son bilan en toutes lettres", async ({
+    page,
+    request,
+  }) => {
     await page.goto("/candidats");
-    const apercu = page.locator("details.apercu").first();
-    await apercu.locator("summary").click();
-    await expect(apercu.locator(".etat")).toBeVisible();
+    const cartes = page.locator(".trombinoscope > li");
+    const total = await cartes.count();
+    expect(total).toBeGreaterThan(20);
+    for (let i = 0; i < total; i += 1) {
+      const carte = cartes.nth(i);
+      const nom = (await carte.locator(".nom").innerText()).trim();
+      const photo = carte.locator("img.portrait");
+      if ((await photo.count()) === 0) {
+        await expect(carte.locator(".portrait-absent"), nom).not.toBeEmpty();
+      } else {
+        const src = await photo.getAttribute("src");
+        expect(src, nom).toMatch(/^\/medias\/portraits\//);
+        expect((await request.get(src!)).status(), nom).toBe(200);
+      }
+      await expect(carte, nom).toContainText(/\d+ pour, \d+ contre.*\d+ sans position connue/);
+    }
   });
 });
 

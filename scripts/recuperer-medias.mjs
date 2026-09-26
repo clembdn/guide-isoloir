@@ -27,6 +27,8 @@
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
+/* `sharp` est celui d'Astro, déjà installé : aucune dépendance ajoutée. */
+import sharp from "sharp";
 
 const RACINE = path.resolve(import.meta.dirname, "..");
 const AGENT = "guide-isoloir/0.1 (https://github.com/ ; clemboudon06@gmail.com)";
@@ -45,10 +47,20 @@ const AGENT = "guide-isoloir/0.1 (https://github.com/ ; clemboudon06@gmail.com)"
  * Relevé le 20 septembre 2026. Si un téléchargement se met à répondre 400, la
  * liste des paliers a changé : la corriger ici, pas ailleurs.
  */
-const PALIERS = [120, 250, 330, 500];
+const PALIERS = [120, 250, 330, 500, 960, 1280];
 
-/** 120 px pour un portrait servi à 56 px : net sur écran à deux fois la densité. */
-const LARGEUR_PORTRAIT = 120;
+/*
+ * 960 et 1280 : vérifiés le 27 septembre 2026 (200), 2560 répond 400. Ils ne servent qu'aux portraits RECADRÉS, qu'il faut
+ * découper dans une image assez grande pour que le carré final reste net.
+ */
+const LARGEUR_SOURCE_RECADRAGE = 1280;
+
+/**
+ * 330 px depuis le 27 septembre 2026 : la liste des candidats affiche désormais
+ * les portraits en grand, jusqu'à 165 px de côté, et 120 px devenaient flous sur
+ * un écran à deux fois la densité. 330 est le palier Wikimedia au-dessus.
+ */
+const LARGEUR_PORTRAIT = 330;
 /** 250 px pour un logo : la plupart sont des mots, et un mot mal rendu se lit mal. */
 const LARGEUR_LOGO = 250;
 
@@ -75,22 +87,41 @@ const PORTRAITS = {
   "olivier-faure": "Olivier Faure PSE-CARCA--1194 (cropped).jpg",
   "raphael-glucksmann": "1720448398743_20240708_GLUCKSMANN_Raphael_FR_006.jpg",
   "jerome-guedj": "Jérôme Guedj 2010 (cropped).jpg",
-  "anasse-kazib": "Anasse Kazib, décembre 2021 (resseré).jpg",
-  // `selma-labib` : aucune photo sous licence libre sur Commons au
-  // 25 septembre 2026. L'interface affiche ses initiales.
+  // Le 27 septembre 2026 : l'ancien recadrage de Commons ne faisait que
+  // 302 × 453 px et sortait flou en grand. Même cliché, même auteur, même
+  // licence, recadré ici depuis l'original de 691 × 864 px.
+  "anasse-kazib": {
+    fichier: "Anasse Kazib, décembre 2021.jpg",
+    recadrage: { gauche: 0.1, haut: 0.1, largeur: 0.66 },
+  },
+  // `selma-labib` : aucune photo sous licence libre au 27 septembre 2026.
+  // L'interface affiche ses initiales. ÉCARTÉ : « Presidentielles-2027-Selma-
+  // LABIB.png » sur Commons est une bannière de 395 × 141 px, d'auteur
+  // inconnu, dont la licence CC BY 3.0 est déclarée par le déposant sans
+  // preuve — le site du NPA-R, cité comme source, ne publie aucune licence.
+  // « Selma LABIB.webp » et « Selma Labib.jpg » ont été supprimés de Commons ;
+  // la photo Flickr du musée de l'affiche est « tous droits réservés ».
   "francis-lalanne": "Lalanne 2021 (cropped).jpg",
   "marine-le-pen": "Marine Le Pen 2025 (cropped).jpg",
   "david-lisnard": "David Lisnard - 2013.jpg",
   "emmanuel-maurel": "Emmanuel Maurel en 2016.jpg",
   "jean-luc-melenchon": "Mélenchon 2027 - 55261894422 (cropped).jpg",
-  // `antoine-mikolajczak` : aucune photo sous licence libre sur Commons au
-  // 20 septembre 2026. L'interface affiche ses initiales. Ne pas prendre une
-  // photo sur son site : elle n'est pas réutilisable.
+  // `antoine-mikolajczak` : aucune photo sous licence libre au 27 septembre
+  // 2026, ni sur Commons ni sur Flickr. L'interface affiche ses initiales. Ne
+  // pas prendre une photo sur le site d'Équinoxe : ses mentions légales
+  // interdisent toute reproduction « sans le consentement explicite
+  // d'Équinoxe ». Voie ouverte : le demander à contact@parti-equinoxe.fr.
   "edouard-philippe": "Edouard Philippe 3x4 crop.jpg",
   "florian-philippot": "2022-04-16 16-49-26 MAM-Paris 02.jpg",
   "bruno-retailleau": "Bruno Retailleau - Ministre de l'Intérieur français (cropped).jpg",
   "fabien-roussel": "Roussel Fabien 1.jpg",
-  "segolene-royal": "Ségolène Royal (435608096) (cropped).jpg",
+  // Le 27 septembre 2026 : l'ancien portrait (2007, 300 × 407 px) sortait flou.
+  // Photographie du gouvernement finlandais, 2019, CC BY 2.0, recadrée ici
+  // sur Ségolène Royal : Antti Rinne, à droite, sort du cadre.
+  "segolene-royal": {
+    fichier: "Antti Rinne & Ségolène Royal (49141293827).jpg",
+    recadrage: { gauche: 0.12, haut: 0.08, largeur: 0.25 },
+  },
   "francois-ruffin": "François Ruffin répondant à un journaliste à Longueau (cropped).jpg",
   "marine-tondelier": "20210819_tondelier.m-cr3.jpg",
   "eric-zemmour": "Portrait d'Éric Zemmour, avril 2022.jpg",
@@ -203,6 +234,8 @@ async function fiche(fichier, largeur) {
       : "";
 
   return {
+    urlOriginal: info.url,
+    largeurOriginal: info.width,
     pageDescription: info.descriptionurl,
     urlVignette: vignetteExacte(info.thumburl ?? info.url, largeur),
     mime: info.thumbmime ?? info.mime,
@@ -235,12 +268,45 @@ async function telecharger(url, destination) {
   await writeFile(destination, Buffer.from(await reponse.arrayBuffer()));
 }
 
+/**
+ * RECADRAGE REPRODUCTIBLE, comme celui des illustrations : exprimé en fractions
+ * de l'image dans la table, jamais fait à la main dans un logiciel. Le carré
+ * est découpé dans la vignette de 1280 px, ou dans l'original s'il est plus
+ * petit (une vignette plus large que l'original n'existe pas), puis ramené à
+ * la largeur servie. Le recadrage est une modification au sens des licences
+ * CC : il est donc écrit dans le manifeste, et publié sur `/credits-images`.
+ */
+async function recadrer(actorId, donnees, recadrage, largeur, sortie) {
+  const source =
+    donnees.largeurOriginal <= LARGEUR_SOURCE_RECADRAGE
+      ? donnees.urlOriginal
+      : vignetteExacte(donnees.urlVignette, LARGEUR_SOURCE_RECADRAGE);
+  const reponse = await fetch(source, { headers: { "User-Agent": AGENT } });
+  if (!reponse.ok) throw new Error(`${source} → HTTP ${reponse.status}`);
+  const tampon = Buffer.from(await reponse.arrayBuffer());
+  const { width, height } = await sharp(tampon).metadata();
+  const cote = Math.round(recadrage.largeur * width);
+  const gauche = Math.round(recadrage.gauche * width);
+  const haut = Math.round(recadrage.haut * height);
+  if (gauche + cote > width || haut + cote > height) {
+    throw new Error(`Le recadrage de « ${actorId} » sort de l'image (${width} × ${height}).`);
+  }
+  const nom = `${actorId}.jpg`;
+  await sharp(tampon)
+    .extract({ left: gauche, top: haut, width: cote, height: cote })
+    .resize(largeur, largeur)
+    .jpeg({ quality: 86, mozjpeg: true })
+    .toFile(path.join(sortie, nom));
+  return nom;
+}
+
 async function lot(table, genre, largeur, dossier) {
   const sortie = path.join(RACINE, "public", "medias", dossier);
   await mkdir(sortie, { recursive: true });
 
   const entrees = [];
-  for (const [actorId, fichier] of Object.entries(table)) {
+  for (const [actorId, entree] of Object.entries(table)) {
+    const { fichier, recadrage } = typeof entree === "string" ? { fichier: entree } : entree;
     const donnees = await fiche(fichier, largeur);
     if (donnees === null) {
       throw new Error(
@@ -250,9 +316,16 @@ async function lot(table, genre, largeur, dossier) {
       );
     }
 
-    const ext = extension(donnees.urlVignette);
-    const nom = `${actorId}.${ext}`;
-    await telecharger(donnees.urlVignette, path.join(sortie, nom));
+    let nom;
+    let retouches;
+    if (recadrage) {
+      nom = await recadrer(actorId, donnees, recadrage, largeur, sortie);
+      retouches = "recadrée au carré et redimensionnée";
+    } else {
+      const ext = extension(donnees.urlVignette);
+      nom = `${actorId}.${ext}`;
+      await telecharger(donnees.urlVignette, path.join(sortie, nom));
+    }
 
     entrees.push({
       actorId,
@@ -264,6 +337,7 @@ async function lot(table, genre, largeur, dossier) {
       licence: donnees.licence || "Licence non précisée sur Commons",
       licenceUrl: donnees.licenceUrl,
       reserve: RESERVES[actorId],
+      retouches,
     });
     process.stdout.write(`  ${actorId} → ${nom} (${donnees.licence})\n`);
   }
@@ -285,6 +359,7 @@ function rendre(entrees, releveLe) {
       `    licenceUrl: ${echappe(entree.licenceUrl)},`,
     ];
     if (entree.reserve) champs.push(`    reserve: ${echappe(entree.reserve)},`);
+    if (entree.retouches) champs.push(`    retouches: ${echappe(entree.retouches)},`);
     return `  {\n${champs.join("\n")}\n  },`;
   });
 
@@ -320,6 +395,8 @@ export type Media = {
   licenceUrl: string;
   /** Réserve relevée sur la page Commons du fichier, s'il y en a une. */
   reserve?: string;
+  /** Modifications apportées à l'image. Les taire rendrait le crédit incomplet. */
+  retouches?: string;
 };
 
 /** Date du relevé des licences. Un relevé vieillit : le republier le dit. */

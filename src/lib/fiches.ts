@@ -252,6 +252,12 @@ export type Fiche = {
   inconnues: Pick<Question, "id" | "texte" | "theme">[];
   documentees: number;
   personnelles: number;
+  /**
+   * De quel côté tombent ses positions : pour, contre, ni l'un ni l'autre, et
+   * combien d'affirmations sans position connue. Même lecture que les pages de
+   * thème (`sensDe`), calculée une fois pour la liste et la fiche.
+   */
+  bilan: Record<Sens | "inconnu", number>;
   /** Positions reprises, par acteur d'origine, dans l'ordre de la chaîne. */
   reprises: { nom: string; nombre: number }[];
   /** Date de la donnée la plus récente de la fiche. */
@@ -397,6 +403,12 @@ function fiche(candidature: Candidate): Fiche {
     })).filter((groupe) => groupe.entrees.length > 0),
     inconnues: entrees.filter((entree) => entree.resolue === null).map((entree) => entree.question),
     documentees: documentees.length,
+    bilan: {
+      pour: documentees.filter((e) => sensDe(e.resolue!.position.value) === "pour").length,
+      contre: documentees.filter((e) => sensDe(e.resolue!.position.value) === "contre").length,
+      neutre: documentees.filter((e) => sensDe(e.resolue!.position.value) === "neutre").length,
+      inconnu: entrees.length - documentees.length,
+    },
     personnelles: documentees.filter((entree) => entree.resolue!.heriteDeId === null).length,
     reprises,
     misAJour: dates.reduce((a, b) => (a > b ? a : b)),

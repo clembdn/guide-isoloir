@@ -747,13 +747,17 @@ téléphone quand il existe, sinon enregistrement. Images en `blob:` : rien ne s
 
 ## 11 bis. Candidats : liste, tag et fiche (25 septembre 2026)
 
-**`/candidats`** — gabarit libre, largeur `--large`. Titre, date, une phrase ; puis la légende des
-étapes en **rail** (vertical à 375 px, couché à partir de 48 rem) ; puis une **grille sans boîte**
-de une, deux ou trois colonnes (375 px, 48 rem, 72 rem), un filet au-dessus de chaque candidat.
-L'ordre reste alphabétique : ni l'étape ni le nombre de propositions ne trient. Chaque entrée :
-portrait carré de 64 px, nom, parti, **tag**, trois repères (programme, propositions, positions du
-test), et un `<details>` natif « Aperçu du programme » — trois propositions au plus, choisies par
-`ordrePropositions` (mesure avant orientation, nature, date, identifiant).
+**`/candidats`** — refaite le 27 septembre 2026 en **trombinoscope**. Titre, une phrase, date ;
+puis « Où en sont les candidatures » : quatre comptes (un par étape, avec ses crans) dans un
+panneau à filets d'un pixel, l'explication des étapes repliée dans un `<details>`. Puis une grille
+de **cartes à grand portrait carré** — deux par ligne à 375 px, trois à 48 rem, quatre à 64 rem.
+Chaque carte : portrait (330 px servis, initiales sur fond secondaire sans média libre), nom,
+parti, tag d'étape, puis, collé en bas pour que les cartes s'alignent, le bilan ✓ / ✗ / ? des
+positions du test et l'état du programme. La carte entière est un seul lien (le `::after` du nom) ;
+elle se soulève au survol, le portrait ne bouge pas. L'ordre reste alphabétique : ni l'étape, ni
+les propositions, ni le bilan ne trient. L'aperçu des propositions a quitté la liste pour la
+fiche : répété vingt-huit fois, c'était lui qui rendait la page interminable. Les candidatures
+retirées suivent en pastilles, sans traitement d'image différent.
 
 **Le tag** (`src/components/candidats/EtapeCandidature.astro`) — quatre crans courts dans
 `--couleur-signature`, remplis jusqu'au rang tiré du statut (`ETAPES_CANDIDATURE`), puis le
