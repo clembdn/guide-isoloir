@@ -27,7 +27,12 @@ const GLYPHE: Record<Props["sens"], string> = {
   pour: "check",
   contre: "x",
   neutre: "minus",
-  inconnu: "question",
+  /*
+   * `question-mark`, le point d'interrogation seul, et non `question` : ce
+   * dernier est déjà cerclé, et posé sur un disque il donnait un cercle dans
+   * un cercle.
+   */
+  inconnu: "question-mark",
 };
 ---
 
@@ -46,7 +51,13 @@ const GLYPHE: Record<Props["sens"], string> = {
     color: var(--sur-position);
   }
 
+  /*
+   * `display: block` : un SVG en ligne se pose sur la ligne de base du texte
+   * et descend de quelques pixels dans son disque. En bloc, la grille le
+   * centre au pixel.
+   */
   .marque :global(.icone) {
+    display: block;
     width: 62%;
     height: 62%;
   }
@@ -75,9 +86,19 @@ const GLYPHE: Record<Props["sens"], string> = {
     color: var(--couleur-surface);
   }
 
+  /*
+   * L'inconnu est une case vide, pas un sens : un contour en pointillé, sans
+   * fond, le dit mieux qu'un disque plein. Même diamètre que les autres
+   * pastilles, pour que la légende reste alignée.
+   */
   .marque--inconnu {
-    background: var(--couleur-surface);
+    background: transparent;
     color: var(--couleur-encre-faible);
-    box-shadow: inset 0 0 0 1.5px var(--couleur-trait);
+    border: 1.5px dashed var(--couleur-encre-faible);
+  }
+
+  .marque--inconnu :global(.icone) {
+    width: 64%;
+    height: 64%;
   }
 </style>

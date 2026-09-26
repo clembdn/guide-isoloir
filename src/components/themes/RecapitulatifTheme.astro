@@ -151,16 +151,26 @@ function libelle(cite: CandidatCite | undefined): string {
     justify-content: flex-end;
   }
 
+  /*
+   * Pastille pleine, chiffre centré au pixel. Bricolage a une ascendante et
+   * une descendante inégales : centré sur sa boîte de ligne, un chiffre
+   * paraît trop haut. `text-box` rogne la boîte au chiffre lui-même (hauteur
+   * de capitale, ligne de base) ; les navigateurs qui ne le connaissent pas
+   * gardent `line-height: 1`, à un pixel près.
+   */
   .numero {
     display: inline-grid;
     place-items: center;
     width: 1.75rem;
     height: 1.75rem;
     border-radius: 50%;
-    background: var(--couleur-surface-2);
-    color: var(--couleur-signature);
+    background: var(--couleur-aplat);
+    color: var(--couleur-sur-aplat);
+    font-size: 0.8125rem;
     font-weight: 700;
-    font-size: var(--t-petit);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    text-box: trim-both cap alphabetic;
   }
 
   /* L'intitulé reste dans l'arbre accessible à toutes les largeurs ; il ne s'affiche qu'avec la place. */

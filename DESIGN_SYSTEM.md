@@ -782,7 +782,11 @@ compactes, parce qu'ils ne proposent pas de tableau pour/contre et ne doivent pa
 Chaque tuile est un seul lien, étendu à toute la carte par un `::after`.
 
 **Page d'un thème du test** — bandeau à la teinte du thème, pictogramme en grand et en filigrane
-(l'illustration, sans photographie), sommaire en pastilles numérotées. Puis un **plateau** par
+(l'illustration, sans photographie), puis le **sommaire en panneau** (27 septembre 2026) : quatre
+cases de même largeur, une par ligne à 375 px, deux à 40 rem, quatre à 64 rem, séparées par des
+filets d'un pixel peints par le fond de la liste ; chaque case porte son numéro, l'intitulé court,
+les comptes ✓ et ✗ de la question et une flèche vers le bas. Il remplace une rangée de pastilles
+à largeur de texte, en escalier sur ordinateur. Puis un **plateau** par
 affirmation : titre « {intitulé court} : qui est pour, qui est contre ? », l'affirmation entière,
 la définition sourcée dans un `<details>`, puis **Pour et Contre côte à côte dès 375 px** —
 visages de 56 px (64 à partir de 30 rem), pastille mordant le coin du portrait, nom, et une ligne

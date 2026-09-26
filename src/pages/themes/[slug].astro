@@ -104,7 +104,14 @@ const webPage = {
     teinte={theme.teinte}
     chapo={chapo}
     misAJour={theme.misAJour}
-    sommaire={duTest ? theme.affirmations.map((a) => ({ id: a.question.id, court: a.court })) : []}
+    sommaire={duTest
+      ? theme.affirmations.map((a) => ({
+          id: a.question.id,
+          court: a.court,
+          pour: a.pour.length,
+          contre: a.contre.length,
+        }))
+      : []}
   />
 
   <div class="enveloppe-large corps">

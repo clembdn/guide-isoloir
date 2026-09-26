@@ -1,7 +1,16 @@
 ---
 /*
  * En-tête d'une page de thème : un bandeau à la teinte du thème, son
- * pictogramme en grand, le titre, une phrase, et le sommaire en pastilles.
+ * pictogramme en grand, le titre, une phrase, et le sommaire.
+ *
+ * LE SOMMAIRE EST UN PANNEAU, PAS UNE RANGÉE DE PASTILLES (27 septembre 2026).
+ * Les pastilles prenaient chacune la largeur de leur texte : un escalier sur
+ * ordinateur, une pile désordonnée sur téléphone, et rien d'autre qu'un
+ * titre. Le panneau aligne quatre cases de même largeur — une par ligne à
+ * 375 px, deux puis quatre par ligne sur ordinateur — séparées par des filets
+ * d'un pixel, et chaque case dit déjà combien de candidats sont pour et
+ * contre : on voit où la question penche avant d'y descendre. Les comptes
+ * sont ceux des colonnes du plateau, tirés des mêmes données.
  *
  * Le grand pictogramme en filigrane déborde du bandeau à droite : c'est
  * l'illustration du thème, sans photographie (celles essayées sur le site ont
@@ -10,6 +19,7 @@
  */
 import Icone from "../Icone.astro";
 import DerniereMiseAJour from "../DerniereMiseAJour.astro";
+import MarquePosition from "./MarquePosition.astro";
 import { SITE_NAME } from "../../lib/site";
 import type { Teinte } from "../../data/themes";
 
@@ -19,8 +29,8 @@ type Props = {
   teinte: Teinte;
   chapo: string;
   misAJour: string;
-  /** Ancres vers les affirmations, pour les thèmes du test. */
-  sommaire?: { id: string; court: string }[];
+  /** Ancres vers les affirmations, pour les thèmes du test, avec leurs comptes. */
+  sommaire?: { id: string; court: string; pour: number; contre: number }[];
 };
 
 const { nom, icone, teinte, chapo, misAJour, sommaire = [] } = Astro.props;
@@ -46,7 +56,7 @@ const { nom, icone, teinte, chapo, misAJour, sommaire = [] } = Astro.props;
 
     {
       sommaire.length > 0 && (
-        <nav class="sommaire" aria-label="Les affirmations du thème">
+        <nav class="sommaire" aria-label="Les questions de ce thème">
           <ol>
             {sommaire.map((entree, index) => (
               <li>
@@ -54,7 +64,25 @@ const { nom, icone, teinte, chapo, misAJour, sommaire = [] } = Astro.props;
                   <span class="numero" aria-hidden="true">
                     {index + 1}
                   </span>
-                  {entree.court}
+                  <span class="entree">
+                    <span class="intitule">{entree.court}</span>
+                    <span class="comptes" aria-hidden="true">
+                      <span class="compte">
+                        <MarquePosition sens="pour" taille="petite" />
+                        {entree.pour}
+                      </span>
+                      <span class="compte">
+                        <MarquePosition sens="contre" taille="petite" />
+                        {entree.contre}
+                      </span>
+                    </span>
+                    <span class="visuellement-masque">
+                      {`, ${entree.pour} pour, ${entree.contre} contre`}
+                    </span>
+                  </span>
+                  <span class="descendre" aria-hidden="true">
+                    <Icone nom="arrow-down" graisse="bold" />
+                  </span>
                 </a>
               </li>
             ))}
@@ -130,58 +158,155 @@ const { nom, icone, teinte, chapo, misAJour, sommaire = [] } = Astro.props;
     text-wrap: pretty;
   }
 
+  /*
+   * Le panneau passe devant le filigrane : sans `z-index`, le grand
+   * pictogramme décoratif, positionné, se peignait par-dessus.
+   */
   .sommaire {
-    margin-top: var(--pas-3);
+    position: relative;
+    z-index: 1;
+    margin-top: var(--pas-4);
   }
 
+  /*
+   * Filets d'un pixel par le fond : la liste est peinte au trait, chaque case
+   * à la surface, et l'écart de 1 px laisse voir le trait entre elles. Les
+   * filets suivent la grille à toutes les largeurs sans une règle de bordure
+   * par cas.
+   */
   .sommaire ol {
     list-style: none;
     padding: 0;
     margin: 0;
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--pas-1);
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    background: var(--couleur-trait);
+    /*
+     * Le contour extérieur est tiré de l'encre : posé sur le pastel du
+     * bandeau, `--couleur-trait` tombait à 1,4:1, sous le plancher de 1,5:1
+     * mesuré par scripts/capturer.mjs. Les filets intérieurs, sur la
+     * surface, gardent le trait.
+     */
+    border: 1px solid color-mix(in srgb, var(--couleur-encre) 22%, transparent);
+    border-radius: var(--rayon-carte);
+    overflow: clip;
+    box-shadow: var(--ombre-1);
+  }
+
+  @media (min-width: 40rem) {
+    .sommaire ol {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .sommaire ol {
+      grid-template-columns: repeat(4, 1fr);
+    }
   }
 
   .sommaire li {
     margin: 0;
+    display: flex;
+    background: var(--couleur-surface);
   }
 
   .sommaire a {
-    display: inline-flex;
+    flex: 1;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    gap: 0.45rem;
-    min-height: 44px;
-    padding: 0.35rem 0.9rem 0.35rem 0.4rem;
-    border-radius: var(--rayon-actionnable);
-    background: var(--couleur-surface);
+    gap: var(--pas-2);
+    min-height: 64px;
+    padding: var(--pas-2) var(--pas-3);
     color: var(--couleur-encre);
-    font-size: var(--t-petit);
-    font-weight: 600;
     text-decoration: none;
-    box-shadow: var(--ombre-1);
-    transition: transform var(--duree) var(--sortie);
+    transition: background-color var(--duree) var(--sortie);
+  }
+
+  @media (min-width: 64rem) {
+    .sommaire a {
+      align-items: start;
+      padding: var(--pas-3);
+    }
   }
 
   @media (hover: hover) and (pointer: fine) {
     .sommaire a:hover {
-      transform: translateY(-2px);
+      background: color-mix(in srgb, var(--vif) 7%, var(--couleur-surface));
+    }
+
+    .sommaire a:hover .descendre {
+      transform: translateY(2px);
     }
   }
 
-  .sommaire a:active {
-    transform: scale(0.97);
+  .sommaire a:focus-visible {
+    outline-offset: -3px;
   }
 
+  .entree {
+    display: grid;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+
+  .intitule {
+    font-weight: 700;
+    font-size: 0.9375rem;
+    line-height: 1.25;
+    text-wrap: balance;
+  }
+
+  .comptes {
+    display: flex;
+    gap: var(--pas-2);
+    font-size: var(--t-petit);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--couleur-encre-faible);
+  }
+
+  .compte {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .descendre {
+    display: grid;
+    place-items: center;
+    color: var(--vif);
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .descendre :global(.icone) {
+    display: block;
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  /*
+   * Pastille pleine, chiffre centré au pixel. Bricolage a une ascendante et
+   * une descendante inégales : centré sur sa boîte de ligne, un chiffre
+   * paraît trop haut. `text-box` rogne la boîte au chiffre lui-même (hauteur
+   * de capitale, ligne de base) ; les navigateurs qui ne le connaissent pas
+   * gardent `line-height: 1`, à un pixel près.
+   */
   .numero {
     display: inline-grid;
     place-items: center;
-    width: 1.6rem;
-    height: 1.6rem;
+    flex: none;
+    width: 2rem;
+    height: 2rem;
     border-radius: 50%;
     background: var(--pastel);
     color: var(--vif);
+    font-size: 0.9375rem;
     font-weight: 700;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
+    text-box: trim-both cap alphabetic;
   }
 </style>
