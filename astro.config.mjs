@@ -1,10 +1,11 @@
 // @ts-check
 import mdx from "@astrojs/mdx";
 import { readdir, readFile, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "astro/config";
 import svelte from "@astrojs/svelte";
+import { lignesPaires } from "./scripts/redirections.mjs";
 
 /**
  * Reporte dans `dist/_headers` les empreintes que la CSP d'Astro vient d'émettre.
@@ -87,6 +88,53 @@ function cspEnTetes() {
   };
 }
 
+/**
+ * Écrit `dist/_redirects` : la paire inversée de chaque face-à-face redirige en
+ * 301 vers l'ordre canonique.
+ *
+ * Les règles sont tirées des pages construites dans `dist/comparer/`, et non
+ * recalculées : une règle ne peut pas viser une page absente. Voir
+ * `scripts/redirections.mjs`. Cloudflare admet 2 000 redirections statiques ;
+ * 28 candidats en font 378 au plus.
+ */
+function redirectionsPaires() {
+  return {
+    name: "redirections-paires",
+    hooks: {
+      /** @param {{ dir: URL, logger: { info: (message: string) => void } }} contexte */
+      "astro:build:done": async ({ dir, logger }) => {
+        const racine = fileURLToPath(dir);
+        const dossier = join(racine, "comparer");
+        /** @type {string[]} */
+        let chemins = [];
+        try {
+          chemins = (await readdir(dossier, { recursive: true, withFileTypes: true }))
+            .filter((entree) => entree.isFile() && entree.name.endsWith(".html"))
+            .map((entree) =>
+              relative(racine, join(entree.parentPath, entree.name)).split(sep).join("/"),
+            );
+        } catch {
+          // Aucun face-à-face construit : aucune règle.
+        }
+
+        const lignes = lignesPaires(chemins);
+        const chemin = join(racine, "_redirects");
+        let existant = "";
+        try {
+          existant = await readFile(chemin, "utf8");
+        } catch {
+          // Pas de `public/_redirects` : le fichier ne contient que les paires.
+        }
+        const entete =
+          "# Paires inversées des face-à-face, générées au build (scripts/redirections.mjs).";
+        const debut = existant.trim() === "" ? [] : [existant.trimEnd(), ""];
+        await writeFile(chemin, [...debut, entete, ...lignes, ""].join("\n"));
+        logger.info(`_redirects : ${lignes.length} paire(s) inversée(s).`);
+      },
+    },
+  };
+}
+
 /*
  * Domaine de production. Cette valeur et `SITE_URL` dans src/lib/site.ts
  * doivent coïncider EXACTEMENT : même protocole, même hôte, aucune barre
@@ -141,7 +189,7 @@ export default defineConfig({
    * articles restent en Markdown pur. Aucun JavaScript client : les schémas
    * sont des composants .astro, rendus en HTML au build.
    */
-  integrations: [svelte(), mdx(), cspEnTetes()],
+  integrations: [svelte(), mdx(), cspEnTetes(), redirectionsPaires()],
   devToolbar: {
     enabled: false,
   },

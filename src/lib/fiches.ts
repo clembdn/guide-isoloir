@@ -61,6 +61,7 @@ import { ETATS_PROGRAMME, PROPOSITIONS } from "../data/programmes";
 import { media } from "../data/medias";
 import { THEMES_PROPOSITIONS, THEMES_PUBLIES, type Teinte } from "../data/themes";
 import { ECHELLE, LIBELLES_SENS, nuanceDe, sensDe, type Sens } from "./echelle";
+import type { DonneesPaire } from "./paire";
 
 /*
  * Validation au build, référentielle : une position rattachée à un acteur, une
@@ -173,6 +174,23 @@ export const THEMES: readonly HabillageTheme[] = [
 
 export const NOMBRE_AFFIRMATIONS = questions.length;
 
+/** Intitulé court de chaque affirmation, validé au chargement du module. */
+export const INTITULES_COURTS: ReadonlyMap<string, string> = courtParQuestion;
+
+/**
+ * Ce que lit la comparaison de deux candidats (`src/lib/paire.ts`) : les
+ * questions dans l'ordre du test, projetées sur ce que le moteur lit, et
+ * EXACTEMENT les positions servies aux fiches et au test — brouillons compris en
+ * prévisualisation, jamais en production. Deux jeux distincts permettraient à
+ * une comparaison de contredire une fiche.
+ */
+export const DONNEES_COMPARAISON: DonneesPaire = {
+  questions: questionsOrdonnees.map((question) => ({ id: question.id, theme: question.theme })),
+  positions,
+  candidatures,
+  annuaire: acteurs,
+};
+
 /**
  * Parti d'un candidat : LE PREMIER ACTEUR DE TYPE `party` de sa chaîne de
  * reprise, et non le premier tout court.
@@ -247,6 +265,12 @@ export type Fiche = {
   apercu: PropositionFiche[];
   parti: { nom: string; logo: string | null } | null;
   portrait: string | null;
+  /**
+   * Les affirmations du test, toutes, dans l'ordre du test, documentées ou non.
+   * C'est la liste à plat que lit la comparaison de deux candidats : une ligne
+   * de comparaison ne peut pas montrer une autre position que la fiche.
+   */
+  entrees: EntreeFiche[];
   /** Affirmations documentées, regroupées par thème dans l'ordre du test. */
   parTheme: { theme: HabillageTheme; entrees: EntreeFiche[] }[];
   /** Affirmations sans aucune position, dans l'ordre du test. */
@@ -398,6 +422,7 @@ function fiche(candidature: Candidate): Fiche {
             logo: media("logo", partiId)?.chemin ?? null,
           },
     portrait: media("portrait", acteur.id)?.chemin ?? null,
+    entrees,
     parTheme: THEMES.map((theme) => ({
       theme,
       entrees: documentees.filter((entree) => entree.question.theme === theme.nom),
@@ -531,7 +556,7 @@ export type ThemeQuelconque = PageTheme | PageThemePropositions;
 export const SEUIL_INDEXATION = 3;
 
 /** « A », « A et B », « A, B et C ». */
-function enumerer(noms: readonly string[]): string {
+export function enumerer(noms: readonly string[]): string {
   if (noms.length <= 1) return noms.join("");
   return `${noms.slice(0, -1).join(", ")} et ${noms.at(-1)}`;
 }

@@ -17,6 +17,10 @@
  * situation où un îlot cesse de s'hydrater. Un test qui ne voit pas la CSP réelle
  * ne prouve rien sur le site déployé.
  *
+ * Il applique enfin `dist/_redirects` (règles littérales seulement), pour que la
+ * redirection de la paire inversée d'un face-à-face se teste comme elle sera
+ * servie : statut, `Location`, et les en-têtes de `_headers`.
+ *
  * Usage : node scripts/serveur-statique.mjs [port]
  */
 import { createServer } from "node:http";
@@ -24,6 +28,7 @@ import { createReadStream } from "node:fs";
 import { readFile, stat } from "node:fs/promises";
 import { join, normalize, extname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { lireRedirections } from "./redirections.mjs";
 
 const RACINE = fileURLToPath(new URL("../dist", import.meta.url));
 const PORT = Number(process.argv[2] ?? 4321);
@@ -123,8 +128,23 @@ async function trouver(chemin) {
 
 const regles = await lireRegles();
 
+/** Règles de `dist/_redirects`, vides si le fichier est absent. */
+const redirections = lireRedirections(
+  await readFile(join(RACINE, "_redirects"), "utf8").catch(() => ""),
+);
+
 const serveur = createServer((requete, reponse) => {
   const url = new URL(requete.url ?? "/", `http://127.0.0.1:${PORT}`);
+
+  const redirection = redirections.get(url.pathname);
+  if (redirection !== undefined) {
+    reponse.writeHead(redirection.statut, {
+      ...Object.fromEntries(entetesPour(regles, url.pathname)),
+      Location: redirection.cible,
+    });
+    reponse.end();
+    return;
+  }
 
   void trouver(url.pathname).then((fichier) => {
     const entetes = Object.fromEntries(entetesPour(regles, url.pathname));
@@ -151,4 +171,5 @@ serveur.listen(PORT, "127.0.0.1", () => {
       ? `_headers appliqué : ${regles.length} règle(s).`
       : "_headers absent : aucune politique de sécurité HTTP.",
   );
+  console.log(`_redirects appliqué : ${redirections.size} règle(s).`);
 });

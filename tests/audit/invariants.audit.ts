@@ -15,6 +15,7 @@
  */
 import { afterAll, describe, expect, it } from "vitest";
 import { calculer, type Classement } from "../../src/lib/moteur";
+import { creerComparateur } from "../../src/lib/paire";
 import type { PoliticalActor, Stance, StanceValue } from "../../src/lib/modele";
 import type { Question } from "../../src/lib/questions";
 import { QUESTIONS_FACTICES } from "../../src/factice/questions-factices";
@@ -557,6 +558,47 @@ describe("invariant : symétrie de l'échelle de réponse", () => {
       ).toEqual(scoresPar(droit));
     }
     relever("symétrie de l'échelle ................. 200 profils, scores identiques au miroir");
+  });
+});
+
+describe("invariant : symétrie d'une comparaison deux à deux", () => {
+  it("comparer A à B donne le même chiffre que comparer B à A, quel que soit l'ordre des données", () => {
+    const tirage = generateur(GRAINE + 7);
+    const donnees = {
+      questions: [...QUESTIONS_FACTICES].sort((a, b) => a.ordre - b.ordre),
+      positions: POSITIONS_FACTICES,
+      candidatures: [],
+      annuaire: ACTEURS_FACTICES,
+    };
+    const comparer = creerComparateur(donnees);
+    let paires = 0;
+
+    for (const a of ACTEURS_FACTICES) {
+      for (const b of ACTEURS_FACTICES) {
+        if (a.id >= b.id) continue;
+        const ab = comparer(a, b);
+        const ba = comparer(b, a);
+        expect(ba.score, "écart mécanique non expliqué : A/B ≠ B/A").toBe(ab.score);
+        expect(ba.parTheme, "écart mécanique non expliqué : A/B ≠ B/A par thème").toEqual(
+          ab.parTheme,
+        );
+
+        for (let essai = 0; essai < 10; essai += 1) {
+          const permute = creerComparateur({
+            ...donnees,
+            positions: melanger(POSITIONS_FACTICES, tirage),
+            annuaire: melanger(ACTEURS_FACTICES, tirage),
+          });
+          expect(permute(a, b).score, "écart mécanique non expliqué : ordre du JSON").toBe(
+            ab.score,
+          );
+        }
+        paires += 1;
+      }
+    }
+    relever(
+      `symétrie deux à deux .................. ${paires} paires, A/B = B/A au bit près, 10 permutations chacune`,
+    );
   });
 });
 

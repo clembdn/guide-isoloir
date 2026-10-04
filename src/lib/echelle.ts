@@ -64,3 +64,16 @@ export const LIBELLES_SENS: Record<Sens | "inconnu", string> = {
   neutre: "Ni pour ni contre",
   inconnu: "Pas de position connue",
 };
+
+/**
+ * Verdict d'une position dans le code des pages de thème : « Pour »,
+ * « Plutôt contre », « Ni pour ni contre ». La valeur exacte de l'échelle reste
+ * écrite à côté, en toutes lettres : le verdict la range, il ne la remplace pas.
+ * Partagé par la fiche candidat et la comparaison de deux candidats, pour qu'une
+ * même position ne s'y lise pas de deux façons.
+ */
+export function verdictDe(valeur: StanceValue): string {
+  const sens = LIBELLES_SENS[sensDe(valeur)];
+  const nuance = nuanceDe(valeur);
+  return nuance ? `${nuance} ${sens.toLowerCase()}` : sens;
+}
