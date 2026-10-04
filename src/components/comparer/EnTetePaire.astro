@@ -1,0 +1,353 @@
+---
+/*
+ * En-tête d'un face-à-face : les deux visages de part et d'autre de la fente
+ * de l'isoloir, et entre eux le seul chiffre qu'on lit d'abord — sur combien
+ * d'affirmations leurs positions s'accordent.
+ *
+ * LE CHIFFRE NE SORT JAMAIS SANS SA COUVERTURE. « D'accord sur 5 » n'existe
+ * pas : c'est « 5 des 10 affirmations comparables », sur la même ligne de
+ * lecture. La proximité du moteur suit, avec le même dénominateur.
+ *
+ * NEUTRALITÉ. Même cadre, même taille, même plaque pour les deux ; aucune
+ * couleur de parti ; le fond est le même pour toutes les paires. Le premier
+ * candidat est à gauche parce qu'il vient le premier dans l'ordre
+ * alphabétique, la règle de toutes les listes du site — ce que dit la
+ * méthodologie.
+ *
+ * La fente est un filet vertical à la signature, derrière le chiffre : le
+ * motif du logo, et rien d'autre qu'un séparateur qui a un sens.
+ */
+import Portrait from "../candidats/Portrait.astro";
+import DerniereMiseAJour from "../DerniereMiseAJour.astro";
+import type { FaceAFace, Visage } from "../../lib/face-a-face";
+import { NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
+import { SITE_NAME } from "../../lib/site";
+
+type Props = {
+  ff: Pick<FaceAFace, "a" | "b" | "comparables" | "daccord" | "pourcent" | "misAJour" | "reserves">;
+};
+
+const { ff } = Astro.props;
+
+const cotes: { quel: "a" | "b"; visage: Visage }[] = [
+  { quel: "a", visage: ff.a },
+  { quel: "b", visage: ff.b },
+];
+
+/* Phrases composées ici : Astro avale l'espace entre une expression et du texte. */
+const total = `des ${ff.comparables} affirmations comparables`;
+const proximite = `${ff.pourcent} %`;
+const chapo = `Leurs positions face à face, sur chacune des ${NOMBRE_AFFIRMATIONS} affirmations du test.`;
+---
+
+<header class="tete">
+  <div class="enveloppe-large interieur">
+    <nav class="fil-ariane" aria-label="Fil d'Ariane">
+      <a href="/">{SITE_NAME}</a>
+      <span aria-hidden="true">/</span>
+      <a href="/comparer">Comparer</a>
+    </nav>
+
+    <h1>{ff.a.nom}{" "}<span class="et">et</span>{" "}{ff.b.nom}</h1>
+    <p class="chapo">{chapo}</p>
+
+    <div class="duel">
+      {
+        cotes.map(({ quel, visage }) => (
+          <a class:list={["cote", `cote--${quel}`]} href={`/candidats/${visage.slug}`}>
+            <Portrait nom={visage.nom} chemin={visage.portrait} taille={120} differe={false} />
+            <span class="nom">{visage.nom}</span>
+            <span class="parti">{visage.parti ?? "Sans parti rattaché"}</span>
+          </a>
+        ))
+      }
+      <p class="accord">
+        <span class="accord-libelle">D'accord sur</span>
+        <span class="accord-chiffre">{ff.daccord}</span>
+        <span class="accord-total">{total}</span>
+      </p>
+    </div>
+
+    <div class="proximite">
+      <p>
+        Proximité calculée comme au test : <strong>{proximite}</strong>
+      </p>
+      <svg class="jauge" height="8" aria-hidden="true" focusable="false">
+        <rect class="jauge-piste" x="0" y="0" width="100%" height="8" rx="4"></rect>
+        <rect class="jauge-valeur" x="0" y="0" width={`${ff.pourcent}%`} height="8" rx="4"></rect>
+      </svg>
+      <p class="definition">
+        « D'accord » : un cran d'écart au plus sur l'échelle du test. La proximité compte aussi les
+        nuances, et chaque thème pèse autant.
+      </p>
+    </div>
+
+    <DerniereMiseAJour date={ff.misAJour} />
+
+    {
+      ff.reserves.length > 0 && (
+        <div class="reserves">
+          {ff.reserves.map((reserve) => (
+            <p class="reserve-paire">{reserve}</p>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</header>
+
+<style>
+  .tete {
+    background: var(--couleur-surface-2);
+    padding-block: var(--pas-3) var(--pas-4);
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  @media (min-width: 48rem) {
+    .tete {
+      padding-block: var(--pas-4) var(--pas-5);
+    }
+  }
+
+  /*
+   * Sur grand écran, deux colonnes : le texte à gauche, le face-à-face à
+   * droite. Une seule colonne laissait la moitié droite du bandeau vide.
+   */
+  @media (min-width: 64rem) {
+    .interieur {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      grid-template-areas:
+        "fil fil"
+        "titre duel"
+        "chapo duel"
+        "proximite duel"
+        "date duel"
+        "reserves duel";
+      grid-template-rows: auto auto auto auto auto 1fr;
+      column-gap: var(--pas-5);
+    }
+
+    .interieur > .fil-ariane {
+      grid-area: fil;
+    }
+
+    .interieur > h1 {
+      grid-area: titre;
+    }
+
+    .interieur > .chapo {
+      grid-area: chapo;
+    }
+
+    .interieur > .proximite {
+      grid-area: proximite;
+      margin-top: var(--pas-4);
+    }
+
+    .interieur > :global(.mise-a-jour) {
+      grid-area: date;
+    }
+
+    .interieur > .reserves {
+      grid-area: reserves;
+    }
+
+    .interieur > .duel {
+      grid-area: duel;
+      align-self: center;
+      margin: 0;
+    }
+  }
+
+  h1 {
+    margin: 0;
+    max-width: 24ch;
+    font-size: clamp(1.875rem, 1.3rem + 2.6vw, 3.5rem);
+    text-wrap: balance;
+  }
+
+  .et {
+    color: var(--couleur-encre-faible);
+    font-weight: 400;
+  }
+
+  .chapo {
+    margin: var(--pas-2) 0 0;
+    max-width: 36rem;
+    font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+    text-wrap: pretty;
+  }
+
+  /*
+   * Trois colonnes à toutes les largeurs : visage, chiffre, visage. À 375 px,
+   * 96 + 96 px de portraits laissent environ 110 px au chiffre, assez pour
+   * « des 10 affirmations comparables » sur trois lignes.
+   */
+  .duel {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(6.5rem, 1fr) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--pas-2);
+    margin: var(--pas-4) 0 var(--pas-3);
+    max-width: 46rem;
+  }
+
+  /* La fente de l'isoloir : un filet vertical, derrière le chiffre. */
+  .duel::before {
+    content: "";
+    position: absolute;
+    inset-block: 0;
+    left: 50%;
+    width: 2px;
+    translate: -1px 0;
+    background: var(--couleur-signature);
+    opacity: 0.35;
+  }
+
+  .cote {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--couleur-encre);
+    text-decoration: none;
+    text-align: center;
+    min-width: 0;
+  }
+
+  .cote--a {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .cote--b {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  .cote :global(.portrait) {
+    border-radius: 18px;
+    border-color: color-mix(in srgb, var(--couleur-encre) 22%, transparent);
+    box-shadow: var(--ombre-1);
+    margin-bottom: 0.2rem;
+    transition: translate var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .cote:hover :global(.portrait) {
+      translate: 0 -3px;
+    }
+
+    .cote:hover .nom {
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+  }
+
+  .nom {
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: break-word;
+    text-wrap: balance;
+  }
+
+  .parti {
+    font-size: 0.8125rem;
+    line-height: 1.3;
+    color: var(--couleur-encre-faible);
+    text-wrap: balance;
+  }
+
+  /*
+   * Le chiffre se pose sur la fente, sur un disque au fond de la page : il
+   * interrompt le filet, comme un bulletin glissé entre les deux rideaux.
+   */
+  .accord {
+    position: relative;
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: var(--pas-2) var(--pas-1);
+    text-align: center;
+    background: var(--couleur-surface-2);
+  }
+
+  .accord-libelle,
+  .accord-total {
+    font-size: var(--t-petit);
+    line-height: 1.3;
+    color: var(--couleur-encre-faible);
+    text-wrap: balance;
+  }
+
+  .accord-chiffre {
+    font-size: clamp(3rem, 2.4rem + 3vw, 4.75rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    font-variant-numeric: tabular-nums;
+    color: var(--couleur-signature);
+    margin-block: 0.15rem 0.3rem;
+  }
+
+  .proximite {
+    max-width: 46rem;
+    margin: 0 0 var(--pas-2);
+  }
+
+  .proximite p {
+    margin: 0;
+  }
+
+  .proximite strong {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .jauge {
+    display: block;
+    width: 100%;
+    margin: var(--pas-1) 0;
+  }
+
+  /*
+   * Piste tirée de l'encre : `--couleur-trait` sur le fond du bandeau tombait
+   * à 1,4:1, sous le plancher de 1,5:1 mesuré par scripts/capturer.mjs.
+   */
+  .jauge-piste {
+    fill: color-mix(in srgb, var(--couleur-encre) 25%, var(--couleur-surface-2));
+  }
+
+  .jauge-valeur {
+    fill: var(--couleur-signature);
+  }
+
+  .definition {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  /* En pleine encre et bordée, comme la réserve d'une fiche : elle se lit avant la suite. */
+  .reserve-paire {
+    margin: var(--pas-2) 0 0;
+    max-width: 46rem;
+    padding-left: var(--pas-2);
+    border-left: 2px solid var(--couleur-encre-faible);
+    font-size: var(--t-petit);
+  }
+
+  @media (forced-colors: active) {
+    .jauge-piste {
+      fill: Canvas;
+      stroke: CanvasText;
+    }
+
+    .jauge-valeur {
+      fill: CanvasText;
+    }
+  }
+</style>

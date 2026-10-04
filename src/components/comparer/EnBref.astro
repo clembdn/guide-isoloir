@@ -1,0 +1,157 @@
+---
+/*
+ * La paire en une phrase, puis où leurs positions s'écartent le plus et où
+ * elles se rejoignent.
+ *
+ * LA PHRASE EST GÉNÉRÉE (`src/lib/face-a-face.ts`), depuis les mêmes données
+ * que la grille et les lignes : elle ne peut pas les contredire, et c'est elle
+ * qu'un moteur ou un assistant extrait.
+ *
+ * RÈGLE MÉCANIQUE, PUBLIÉE : trois affirmations au plus de chaque côté, les
+ * plus grands écarts d'abord (puis l'ordre du test), les plus petits pour les
+ * rapprochements. Jamais un choix de « sujet phare ».
+ *
+ * Les titres disent « leurs positions », jamais « ils » : les données ne
+ * portent pas le genre des candidats, et la page ne le devine pas.
+ */
+import GlypheRelation from "./GlypheRelation.astro";
+import type { LigneFaceAFace } from "../../lib/face-a-face";
+
+type Props = {
+  enBref: string;
+  ecarts: LigneFaceAFace[];
+  rejoignent: LigneFaceAFace[];
+};
+
+const { enBref, ecarts, rejoignent } = Astro.props;
+
+const listes = [
+  {
+    id: "ecarts",
+    titre: "Où leurs positions s'écartent le plus",
+    lignes: ecarts,
+    vide: "Aucune affirmation à deux crans d'écart ou plus.",
+  },
+  {
+    id: "rejoignent",
+    titre: "Où elles se rejoignent",
+    lignes: rejoignent,
+    vide: "Aucune affirmation à un cran d'écart ou moins.",
+  },
+];
+
+/* « 4 crans », « Même position » : la fin du texte d'écart, sans « d'écart ». */
+const ecartCourt = (ligne: LigneFaceAFace) =>
+  ligne.ecart === 0 ? "même position" : `${ligne.ecart} ${ligne.ecart === 1 ? "cran" : "crans"}`;
+---
+
+<section class="en-bref" id="en-bref" aria-labelledby="en-bref-titre">
+  <h2 id="en-bref-titre">En bref</h2>
+  <p class="phrase">{enBref}</p>
+
+  {
+    listes.map((liste) => (
+      <div class="saillantes">
+        <h3 id={liste.id}>{liste.titre}</h3>
+        {liste.lignes.length === 0 ? (
+          <p class="vide">{liste.vide}</p>
+        ) : (
+          <ol>
+            {liste.lignes.map((ligne) => (
+              <li>
+                <a href={`#${ligne.id}`}>
+                  <GlypheRelation relation={ligne.relation} ecart={ligne.ecart} />
+                  <span class="intitule">{ligne.court}</span>
+                  <span class="ecart">{ecartCourt(ligne)}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+    ))
+  }
+</section>
+
+<style>
+  .en-bref h2 {
+    margin: 0 0 var(--pas-2);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  }
+
+  .phrase {
+    margin: 0;
+    max-width: var(--mesure);
+    text-wrap: pretty;
+  }
+
+  .saillantes {
+    margin-top: var(--pas-4);
+  }
+
+  .saillantes h3 {
+    margin: 0 0 var(--pas-1);
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin: 0;
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  li:last-child {
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  a {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--pas-2);
+    min-height: 44px;
+    padding: 0.45rem 0.25rem;
+    color: var(--couleur-encre);
+    text-decoration: none;
+    transition: background-color var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      background: var(--couleur-surface-2);
+    }
+
+    a:hover .intitule {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  a:focus-visible {
+    outline-offset: -2px;
+  }
+
+  .intitule {
+    font-weight: 600;
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+
+  .ecart {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .vide {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+</style>

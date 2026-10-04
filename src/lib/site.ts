@@ -80,7 +80,7 @@ type NavPrincipale = NavEntry & {
 };
 
 /**
- * Navigation principale, dans l'ordre du parcours : qui se présente, sur quoi,
+ * Navigation principale, dans l'ordre du parcours : qui se présente, sur quoi, l'un face à l'autre,
  * comment voter, comment c'est fait, qui l'écrit.
  *
  * Le test n'y figure pas : il a son propre bouton, à côté, et le répéter ici
@@ -96,6 +96,11 @@ export const NAV_PRINCIPALE: readonly NavPrincipale[] = [
     href: "/themes",
     label: "Thèmes",
     description: "Les positions de tous, affirmation par affirmation",
+  },
+  {
+    href: "/comparer",
+    label: "Comparer",
+    description: "Deux candidats face à face, et l'écart entre leurs positions",
   },
   {
     href: "/comprendre",
@@ -119,6 +124,7 @@ export const FOOTER_NAV: readonly NavEntry[] = [
   { href: "/test", label: "Le test" },
   { href: "/candidats", label: "Candidats" },
   { href: "/themes", label: "Thèmes" },
+  { href: "/comparer", label: "Comparer deux candidats" },
   { href: "/donnees", label: "Données ouvertes" },
   { href: "/comprendre", label: "Comprendre" },
   { href: "/a-propos", label: "À propos" },

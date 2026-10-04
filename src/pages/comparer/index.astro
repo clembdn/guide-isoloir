@@ -1,0 +1,599 @@
+---
+/*
+ * Comparer deux candidats : on touche un premier visage, les candidats qu'on
+ * peut lui comparer apparaissent, on en touche un second.
+ *
+ * SANS JAVASCRIPT, ET SANS `:has()`. Chaque visage est un bouton radio et son
+ * étiquette, suivis de la rangée de ses partenaires ; le combinateur de frère
+ * (`:checked + label + .rangee`) affiche la rangée du visage choisi. Tous les
+ * navigateurs le connaissent. Au clavier : les flèches parcourent les visages,
+ * Tab mène aux liens de la rangée ouverte, qui suit le visage dans le DOM.
+ *
+ * RIEN N'EST CHOISI D'AVANCE : cocher le premier visage de la liste le mettrait
+ * en avant. Et aucun pourcentage ici : une grille des proximités ferait une
+ * carte des affinités, ce que la page n'est pas. On choisit des noms, on lit
+ * les chiffres sur la page de la paire.
+ *
+ * TOUS LES CANDIDATS EN LICE SONT NOMMÉS. Ceux qu'on ne peut encore comparer à
+ * personne le sont en bas, avec la raison mécanique : les taire laisserait
+ * croire qu'ils ne sont pas en lice.
+ *
+ * Filet de sécurité pour les robots et les lecteurs qui ne veulent pas du
+ * sélecteur : la liste complète des comparaisons, dépliable, en liens simples.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import Portrait from "../../components/candidats/Portrait.astro";
+import Icone from "../../components/Icone.astro";
+import DerniereMiseAJour from "../../components/DerniereMiseAJour.astro";
+import {
+  candidatsComparables,
+  COMPARABLES_MIN,
+  paires,
+  sansComparaison,
+} from "../../lib/face-a-face";
+import { NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
+import { SITE_NAME, SITE_URL } from "../../lib/site";
+
+const comparables = candidatsComparables();
+const absents = sansComparaison();
+/* Les comparaisons proposées : entre deux candidats en lice. */
+const disponibles = paires().filter((paire) => paire.a.enLice && paire.b.enLice);
+const misAJour = disponibles.map((paire) => paire.misAJour).reduce((x, y) => (x > y ? x : y), "");
+
+const title = "Comparer deux candidats à la présidentielle 2027";
+const description = `Choisissez deux candidats à la présidentielle 2027 et voyez leurs positions face à face sur les ${NOMBRE_AFFIRMATIONS} affirmations du test, affirmation par affirmation, avec l'écart entre elles. ${disponibles.length} comparaisons disponibles.`;
+
+/* Phrases composées ici : Astro avale l'espace entre une expression et du texte. */
+const regle = `Une comparaison s'ouvre quand les positions des deux candidats sont connues, et tirées de documents distincts, sur au moins ${COMPARABLES_MIN} des ${NOMBRE_AFFIRMATIONS} affirmations du test : le seuil à partir duquel le test affiche un pourcentage.`;
+const nombreDisponibles = `Les ${disponibles.length} comparaisons disponibles`;
+const nombreComparaisons = (n: number) => `${n} ${n > 1 ? "comparaisons" : "comparaison"}`;
+const positionsConnues = (n: number) =>
+  n === 0 ? "aucune position connue" : `${n} ${n > 1 ? "positions connues" : "position connue"}`;
+
+const filAriane = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  itemListElement: [
+    { "@type": "ListItem", position: 1, name: SITE_NAME, item: SITE_URL },
+    {
+      "@type": "ListItem",
+      position: 2,
+      name: "Comparer",
+      item: new URL("/comparer", SITE_URL).href,
+    },
+  ],
+};
+---
+
+<BaseLayout
+  title={title}
+  description={description}
+  updated={misAJour}
+  gabarit="libre"
+  webPage={{ "@type": "CollectionPage" }}
+>
+  <header class="tete">
+    <div class="enveloppe-large">
+      <nav class="fil-ariane" aria-label="Fil d'Ariane">
+        <a href="/">{SITE_NAME}</a>
+      </nav>
+      <h1>Comparer deux candidats</h1>
+      <p class="chapo">
+        Leurs positions face à face sur chacune des {NOMBRE_AFFIRMATIONS} affirmations du test, et l'écart
+        entre elles. Choisissez un premier visage, puis un second.
+      </p>
+      <DerniereMiseAJour date={misAJour} />
+    </div>
+  </header>
+
+  <div class="enveloppe-large corps">
+    <section aria-labelledby="choisir-titre">
+      <h2 id="choisir-titre">Choisissez un premier candidat</h2>
+
+      <div class="selecteur">
+        {
+          comparables.map(({ visage, partenaires }) => (
+            <>
+              <input
+                class="choix visuellement-masque"
+                type="radio"
+                name="premier"
+                id={`p-${visage.slug}`}
+                value={visage.slug}
+              />
+              <label class="visage-choix" for={`p-${visage.slug}`}>
+                <Portrait nom={visage.nom} chemin={visage.portrait} taille={64} />
+                <span class="nom">{visage.nom}</span>
+                <span class="compte">{nombreComparaisons(partenaires.length)}</span>
+              </label>
+              <section class="rangee" aria-labelledby={`r-${visage.slug}`}>
+                <h3 id={`r-${visage.slug}`}>Comparer {visage.nom} avec…</h3>
+                <ul>
+                  {partenaires.map(({ autre, paire }) => (
+                    <li>
+                      <a href={paire.chemin}>
+                        <Portrait nom={autre.nom} chemin={autre.portrait} taille={40} />
+                        <span class="partenaire">
+                          <span class="nom">{autre.nom}</span>
+                          <span class="compte">
+                            {`${paire.comparables} affirmations comparables`}
+                          </span>
+                        </span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </>
+          ))
+        }
+        <p class="indice">
+          <Icone nom="hand-pointing" graisse="bold" />
+          Les candidats qu'on peut comparer au visage choisi s'affichent ici.
+        </p>
+      </div>
+
+      <details class="toutes">
+        <summary>
+          <Icone nom="caret-right" graisse="bold" class="chevron" />
+          {nombreDisponibles}
+        </summary>
+        <ul>
+          {
+            disponibles.map((paire) => (
+              <li>
+                <a href={paire.chemin}>{`${paire.a.nom} et ${paire.b.nom}`}</a>
+                <span class="compte">{`${paire.comparables} affirmations comparables`}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </details>
+    </section>
+
+    {
+      absents.length > 0 && (
+        <section class="absents" aria-labelledby="absents-titre">
+          <h2 id="absents-titre">Pas encore comparables</h2>
+          <p class="explication">
+            Trop peu de leurs positions sont connues pour les mettre face à un autre candidat. Leur
+            fiche dit ce qu'on sait, et chaque comparaison s'ouvrira d'elle-même quand les
+            programmes et les déclarations le permettront.
+          </p>
+          <ul class="noms">
+            {absents.map(({ visage, documentees, raison }) => (
+              <li>
+                <a href={`/candidats/${visage.slug}`}>
+                  <Portrait nom={visage.nom} chemin={visage.portrait} taille={32} />
+                  <span>
+                    {visage.nom}
+                    <span class="compte">
+                      {raison === "trop-peu"
+                        ? positionsConnues(documentees)
+                        : `${positionsConnues(documentees)}, sans recoupement suffisant`}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    <p class="regle">
+      {regle} La règle, et ce qu'elle exclut : la <a href="/methodologie#comparer-deux-candidats"
+        >méthodologie</a
+      >.
+    </p>
+
+    <section class="appel" aria-labelledby="appel-titre">
+      <h2 id="appel-titre">Et vous, de qui êtes-vous proche ?</h2>
+      <p>
+        Le même calcul, entre vos réponses et les positions des candidats, dans votre navigateur.
+      </p>
+      <a class="action action--grand" href="/test">Commencer le test</a>
+    </section>
+  </div>
+
+  <script type="application/ld+json" set:html={JSON.stringify(filAriane)} is:inline />
+
+  <script>
+    /*
+     * AMÉLIORATION PROGRESSIVE, ET SEULEMENT AU TOUCHER OU À LA SOURIS. Sur
+     * téléphone, la rangée du visage choisi s'ouvre sous toute la mosaïque,
+     * parfois hors de l'écran : on l'y ramène. Au clavier, rien : Tab y mène
+     * déjà le focus, et un défilement à chaque flèche serait de la latence.
+     * Sans ce script, le sélecteur marche à l'identique. Aucune requête.
+     */
+    let pointeur = false;
+    const selecteur = document.querySelector(".selecteur");
+    selecteur?.addEventListener("pointerdown", () => {
+      pointeur = true;
+    });
+    selecteur?.addEventListener("keydown", () => {
+      pointeur = false;
+    });
+    selecteur?.addEventListener("change", (evenement) => {
+      const choix = evenement.target;
+      if (!pointeur || !(choix instanceof HTMLInputElement)) return;
+      const rangee = choix.nextElementSibling?.nextElementSibling;
+      const calme = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      rangee?.scrollIntoView({ block: "nearest", behavior: calme ? "auto" : "smooth" });
+    });
+  </script>
+</BaseLayout>
+
+<style>
+  .tete {
+    background: var(--couleur-surface-2);
+    padding-block: var(--pas-3) var(--pas-4);
+    border-bottom: 1px solid var(--couleur-trait);
+  }
+
+  @media (min-width: 48rem) {
+    .tete {
+      padding-block: var(--pas-4) var(--pas-5);
+    }
+  }
+
+  h1 {
+    margin: 0;
+  }
+
+  .chapo {
+    margin: var(--pas-2) 0 var(--pas-1);
+    max-width: 36rem;
+    font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
+    text-wrap: pretty;
+  }
+
+  .corps {
+    padding-block: var(--pas-4) var(--pas-6);
+  }
+
+  h2 {
+    margin: 0 0 var(--pas-3);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  }
+
+  /*
+   * Les visages d'abord, puis la rangée du visage choisi : `order` range les
+   * rangées après la mosaïque, alors que le DOM les garde juste après leur
+   * visage — c'est l'ordre du clavier.
+   */
+  .selecteur {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-2) var(--pas-1);
+  }
+
+  .visage-choix {
+    flex: 0 0 calc((100% - 2 * var(--pas-1)) / 3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
+    padding: var(--pas-1) 0.125rem;
+    border: 2px solid transparent;
+    border-radius: var(--rayon-carte);
+    color: var(--couleur-encre);
+    text-align: center;
+    cursor: pointer;
+    transition:
+      background-color var(--duree) var(--sortie),
+      border-color var(--duree) var(--sortie);
+  }
+
+  @media (min-width: 40rem) {
+    .visage-choix {
+      flex-basis: calc((100% - 4 * var(--pas-1)) / 5);
+    }
+  }
+
+  .visage-choix :global(.portrait) {
+    border-radius: 16px;
+    border-color: color-mix(in srgb, var(--couleur-encre) 22%, transparent);
+    transition:
+      translate var(--duree) var(--sortie),
+      opacity var(--duree) var(--sortie);
+  }
+
+  @media (min-width: 48rem) {
+    .visage-choix :global(.portrait) {
+      width: 80px;
+      height: 80px;
+    }
+  }
+
+  .visage-choix .nom {
+    font-weight: 700;
+    font-size: 0.9375rem;
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+
+  .compte {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--couleur-encre-faible);
+  }
+
+  .visage-choix .compte {
+    white-space: nowrap;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .visage-choix:hover {
+      background: var(--couleur-surface-2);
+    }
+
+    .visage-choix:hover :global(.portrait) {
+      translate: 0 -3px;
+    }
+  }
+
+  .choix:focus-visible + .visage-choix {
+    outline: 2px solid var(--couleur-signature);
+    outline-offset: 2px;
+  }
+
+  .choix:checked + .visage-choix {
+    border-color: var(--couleur-encre);
+    background: var(--couleur-surface);
+    box-shadow: var(--ombre-1);
+  }
+
+  /*
+   * `:has()` n'est qu'un plus : il estompe les IMAGES des visages non choisis,
+   * jamais les noms. Sans lui, rien ne change de sens.
+   */
+  @supports selector(:has(*)) {
+    .selecteur:has(.choix:checked) .visage-choix :global(.portrait) {
+      opacity: 0.45;
+    }
+
+    .selecteur .choix:checked + .visage-choix :global(.portrait) {
+      opacity: 1;
+    }
+  }
+
+  .rangee {
+    display: none;
+    order: 1;
+    flex: 0 0 100%;
+    margin-top: var(--pas-3);
+    padding: var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface-2);
+  }
+
+  .choix:checked + .visage-choix + .rangee {
+    display: block;
+  }
+
+  .rangee h3 {
+    margin: 0 0 var(--pas-2);
+    font-size: 1.125rem;
+  }
+
+  .rangee ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--pas-1);
+  }
+
+  @media (min-width: 40rem) {
+    .rangee ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .rangee ul {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .rangee li {
+    margin: 0;
+  }
+
+  .rangee a {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
+    min-height: 44px;
+    padding: 0.35rem var(--pas-3) 0.35rem 0.35rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    /* Tiré de l'encre : le trait seul tombait à 1,4:1 sur le fond de la rangée. */
+    border: 1px solid color-mix(in srgb, var(--couleur-encre) 22%, transparent);
+    color: var(--couleur-encre);
+    text-decoration: none;
+    transition:
+      border-color var(--duree) var(--sortie),
+      translate var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .rangee a:hover {
+      border-color: var(--couleur-signature);
+      translate: 0 -2px;
+    }
+  }
+
+  .rangee a:active {
+    translate: 0 1px;
+  }
+
+  .rangee :global(.portrait) {
+    border-radius: 50%;
+  }
+
+  .partenaire .nom {
+    display: block;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .indice {
+    order: 2;
+    flex: 0 0 100%;
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: var(--pas-2) 0 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .indice :global(.icone) {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--couleur-signature);
+  }
+
+  .choix:checked ~ .indice {
+    display: none;
+  }
+
+  .toutes {
+    margin-top: var(--pas-4);
+    font-size: var(--t-petit);
+  }
+
+  .toutes summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 44px;
+    font-weight: 600;
+    color: var(--couleur-signature);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .toutes summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .toutes summary :global(.chevron) {
+    flex: none;
+    width: 0.9rem;
+    height: 0.9rem;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .toutes[open] summary :global(.chevron) {
+    transform: rotate(90deg);
+  }
+
+  .toutes ul {
+    list-style: none;
+    padding: 0;
+    margin: var(--pas-1) 0 0;
+    columns: 1;
+  }
+
+  @media (min-width: 48rem) {
+    .toutes ul {
+      columns: 2;
+      column-gap: var(--pas-5);
+    }
+  }
+
+  .toutes li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--pas-2);
+    margin: 0;
+    padding: 0.4rem 0;
+    border-top: 1px solid var(--couleur-trait);
+    break-inside: avoid;
+  }
+
+  .toutes .compte {
+    display: inline;
+    text-align: right;
+  }
+
+  .absents {
+    margin-top: var(--pas-6);
+  }
+
+  .explication {
+    max-width: var(--mesure);
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .noms {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1);
+  }
+
+  .noms li {
+    margin: 0;
+  }
+
+  .noms a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-1);
+    min-height: 44px;
+    padding: 0.25rem 0.9rem 0.25rem 0.3rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    border: 1px solid var(--couleur-trait);
+    color: var(--couleur-encre);
+    font-size: var(--t-petit);
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+  }
+
+  .noms :global(.portrait) {
+    border-radius: 50%;
+  }
+
+  .regle {
+    margin: var(--pas-5) 0 0;
+    max-width: 44rem;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .appel {
+    margin-top: var(--pas-6);
+    padding: var(--pas-5) var(--pas-3);
+    border-radius: var(--rayon-carte-l);
+    background: var(--couleur-surface-2);
+    text-align: center;
+  }
+
+  .appel h2 {
+    margin: 0 auto;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+
+  .appel p {
+    margin: var(--pas-2) auto var(--pas-4);
+    max-width: 32rem;
+  }
+
+  @media (forced-colors: active) {
+    .choix:checked + .visage-choix {
+      border-color: Highlight;
+    }
+  }
+</style>

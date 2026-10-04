@@ -1,0 +1,248 @@
+---
+/*
+ * Où se situe chacun parmi tous les candidats qu'on peut comparer à l'autre.
+ *
+ * LE MÊME CALCUL, PAIRE PAR PAIRE. Pour chacun des deux, la règle porte un
+ * tic par candidat comparable, à sa proximité ; celui de l'autre candidat de la
+ * page est plus long et nommé. Même encre pour tous les tics.
+ *
+ * RÉSERVE, ÉCRITE : chaque proximité porte sur ses propres affirmations
+ * comparables, qui ne sont pas les mêmes d'une paire à l'autre. Le rang situe,
+ * il ne classe pas. Sous trois candidats comparables, aucun rang n'est donné.
+ *
+ * La liste dépliable suit l'ordre alphabétique : un ordre par proximité en
+ * ferait un palmarès.
+ */
+import Icone from "../Icone.astro";
+import type { Champ, Visage } from "../../lib/face-a-face";
+
+type Props = {
+  cotes: { visage: Visage; autre: Visage; champ: Champ }[];
+};
+
+const { cotes } = Astro.props;
+
+const blocs = cotes.map(({ visage, autre, champ }) => {
+  const cible = champ.voisins.find((voisin) => voisin.estAutre)!;
+  /* L'étiquette s'appuie sur le bord le plus proche, pour ne jamais sortir de la règle. */
+  const ancrage = cible.pourcent < 25 ? "start" : cible.pourcent > 75 ? "end" : "middle";
+  const rang =
+    champ.rang === null
+      ? `${autre.nom} est l'un des ${champ.partenaires} candidats comparables à ${visage.nom} : trop peu pour situer un rang.`
+      : `${autre.nom} arrive au ${champ.rang === 1 ? "1er" : `${champ.rang}e`} rang${champ.exAequo ? ", ex æquo," : ""} sur les ${champ.partenaires} candidats comparables à ${visage.nom}.`;
+  return { visage, autre, champ, cible, ancrage, rang };
+});
+---
+
+<section class="champ" id="champ" aria-labelledby="champ-titre">
+  <h2 id="champ-titre">Parmi les autres candidats</h2>
+  <p class="chapo-section">
+    La proximité de chacun avec tous les candidats qu'on peut lui comparer, calculée de la même
+    façon. Chaque proximité porte sur ses propres affirmations comparables : le rang situe, il ne
+    classe pas.
+  </p>
+
+  <div class="blocs">
+    {
+      blocs.map((bloc) => (
+        <section class="bloc" aria-labelledby={`champ-${bloc.visage.slug}`}>
+          <h3 id={`champ-${bloc.visage.slug}`}>Proximité avec {bloc.visage.nom}</h3>
+          <p class="rang">{bloc.rang}</p>
+          <svg class="regle" height="58" aria-hidden="true" focusable="false">
+            <line class="axe" x1="0" x2="100%" y1="40" y2="40" />
+            {bloc.champ.voisins
+              .filter((voisin) => !voisin.estAutre)
+              .map((voisin) => (
+                <line
+                  class="tic"
+                  x1={`${voisin.pourcent}%`}
+                  x2={`${voisin.pourcent}%`}
+                  y1="33"
+                  y2="47"
+                >
+                  <title>{`${voisin.visage.nom} : ${voisin.pourcent} %`}</title>
+                </line>
+              ))}
+            <line
+              class="tic tic--autre"
+              x1={`${bloc.cible.pourcent}%`}
+              x2={`${bloc.cible.pourcent}%`}
+              y1="22"
+              y2="50"
+            />
+            <text class="etiquette" x={`${bloc.cible.pourcent}%`} y="15" text-anchor={bloc.ancrage}>
+              {`${bloc.autre.nom} ${bloc.cible.pourcent} %`}
+            </text>
+          </svg>
+          <p class="bornes" aria-hidden="true">
+            <span>0 %</span>
+            <span>100 %</span>
+          </p>
+          <details>
+            <summary>
+              <Icone nom="caret-right" graisse="bold" class="chevron" />
+              {`Les ${bloc.champ.partenaires} candidats comparables à ${bloc.visage.nom}`}
+            </summary>
+            <ul>
+              {bloc.champ.voisins.map((voisin) => (
+                <li class:list={{ autre: voisin.estAutre }}>
+                  <a href={voisin.chemin}>{voisin.visage.nom}</a>
+                  <span class="valeur">
+                    {`${voisin.pourcent} %, sur ${voisin.comparables} affirmations`}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </section>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .champ h2 {
+    margin: 0 0 var(--pas-2);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  }
+
+  .chapo-section {
+    max-width: var(--mesure);
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .blocs {
+    display: grid;
+    gap: var(--pas-4);
+  }
+
+  @media (min-width: 48rem) {
+    .blocs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--pas-5);
+    }
+  }
+
+  .bloc {
+    min-width: 0;
+  }
+
+  h3 {
+    margin: 0 0 var(--pas-1);
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  .rang {
+    margin: 0 0 var(--pas-2);
+    font-size: var(--t-petit);
+  }
+
+  .regle {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .axe {
+    stroke: var(--couleur-trait);
+    stroke-width: 3;
+  }
+
+  .tic {
+    stroke: color-mix(in srgb, var(--couleur-encre) 45%, transparent);
+    stroke-width: 2;
+  }
+
+  .tic--autre {
+    stroke: var(--couleur-signature);
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+
+  .etiquette {
+    fill: var(--couleur-encre);
+    font-size: 0.8125rem;
+    font-weight: 700;
+    font-family: inherit;
+  }
+
+  .bornes {
+    display: flex;
+    justify-content: space-between;
+    margin: 0 0 var(--pas-2);
+    font-size: 0.75rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  details {
+    font-size: var(--t-petit);
+  }
+
+  summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-height: 44px;
+    cursor: pointer;
+    font-weight: 600;
+    color: var(--couleur-signature);
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary :global(.chevron) {
+    flex: none;
+    width: 0.9rem;
+    height: 0.9rem;
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  details[open] summary :global(.chevron) {
+    transform: rotate(90deg);
+  }
+
+  details ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  details li {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--pas-2);
+    margin: 0;
+    padding: 0.35rem 0;
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .autre a {
+    font-weight: 700;
+  }
+
+  .valeur {
+    color: var(--couleur-encre-faible);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  @media (forced-colors: active) {
+    .axe,
+    .tic {
+      stroke: CanvasText;
+    }
+
+    .tic--autre {
+      stroke: Highlight;
+    }
+
+    .etiquette {
+      fill: CanvasText;
+    }
+  }
+</style>

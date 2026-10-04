@@ -1,0 +1,134 @@
+---
+/*
+ * Ce que deux positions disent l'une de l'autre, en un signe.
+ *
+ * LES ATOMES DE LA LIGNE DE PARTAGE, EN MINIATURE. Un disque plein est une
+ * position connue, un cercle tireté une position inconnue, et la distance
+ * entre les deux disques est l'écart en crans : collés pour un cran, aux deux
+ * bouts pour quatre. Le premier candidat à gauche, le second à droite, comme
+ * dans l'en-tête. Même position : un disque cerclé, deux en un. Même document
+ * repris des deux côtés : deux feuilles superposées, hors calcul.
+ *
+ * UNE SEULE ENCRE (`currentColor`), aucune couleur de sens : la grille montre
+ * des distances, pas des pour ou des contre. Décoratif : le nom accessible de
+ * la case le dit en toutes lettres.
+ */
+import Icone from "../Icone.astro";
+import type { Relation } from "../../lib/paire";
+
+type Props = {
+  relation: Relation;
+  /** Écart en crans, pour une affirmation comparée. */
+  ecart: number | null;
+  class?: string;
+};
+
+const { relation, ecart, class: classe } = Astro.props;
+
+/* Viewbox de 40 × 16 : centre à 20, rayon 4, un cran = 4 unités de demi-écart. */
+const R = 4;
+const demi = (ecart ?? 0) * R;
+const gauche = 20 - demi;
+const droite = 20 + demi;
+---
+
+{
+  relation === "meme-document" ? (
+    <span class:list={["glyphe", "glyphe--document", classe]} aria-hidden="true">
+      <Icone nom="copy" graisse="bold" />
+    </span>
+  ) : (
+    <svg
+      class:list={["glyphe", classe]}
+      viewBox="0 0 40 16"
+      width="40"
+      height="16"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {relation === "identique" && (
+        <>
+          <circle cx="20" cy="8" r={R} class="plein" />
+          <circle cx="20" cy="8" r="6.6" class="anneau" />
+        </>
+      )}
+      {(relation === "proche" || relation === "eloignee") && (
+        <>
+          {relation === "eloignee" && <line x1={gauche} x2={droite} y1="8" y2="8" class="trait" />}
+          <circle cx={gauche} cy="8" r={R} class="plein" />
+          <circle cx={droite} cy="8" r={R} class="plein" />
+        </>
+      )}
+      {relation === "seul-a" && (
+        <>
+          <circle cx="12" cy="8" r={R} class="plein" />
+          <circle cx="28" cy="8" r={R} class="vide" />
+        </>
+      )}
+      {relation === "seul-b" && (
+        <>
+          <circle cx="12" cy="8" r={R} class="vide" />
+          <circle cx="28" cy="8" r={R} class="plein" />
+        </>
+      )}
+      {relation === "aucune" && (
+        <>
+          <circle cx="12" cy="8" r={R} class="vide" />
+          <circle cx="28" cy="8" r={R} class="vide" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+<style>
+  .glyphe {
+    display: block;
+    flex: none;
+    width: 2.5rem;
+    height: 1rem;
+    color: var(--couleur-signature);
+    overflow: visible;
+  }
+
+  .plein {
+    fill: currentColor;
+  }
+
+  .anneau {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+  }
+
+  .trait {
+    stroke: currentColor;
+    stroke-width: 2;
+  }
+
+  /* Inconnu : le pointillé de la pastille « ? », à l'encre faible. */
+  .vide {
+    fill: none;
+    stroke: var(--couleur-encre-faible);
+    stroke-width: 1.4;
+    stroke-dasharray: 2 2;
+  }
+
+  .glyphe--document {
+    display: grid;
+    place-items: center;
+    color: var(--couleur-encre-faible);
+  }
+
+  .glyphe--document :global(.icone) {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  @media (forced-colors: active) {
+    .glyphe {
+      color: CanvasText;
+    }
+  }
+</style>

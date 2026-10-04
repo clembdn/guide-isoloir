@@ -1,0 +1,269 @@
+---
+/*
+ * Les 24 affirmations d'un coup d'œil : un thème par rangée, une case par
+ * affirmation, et dans chaque case la distance entre les deux positions.
+ *
+ * ON VOIT OÙ LA PAIRE SE SÉPARE AVANT D'Y DESCENDRE. Chaque case est un lien
+ * vers sa ligne plus bas. Le compte du thème est écrit en clair (« d'accord
+ * sur 2 des 3 ») : aucun pourcentage par thème, trop peu d'affirmations pour
+ * qu'un chiffre informe plutôt qu'il ne trompe.
+ *
+ * Panneau à filets d'un pixel peints par le fond, comme le sommaire des pages
+ * de thème. AUCUNE TEINTE DE THÈME, AUCUNE PASTILLE DE SENS : le panneau dit
+ * des distances entre deux candidats, et la couleur n'y entre pas.
+ *
+ * L'intitulé court s'affiche sous chaque case sur grand écran ; sur téléphone,
+ * il reste dans le nom accessible du lien, avec la relation en toutes lettres.
+ */
+import Icone from "../Icone.astro";
+import GlypheRelation from "./GlypheRelation.astro";
+import type { ThemeFaceAFace } from "../../lib/face-a-face";
+import type { Relation } from "../../lib/paire";
+
+type Props = {
+  parTheme: ThemeFaceAFace[];
+  compte: Record<Relation, number>;
+  total: number;
+};
+
+const { parTheme, compte, total } = Astro.props;
+
+function compteTheme(theme: ThemeFaceAFace): string {
+  if (theme.comparables === 0) return "Rien de comparable";
+  return `D'accord sur ${theme.daccord} des ${theme.comparables}`;
+}
+
+/*
+ * La légende ne nomme que les signes présents sur la page : six entrées dont
+ * trois inutiles se lisent avant la grille, et la grille passe après.
+ */
+const legende = [
+  { relation: "identique", ecart: 0, texte: "Même position", present: compte.identique > 0 },
+  { relation: "proche", ecart: 1, texte: "1 cran d'écart", present: compte.proche > 0 },
+  {
+    relation: "eloignee",
+    ecart: 3,
+    texte: "2 crans ou plus : plus le trait est long, plus l'écart est grand",
+    present: compte.eloignee > 0,
+  },
+  {
+    relation: "seul-a",
+    ecart: null,
+    texte: "Une seule position connue",
+    present: compte["seul-a"] + compte["seul-b"] > 0,
+  },
+  { relation: "aucune", ecart: null, texte: "Aucune position connue", present: compte.aucune > 0 },
+  {
+    relation: "meme-document",
+    ecart: null,
+    texte: "Même document repris des deux côtés, hors calcul",
+    present: compte["meme-document"] > 0,
+  },
+] as const;
+---
+
+<section class="coup-d-oeil" id="coup-d-oeil" aria-labelledby="coup-d-oeil-titre">
+  <h2 id="coup-d-oeil-titre">Les {total} affirmations d'un coup d'œil</h2>
+
+  <ol class="themes">
+    {
+      parTheme.map((theme) => (
+        <li class="theme">
+          <h3 class="theme-nom">
+            <Icone nom={theme.theme.icone} graisse="bold" />
+            {theme.theme.nom}
+          </h3>
+          <p class="theme-compte">{compteTheme(theme)}</p>
+          <ol class="cases">
+            {theme.lignes.map((ligne) => (
+              <li>
+                <a class="case" href={`#${ligne.id}`}>
+                  <GlypheRelation relation={ligne.relation} ecart={ligne.ecart} />
+                  <span class="case-court">{ligne.court}</span>
+                  <span class="visuellement-masque">{` : ${ligne.ecartTexte}`}</span>
+                </a>
+              </li>
+            ))}
+          </ol>
+        </li>
+      ))
+    }
+  </ol>
+
+  <ul class="legende" aria-label="Légende des signes">
+    {
+      legende
+        .filter((entree) => entree.present)
+        .map((entree) => (
+          <li>
+            <GlypheRelation relation={entree.relation} ecart={entree.ecart} />
+            {entree.texte}
+          </li>
+        ))
+    }
+  </ul>
+</section>
+
+<style>
+  .coup-d-oeil h2 {
+    margin: 0 0 var(--pas-3);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  }
+
+  /*
+   * Filets d'un pixel par le fond : la liste est peinte au trait, chaque
+   * rangée à la surface, et l'écart de 1 px laisse voir le trait entre elles.
+   */
+  .themes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1px;
+    background: var(--couleur-trait);
+    border: 1px solid var(--couleur-trait);
+    border-radius: var(--rayon-carte);
+    overflow: clip;
+    box-shadow: var(--ombre-1);
+  }
+
+  .theme {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--pas-1) var(--pas-2);
+    margin: 0;
+    padding: var(--pas-2) var(--pas-2) var(--pas-2) var(--pas-3);
+    background: var(--couleur-surface);
+  }
+
+  .theme-nom {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0;
+    font-size: 0.9375rem;
+    line-height: 1.25;
+    letter-spacing: 0;
+  }
+
+  .theme-nom :global(.icone) {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  .theme-compte {
+    margin: 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+  }
+
+  .cases {
+    grid-column: 1 / -1;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--pas-1);
+  }
+
+  .cases li {
+    margin: 0;
+    min-width: 0;
+  }
+
+  .case {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    min-height: 44px;
+    padding: 0.5rem 0.25rem;
+    border-radius: 12px;
+    background: var(--couleur-surface-2);
+    color: var(--couleur-encre);
+    text-decoration: none;
+    text-align: center;
+    transition: background-color var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .case:hover {
+      background: color-mix(in srgb, var(--couleur-signature) 12%, var(--couleur-surface));
+    }
+
+    .case:hover .case-court {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+  }
+
+  .case:focus-visible {
+    outline-offset: -2px;
+  }
+
+  /* Sur téléphone, l'intitulé reste dans le nom accessible, pas à l'écran. */
+  .case-court {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (min-width: 64rem) {
+    .theme {
+      padding: var(--pas-2) var(--pas-2) var(--pas-2) var(--pas-3);
+    }
+
+    .case {
+      justify-content: flex-start;
+      min-height: 5.25rem;
+      padding: 0.65rem 0.35rem;
+    }
+
+    .case-court {
+      position: static;
+      width: auto;
+      height: auto;
+      overflow: visible;
+      clip-path: none;
+      white-space: normal;
+      font-size: 0.75rem;
+      line-height: 1.2;
+      text-wrap: balance;
+    }
+  }
+
+  .legende {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1) var(--pas-3);
+    margin: var(--pas-2) 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .legende li {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0;
+  }
+
+  @media (forced-colors: active) {
+    .case {
+      border: 1px solid CanvasText;
+    }
+  }
+</style>

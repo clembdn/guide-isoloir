@@ -1,0 +1,91 @@
+---
+/*
+ * Les face-à-face d'un candidat, en bas de sa fiche.
+ *
+ * ORDRE ALPHABÉTIQUE DE L'AUTRE, AUCUN CHIFFRE : un ordre par proximité, ou
+ * un pourcentage à côté de chaque nom, ferait de la fiche un palmarès des
+ * affinités. Le nombre d'affirmations comparables dit seulement ce que vaut
+ * chaque comparaison ; les chiffres se lisent sur la page de la paire.
+ */
+import Portrait from "../candidats/Portrait.astro";
+import type { ResumePaire, Visage } from "../../lib/face-a-face";
+
+type Props = {
+  nom: string;
+  partenaires: { autre: Visage; paire: ResumePaire }[];
+};
+
+const { nom, partenaires } = Astro.props;
+---
+
+<ul class="partenaires" aria-label={`Comparer ${nom} avec…`}>
+  {
+    partenaires.map(({ autre, paire }) => (
+      <li>
+        <a href={paire.chemin}>
+          <Portrait nom={autre.nom} chemin={autre.portrait} taille={40} />
+          <span>
+            <span class="nom">{autre.nom}</span>
+            <span class="compte">{`${paire.comparables} affirmations comparables`}</span>
+          </span>
+        </a>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .partenaires {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 var(--pas-3);
+    display: grid;
+    gap: var(--pas-1);
+  }
+
+  @media (min-width: 40rem) {
+    .partenaires {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  li {
+    margin: 0;
+  }
+
+  a {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-2);
+    min-height: 44px;
+    padding: 0.35rem var(--pas-3) 0.35rem 0.35rem;
+    border-radius: var(--rayon-actionnable);
+    background: var(--couleur-surface);
+    border: 1px solid var(--couleur-trait);
+    color: var(--couleur-encre);
+    text-decoration: none;
+    transition: border-color var(--duree) var(--sortie);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    a:hover {
+      border-color: var(--couleur-signature);
+    }
+  }
+
+  a :global(.portrait) {
+    border-radius: 50%;
+  }
+
+  .nom {
+    display: block;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .compte {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+  }
+</style>

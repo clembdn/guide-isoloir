@@ -33,6 +33,7 @@ const PAGES_FIXES = [
   "comprendre.html",
   "candidats.html",
   "themes.html",
+  "comparer.html",
   "donnees.html",
   "a-propos.html",
   "methodologie.html",
@@ -43,11 +44,12 @@ const PAGES_FIXES = [
 ];
 
 /**
- * Les articles de /comprendre et les fiches de /candidats et /themes sont
- * générés depuis les données : leur nombre n'est pas connu d'avance. Ils sont ramassés par ce
- * motif, et soumis aux mêmes contrôles que les pages fixes.
+ * Les articles de /comprendre, les fiches de /candidats et /themes et les
+ * face-à-face de /comparer sont générés depuis les données : leur nombre n'est
+ * pas connu d'avance. Ils sont ramassés par ce motif, et soumis aux mêmes
+ * contrôles que les pages fixes.
  */
-const MOTIF_ARTICLES = /^(?:comprendre|candidats|themes)\/.+\.html$/;
+const MOTIF_ARTICLES = /^(?:comprendre|candidats|themes|comparer)\/.+\.html$/;
 
 /** Fichiers servis qui ne sont pas des pages mais ne doivent pas fuiter de domaine. */
 const AUTRES_FICHIERS_SERVIS = [

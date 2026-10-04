@@ -15,7 +15,16 @@
  */
 import { test, expect } from "@playwright/test";
 
-const ROUTES = ["/test", "/resultat"] as const;
+/*
+ * `/comparer` et une paire : la page place des positions sur l'échelle, au
+ * build, et rien de ce qui la sert ne doit embarquer le champ.
+ */
+const ROUTES = [
+  "/test",
+  "/resultat",
+  "/comparer",
+  "/comparer/marine-le-pen/jean-luc-melenchon",
+] as const;
 
 /**
  * Formes sous lesquelles le CHAMP pourrait apparaître une fois sérialisé.

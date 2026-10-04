@@ -74,6 +74,16 @@ const ROUTES = [
   /* Thème hors test : propositions seules, sans pour ni contre. */
   { chemin: "/themes/economie-et-salaires", nom: "Thème hors test" },
   { chemin: "/donnees", nom: "Données" },
+  { chemin: "/comparer", nom: "Comparer" },
+  /*
+   * Face-à-face, deux paires choisies pour ce qu'elles montrent, pas pour qui
+   * elles opposent : l'une a des écarts de quatre crans, des positions seules
+   * et une réserve d'ancienneté ; l'autre des positions identiques et un même
+   * document repris des deux côtés. Ces routes dépendent des données : si une
+   * paire passe sous le seuil, le script le signale par une page 404.
+   */
+  { chemin: "/comparer/marine-le-pen/jean-luc-melenchon", nom: "Face-à-face" },
+  { chemin: "/comparer/jean-luc-melenchon/marine-tondelier", nom: "Face-à-face, même document" },
   /* Article à schémas : cartes, cadre tireté, frise hachurée. */
   { chemin: "/comprendre/ou-et-comment-voter", nom: "Article à schémas" },
   { chemin: "/comprendre/s-inscrire-sur-les-listes-electorales", nom: "Article inscription" },

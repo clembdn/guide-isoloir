@@ -110,6 +110,11 @@ const liste = {
         préférence.
       </p>
       <DerniereMiseAJour date={UPDATED} />
+      <p class="vers-comparer">
+        Deux candidats face à face, affirmation par affirmation : <a href="/comparer"
+          >comparer leurs positions</a
+        >.
+      </p>
     </header>
 
     <section class="etapes" aria-labelledby="etapes-titre">
@@ -251,6 +256,11 @@ const liste = {
     font-size: clamp(1.0625rem, 1rem + 0.5vw, 1.3125rem);
     margin: var(--pas-2) 0 var(--pas-1);
     text-wrap: pretty;
+  }
+
+  .vers-comparer {
+    margin: 0;
+    font-size: var(--t-petit);
   }
 
   /*

@@ -34,8 +34,10 @@ import Proposition from "../../components/candidats/Proposition.astro";
 import MarquePosition from "../../components/themes/MarquePosition.astro";
 import Icone from "../../components/Icone.astro";
 import EtapesCandidature from "../../components/schemas/EtapesCandidature.astro";
+import ComparerAvec from "../../components/comparer/ComparerAvec.astro";
+import { partenairesDe } from "../../lib/face-a-face";
 import { fiches, NOMBRE_AFFIRMATIONS, type Fiche } from "../../lib/fiches";
-import { ECHELLE, LIBELLES_SENS, nuanceDe, sensDe } from "../../lib/echelle";
+import { ECHELLE, LIBELLES_SENS, sensDe, verdictDe } from "../../lib/echelle";
 import { LIBELLES_ADEQUATION, LIBELLES_CONFIANCE } from "../../lib/libelles";
 import { formatDateFr } from "../../lib/date";
 import { SITE_NAME, SITE_URL } from "../../lib/site";
@@ -50,18 +52,6 @@ const { acteur, candidature } = fiche;
 const nom = acteur.name;
 
 const LIBELLE_VALEUR = new Map(ECHELLE.map((cran) => [cran.valeur, cran.libelle]));
-
-/*
- * Verdict d'une position, dans le code des pages de thème : « Pour »,
- * « Plutôt contre », « Ni pour ni contre ». La valeur exacte de l'échelle du
- * test reste affichée juste à côté, en toutes lettres : le verdict la range,
- * il ne la remplace pas.
- */
-function verdict(valeur: (typeof ECHELLE)[number]["valeur"]): string {
-  const sens = LIBELLES_SENS[sensDe(valeur)];
-  const nuance = nuanceDe(valeur);
-  return nuance ? `${nuance} ${sens.toLowerCase()}` : sens;
-}
 
 /*
  * Bilan en pastilles, en tête des positions : combien de pour, de contre, de
@@ -97,12 +87,20 @@ const decompte = [
   ...(fiche.inconnues.length > 0 ? [`${fiche.inconnues.length} sans position connue`] : []),
 ];
 
+/*
+ * Les face-à-face publiés pour ce candidat. Une fiche sans comparaison
+ * n'affiche pas de section vide : le candidat est nommé, avec la raison, sur
+ * `/comparer`.
+ */
+const partenaires = partenairesDe(acteur.slug);
+
 const sommaire = [
   { id: "programme", texte: "Son programme" },
   { id: "positions", texte: "Ses positions sur le test" },
   ...(fiche.inconnues.length > 0
     ? [{ id: "sans-position", texte: "Sans position documentée" }]
     : []),
+  ...(partenaires.length > 0 ? [{ id: "comparer", texte: "Comparer avec un autre candidat" }] : []),
 ];
 
 const url = new URL(`/candidats/${acteur.slug}`, SITE_URL).href;
@@ -388,7 +386,7 @@ const personne = {
                   <span class="position-tete">
                     <h4>{entree.question.texte}</h4>
                     <span class="position-verdict">
-                      <strong>{verdict(position.value)}</strong>
+                      <strong>{verdictDe(position.value)}</strong>
                       {heriteDe !== null && <span> · reprise : {heriteDe}</span>}
                     </span>
                   </span>
@@ -495,6 +493,19 @@ const personne = {
             </li>
           ))}
         </ul>
+      </section>
+    )
+  }
+
+  {
+    partenaires.length > 0 && (
+      <section aria-labelledby="comparer">
+        <h2 id="comparer">Comparer avec un autre candidat</h2>
+        <p>
+          Les positions de {nom} face à celles d'un autre candidat, affirmation par affirmation, et
+          l'écart entre elles.
+        </p>
+        <ComparerAvec nom={nom} partenaires={partenaires} />
       </section>
     )
   }

@@ -24,6 +24,7 @@ import {
   pagesThemesPropositions,
 } from "../lib/fiches";
 import { LIBELLES_STATUT_CANDIDATURE } from "../lib/libelles";
+import { COMPARABLES_MIN, faceAFace, paires } from "../lib/face-a-face";
 import { formatDateFr } from "../lib/date";
 import { articlesPublies } from "../lib/comprendre";
 
@@ -49,6 +50,12 @@ const PAGES: readonly Entree[] = [
     titre: "Thèmes",
     resume:
       "les affirmations du test, thème par thème : qui est pour, qui est contre, qui n'a pas de position connue ; et, hors test, ce que les candidats proposent sur l'économie, la sécurité, la santé, l'éducation et la famille",
+  },
+  {
+    chemin: "/comparer",
+    titre: "Comparer",
+    resume:
+      "deux candidats face à face, affirmation par affirmation : l'écart entre leurs positions sur l'échelle du test, et la proximité calculée comme au test",
   },
   {
     chemin: "/donnees",
@@ -120,6 +127,20 @@ export const GET: APIRoute = async () => {
         : `position documentée sur ${fiche.documentees} des ${NOMBRE_AFFIRMATIONS} affirmations`;
     return `- [${fiche.acteur.name}](${lien(`/candidats/${fiche.acteur.slug}`)}) : ${LIBELLES_STATUT_CANDIDATURE[fiche.candidature.status].toLowerCase()}${fiche.parti ? `, ${fiche.parti.nom}` : ""}${fiche.reserve ? " (sous réserve, voir la fiche)" : ""} ; programme : ${fiche.programme.court.toLowerCase()} ; ${couverture}.`;
   });
+
+  /*
+   * Face-à-face : seulement les paires indexées, avec leur phrase « En bref »,
+   * générée depuis les mêmes données que la page. Les autres comparent surtout
+   * la ligne d'un parti ; elles sont nommées plus bas, à ne pas citer.
+   */
+  const toutesPaires = paires();
+  const lignesPaires = toutesPaires
+    .filter((paire) => paire.indexable)
+    .map(
+      (paire) =>
+        `- [${paire.a.nom} et ${paire.b.nom}](${lien(paire.chemin)}) : ${faceAFace(paire.a.slug, paire.b.slug).enBref}`,
+    );
+  const pairesNonIndexees = toutesPaires.filter((paire) => !paire.indexable).length;
 
   const lignesThemes = pagesThemes().map((theme) =>
     [
@@ -224,11 +245,27 @@ ${pagesThemesPropositions()
   )
   .join("\n")}
 
+## Comparaisons deux à deux
+
+Une comparaison existe quand les positions des deux candidats sont connues, et
+tirées de documents distincts, sur au moins ${COMPARABLES_MIN} des ${NOMBRE_AFFIRMATIONS} affirmations.
+« D'accord » veut dire un cran d'écart au plus sur l'échelle du test ; la
+proximité est calculée comme au test. Une position reprise du même document des
+deux côtés est tenue hors du calcul. Aucune paire n'est choisie à la main.
+
+${lignesPaires.length > 0 ? lignesPaires.join("\n") : "Aucune comparaison indexée à ce jour."}
+
 ## Pages à ne pas citer
 
 - /resultat : un résultat personnel, calculé dans le navigateur de chaque
   visiteur et jamais transmis. En noindex de façon permanente.
-`;
+${
+  pairesNonIndexees > 0
+    ? `- ${pairesNonIndexees} comparaisons de /comparer, en noindex : l'un des deux candidats n'y a aucune
+  position personnelle, et la page compare surtout la ligne d'un parti.
+`
+    : ""
+}`;
 
   return new Response(texte, {
     headers: { "Content-Type": "text/plain; charset=utf-8" },

@@ -1,0 +1,224 @@
+---
+/*
+ * Sur quoi repose la comparaison, de chaque côté : combien de positions
+ * viennent du candidat lui-même, combien sont reprises de son parti, de quels
+ * documents, et de quand.
+ *
+ * LA QUALITÉ DES PREUVES N'ENTRE PAS DANS LE CHIFFRE (CLAUDE.md, quatre
+ * grandeurs distinctes). Elle s'affiche à côté, pour qu'on sache ce que vaut
+ * le chiffre. Une position reprise d'un parti compte dans la proximité comme
+ * au test, et elle est nommée comme telle.
+ *
+ * LA BANDE : une case par affirmation comparée, pleine pour une position en
+ * propre, en contour pour une reprise — le code des graphiques de couverture
+ * de /methodologie. Même encre des deux côtés : la forme distingue, jamais
+ * l'intensité.
+ */
+import EtapeCandidature from "../candidats/EtapeCandidature.astro";
+import type { Solidite, Visage } from "../../lib/face-a-face";
+import { formatDateFr } from "../../lib/date";
+
+type Props = {
+  cotes: { visage: Visage; solidite: Solidite }[];
+};
+
+const { cotes } = Astro.props;
+
+const lignes = cotes.map(({ visage, solidite }) => {
+  const reprises = solidite.comparees - solidite.propres;
+  return {
+    visage,
+    solidite,
+    cases: Array.from({ length: solidite.comparees }, (_, i) => i < solidite.propres),
+    /* Phrases composées ici : Astro avale l'espace entre une expression et du texte. */
+    propres: `${solidite.propres} sur ${solidite.comparees}`,
+    resume:
+      reprises === 0
+        ? "Toutes les positions comparées viennent du candidat lui-même."
+        : `${reprises} ${reprises > 1 ? "reprises" : "reprise"} : ${solidite.reprises
+            .map((r) => `${r.nombre} de ${r.nom}`)
+            .join(", ")}.`,
+    origines: solidite.origines.map((o) => `${o.libelle} (${o.nombre})`).join(", "),
+    anciennes:
+      solidite.anciennes === 0
+        ? null
+        : `${solidite.anciennes} ${solidite.anciennes > 1 ? "positions tirées" : "position tirée"} de documents antérieurs à 2026.`,
+  };
+});
+---
+
+<section class="solidite" id="solidite" aria-labelledby="solidite-titre">
+  <h2 id="solidite-titre">Sur quoi repose la comparaison</h2>
+  <p class="chapo-section">
+    Une position en propre vient d'un programme, d'une déclaration ou d'un entretien du candidat.
+    Une reprise vient de son parti ou de sa coalition, faute de déclaration personnelle.
+  </p>
+
+  <div class="colonnes">
+    {
+      lignes.map((ligne) => (
+        <section class="colonne" aria-label={ligne.visage.nom}>
+          <h3>{ligne.visage.nom}</h3>
+          <p class="chiffre">
+            <strong>{ligne.propres}</strong>
+            <span>positions en propre</span>
+          </p>
+          <span class="bande" aria-hidden="true">
+            {ligne.cases.map((propre) => (
+              <span class:list={["case", { "case--propre": propre }]} />
+            ))}
+          </span>
+          <p class="resume">{ligne.resume}</p>
+          <dl>
+            <div>
+              <dt>Origine</dt>
+              <dd>{ligne.origines}</dd>
+            </div>
+            {ligne.solidite.sourceRecente && (
+              <div>
+                <dt>Source la plus récente</dt>
+                <dd>
+                  <time datetime={ligne.solidite.sourceRecente}>
+                    {formatDateFr(ligne.solidite.sourceRecente)}
+                  </time>
+                  {ligne.anciennes && <span class="ancien">{ligne.anciennes}</span>}
+                </dd>
+              </div>
+            )}
+            <div>
+              <dt>Programme</dt>
+              <dd>{ligne.solidite.programme.court}</dd>
+            </div>
+          </dl>
+          <EtapeCandidature etape={ligne.solidite.etape} reserve={ligne.solidite.reserve} />
+        </section>
+      ))
+    }
+  </div>
+</section>
+
+<style>
+  .solidite h2 {
+    margin: 0 0 var(--pas-2);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  }
+
+  .chapo-section {
+    max-width: var(--mesure);
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * Deux colonnes dès 375 px, séparées par un filet : la comparaison se lit
+   * de gauche à droite, comme l'en-tête.
+   */
+  .colonnes {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--couleur-trait);
+    border-block: 1px solid var(--couleur-trait);
+  }
+
+  .colonne {
+    min-width: 0;
+    padding: var(--pas-3) var(--pas-2) var(--pas-3) 0;
+    background: var(--couleur-fond);
+  }
+
+  .colonne + .colonne {
+    padding: var(--pas-3) 0 var(--pas-3) var(--pas-2);
+  }
+
+  @media (min-width: 48rem) {
+    .colonne {
+      padding-right: var(--pas-4);
+    }
+
+    .colonne + .colonne {
+      padding-left: var(--pas-4);
+    }
+  }
+
+  h3 {
+    margin: 0 0 var(--pas-2);
+    font-size: 1rem;
+    letter-spacing: 0;
+    overflow-wrap: break-word;
+  }
+
+  .chiffre {
+    display: flex;
+    flex-direction: column;
+    margin: 0 0 var(--pas-1);
+  }
+
+  .chiffre strong {
+    font-size: clamp(1.5rem, 1.2rem + 1.4vw, 2.25rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chiffre span {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .bande {
+    display: flex;
+    gap: 3px;
+    margin: var(--pas-1) 0 var(--pas-2);
+  }
+
+  .case {
+    flex: 1;
+    max-width: 1.25rem;
+    height: 0.75rem;
+    border: 2px solid var(--couleur-signature);
+    border-radius: 3px;
+  }
+
+  .case--propre {
+    background: var(--couleur-signature);
+  }
+
+  .resume {
+    font-size: var(--t-petit);
+  }
+
+  dl {
+    display: grid;
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-2);
+    font-size: var(--t-petit);
+  }
+
+  dl div {
+    margin: 0;
+  }
+
+  dt {
+    color: var(--couleur-encre-faible);
+  }
+
+  dd {
+    margin: 0;
+  }
+
+  .ancien {
+    display: block;
+    color: var(--couleur-encre-faible);
+  }
+
+  @media (forced-colors: active) {
+    .case {
+      border-color: CanvasText;
+    }
+
+    .case--propre {
+      background: CanvasText;
+    }
+  }
+</style>

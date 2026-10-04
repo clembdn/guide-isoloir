@@ -1,0 +1,282 @@
+---
+/*
+ * Propositions relevées, domaine par domaine : le premier candidat à gauche,
+ * le second à droite, dos à dos.
+ *
+ * HORS SCORE, ET ÉCRIT. Une proposition décrit un programme ; elle n'entre
+ * dans aucun calcul. Le nombre dépend surtout de ce que chaque campagne a déjà
+ * publié : un domaine vide ne dit pas qu'un candidat n'a rien à y proposer,
+ * seulement qu'on n'a rien relevé.
+ *
+ * MÊME ENCRE DES DEUX CÔTÉS. Pleine pour une proposition du candidat lui-même,
+ * en contour pour celle d'un document de son parti, comme les graphiques de
+ * couverture. SVG sans `viewBox` : les longueurs sont des pourcentages en
+ * attributs, que la CSP admet là où elle refuse `style=""`.
+ */
+import Icone from "../Icone.astro";
+import type { DomainePapillon, Visage } from "../../lib/face-a-face";
+
+type Props = {
+  domaines: DomainePapillon[];
+  maximum: number;
+  a: Visage;
+  b: Visage;
+};
+
+const { domaines, maximum, a, b } = Astro.props;
+
+const part = (nombre: number) => (maximum === 0 ? 0 : (100 * nombre) / maximum);
+const pourcent = (valeur: number) => `${valeur.toFixed(2)}%`;
+
+const lignes = domaines.map((domaine) => {
+  const cote = (compte: { propres: number; parti: number }) => {
+    const propres = part(compte.propres);
+    const parti = part(compte.parti);
+    return { ...compte, total: compte.propres + compte.parti, propres_: propres, parti_: parti };
+  };
+  const gauche = cote(domaine.a);
+  const droite = cote(domaine.b);
+  return {
+    domaine,
+    gauche,
+    droite,
+    /* À gauche, la barre part du centre vers la gauche : x = 100 % − longueur. */
+    gaucheX: {
+      propres: pourcent(100 - gauche.propres_),
+      parti: pourcent(100 - gauche.propres_ - gauche.parti_),
+    },
+    accessible: `${domaine.libelle} : ${domaine.a.propres + domaine.a.parti} pour ${a.nom}, ${domaine.b.propres + domaine.b.parti} pour ${b.nom}${domaine.communes > 0 ? `, dont ${domaine.communes} du même document de parti` : ""}.`,
+  };
+});
+---
+
+<section class="propositions" id="propositions" aria-labelledby="propositions-titre">
+  <h2 id="propositions-titre">Propositions relevées</h2>
+  <p class="hors-score">
+    <Icone nom="info" graisse="bold" />
+    Hors score : ces propositions décrivent un programme, elles ne comptent pas dans la comparaison. Leur
+    nombre dépend surtout de ce que chaque campagne a déjà publié. Le détail, sourcé, est sur chaque fiche.
+  </p>
+
+  <ul class="legende" aria-label="Légende">
+    <li><span class="pastille pastille--propre" aria-hidden="true"></span>du candidat lui-même</li>
+    <li>
+      <span class="pastille pastille--parti" aria-hidden="true"></span>d'un document de son parti
+    </li>
+  </ul>
+
+  <div class="papillon">
+    <p class="noms" aria-hidden="true">
+      <span>{a.nom}</span>
+      <span>{b.nom}</span>
+    </p>
+    <ul class="domaines">
+      {
+        lignes.map((ligne) => (
+          <li>
+            <span class="visuellement-masque">{ligne.accessible}</span>
+            <span class="libelle" aria-hidden="true">
+              {ligne.domaine.libelle}
+            </span>
+            <span class="rangee" aria-hidden="true">
+              <span class="nombre nombre--a">{ligne.gauche.total}</span>
+              <svg class="barre barre--a" height="16" focusable="false">
+                <rect
+                  class="parti"
+                  x={ligne.gaucheX.parti}
+                  y="2"
+                  width={pourcent(ligne.gauche.parti_)}
+                  height="12"
+                  rx="3"
+                />
+                <rect
+                  class="propre"
+                  x={ligne.gaucheX.propres}
+                  y="1"
+                  width={pourcent(ligne.gauche.propres_)}
+                  height="14"
+                  rx="3"
+                />
+              </svg>
+              <span class="axe" />
+              <svg class="barre barre--b" height="16" focusable="false">
+                <rect
+                  class="parti"
+                  x={pourcent(ligne.droite.propres_)}
+                  y="2"
+                  width={pourcent(ligne.droite.parti_)}
+                  height="12"
+                  rx="3"
+                />
+                <rect
+                  class="propre"
+                  x="0"
+                  y="1"
+                  width={pourcent(ligne.droite.propres_)}
+                  height="14"
+                  rx="3"
+                />
+              </svg>
+              <span class="nombre nombre--b">{ligne.droite.total}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .propositions h2 {
+    margin: 0 0 var(--pas-2);
+    font-size: clamp(1.375rem, 1.1rem + 1vw, 1.75rem);
+  }
+
+  .hors-score {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-1);
+    margin: 0 0 var(--pas-3);
+    max-width: 44rem;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .hors-score :global(.icone) {
+    flex: none;
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-top: 0.15rem;
+    color: var(--couleur-signature);
+  }
+
+  .legende {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--pas-1) var(--pas-3);
+    margin: 0 0 var(--pas-3);
+    padding: 0;
+    list-style: none;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .legende li {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0;
+  }
+
+  .pastille {
+    flex: none;
+    width: 1rem;
+    height: 0.875rem;
+    border-radius: 3px;
+  }
+
+  .pastille--propre {
+    background: var(--couleur-signature);
+  }
+
+  .pastille--parti {
+    border: 2px solid var(--couleur-signature);
+  }
+
+  .papillon {
+    max-width: 44rem;
+  }
+
+  .noms {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--pas-3);
+    margin: 0 0 var(--pas-1);
+    font-size: var(--t-petit);
+    font-weight: 700;
+  }
+
+  .noms span + span {
+    text-align: right;
+  }
+
+  .domaines {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--pas-2);
+  }
+
+  .domaines li {
+    margin: 0;
+  }
+
+  .libelle {
+    display: block;
+    margin-bottom: 0.2rem;
+    text-align: center;
+    font-size: 0.8125rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  /* Nombre, barre vers la gauche, filet central, barre vers la droite, nombre. */
+  .rangee {
+    display: grid;
+    grid-template-columns: 1.75rem minmax(0, 1fr) 2px minmax(0, 1fr) 1.75rem;
+    align-items: center;
+    gap: 0 3px;
+  }
+
+  .axe {
+    align-self: stretch;
+    background: var(--couleur-encre-faible);
+  }
+
+  .nombre {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .nombre--a {
+    text-align: right;
+  }
+
+  .nombre--b {
+    text-align: left;
+  }
+
+  .barre {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .propre {
+    fill: var(--couleur-signature);
+  }
+
+  .parti {
+    fill: none;
+    stroke: var(--couleur-signature);
+    stroke-width: 2;
+  }
+
+  @media (forced-colors: active) {
+    .propre {
+      fill: CanvasText;
+    }
+
+    .parti {
+      stroke: CanvasText;
+    }
+
+    .pastille--propre {
+      background: CanvasText;
+    }
+
+    .pastille--parti {
+      border-color: CanvasText;
+    }
+  }
+</style>

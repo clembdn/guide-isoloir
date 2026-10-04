@@ -12,6 +12,7 @@ import type { APIRoute } from "astro";
 import { SITE_URL } from "../lib/site";
 import { articlesPublies } from "../lib/comprendre";
 import { DONNEES_MISES_A_JOUR, fiches, pagesThemes, pagesThemesPropositions } from "../lib/fiches";
+import { paires } from "../lib/face-a-face";
 import { MEDIAS_RELEVES_LE } from "../data/medias";
 import { ILLUSTRATIONS } from "../data/illustrations";
 import { MISES_A_JOUR } from "../lib/mises-a-jour";
@@ -69,6 +70,14 @@ export const GET: APIRoute = async () => {
    */
   const themes = [...pagesThemes(), ...pagesThemesPropositions().filter((t) => t.indexable)];
   const plusRecente = (dates: readonly string[]) => dates.reduce((a, b) => (a > b ? a : b));
+  /*
+   * Face-à-face : seules les paires indexables. Une paire qui compare surtout
+   * la ligne d'un parti porte `noindex` ; la proposer aux moteurs la
+   * contredirait. L'index `/comparer` suit la plus récente des paires qu'il
+   * propose, toutes, indexables ou non.
+   */
+  const toutesPaires = paires();
+  const pairesIndexables = toutesPaires.filter((paire) => paire.indexable);
 
   const entrees: SitemapEntry[] = [
     ...PAGES_FIXES,
@@ -79,6 +88,17 @@ export const GET: APIRoute = async () => {
     })),
     { path: "/themes", lastmod: plusRecente(themes.map((theme) => theme.misAJour)) },
     ...themes.map((theme) => ({ path: `/themes/${theme.slug}`, lastmod: theme.misAJour })),
+    ...(toutesPaires.length > 0
+      ? [
+          {
+            path: "/comparer",
+            lastmod: plusRecente(
+              toutesPaires.filter((p) => p.a.enLice && p.b.enLice).map((p) => p.misAJour),
+            ),
+          },
+        ]
+      : []),
+    ...pairesIndexables.map((paire) => ({ path: paire.chemin, lastmod: paire.misAJour })),
     { path: "/donnees", lastmod: DONNEES_MISES_A_JOUR },
     ...articles.map((article) => ({
       path: `/comprendre/${article.id}`,

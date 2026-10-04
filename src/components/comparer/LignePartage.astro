@@ -1,0 +1,532 @@
+---
+/*
+ * Une affirmation, et les deux candidats posés sur l'échelle du test.
+ *
+ * LA LIGNE DE PARTAGE. Cinq crans, de « Tout à fait d'accord » à gauche à
+ * « Pas du tout d'accord » à droite, dans l'ordre où le test les pose. Chaque
+ * visage est posé sur son cran ; un trait les relie, et sa longueur EST
+ * l'écart. Même cran : les deux visages côte à côte, sans trait. On lit le
+ * sens et la distance avant de lire un mot.
+ *
+ * UN VISAGE N'EST JAMAIS POSÉ AU HASARD. Sans position connue, il n'est pas
+ * sur la ligne : le poser au milieu le dirait « ni d'accord, ni pas d'accord »,
+ * une position qu'il n'a pas prise. Et les visages NE BOUGENT JAMAIS : un
+ * glissement au défilement les montrerait à un faux cran à quiconque lit la
+ * page sans la faire défiler — un robot, une capture, une impression.
+ *
+ * CE QUI SE LIT, EN TEXTE. Le rail est décoratif ; la liste des verdicts dit
+ * tout en toutes lettres, avec le nom, le cran exact, la reprise éventuelle,
+ * et un lien vers la ligne de la fiche où se lisent la citation et la source.
+ * Aucune citation n'est recopiée ici.
+ *
+ * Pastille vert ou rouge À CÔTÉ DU VERDICT ÉCRIT seulement, comme sur la
+ * fiche : jamais sur un visage, sur le rail ou sur le trait.
+ *
+ * CSP : aucun `style=""`. Les visages se placent par `data-a` et `data-b`
+ * (colonne de la grille), le trait par des pourcentages en attributs SVG.
+ */
+import Portrait from "../candidats/Portrait.astro";
+import MarquePosition from "../themes/MarquePosition.astro";
+import GlypheRelation from "./GlypheRelation.astro";
+import type { Cote, LigneFaceAFace, Visage } from "../../lib/face-a-face";
+import type { Cran } from "../../lib/paire";
+
+type Props = {
+  ligne: LigneFaceAFace;
+  a: Visage;
+  b: Visage;
+};
+
+const { ligne, a, b } = Astro.props;
+
+/** Centre d'un cran sur le rail : 10, 30, 50, 70 ou 90 %. */
+const centre = (cran: Cran) => `${10 + 20 * (cran - 1)}%`;
+const CRANS: Cran[] = [1, 2, 3, 4, 5];
+
+const memeCran = ligne.a.cran !== null && ligne.a.cran === ligne.b.cran;
+const surLeRail = ligne.a.cran !== null || ligne.b.cran !== null;
+const ECART_COURT: Partial<Record<LigneFaceAFace["relation"], string>> = {
+  identique: "Même position",
+  proche: "1 cran d'écart",
+  eloignee: `${ligne.ecart} crans d'écart`,
+  "meme-document": "Même document",
+};
+const ecartCourt = ECART_COURT[ligne.relation] ?? null;
+const aucune = `Aucune position connue, ni pour ${a.nom} ni pour ${b.nom}.`;
+
+/*
+ * Mentions courtes à l'écran, comme sur les pages de thème (« Reprise »,
+ * « Partielle », « Déduite ») ; la forme longue, avec le nom du parti, reste
+ * dans le texte lu par les lecteurs d'écran. En deux colonnes à 375 px,
+ * « reprise : Rassemblement national · citation partielle » prenait quatre
+ * lignes sous chaque verdict.
+ */
+const ADEQUATION: Record<string, { court: string; long: string }> = {
+  partielle: { court: "Partielle", long: "citation partielle" },
+  deduite: { court: "Déduite", long: "valeur déduite" },
+};
+
+function mentions(cote: Cote): { court: string; long: string } | null {
+  const adequation = cote.adequation ? ADEQUATION[cote.adequation] : undefined;
+  const courtes = [cote.heriteDe ? "Reprise" : null, adequation?.court ?? null].filter(
+    (mention) => mention !== null,
+  );
+  const longues = [
+    cote.heriteDe ? `position reprise : ${cote.heriteDe}` : null,
+    adequation?.long ?? null,
+  ].filter((mention) => mention !== null);
+  return courtes.length > 0 ? { court: courtes.join(" · "), long: longues.join(", ") } : null;
+}
+
+const verdicts = [
+  { visage: a, cote: ligne.a, quel: "a" },
+  { visage: b, cote: ligne.b, quel: "b" },
+].map(({ visage, cote, quel }) => ({
+  visage,
+  cote,
+  quel,
+  mention: mentions(cote),
+  /* Le cran exact, pour qui n'entend pas « plutôt pour » comme l'échelle du test. */
+  precision: cote.libelleEchelle ? `, ${cote.libelleEchelle.toLowerCase()}` : "",
+}));
+---
+
+<li
+  class:list={["ligne", `ligne--${ligne.relation}`]}
+  id={ligne.id}
+  data-a={ligne.a.cran ?? undefined}
+  data-b={ligne.b.cran ?? undefined}
+>
+  <div class="enonce">
+    <div class="enonce-tete">
+      <h4 class="court">{ligne.court}</h4>
+      {
+        /*
+         * L'écart à côté du titre : c'est ce qu'on cherche en défilant. Il
+         * n'est écrit que s'il dit quelque chose que les verdicts ne disent
+         * pas — une distance, ou un document partagé.
+         */
+        ecartCourt && (
+          <p class="ecart-etiquette">
+            <GlypheRelation relation={ligne.relation} ecart={ligne.ecart} />
+            <span aria-hidden="true">{ecartCourt}</span>
+            <span class="visuellement-masque">{ligne.ecartTexte}</span>
+          </p>
+        )
+      }
+    </div>
+    <p class="affirmation">« {ligne.texte} »</p>
+  </div>
+
+  <div class="mesure">
+    {
+      surLeRail && (
+        <>
+          <div class="rail-paire" aria-hidden="true">
+            <svg class="rail-fond" width="100%" height="100%" focusable="false">
+              <line class="base" x1="10%" x2="90%" y1="50%" y2="50%" />
+              {CRANS.map((cran) => (
+                <circle class="cran" cx={centre(cran)} cy="50%" r="3" />
+              ))}
+              {ligne.a.cran !== null && ligne.b.cran !== null && !memeCran && (
+                <line
+                  class="ecart"
+                  x1={centre(ligne.a.cran)}
+                  x2={centre(ligne.b.cran)}
+                  y1="50%"
+                  y2="50%"
+                />
+              )}
+            </svg>
+            {memeCran ? (
+              <span class="visage duo">
+                <Portrait nom={a.nom} chemin={a.portrait} taille={64} />
+                <Portrait nom={b.nom} chemin={b.portrait} taille={64} />
+              </span>
+            ) : (
+              <>
+                {ligne.a.cran !== null && (
+                  <span class="visage visage--a">
+                    <Portrait nom={a.nom} chemin={a.portrait} taille={64} />
+                  </span>
+                )}
+                {ligne.b.cran !== null && (
+                  <span class="visage visage--b">
+                    <Portrait nom={b.nom} chemin={b.portrait} taille={64} />
+                  </span>
+                )}
+              </>
+            )}
+          </div>
+          <p class="bornes" aria-hidden="true">
+            <span>Tout à fait d'accord</span>
+            <span>Pas du tout d'accord</span>
+          </p>
+        </>
+      )
+    }
+
+    {
+      ligne.relation === "aucune" ? (
+        /*
+         * Rien à poser sur la ligne, rien à citer : une phrase suffit. Les deux
+         * lignes de verdict « pas de position connue » doublaient la hauteur
+         * pour ne rien dire de plus.
+         */
+        <p class="aucune">
+          <MarquePosition sens="inconnu" taille="petite" />
+          <span>{aucune}</span>
+        </p>
+      ) : (
+        <ul class="verdicts">
+          {verdicts.map(({ visage, cote, mention, precision, quel }) => (
+            <li class:list={["verdict", `verdict--${quel}`]}>
+              <MarquePosition sens={cote.sens} taille="petite" />
+              <span class="verdict-texte">
+                <a href={cote.ancre}>{visage.nom}</a>
+                <span class="visuellement-masque"> : </span>
+                {cote.verdict ? (
+                  <strong>
+                    {cote.verdict}
+                    <span class="visuellement-masque">{precision}</span>
+                  </strong>
+                ) : (
+                  <span class="inconnu">Pas de position connue</span>
+                )}
+                {mention && (
+                  <>
+                    <span class="mention" aria-hidden="true">
+                      {mention.court}
+                    </span>
+                    <span class="visuellement-masque">{`, ${mention.long}`}</span>
+                  </>
+                )}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )
+    }
+  </div>
+</li>
+
+<style>
+  .ligne {
+    display: grid;
+    gap: var(--pas-2);
+    margin: 0;
+    padding: var(--pas-3) 0;
+    border-top: 1px solid var(--couleur-trait);
+    scroll-margin-top: 5rem;
+  }
+
+  .ligne:first-child {
+    border-top: 0;
+  }
+
+  /*
+   * À partir de 64 rem, une rangée : l'énoncé à gauche, la mesure à droite, à
+   * largeur fixe. Les crans s'alignent alors d'une affirmation à l'autre dans
+   * tout le thème, et l'œil compare les traits d'un coup.
+   */
+  @media (min-width: 64rem) {
+    .ligne {
+      grid-template-columns: minmax(0, 1fr) 30rem;
+      gap: var(--pas-4);
+      align-items: start;
+    }
+  }
+
+  .enonce-tete {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.25rem var(--pas-2);
+  }
+
+  .ecart-etiquette {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--couleur-encre-faible);
+    white-space: nowrap;
+  }
+
+  .ligne--eloignee .ecart-etiquette,
+  .ligne--identique .ecart-etiquette {
+    color: var(--couleur-encre);
+  }
+
+  .court {
+    margin: 0;
+    font-size: 1.0625rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+
+  .affirmation {
+    margin: 0.25rem 0 0;
+    max-width: 38rem;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+    text-wrap: pretty;
+  }
+
+  .mesure {
+    min-width: 0;
+  }
+
+  /*
+   * Le rail : cinq colonnes égales, une par cran. Le SVG occupe toute la
+   * grille, derrière ; ses crans tombent au centre des colonnes (10 % … 90 %),
+   * là où la grille centre les visages.
+   */
+  .rail-paire {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    height: 3.25rem;
+  }
+
+  .rail-fond {
+    position: absolute;
+    inset: 0;
+    overflow: visible;
+  }
+
+  .base {
+    stroke: var(--couleur-trait);
+    stroke-width: 2;
+  }
+
+  .cran {
+    fill: var(--couleur-surface);
+    stroke: color-mix(in srgb, var(--couleur-encre) 35%, transparent);
+    stroke-width: 1.5;
+  }
+
+  .ecart {
+    stroke: var(--couleur-signature);
+    stroke-width: 4;
+    stroke-linecap: round;
+  }
+
+  .visage {
+    position: relative;
+    grid-row: 1;
+    justify-self: center;
+    display: flex;
+  }
+
+  /*
+   * Placement par attribut, puisque la CSP refuse `style=""`. Cinq règles par
+   * côté, une par cran.
+   */
+  [data-a="1"] .visage--a,
+  [data-a="1"] .duo,
+  [data-b="1"] .visage--b {
+    grid-column: 1;
+  }
+
+  [data-a="2"] .visage--a,
+  [data-a="2"] .duo,
+  [data-b="2"] .visage--b {
+    grid-column: 2;
+  }
+
+  [data-a="3"] .visage--a,
+  [data-a="3"] .duo,
+  [data-b="3"] .visage--b {
+    grid-column: 3;
+  }
+
+  [data-a="4"] .visage--a,
+  [data-a="4"] .duo,
+  [data-b="4"] .visage--b {
+    grid-column: 4;
+  }
+
+  [data-a="5"] .visage--a,
+  [data-a="5"] .duo,
+  [data-b="5"] .visage--b {
+    grid-column: 5;
+  }
+
+  /* Le duo déborde de sa colonne aux extrémités : il s'appuie alors sur le bord. */
+  [data-a="1"] .duo {
+    justify-self: start;
+  }
+
+  [data-a="5"] .duo {
+    justify-self: end;
+  }
+
+  /*
+   * Même cadre pour tous, plus petit que sur la fiche : 40 px sur téléphone,
+   * 48 au-delà. Un anneau à la couleur du fond détache le visage du trait.
+   */
+  .visage :global(.portrait) {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    border-color: color-mix(in srgb, var(--couleur-encre) 28%, transparent);
+    box-shadow: 0 0 0 3px var(--couleur-fond);
+  }
+
+  .duo :global(.portrait + .portrait) {
+    margin-left: -8px;
+  }
+
+  @media (max-width: 29.99rem) {
+    .duo :global(.portrait) {
+      width: 34px;
+      height: 34px;
+    }
+  }
+
+  @media (min-width: 48rem) {
+    .visage :global(.portrait) {
+      width: 48px;
+      height: 48px;
+    }
+
+    .rail-paire {
+      height: 3.75rem;
+    }
+  }
+
+  .bornes {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.15rem 0 var(--pas-2);
+    font-size: 0.75rem;
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * Deux colonnes face à face, dès 375 px : le premier candidat à gauche, le
+   * second à droite, comme l'en-tête. Le nom d'abord dans le DOM (c'est ce
+   * qu'on entend), le verdict en gras dessous.
+   */
+  .verdicts {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--pas-2);
+  }
+
+  .verdict {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--pas-1);
+    margin: 0;
+    min-width: 0;
+    font-size: 0.9375rem;
+    line-height: 1.3;
+  }
+
+  .verdict--b {
+    flex-direction: row-reverse;
+    text-align: right;
+  }
+
+  .verdict :global(.marque) {
+    margin-top: 0.1rem;
+  }
+
+  .verdict-texte {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .verdict-texte a {
+    font-size: 0.8125rem;
+    color: var(--couleur-encre);
+    overflow-wrap: break-word;
+  }
+
+  .verdict-texte strong {
+    font-weight: 700;
+  }
+
+  .inconnu {
+    color: var(--couleur-encre-faible);
+  }
+
+  .mention {
+    font-size: 0.75rem;
+    line-height: 1.3;
+    color: var(--couleur-encre-faible);
+  }
+
+  .aucune {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+    margin: 0;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  /*
+   * LE TRAIT S'OUVRE COMME UN RIDEAU, depuis le milieu de l'écart, quand la
+   * ligne entre dans la fenêtre. C'est le seul mouvement de la page, et il ne
+   * touche ni un visage, ni un mot. Par défaut — sans animation liée au
+   * défilement, avec « réduire les animations », à l'impression, avant que la
+   * ligne n'approche de l'écran — le trait est entier : la page se lit juste
+   * sans avoir été défilée.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    @supports (animation-timeline: view()) {
+      .ecart {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation-name: ouvrir-ecart;
+        animation-duration: 1ms;
+        animation-timing-function: var(--va-et-vient);
+        animation-fill-mode: forwards;
+        animation-timeline: view();
+        animation-range: entry 0% cover 35%;
+      }
+    }
+  }
+
+  @keyframes ouvrir-ecart {
+    from {
+      scale: 0 1;
+    }
+
+    to {
+      scale: 1 1;
+    }
+  }
+
+  @media print {
+    .ecart {
+      animation-name: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .base,
+    .cran {
+      stroke: CanvasText;
+    }
+
+    .ecart {
+      stroke: Highlight;
+    }
+
+    .visage :global(.portrait) {
+      border-color: CanvasText;
+    }
+  }
+</style>
