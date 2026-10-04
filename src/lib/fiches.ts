@@ -22,6 +22,7 @@ import {
 import {
   DOMAINES_PROPOSITION,
   positionsPubliables,
+  sourcesCitees,
   validerActeurs,
   validerCandidatures,
   validerEtatsProgramme,
@@ -755,6 +756,9 @@ export function tousLesThemes(): ThemeQuelconque[] {
  * `direction` EST RETIRÉ DES QUESTIONS. Il ne sert qu'à l'audit d'équilibre et
  * ne doit jamais être montré : l'exporter, c'est le publier.
  */
+const positionsPubliees = positionsPubliables(toutesPositions);
+const propositionsPubliees = positionsPubliables(toutesPropositions);
+
 export const DONNEES_OUVERTES = {
   questions: questionsOrdonnees.map(
     ({ id, theme, texte, infobulle, infobulleSourceId, version, ordre }) => ({
@@ -771,10 +775,19 @@ export const DONNEES_OUVERTES = {
   sourcesInfobulles,
   acteurs,
   candidatures,
-  sourcesPositions: sources,
-  positions: positionsPubliables(toutesPositions),
+  /** Seulement les sources citées par une donnée publiée : voir `sourcesCitees`. */
+  sourcesPositions: sourcesCitees(sources, [
+    ...positionsPubliees.flatMap((position) => position.sourceIds),
+    ...propositionsPubliees.flatMap((proposition) => proposition.sourceIds),
+    ...candidatures.flatMap((candidature) => [
+      ...candidature.statutSourceIds,
+      ...(candidature.reserve?.sourceIds ?? []),
+    ]),
+    ...etatsProgramme.flatMap((etat) => etat.sourceIds),
+  ]),
+  positions: positionsPubliees,
   /** Hors score : elles ne servent à aucun calcul, et l'export le dit par son nom. */
-  propositions: positionsPubliables(toutesPropositions),
+  propositions: propositionsPubliees,
   etatsProgramme,
 };
 

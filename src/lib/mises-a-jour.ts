@@ -13,12 +13,12 @@
  * Changer le contenu d'une de ces pages, c'est changer sa date ICI.
  */
 export const MISES_A_JOUR = {
-  "/": "2026-09-24",
+  "/": "2026-09-27",
   "/comprendre": "2026-09-14",
   "/a-propos": "2026-09-23",
-  "/methodologie": "2026-09-25",
+  "/methodologie": "2026-10-04",
   "/charte-editoriale": "2026-09-14",
-  "/corrections": "2026-09-14",
+  "/corrections": "2026-10-04",
   "/financement": "2026-09-14",
   "/mentions-legales": "2026-09-14",
 } as const satisfies Record<string, string>;

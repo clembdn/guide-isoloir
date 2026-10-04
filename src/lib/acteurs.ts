@@ -321,6 +321,24 @@ export function positionsPubliables<T extends { reviewStatus: string }>(
   );
 }
 
+/**
+ * Sources effectivement citées, dans l'ordre du fichier.
+ *
+ * UNE SOURCE NE SE PUBLIE QU'AVEC CE QU'ELLE PORTE. La veille quotidienne ajoute
+ * ses sources en même temps que ses brouillons : le jour où `sources-positions.ts`
+ * est commité, une source citée par un seul brouillon partirait sinon dans
+ * l'export et dans les propriétés de l'îlot de `/resultat` — un titre, une date
+ * et une URL relevés par une IA, publiés sans relecture. Le filtre des
+ * brouillons ne suffit pas : il porte sur les positions, pas sur leurs sources.
+ */
+export function sourcesCitees<T extends { id: string }>(
+  sources: readonly T[],
+  identifiants: Iterable<string>,
+): T[] {
+  const citees = new Set(identifiants);
+  return sources.filter((source) => citees.has(source.id));
+}
+
 export const NATURES_PROPOSITION = [
   "programme-2027",
   "declaration-personnelle",
@@ -468,4 +486,25 @@ export function validerEtatsProgramme(
   }
 
   return etats;
+}
+
+/** Entrée du registre des corrections : datée, située, expliquée. */
+export const CorrectionSchema = z
+  .object({
+    date: z.string().regex(ISO_JOUR, "Date attendue au format AAAA-MM-JJ"),
+    portee: z.string().min(5),
+    description: z.string().min(20),
+    origine: z.string().min(5),
+  })
+  .strict();
+
+/** Lève sur une entrée mal formée, ou hors de l'ordre chronologique. */
+export function validerCorrections(brut: unknown) {
+  const corrections = z.array(CorrectionSchema).parse(brut);
+  for (let i = 1; i < corrections.length; i += 1) {
+    if (corrections[i]!.date < corrections[i - 1]!.date) {
+      throw new Error(`Corrections : ${corrections[i]!.date} précède ${corrections[i - 1]!.date}.`);
+    }
+  }
+  return corrections;
 }

@@ -1,0 +1,181 @@
+---
+/*
+ * Graphique : la part des couples candidat × affirmation documentés par le
+ * candidat lui-même, relevé après relevé.
+ *
+ * C'est la seule série qui dit si le test devient plus fiable : une position
+ * reprise du parti remplit une case, elle ne renseigne pas sur le candidat.
+ * Courbe en ESCALIER : entre deux relevés, rien n'a changé, et une pente
+ * dessinerait une progression qui n'a pas eu lieu.
+ *
+ * Masqué sous deux relevés : un point n'est pas une courbe. Le tableau de repli
+ * reste, pour qui ne lit pas le graphique.
+ *
+ * Construction sans `viewBox` : hauteur fixe en pixels, abscisses en
+ * pourcentages de la largeur. Les traits gardent leurs 2 px et les points leurs
+ * 8 px à toutes les largeurs, sans style en ligne (refusé par la CSP).
+ */
+import { formatDateFr } from "../../lib/date";
+import type { ReleveCouverture } from "../../lib/couverture";
+
+interface Props {
+  releves: readonly ReleveCouverture[];
+}
+
+const { releves } = Astro.props;
+
+const HAUT = 16;
+const BAS = 176;
+const part = (r: ReleveCouverture) => (r.couples === 0 ? 0 : r.personnelles / r.couples);
+const pourcentFr = (valeur: number) =>
+  `${(100 * valeur).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}\u202f%`;
+
+/* Échelle verticale : de 0 au quart supérieur, jamais tronquée en bas. */
+const maximum = Math.max(0.25, Math.ceil(Math.max(...releves.map(part), 0) * 4) / 4);
+const y = (valeur: number) => BAS - ((BAS - HAUT) * valeur) / maximum;
+
+const temps = releves.map((r) => Date.parse(`${r.date}T12:00:00Z`));
+const debut = temps[0] ?? 0;
+const duree = Math.max(1, (temps.at(-1) ?? 0) - debut);
+/* De 7 % à 97 % : la marge de gauche laisse la place aux graduations. */
+const x = (t: number) => `${(7 + (90 * (t - debut)) / duree).toFixed(2)}%`;
+
+const points = releves.map((r, i) => ({ releve: r, x: x(temps[i]!), y: y(part(r)) }));
+const marches = points.slice(1).map((point, i) => ({ de: points[i]!, a: point }));
+const grille = [0, maximum / 2, maximum];
+const dernier = releves.at(-1);
+---
+
+<figure class="schema progression">
+  <figcaption class="schema-titre">
+    Positions documentées par les candidats eux-mêmes, au fil des relevés
+  </figcaption>
+
+  {
+    releves.length >= 2 ? (
+      <svg class="trace" height={BAS + 8} aria-hidden="true" focusable="false">
+        {grille.map((valeur) => (
+          <g>
+            <line class="grille" x1="0" x2="100%" y1={y(valeur)} y2={y(valeur)} />
+            <text class="graduation" x="0" y={y(valeur) - 4}>
+              {pourcentFr(valeur)}
+            </text>
+          </g>
+        ))}
+        {marches.map(({ de, a }) => (
+          <g class="marche">
+            <line x1={de.x} x2={a.x} y1={de.y} y2={de.y} />
+            <line x1={a.x} x2={a.x} y1={de.y} y2={a.y} />
+          </g>
+        ))}
+        {points.map((point) => (
+          <circle class="point" cx={point.x} cy={point.y} r="4">
+            <title>{`${formatDateFr(point.releve.date)} : ${pourcentFr(part(point.releve))} des couples documentés par le candidat lui-même`}</title>
+          </circle>
+        ))}
+      </svg>
+    ) : (
+      <p class="attente">
+        La courbe apparaîtra au deuxième relevé. Un seul point ne fait pas une tendance.
+      </p>
+    )
+  }
+
+  {
+    dernier && (
+      <p class="lecture">
+        Au {formatDateFr(dernier.date)} : <strong>{pourcentFr(part(dernier))}</strong> des couples
+        candidat × affirmation sont documentés par le candidat lui-même ({dernier.personnelles} sur{" "}
+        {dernier.couples}).
+      </p>
+    )
+  }
+
+  {
+    releves.length > 0 && (
+      <details class="repli">
+        <summary>Voir les relevés en tableau</summary>
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Données du</th>
+              <th scope="col">En propre</th>
+              <th scope="col">Reprises comprises</th>
+              <th scope="col">Candidats classables</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...releves].reverse().map((r) => (
+              <tr>
+                <th scope="row">{formatDateFr(r.date)}</th>
+                <td>
+                  {r.personnelles} sur {r.couples}
+                </td>
+                <td>{r.documentees}</td>
+                <td>
+                  {r.classables} sur {r.candidats}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </details>
+    )
+  }
+</figure>
+
+<style>
+  .trace {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .grille {
+    stroke: var(--couleur-trait);
+    stroke-width: 1;
+  }
+
+  .graduation {
+    fill: var(--couleur-encre-faible);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .marche line {
+    stroke: var(--donnee);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  /* Un anneau de la couleur du fond sépare le point du trait qu'il chevauche. */
+  .point {
+    fill: var(--donnee);
+    stroke: var(--couleur-fond);
+    stroke-width: 2;
+  }
+
+  .attente,
+  .lecture {
+    margin: var(--pas-2) 0 0;
+    font-size: var(--t-petit);
+  }
+
+  .attente {
+    color: var(--couleur-encre-faible);
+  }
+
+  .repli {
+    margin-top: var(--pas-2);
+    font-size: var(--t-petit);
+  }
+
+  .repli summary {
+    cursor: pointer;
+  }
+
+  .repli table {
+    margin-top: var(--pas-2);
+    font-variant-numeric: tabular-nums;
+  }
+</style>

@@ -1,0 +1,165 @@
+---
+/*
+ * Graphique : par thème, combien de couples candidat × affirmation le test
+ * documente, et combien par le candidat lui-même.
+ *
+ * Une barre par thème sur une piste qui vaut tous les couples possibles. La
+ * part « en propre » est pleine, la part « reprise du parti » en contour : même
+ * teinte, jamais d'intensité, et le chiffre écrit à côté de chaque barre — la
+ * couleur ne porte rien seule.
+ *
+ * SVG ET NON `style=""`. La CSP refuse les styles en ligne. Les longueurs sont
+ * donc des attributs de présentation (`width="13.4%"`), qu'un `<rect>` résout
+ * contre la largeur du SVG. Aucun JavaScript : le graphique est du HTML statique,
+ * et les infobulles sont des `<title>` natifs.
+ */
+import { SLUG_PAR_THEME, type CouvertureTheme } from "../../lib/couverture";
+
+interface Props {
+  themes: readonly CouvertureTheme[];
+}
+
+const { themes } = Astro.props;
+
+const pourcent = (part: number, total: number) =>
+  total === 0 ? "0%" : `${((100 * part) / total).toFixed(2)}%`;
+const lignes = themes.map((theme) => ({
+  ...theme,
+  slug: SLUG_PAR_THEME.get(theme.theme) ?? null,
+  propre: pourcent(theme.personnelles, theme.couples),
+  documente: pourcent(theme.documentees, theme.couples),
+  reprises: theme.documentees - theme.personnelles,
+}));
+---
+
+<figure class="schema couverture">
+  <figcaption class="schema-titre">Ce que le test documente, thème par thème</figcaption>
+
+  <ul class="legende" aria-label="Légende">
+    <li>
+      <span class="pastille pastille--propre" aria-hidden="true"></span>position du candidat
+      lui-même
+    </li>
+    <li>
+      <span class="pastille pastille--reprise" aria-hidden="true"></span>position reprise de son
+      parti ou de sa coalition
+    </li>
+  </ul>
+
+  <div class="lignes">
+    {
+      lignes.map((ligne) => (
+        <p class="ligne">
+          <span class="etiquette">
+            {ligne.slug ? <a href={`/themes/${ligne.slug}`}>{ligne.theme}</a> : ligne.theme}
+          </span>
+          <svg class="barre" height="20" aria-hidden="true" focusable="false">
+            <title>
+              {`${ligne.theme} : ${ligne.documentees} couples documentés sur ${ligne.couples}, dont ${ligne.personnelles} par le candidat lui-même`}
+            </title>
+            <rect
+              class="reprise"
+              x={ligne.propre}
+              y="2"
+              width={pourcent(ligne.reprises, ligne.couples)}
+              height="15"
+              rx="3"
+            />
+            <rect class="propre" x="0" y="1" width={ligne.propre} height="17" rx="3" />
+            <line class="base" x1="0" x2="100%" y1="19" y2="19" />
+          </svg>
+          <span class="valeur">
+            <strong>{ligne.documentees}</strong> sur {ligne.couples}
+            <span class="dont">dont {ligne.personnelles} en propre</span>
+          </span>
+        </p>
+      ))
+    }
+  </div>
+</figure>
+
+<style>
+  .legende {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--pas-1) var(--pas-3);
+    margin: 0 0 var(--pas-3);
+    padding: 0;
+    list-style: none;
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .legende li {
+    display: flex;
+    align-items: center;
+    gap: var(--pas-1);
+  }
+
+  .pastille {
+    flex: none;
+    width: 1rem;
+    height: 0.875rem;
+    border-radius: 3px;
+  }
+
+  .pastille--propre {
+    background: var(--donnee);
+  }
+
+  .pastille--reprise {
+    border: 2px solid var(--donnee);
+  }
+
+  .lignes {
+    display: grid;
+    gap: var(--pas-3);
+  }
+
+  .ligne {
+    display: grid;
+    gap: 4px var(--pas-2);
+    margin: 0;
+    font-size: var(--t-petit);
+  }
+
+  @media (min-width: 48rem) {
+    .ligne {
+      grid-template-columns: 14rem minmax(0, 1fr) 11rem;
+      align-items: center;
+    }
+  }
+
+  .barre {
+    display: block;
+    width: 100%;
+    overflow: visible;
+  }
+
+  .propre {
+    fill: var(--donnee);
+  }
+
+  /* Contour intérieur : le trait de 2 px tient dans la hauteur de la barre pleine. */
+  .reprise {
+    fill: none;
+    stroke: var(--donnee);
+    stroke-width: 2;
+  }
+
+  /* La piste : un filet de base, sur lequel les barres se lisent. */
+  .base {
+    stroke: var(--couleur-trait);
+    stroke-width: 3;
+  }
+
+  .valeur {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dont {
+    display: block;
+    color: var(--couleur-encre-faible);
+  }
+</style>

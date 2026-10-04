@@ -938,6 +938,51 @@ trait tombait à 1,4:1 sur le fond vert. Les fonds de colonne sont mélangés `i
 script sait lire ; `in oklab` lui faisait mesurer un fond blanc. Lighthouse mobile : 100 dans les
 quatre catégories sur l'index, un thème du test et un thème hors test.
 
+## 11 quater. Couverture, journal et fraîcheur (4 octobre 2026)
+
+**Une teinte de donnée, `--donnee`.** Les graphiques de couverture comptent des affirmations
+documentées ; ils ne distinguent aucun acteur. Une seule teinte, celle de la signature : `#5321d6`
+en clair (bande de luminosité et contraste ≥ 3:1 sur le fond, au script `validate_palette.js` de la
+skill `dataviz`) ; en sombre, le violet signature `#b49cf5` sortait de la bande (L 0,75 pour 0,48–0,67)
+et cède la place à `#9b7cf2`, un pas plus soutenu de la même famille. Elle n'entre ni sur
+`/resultat`, ni sur un candidat.
+
+**`CouvertureParTheme`** (`src/components/schemas/`) — une ligne par thème, même grille que
+`PremierRang` : libellé lié à la page du thème, barre, valeur écrite (« 29 sur 112, dont 15 en
+propre »). La barre se pose sur un filet de base de 3 px qui vaut tous les couples possibles. La
+part « en propre » est **pleine**, la part « reprise du parti » en **contour** de 2 px : même teinte,
+la distinction tient à la forme, jamais à l'intensité, et une légende la nomme au-dessus. SVG sans
+`viewBox` : les longueurs sont des pourcentages en attributs de présentation, que la CSP admet là où
+elle refuse `style=""`. Infobulle native par `<title>`, aucun JavaScript.
+
+**`ProgressionCouverture`** — une seule série, la part des couples documentés par les candidats
+eux-mêmes, en **escalier** : entre deux relevés rien n'a changé, et une pente inventerait une
+progression. Hauteur fixe de 184 px, abscisses en pourcentages de 7 à 97 %, axe vertical de 0 au
+quart supérieur, jamais tronqué en bas. Trait de 2 px, points de 8 px cerclés de la couleur du fond.
+Sous deux relevés, la courbe cède la place à une phrase ; la dernière valeur est toujours écrite en
+clair, et un `<details>` donne les relevés en tableau.
+
+**Chiffres de tête** (`/methodologie`) — quatre paires chiffre et libellé posées sur un filet de
+3 px, sans carte ni fond, en grille `auto-fit` de 8,5 rem : une ligne de quatre à 1280 px, deux par
+deux à 375 px. Le chiffre est rendu au-dessus de son libellé par `column-reverse`, le libellé
+restant premier dans le DOM ; `justify-content: flex-end` aligne les chiffres en haut quelle que
+soit la longueur du libellé.
+
+**Journal des données** (`/donnees#journal`) — une ligne par date de codage, date en gras à gauche
+à partir de 48 rem, filet d'un pixel entre les jours. Les noms viennent dans l'ordre alphabétique et
+s'arrêtent à huit (« et 17 autres ») : un ordre par volume en ferait un palmarès.
+
+**Fraîcheur sur `/resultat`** — une ligne statique sous la promesse de confidentialité, à l'encre
+faible : nombre de positions publiées, date des données, lien vers l'état de la couverture.
+
+**Piège rencontré** : Astro avale l'espace entre une expression et du texte séparés par un saut de
+ligne. Prettier replie les lignes à sa guise, et la page a affiché « 28ont » puis « 185des ». Les
+phrases faites de plusieurs nombres sont donc composées en une chaîne dans le frontmatter.
+
+**Mesures** — captures à 375 et 1280 px, clair et sombre, de `/methodologie`, `/donnees`,
+`/resultat` et `/corrections`, sans défilement horizontal ; `scripts/capturer.mjs --strict` : aucun
+couple sous son seuil.
+
 ## 12. Ce qui reste à faire
 
 - **Illustrations de rubrique** : les cartes de `/comprendre` portent aujourd'hui la couleur et la

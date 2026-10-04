@@ -21,18 +21,17 @@
 //   Build output dir     dist
 //   Node version         22   (ou variable NODE_VERSION = 22)
 //
-// `build:prod` ajoute le garde-fou de publication (npm run verify:pages en
-// mode strict) : il échoue si une page publique contient un espace réservé,
-// un domaine .invalid, une mention légale manquante, ou une donnée factice.
-// C'est la seule commande qui empêche réellement Cloudflare de publier un
-// site incomplet — `npm run build` seul ne vérifie rien.
+// `build:prod` lance d'abord l'audit des invariants publiés sur /methodologie
+// (`npm run audit`, moins d'une seconde), puis le garde-fou de publication
+// (npm run verify:pages en mode strict) : il échoue si une page publique
+// contient un espace réservé, un domaine .invalid, une mention légale
+// manquante, une donnée factice ou une position en brouillon. C'est la seule
+// commande qui empêche réellement Cloudflare de publier — `npm run build` seul
+// ne vérifie rien.
 //
-// /test et /resultat tournaient sur src/factice/ (questions et acteurs
-// d'exemple) et faisaient échouer ce garde-fou à chaque build. Elles ont été
-// déplacées hors de `src/pages/` vers `src/routes-desactivees/` : elles ne
-// sont plus construites, donc plus indexables et plus dans le sitemap, tant
-// que de vraies données ne les remplacent pas. Voir
-// src/routes-desactivees/README.md pour la condition de réactivation.
+// /test et /resultat ont tourné un temps sur des données factices, hors de
+// `src/pages/`. Elles sont revenues le 18 septembre 2026 sur les données
+// réelles : voir src/routes-desactivees/README.md.
 //
 // CE QUI EST INDEXABLE. IS_PUBLISHABLE (src/lib/site.ts) vaut `true` : le
 // `noindex` global est levé sur tout ce qui est construit.

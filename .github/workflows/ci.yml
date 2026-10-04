@@ -55,6 +55,11 @@ jobs:
       - name: Tests unitaires
         run: npm test
 
+      # Les invariants publiés sur /methodologie. `build:prod` les relance côté
+      # Cloudflare ; ici, on les voit échouer avant le push.
+      - name: Audit des invariants
+        run: npm run audit
+
       - name: Construire le site
         run: npm run build
 

@@ -9,6 +9,7 @@
 import { describe, expect, it } from "vitest";
 import {
   positionsPubliables,
+  sourcesCitees,
   validerActeurs,
   validerCandidatures,
   validerPositions,
@@ -262,5 +263,25 @@ describe("positions publiables", () => {
       { reviewStatus: "reconciled" },
       { reviewStatus: "published" },
     ]);
+  });
+});
+
+describe("sources citées", () => {
+  it("ne garde pas une source que seul un brouillon cite", () => {
+    const brouillon = { ...POSITION, id: "brouillon", reviewStatus: "draft", sourceIds: ["seule"] };
+    const sources = [SOURCE, { ...SOURCE, id: "seule" }];
+    const publiees = positionsPubliables([POSITION, brouillon]);
+
+    expect(
+      sourcesCitees(
+        sources,
+        publiees.flatMap((position) => position.sourceIds),
+      ).map((source) => source.id),
+    ).toStrictEqual(["source-essai"]);
+  });
+
+  it("garde l'ordre du fichier, pas celui des citations", () => {
+    const sources = [{ id: "a" }, { id: "b" }, { id: "c" }];
+    expect(sourcesCitees(sources, ["c", "a"])).toStrictEqual([{ id: "a" }, { id: "c" }]);
   });
 });

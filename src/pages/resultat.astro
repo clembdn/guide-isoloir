@@ -32,6 +32,7 @@ import Resultat from "../components/Resultat.svelte";
 import { validerQuestions, validerSourcesInfobulles } from "../lib/questions";
 import {
   positionsPubliables,
+  sourcesCitees,
   validerActeurs,
   validerCandidatures,
   validerPositions,
@@ -49,7 +50,8 @@ import {
 } from "../lib/previsualisation";
 import { SEUIL_PUBLICATION, seuilDepuisEnvironnement } from "../lib/seuils";
 import { media } from "../data/medias";
-import { partiDe } from "../lib/fiches";
+import { DONNEES_MISES_A_JOUR, partiDe } from "../lib/fiches";
+import { formatDateFr } from "../lib/date";
 
 /*
  * Validation au build, côté serveur uniquement. Elle est référentielle : une
@@ -75,7 +77,17 @@ const positions = validerPositions(POSITIONS, { acteurs, questions: questionsVal
  */
 const candidats = acteurs.filter((acteur) => acteur.kind === "candidate");
 const servies = positionsServies(positions);
-const nonRelues = positions.length - positionsPubliables(positions).length;
+const publiees = positionsPubliables(positions).length;
+const nonRelues = positions.length - publiees;
+
+/*
+ * Seulement les sources des positions servies. L'îlot sérialise ses propriétés
+ * dans le HTML : une source citée par un seul brouillon y serait publiée.
+ */
+const sourcesServies = sourcesCitees(
+  sources,
+  servies.flatMap((position) => position.sourceIds),
+);
 
 const questions = projeter(QUESTIONS);
 
@@ -153,6 +165,16 @@ const seuilActeursMin = seuilDepuisEnvironnement(
     <p class="promesse-resultat">
       Calculé dans votre navigateur. Vos réponses et vos résultats ne sont jamais envoyés,
       enregistrés ou associés à un identifiant.
+      {
+        /*
+         * La fraîcheur des données, en HTML statique : un résultat calculé sur des
+         * positions de la semaine dernière doit le dire avant d'être lu.
+         */
+      }
+      <span class="fraicheur">
+        {publiees} positions publiées, données du {formatDateFr(DONNEES_MISES_A_JOUR)}.{" "}
+        <a href="/methodologie#etat-de-la-couverture">Où en est la couverture</a>
+      </span>
     </p>
 
     {
@@ -184,7 +206,7 @@ const seuilActeursMin = seuilDepuisEnvironnement(
           annuaire={acteurs}
           positions={servies}
           candidatures={candidatures}
-          sources={sources}
+          sources={sourcesServies}
           visuels={visuels}
           seuilCouverture={seuilCouverture}
           seuilActeursMin={seuilActeursMin}
@@ -221,6 +243,11 @@ const seuilActeursMin = seuilDepuisEnvironnement(
     font-size: var(--t-petit);
     color: var(--couleur-encre-faible);
     margin-bottom: var(--pas-4);
+  }
+
+  .fraicheur {
+    display: block;
+    margin-top: 2px;
   }
 
   .bandeau-previsualisation {

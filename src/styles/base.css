@@ -191,6 +191,18 @@
   --contre: #991b1b;
   --sur-position: #ffffff;
 
+  /*
+   * DONNÉE — la teinte unique des graphiques de couverture (/methodologie).
+   *
+   * Une seule teinte, celle de la signature : un graphique de couverture compte
+   * des affirmations documentées, il ne distingue aucun acteur. « En propre » et
+   * « reprise du parti » se séparent par le plein et le contour, jamais par
+   * l'intensité. Validée au script de la skill dataviz : en clair, bande de
+   * luminosité et contraste ≥ 3:1 sur le fond ; en sombre, le violet signature
+   * (#b49cf5) sortait de la bande, d'où un pas plus soutenu.
+   */
+  --donnee: #5321d6;
+
   --police-texte:
     "Bricolage Grotesque", "Bricolage repli", "Helvetica Neue", Helvetica, Arial, sans-serif;
 
@@ -274,6 +286,9 @@
     --pour: #199a52;
     --contre: #ef4f63;
     --sur-position: #12101c;
+
+    /* Dans la bande de luminosité du mode sombre (L 0,48–0,67), ≥ 3:1 sur le fond. */
+    --donnee: #9b7cf2;
 
     --ombre-1: 0 1px 2px rgb(0 0 0 / 0.4);
     --ombre-2: 0 18px 40px -18px rgb(0 0 0 / 0.7);

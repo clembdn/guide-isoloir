@@ -1,8 +1,9 @@
 /**
  * Modèle de données.
  *
- * Aucune donnée politique n'existe encore dans ce dépôt : ce fichier ne décrit
- * que les formes. Il est la référence, `CLAUDE.md` en est le résumé.
+ * Ce fichier ne décrit que les formes ; les données vivent dans `src/data/`, et
+ * leurs schémas zod dans `src/lib/acteurs.ts`. Il est la référence, `CLAUDE.md`
+ * en est le résumé.
  *
  * L'entité primaire est l'acteur politique, pas le candidat : un candidat peut
  * contredire son parti, se retirer avant mars 2027, ou sortir d'une primaire.
@@ -156,6 +157,24 @@ export type EtatProgramme = {
   /** Une ou deux phrases factuelles, sans jugement sur le contenu. */
   texte: string;
   sourceIds: string[];
+};
+
+/**
+ * Entrée du registre public des corrections (`/corrections`).
+ *
+ * Une position modifiée ou retirée APRÈS publication, une source corrigée, une
+ * question reformulée, un calcul qui change un classement publié. Les ajouts
+ * n'y figurent pas : ils sont au journal des données de `/donnees`.
+ */
+export type Correction = {
+  /** Date de mise en ligne de la correction. */
+  date: string;
+  /** Page ou donnée concernée. */
+  portee: string;
+  /** Ce qui était publié, et ce qui l'est désormais. */
+  description: string;
+  /** Signalement extérieur, relecture interne, droit de réponse. */
+  origine: string;
 };
 
 export type StanceValue = -2 | -1 | 0 | 1 | 2;

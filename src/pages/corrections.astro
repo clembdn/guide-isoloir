@@ -2,33 +2,25 @@
 /*
  * Registre public des corrections.
  *
- * Tant qu'aucune donnée politique n'est publiée, le registre est vide et le dit.
- * Un registre vide est une information : il montre que le dispositif existe
- * avant qu'il ait servi, et qu'il n'a pas été créé après le premier incident.
- *
- * Les entrées viendront d'un fichier de données versionné, pas d'une saisie en
- * dur dans cette page.
+ * Les entrées viennent de `src/data/corrections.ts`, fichier de données
+ * versionné et validé au build. Un registre vide est une information : il
+ * montre que le dispositif existe avant d'avoir servi, et qu'il n'a pas été
+ * créé après le premier incident.
  */
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import Signature from "../components/Signature.astro";
 import { formatDateFr } from "../lib/date";
+import { validerCorrections } from "../lib/acteurs";
+import { CORRECTIONS as BRUTES } from "../data/corrections";
 
-const UPDATED = MISES_A_JOUR["/corrections"];
+const CORRECTIONS = validerCorrections(BRUTES);
 
-type Correction = {
-  /** Date ISO `AAAA-MM-JJ` de publication de la correction. */
-  date: string;
-  /** Page ou donnée concernée. */
-  portee: string;
-  /** Ce qui était publié, et ce qui l'est désormais. */
-  description: string;
-  /** Origine : signalement extérieur, relecture interne, droit de réponse. */
-  origine: string;
-};
-
-const CORRECTIONS: readonly Correction[] = [];
+/* La page change avec son registre : sa date suit la dernière correction. */
+const UPDATED = [MISES_A_JOUR["/corrections"], ...CORRECTIONS.map((c) => c.date)].reduce((a, b) =>
+  a > b ? a : b,
+);
 ---
 
 <BaseLayout
@@ -48,7 +40,7 @@ const CORRECTIONS: readonly Correction[] = [];
   <h2>Ce qui est inscrit</h2>
 
   <ul>
-    <li>une position modifiée, retirée ou ajoutée après publication ;</li>
+    <li>une position modifiée ou retirée après publication ;</li>
     <li>une source corrigée, remplacée ou retirée ;</li>
     <li>une question reformulée ou supprimée après publication ;</li>
     <li>une modification du calcul qui change un classement déjà publié ;</li>
@@ -56,8 +48,12 @@ const CORRECTIONS: readonly Correction[] = [];
   </ul>
 
   <p>
-    Les corrections de forme sans effet sur le sens — faute de frappe, lien mort, mise en page — ne
-    sont pas inscrites. L'historique complet du dépôt les conserve de toute façon.
+    Une position nouvelle n'est pas une correction : les ajouts sont listés jour par jour dans le{
+      " "
+    }
+    <a href="/donnees#journal">journal des données</a>. Les corrections de forme sans effet sur le
+    sens — faute de frappe, lien mort, mise en page — ne sont pas inscrites. L'historique complet du
+    dépôt les conserve de toute façon.
   </p>
 
   <h2>Registre</h2>
@@ -65,9 +61,8 @@ const CORRECTIONS: readonly Correction[] = [];
   {
     CORRECTIONS.length === 0 ? (
       <p>
-        Aucune correction n'a encore été publiée. Aucune donnée politique n'est en ligne à ce jour :
-        il n'y a rien à corriger. Ce registre existe avant d'avoir servi, et non après le premier
-        incident.
+        Aucune correction n'a encore été publiée : aucune position mise en ligne n'a été modifiée ni
+        retirée depuis. Ce registre existe avant d'avoir servi, et non après le premier incident.
       </p>
     ) : (
       <table>

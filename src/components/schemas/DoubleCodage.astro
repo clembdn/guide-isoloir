@@ -13,16 +13,39 @@
  * l'ont précédé perdaient la forme en Y sur téléphone, là où l'on lit.
  *
  * Contenu repris de la page, sans ajout.
+ *
+ * La mention « pas encore appliqué » suit les données : elle disparaît avec la
+ * première campagne publiée dans `src/data/double-codage.json`, et laisse place
+ * à sa date. Écrite en dur, elle aurait menti dans un sens, puis dans l'autre.
  */
 import Icone from "../Icone.astro";
+import { formatDateFr } from "../../lib/date";
+
+interface Props {
+  /** Date de la dernière campagne publiée, ou `null` s'il n'y en a pas eu. */
+  derniereCampagne: string | null;
+}
+
+const { derniereCampagne } = Astro.props;
 ---
 
 <figure class="schema">
-  <figcaption class="schema-titre">Le protocole, tel qu'il sera appliqué</figcaption>
-  <p class="pas-encore">
-    <Icone nom="clock-countdown" graisse="bold" />
-    Pas encore appliqué&nbsp;: aucune campagne n'a eu lieu.
-  </p>
+  <figcaption class="schema-titre">
+    {derniereCampagne === null ? "Le protocole, tel qu'il sera appliqué" : "Le protocole"}
+  </figcaption>
+  {
+    derniereCampagne === null ? (
+      <p class="pas-encore">
+        <Icone nom="clock-countdown" graisse="bold" />
+        Pas encore appliqué&nbsp;: aucune campagne n'a eu lieu.
+      </p>
+    ) : (
+      <p class="pas-encore">
+        <Icone nom="seal-check" graisse="bold" />
+        Dernière campagne&nbsp;: {formatDateFr(derniereCampagne)}.
+      </p>
+    )
+  }
 
   <div class="y">
     <p class="cloison">

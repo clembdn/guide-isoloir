@@ -58,6 +58,7 @@ const AUTRES_FICHIERS_SERVIS = [
   "donnees/positions.csv",
   "donnees/positions-retenues.csv",
   "donnees/propositions.csv",
+  "donnees/couverture.json",
 ];
 
 /**
@@ -322,7 +323,14 @@ const MOTIFS_NON_RELUES = NON_RELUES.map((statut) => ({
   motif: new RegExp(`"reviewStatus"\\s*:\\s*(?:\\[\\s*\\d+\\s*,\\s*)?"${statut}"`),
 }));
 
-for (const fichier of [...presents].filter((f) => f.endsWith(".html") || f.endsWith(".js"))) {
+/*
+ * Les exports aussi. Le premier jet ne lisait que `.html` et `.js` : un export
+ * qui aurait contourné `positionsPubliables` serait passé, alors qu'il est fait
+ * pour être copié ailleurs, là où un brouillon ne se retire plus.
+ */
+const SERVIS_A_LIRE = /\.(?:html|js|json|csv|txt)$/;
+
+for (const fichier of [...presents].filter((f) => SERVIS_A_LIRE.test(f))) {
   const contenu = await readFile(join(RACINE, fichier), "utf8");
   if (MOTIF_FACTICE.test(contenu)) {
     signaler(fichier, "données factices servies : le quiz tourne encore sur src/factice/");

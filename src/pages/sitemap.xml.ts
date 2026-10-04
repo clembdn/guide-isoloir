@@ -15,6 +15,8 @@ import { DONNEES_MISES_A_JOUR, fiches, pagesThemes, pagesThemesPropositions } fr
 import { MEDIAS_RELEVES_LE } from "../data/medias";
 import { ILLUSTRATIONS } from "../data/illustrations";
 import { MISES_A_JOUR } from "../lib/mises-a-jour";
+import { dateMethodologie } from "../lib/couverture";
+import { CORRECTIONS } from "../data/corrections";
 
 type SitemapEntry = {
   path: string;
@@ -35,7 +37,20 @@ type SitemapEntry = {
  * seraient fausses le jour où une position est ajoutée.
  */
 const PAGES_FIXES: readonly SitemapEntry[] = [
-  ...Object.entries(MISES_A_JOUR).map(([path, lastmod]) => ({ path, lastmod })),
+  /*
+   * Deux pages fixes suivent des données, et leur date avec : `/methodologie`
+   * affiche des chiffres calculés, `/corrections` son registre. La date publiée
+   * est celle que la page affiche elle-même.
+   */
+  ...Object.entries(MISES_A_JOUR).map(([path, lastmod]) => ({
+    path,
+    lastmod:
+      path === "/methodologie"
+        ? dateMethodologie()
+        : path === "/corrections"
+          ? [lastmod, ...CORRECTIONS.map((c: { date: string }) => c.date)].sort().at(-1)!
+          : lastmod,
+  })),
   /* La page de crédits change avec les portraits ET avec les photographies de scène. */
   {
     path: "/credits-images",

@@ -37,6 +37,21 @@ describe("données ouvertes", () => {
     }
   });
 
+  it("n'exportent que des sources citées par une donnée publiée, et toutes celles-là", () => {
+    const citees = new Set([
+      ...DONNEES_OUVERTES.positions.flatMap((position) => position.sourceIds),
+      ...DONNEES_OUVERTES.propositions.flatMap((proposition) => proposition.sourceIds),
+      ...DONNEES_OUVERTES.candidatures.flatMap((candidature) => [
+        ...candidature.statutSourceIds,
+        ...(candidature.reserve?.sourceIds ?? []),
+      ]),
+      ...DONNEES_OUVERTES.etatsProgramme.flatMap((etat) => etat.sourceIds),
+    ]);
+    const exportees = DONNEES_OUVERTES.sourcesPositions.map((source) => source.id);
+
+    expect(new Set(exportees)).toStrictEqual(citees);
+  });
+
   it("retiennent autant de positions que les fiches en affichent", () => {
     const affichees = fiches().reduce((somme, fiche) => somme + fiche.documentees, 0);
     expect(positionsRetenues()).toHaveLength(affichees);

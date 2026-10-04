@@ -20,6 +20,8 @@ import {
   positionsRetenues,
 } from "../../lib/fiches";
 import { ECHELLE } from "../../lib/echelle";
+import { journalPublie } from "../../lib/couverture";
+import { formatDateFr } from "../../lib/date";
 import { NIVEAUX_RESOLUTION } from "../../lib/moteur";
 import {
   EDITOR_NAME,
@@ -69,7 +71,24 @@ const FICHIERS = [
     description:
       "Affirmations, échelle, chaîne de résolution, acteurs, candidatures, positions, sources, positions retenues, propositions et états de programme : de quoi refaire le calcul.",
   },
+  {
+    chemin: "/donnees/couverture.json",
+    format: "JSON",
+    type: "application/json",
+    titre: "Couverture",
+    description:
+      "Combien d'affirmations sont documentées pour chaque candidat et chaque thème, dont combien par le candidat lui-même, calculé par le moteur du test.",
+  },
 ] as const;
+
+/*
+ * Journal des données : ce qui a été codé, par date de codage. Les noms
+ * viennent dans l'ordre alphabétique : un ordre par volume ferait de ce journal
+ * un palmarès de qui est le mieux couvert.
+ */
+const JOURNAL = journalPublie(10);
+const MAX_NOMS = 8;
+const pluriel = (n: number, mot: string) => `${n} ${mot}${n > 1 ? "s" : ""}`;
 
 const AVERTISSEMENTS = [
   "Une position reprise d'un parti ou d'une coalition n'est pas une déclaration du candidat. Elle est signalée dans les colonnes reprise_de.",
@@ -156,6 +175,35 @@ const dataset = {
     {REPOSITORY_URL ? <a href={REPOSITORY_URL}>dépôt public</a> : "dépôt public"}.
   </p>
 
+  <h2 id="journal">Journal des données</h2>
+
+  <p>
+    Ce qui a été codé, jour par jour, d'après la date de codage de chaque position et de chaque
+    proposition publiée. Une position mise à jour quitte le jour de son premier codage pour celui de
+    sa mise à jour. Une modification ou un retrait d'une position déjà publiée est inscrit au{" "}
+    <a href="/corrections">registre des corrections</a>.
+  </p>
+
+  <ol class="journal">
+    {
+      JOURNAL.map((jour) => (
+        <li>
+          <time datetime={jour.date}>{formatDateFr(jour.date)}</time>
+          <span>
+            {[
+              jour.positions > 0 ? pluriel(jour.positions, "position") : null,
+              jour.propositions > 0 ? pluriel(jour.propositions, "proposition") : null,
+            ]
+              .filter(Boolean)
+              .join(", ")}{" "}
+            : {jour.acteurs.slice(0, MAX_NOMS).join(", ")}
+            {jour.acteurs.length > MAX_NOMS && ` et ${jour.acteurs.length - MAX_NOMS} autres`}.
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+
   <h2>Avant de réutiliser</h2>
 
   <ul>
@@ -227,6 +275,31 @@ const dataset = {
   .fichiers dd {
     margin: var(--pas-1) 0 0;
     color: var(--couleur-encre-faible);
+  }
+
+  .journal {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: var(--pas-2);
+  }
+
+  .journal li {
+    display: grid;
+    gap: 2px var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+    padding-top: var(--pas-2);
+  }
+
+  @media (min-width: 48rem) {
+    .journal li {
+      grid-template-columns: 11rem minmax(0, 1fr);
+    }
+  }
+
+  .journal time {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
   }
 
   .format {

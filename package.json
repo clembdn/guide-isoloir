@@ -11,7 +11,7 @@
     "dev:previsualisation": "GUIDE_ISOLOIR_PREVISUALISATION=1 astro dev",
     "build": "astro build",
     "build:previsualisation": "GUIDE_ISOLOIR_PREVISUALISATION=1 astro build",
-    "build:prod": "astro build && node scripts/verifier-pages-publiques.mjs --strict",
+    "build:prod": "npm run audit && astro build && node scripts/verifier-pages-publiques.mjs --strict",
     "verify:pages": "node scripts/verifier-pages-publiques.mjs",
     "preview": "astro preview",
     "check": "astro check && tsc --noEmit && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
@@ -22,7 +22,11 @@
     "serve:dist": "node scripts/serveur-statique.mjs",
     "ci": "npm run check && npm run lint && npm run test && npm run audit",
     "build:deploy": "npm run ci && npm run build:prod",
-    "audit": "vitest run --config vitest.audit.config.ts"
+    "audit": "vitest run --config vitest.audit.config.ts",
+    "couverture": "node scripts/mesurer-couverture.mjs",
+    "veille": "node scripts/veille/veiller.mjs",
+    "veille:valider": "node scripts/veille/valider.mjs",
+    "double-codage": "node scripts/double-codage.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

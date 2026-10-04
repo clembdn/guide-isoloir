@@ -69,7 +69,9 @@ const ECHELLE: readonly StanceValue[] = [-2, -1, 0, 1, 2];
  * publié.
  *
  * Les invariants de CALCUL, eux, restent sur le jeu factice : ils ont besoin de
- * positions, et le questionnaire réel n'en a aucune.
+ * configurations construites exprès — deux acteurs aux mêmes positions mais
+ * inégalement documentées, des ex æquo, une couverture partielle — qu'un jeu
+ * réel ne garantit pas.
  */
 const JEUX_DE_QUESTIONS: readonly { nom: string; questions: readonly Question[] }[] = [
   { nom: "factice", questions: QUESTIONS_FACTICES },

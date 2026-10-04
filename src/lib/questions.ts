@@ -8,8 +8,8 @@
  *
  * Zod vient d'Astro, qui en dépend déjà — aucune dépendance ajoutée. On importe
  * `zod` directement plutôt que `astro:content` parce que ce schéma doit servir à
- * trois endroits : le build Astro, Vitest, et `scripts/audit.mjs`, dont deux ne
- * connaissent pas le module virtuel d'Astro. Si Astro cessait un jour de fournir
+ * trois endroits : le build Astro, les tests unitaires et l'audit (`npm run audit`,
+ * tous deux sous Vitest), dont deux ne connaissent pas le module virtuel d'Astro. Si Astro cessait un jour de fournir
  * zod, le correctif serait de l'ajouter aux devDependencies, pas de dupliquer le
  * schéma.
  */

@@ -1,6 +1,5 @@
 ---
 import PageLecture from "../layouts/PageLecture.astro";
-import { MISES_A_JOUR } from "../lib/mises-a-jour";
 import DerniereMiseAJour from "../components/DerniereMiseAJour.astro";
 import Signature from "../components/Signature.astro";
 import ListeIcones from "../components/ListeIcones.astro";
@@ -8,10 +7,55 @@ import ChaineResolution from "../components/schemas/ChaineResolution.astro";
 import QuatreGrandeurs from "../components/schemas/QuatreGrandeurs.astro";
 import PremierRang from "../components/schemas/PremierRang.astro";
 import DoubleCodage from "../components/schemas/DoubleCodage.astro";
-import { CONTACT_EMAIL } from "../lib/site";
+import CouvertureParTheme from "../components/schemas/CouvertureParTheme.astro";
+import ProgressionCouverture from "../components/schemas/ProgressionCouverture.astro";
+import { CONTACT_EMAIL, REPOSITORY_URL } from "../lib/site";
 import { SEUIL_PUBLICATION } from "../lib/seuils";
+import { formatDateFr } from "../lib/date";
+import { DONNEES_MISES_A_JOUR } from "../lib/fiches";
+import {
+  couverturePubliee,
+  dateMethodologie,
+  derniereCampagne,
+  HISTORIQUE_COUVERTURE,
+} from "../lib/couverture";
 
-const UPDATED = MISES_A_JOUR["/methodologie"];
+/*
+ * La page affiche des chiffres calculés : sa date suit les données autant que
+ * son texte. `MISES_A_JOUR["/methodologie"]` reste la date du texte.
+ */
+const UPDATED = dateMethodologie();
+
+/*
+ * Couverture des données publiées, calculée par le moteur du test au build.
+ * Aucun de ces chiffres n'est recopié à la main : une méthodologie qui
+ * publierait la couverture de la semaine dernière dirait le contraire de ce
+ * qu'elle prétend.
+ */
+const COUVERTURE = couverturePubliee();
+const DATE_DONNEES = formatDateFr(DONNEES_MISES_A_JOUR);
+const CAMPAGNE = derniereCampagne();
+const pourcentFr = (valeur: number) =>
+  `${(100 * valeur).toLocaleString("fr-FR", { maximumFractionDigits: 1 })}\u202f%`;
+
+/*
+ * Phrases composées ICI, en une chaîne : Astro avale l'espace entre deux
+ * expressions séparées par un saut de ligne, et la page a affiché « 28ont ».
+ */
+const PROGRAMMES_PUBLIES = `${candidats(COUVERTURE.programmesPublies)} sur ${COUVERTURE.candidats} ${
+  COUVERTURE.programmesPublies > 1 ? "ont" : "a"
+} publié`;
+
+const ETAT_COUVERTURE =
+  `Au ${DATE_DONNEES}, il documente ${COUVERTURE.documentees} des ${COUVERTURE.couples} couples ` +
+  `candidat × affirmation possibles — ${COUVERTURE.candidats} candidats en lice, ` +
+  `${COUVERTURE.affirmations} affirmations —, dont ${COUVERTURE.personnelles} par le candidat lui-même.`;
+
+/** « aucun candidat », « un candidat », « 5 candidats » : le chiffre et l'accord. */
+function candidats(n: number): string {
+  if (n === 0) return "aucun candidat";
+  return n === 1 ? "un candidat" : `${n} candidats`;
+}
 
 /*
  * Lu depuis la constante, jamais recopié à la main : un seuil qui bouge dans le
@@ -26,6 +70,7 @@ const SOMMAIRE = [
   { id: "ce-que-le-calcul-fait", texte: "Ce que le calcul fait" },
   { id: "ce-que-le-calcul-ne-fait-pas", texte: "Ce que le calcul ne fait pas" },
   { id: "candidats-non-classes", texte: "Pourquoi certains candidats ne sont pas classés" },
+  { id: "etat-de-la-couverture", texte: "Où en est la couverture" },
   { id: "candidatures-et-programmes", texte: "Candidatures et programmes" },
   { id: "double-codage", texte: "Double codage à l'aveugle" },
   { id: "invariants", texte: "Invariants vérifiés" },
@@ -115,11 +160,10 @@ const INVARIANTS = [
   <h3>La presse est une source, et elle est nommée comme telle</h3>
 
   <p>
-    À sept mois du scrutin, un seul candidat a publié un programme. Un comparateur qui n'accepterait
-    que les programmes ne comparerait donc rien. Les entretiens, les débats et les comptes rendus de
-    presse sont utilisés, et ils apparaissent pour ce qu'ils sont : la ligne « Origine » sous chaque
-    position dit si vous lisez un programme, les mots du candidat, ou la phrase d'un journaliste qui
-    les rapporte.
+    Au {DATE_DONNEES}, {PROGRAMMES_PUBLIES} un programme. Un comparateur qui n'accepterait que les programmes
+    ne comparerait donc presque rien. Les entretiens, les débats et les comptes rendus de presse sont
+    utilisés, et ils apparaissent pour ce qu'ils sont : la ligne « Origine » sous chaque position dit
+    si vous lisez un programme, les mots du candidat, ou la phrase d'un journaliste qui les rapporte.
   </p>
 
   <p>
@@ -197,6 +241,53 @@ const INVARIANTS = [
     sur tout. Ce rapport est mesuré à chaque publication, et l'audit échoue s'il dérive.
   </p>
 
+  <h2 id="etat-de-la-couverture">Où en est la couverture</h2>
+
+  <p>
+    Le test ne vaut que ce que valent ses données. {ETAT_COUVERTURE} Les autres reprennent la ligne de
+    son parti ou de sa coalition, et la position le dit.
+  </p>
+
+  <dl class="chiffres">
+    <div>
+      <dt>Couples documentés</dt>
+      <dd><strong>{COUVERTURE.documentees}</strong> sur {COUVERTURE.couples}</dd>
+    </div>
+    <div>
+      <dt>Par le candidat lui-même</dt>
+      <dd><strong>{COUVERTURE.personnelles}</strong> sur {COUVERTURE.couples}</dd>
+    </div>
+    <div>
+      <dt>Candidats assez documentés pour être classés</dt>
+      <dd><strong>{COUVERTURE.classables}</strong> sur {COUVERTURE.candidats}</dd>
+    </div>
+    <div>
+      <dt>Programmes publiés</dt>
+      <dd><strong>{COUVERTURE.programmesPublies}</strong> sur {COUVERTURE.candidats}</dd>
+    </div>
+  </dl>
+
+  <CouvertureParTheme themes={COUVERTURE.parTheme} />
+
+  <p>
+    {
+      COUVERTURE.horsIncertitudeForte === 0
+        ? "Aucun résultat n'échappe encore à la mention « résultat incertain »."
+        : `${candidats(COUVERTURE.horsIncertitudeForte)} sur ${COUVERTURE.candidats} échappe${COUVERTURE.horsIncertitudeForte > 1 ? "nt" : ""} à la mention « résultat incertain » quand toutes les affirmations reçoivent une réponse.`
+    } Elle s'affiche tant que moins de la moitié des affirmations auxquelles vous avez répondu sont documentées
+    par le candidat lui-même, ou moins de trois sur cinq au total. Une position reprise du parti renseigne
+    sur le parti, pas sur la personne : elle remplit une case, elle ne lève pas l'incertitude. La mention
+    reculera à mesure que les candidats publieront leurs programmes et s'exprimeront, pas en abaissant
+    un seuil.
+  </p>
+
+  <ProgressionCouverture releves={HISTORIQUE_COUVERTURE} />
+
+  <p>
+    Le détail par candidat est dans les <a href="/donnees/couverture.json">données ouvertes</a>, et
+    chaque fiche candidat dit sur combien d'affirmations il est documenté.
+  </p>
+
   <h2 id="candidatures-et-programmes">Candidatures et programmes</h2>
 
   <p>
@@ -226,18 +317,24 @@ const INVARIANTS = [
 
   <h2 id="double-codage">Double codage à l'aveugle</h2>
 
-  <div class="reserve">
-    <p>
-      <strong
-        >Les positions actuellement publiées n'ont pas été doublement codées, et ce protocole décrit
-        ce qui sera fait, pas ce qui a été fait.</strong
-      > Elles sont un premier relevé, effectué à partir des documents cités sous chacune d'elles. Chacune
-      est vérifiable une par une, aucune n'a été confrontée à un second relevé indépendant. Tant que la
-      première campagne n'a pas eu lieu, lisez ce classement comme une estimation.
-    </p>
-  </div>
+  {
+    CAMPAGNE === null && (
+      <div class="reserve">
+        <p>
+          <strong>
+            Les positions actuellement publiées n'ont pas été doublement codées, et ce protocole
+            décrit ce qui sera fait, pas ce qui a été fait.
+          </strong>{" "}
+          Elles sont un premier relevé, effectué à partir des documents cités sous chacune d'elles.
+          Chacune est vérifiable une par une, aucune n'a été confrontée à un second relevé
+          indépendant. Tant que la première campagne n'a pas eu lieu, lisez ce classement comme une
+          estimation.
+        </p>
+      </div>
+    )
+  }
 
-  <DoubleCodage />
+  <DoubleCodage derniereCampagne={CAMPAGNE?.date ?? null} />
 
   <p>Après chaque campagne de codage, cette page publie :</p>
 
@@ -249,12 +346,67 @@ const INVARIANTS = [
     <li>la date de la dernière campagne.</li>
   </ul>
 
-  <div class="reserve">
-    <p>
-      Aucune campagne de double codage n'a encore eu lieu. Les chiffres ci-dessus apparaîtront ici
-      dès la première, et l'historique restera consultable.
-    </p>
-  </div>
+  {
+    CAMPAGNE === null ? (
+      <div class="reserve">
+        <p>
+          Aucune campagne de double codage n'a encore eu lieu. Les chiffres ci-dessus apparaîtront
+          ici dès la première, et l'historique restera consultable.
+        </p>
+      </div>
+    ) : (
+      <>
+        <h3>Dernière campagne : {formatDateFr(CAMPAGNE.date)}</h3>
+        <p>{CAMPAGNE.codeurs}</p>
+        <dl class="chiffres">
+          <div>
+            <dt>Accord exact</dt>
+            <dd>
+              <strong>{pourcentFr(CAMPAGNE.accordExact)}</strong> de {CAMPAGNE.couples} couples
+            </dd>
+          </div>
+          <div>
+            <dt>Accord à un niveau près</dt>
+            <dd>
+              <strong>{pourcentFr(CAMPAGNE.accordUnNiveau)}</strong> de {CAMPAGNE.couplesNumeriques}{" "}
+              couples chiffrés par les deux
+            </dd>
+          </div>
+          <div>
+            <dt>Désaccords non résolus</dt>
+            <dd>
+              <strong>{CAMPAGNE.desaccordsNonResolus}</strong> sur {CAMPAGNE.desaccords}
+            </dd>
+          </div>
+        </dl>
+        <table>
+          <caption>Couverture atteinte par thème, après réconciliation</caption>
+          <thead>
+            <tr>
+              <th scope="col">Thème</th>
+              <th scope="col">Couples documentés</th>
+            </tr>
+          </thead>
+          <tbody>
+            {CAMPAGNE.couvertureParTheme.map((theme) => (
+              <tr>
+                <th scope="row">{theme.theme}</th>
+                <td>
+                  {theme.documentes} sur {theme.couples}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        {REPOSITORY_URL && (
+          <p>
+            Les deux relevés, leurs empreintes et le rapport de confrontation sont publiés dans le{" "}
+            <a href={`${REPOSITORY_URL}/blob/main/${CAMPAGNE.rapport}`}>dépôt du projet</a>.
+          </p>
+        )}
+      </>
+    )
+  }
 
   <h2 id="invariants">Invariants vérifiés automatiquement</h2>
 
@@ -289,8 +441,8 @@ const INVARIANTS = [
 
   <ul>
     <li>
-      Une dizaine d'affirmations ne résument pas un programme. Le résultat est un point de départ
-      pour aller lire, pas une conclusion.
+      Les {COUVERTURE.affirmations} affirmations du test ne résument pas un programme. Le résultat est
+      un point de départ pour aller lire, pas une conclusion.
     </li>
     <li>
       Le choix des affirmations est lui-même un choix éditorial. Il oriente le résultat autant que
@@ -329,3 +481,43 @@ const INVARIANTS = [
 
   <Signature />
 </PageLecture>
+
+<style>
+  /* Les chiffres de tête : une grille de paires, sans carte ni fond. */
+  .chiffres {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+    gap: var(--pas-3);
+    margin: var(--pas-3) 0;
+  }
+
+  /*
+   * Le chiffre au-dessus de son libellé, sans changer l'ordre de lecture (le
+   * libellé reste premier dans le DOM). `flex-end` en colonne inversée : les
+   * chiffres s'alignent en haut, quelle que soit la longueur du libellé.
+   */
+  .chiffres div {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: 2px;
+    border-top: 3px solid var(--couleur-trait);
+    padding-top: var(--pas-1);
+  }
+
+  .chiffres dt {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .chiffres dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chiffres strong {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+</style>
