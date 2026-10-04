@@ -1,0 +1,12 @@
+# Modèle : scripts/veille/installer.sh remplace @RACINE@ par le chemin du dépôt
+# et copie ce fichier dans ~/.config/systemd/user/.
+[Unit]
+Description=Guide Isoloir — veille quotidienne des programmes (mots-clés, sans IA, aucun commit)
+Documentation=file://@RACINE@/scripts/veille/lancer.sh
+
+[Service]
+Type=oneshot
+ExecStart=@RACINE@/scripts/veille/lancer.sh
+WorkingDirectory=@RACINE@
+Nice=10
+TimeoutStartSec=30min

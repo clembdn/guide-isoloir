@@ -1,0 +1,184 @@
+{
+  "commentaire": "Cibles de la veille quotidienne (scripts/veille/veiller.mjs). Chaque adresse a été ouverte le 4 octobre 2026 avant d'être inscrite. Les sources déjà citées ne figurent pas ici : leur bonne santé est relevée d'office depuis src/data/sources-positions.ts et src/data/questions.ts.",
+  "nonSurveilles": [
+    "Olivier Becht, Francis Lalanne, Emmanuel Maurel, Ségolène Royal, François Ruffin : aucun site de campagne ni de mouvement identifié avec certitude au 4 octobre 2026. francoisruffin.fr ne résout pas.",
+    "Conseil constitutionnel : la page de l'élection présidentielle 2027 n'existe pas encore (404 au 4 octobre 2026). À inscrire à l'ouverture des parrainages.",
+    "La France insoumise : le programme du candidat est sur melenchon2027.fr ; le sitemap de lafranceinsoumise.fr (vingt sitemaps d'articles) noierait la veille."
+  ],
+  "cibles": [
+    {
+      "id": "lisnard-programme",
+      "acteurs": ["david-lisnard", "parti-nouvelle-energie"],
+      "type": "sitemap",
+      "url": "https://www.unenouvelleenergie.fr/pages-sitemap.xml",
+      "motifUrl": "/notre-programme/",
+      "note": "Programme présidentiel de David Lisnard. Les pages ne portent aucune date : le lastmod du sitemap est la seule, et il sert déjà de date de déclaration."
+    },
+    {
+      "id": "melenchon-programme",
+      "acteurs": ["jean-luc-melenchon", "parti-la-france-insoumise"],
+      "type": "liste-documents",
+      "url": "https://melenchon2027.fr/programme2025/livre/",
+      "motifLiens": "chapitre|/programme/|\\.pdf$",
+      "note": "Sommaire de L'Avenir en commun 2027 : un chapitre ou un plan thématique nouveau y apparaît en lien. Le sitemap du site renvoie une 404."
+    },
+    {
+      "id": "dlf-projet",
+      "acteurs": ["nicolas-dupont-aignan", "parti-debout-la-france"],
+      "type": "sitemap",
+      "url": "https://www.debout-la-france.fr/dt_portfolio-sitemap.xml",
+      "motifUrl": "/projet/",
+      "note": "Chapitres du projet de Debout la France, chacun daté par son lastmod. Le parti annonce l'actualisation de son programme pour 2027."
+    },
+    {
+      "id": "patriotes-projet",
+      "acteurs": ["florian-philippot", "parti-les-patriotes"],
+      "type": "liste-documents",
+      "url": "https://les-patriotes.fr/projet/",
+      "motifLiens": "\\.pdf$|projet",
+      "note": "Page projet des Patriotes : notes thématiques et projet 2026-2027 en PDF."
+    },
+    {
+      "id": "ecologistes-projet",
+      "acteurs": ["marine-tondelier", "parti-les-ecologistes"],
+      "type": "liste-documents",
+      "url": "https://lesecologistes.fr/pages/6ImK65GKUnvibm33WGkjkj/projet-2027",
+      "motifLiens": "\\.pdf|/document/",
+      "rendu": "chromium",
+      "note": "Page du projet 2027 des Écologistes. Le site refuse une requête HTTP simple (403) : rendu par Chromium."
+    },
+    {
+      "id": "rn-accueil",
+      "acteurs": ["marine-le-pen", "parti-rassemblement-national"],
+      "type": "liste-documents",
+      "url": "https://rassemblementnational.fr/",
+      "motifLiens": "/documents/|programme|projet",
+      "rendu": "chromium",
+      "note": "Accueil du Rassemblement national, rendu côté client : c'est là qu'apparaissent les liens vers les programmes en PDF. Aucun sitemap ni flux."
+    },
+    {
+      "id": "lr-flux",
+      "acteurs": ["bruno-retailleau", "parti-les-republicains"],
+      "type": "flux",
+      "url": "https://republicains.fr/feed/",
+      "note": "Flux d'actualité des Républicains : communiqués, projet, déclarations du candidat investi."
+    },
+    {
+      "id": "ps-flux",
+      "acteurs": [
+        "karim-bouamrane",
+        "olivier-faure",
+        "raphael-glucksmann",
+        "jerome-guedj",
+        "parti-parti-socialiste"
+      ],
+      "type": "flux",
+      "url": "https://parti-socialiste.fr/feed/",
+      "note": "Flux du Parti socialiste. La primaire fermée des 9 et 10 octobre 2026 reclassera les candidatures du pôle socialiste."
+    },
+    {
+      "id": "lcp-actualites",
+      "acteurs": [],
+      "type": "flux",
+      "url": "https://lcp.fr/rss-actualites.xml",
+      "motifTitre": "présidentielle|presidentielle|candidat|primaire|programme",
+      "note": "LCP, média public et signé, principale source de presse du codage : relevés thématiques, candidatures, résultats de primaire."
+    },
+    {
+      "id": "lo-flux",
+      "acteurs": ["nathalie-arthaud", "parti-lutte-ouvriere"],
+      "type": "flux",
+      "url": "https://www.lutte-ouvriere.org/xml/rss.xml",
+      "note": "Flux de Lutte ouvrière. Le site est rendu côté client : le flux est la seule voie lisible."
+    },
+    {
+      "id": "revolution-permanente-flux",
+      "acteurs": ["anasse-kazib", "parti-revolution-permanente"],
+      "type": "flux",
+      "url": "https://www.revolutionpermanente.fr/spip.php?page=backend",
+      "motifTitre": "Kazib|présidentielle|presidentielle|2027|candidature|programme",
+      "note": "Flux de Révolution permanente, filtré sur la campagne : le média publie plusieurs dizaines d'articles par jour."
+    },
+    {
+      "id": "npa-r-articles",
+      "acteurs": ["selma-labib", "parti-npa-revolutionnaires"],
+      "type": "liste-documents",
+      "url": "https://npa-revolutionnaires.org/",
+      "motifLiens": "/articles/.*(presidentielle|labib|candidat|programme)",
+      "note": "Accueil du NPA-Révolutionnaires, sans sitemap ni flux : seuls les articles de campagne sont retenus."
+    },
+    {
+      "id": "solution-democratique",
+      "acteurs": ["clara-egger", "parti-solution-democratique"],
+      "type": "sitemap",
+      "url": "https://solutiondemocratique.fr/page-sitemap.xml",
+      "note": "Pages de Solution démocratique, dont le calendrier présidentiel qui tient lieu de programme."
+    },
+    {
+      "id": "horizons-pages",
+      "acteurs": ["edouard-philippe", "parti-horizons"],
+      "type": "sitemap",
+      "url": "https://horizonsleparti.fr/page-sitemap.xml",
+      "note": "Pages d'Horizons. Édouard Philippe n'a publié aucun texte programmatique au 4 octobre 2026."
+    },
+    {
+      "id": "renaissance",
+      "acteurs": ["gabriel-attal", "parti-renaissance"],
+      "type": "sitemap",
+      "url": "https://parti-renaissance.fr/sitemap.xml",
+      "note": "Sitemap de Renaissance. Le projet « Besoin d'Europe » de 2024 n'est plus accessible en entier."
+    },
+    {
+      "id": "place-publique",
+      "acteurs": ["raphael-glucksmann", "parti-place-publique"],
+      "type": "sitemap",
+      "url": "https://place-publique.eu/sitemap.xml",
+      "note": "Sitemap de Place publique, parti de Raphaël Glucksmann."
+    },
+    {
+      "id": "generation-ecologie",
+      "acteurs": ["delphine-batho", "parti-generation-ecologie"],
+      "type": "sitemap",
+      "url": "https://www.generationecologie.fr/sitemap.xml",
+      "note": "Sitemap de Génération écologie, qui a investi Delphine Batho."
+    },
+    {
+      "id": "nous-france-projet",
+      "acteurs": ["xavier-bertrand", "parti-nous-france"],
+      "type": "sitemap",
+      "url": "https://www.nousfrance.fr/projet-sitemap.xml",
+      "note": "Pages projet de Nous France. Au 20 septembre 2026, des coquilles sans mesures datées de 2021."
+    },
+    {
+      "id": "upr-programme",
+      "acteurs": ["francois-asselineau", "parti-union-populaire-republicaine"],
+      "type": "sitemap",
+      "url": "https://upr.fr/sitemap.xml",
+      "motifUrl": "programme|presidentielle|2027",
+      "note": "Sitemap de l'UPR, filtré sur le programme : le site est rendu côté client, et l'UPR annonce son programme 2027 « prochainement »."
+    },
+    {
+      "id": "pcf-presidentielle",
+      "acteurs": ["fabien-roussel", "parti-parti-communiste-francais"],
+      "type": "sitemap",
+      "url": "https://www.pcf.fr/sitemap.xml",
+      "motifUrl": "presidentielle|roussel|programme",
+      "note": "Sitemap du PCF (plus de six mille adresses), filtré sur la campagne de Fabien Roussel."
+    },
+    {
+      "id": "reconquete-programme",
+      "acteurs": ["eric-zemmour", "parti-reconquete"],
+      "type": "sitemap",
+      "url": "https://leprogrammepourlafrance.fr/sitemap.xml",
+      "note": "Plateforme programmatique de Reconquête, vers laquelle renvoie le site du parti."
+    },
+    {
+      "id": "equinoxe-presidentielle",
+      "acteurs": ["antoine-mikolajczak", "parti-equinoxe"],
+      "type": "liste-documents",
+      "url": "https://parti-equinoxe.fr/presidentielle-2027/",
+      "motifLiens": "\\.pdf$",
+      "note": "Page présidentielle du parti Équinoxe, qui investit Antoine Mikolajczak : manifeste et tracts en PDF."
+    }
+  ]
+}

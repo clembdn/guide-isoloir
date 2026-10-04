@@ -1,0 +1,14 @@
+# 6 h 47 à Melbourne, soit 20 h 47 ou 21 h 47 à Paris selon l'heure d'été :
+# la journée de campagne française est finie, et le rapport attend l'éditeur
+# à son réveil. `Persistent=true` rattrape au réveil du PC un passage manqué
+# pendant qu'il dormait ; lancer.sh attend alors que le réseau revienne.
+[Unit]
+Description=Guide Isoloir — veille quotidienne, chaque matin
+
+[Timer]
+OnCalendar=*-*-* 06:47:00 Australia/Melbourne
+Persistent=true
+AccuracySec=5min
+
+[Install]
+WantedBy=timers.target

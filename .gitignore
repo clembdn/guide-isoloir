@@ -68,9 +68,20 @@ skills-lock.json
 
 # En revanche, un réglage Claude Code propre au projet a sa place dans le
 # dépôt : il fait partie de la façon de travailler ici, pas de l'outillage
-# personnel. On ignore donc les skills, pas tout .claude/.
+# personnel — les réglages comme les commandes du projet (/veille-semaine).
+# On ignore donc les skills, pas tout .claude/.
 .claude/*
 !.claude/settings.json
+!.claude/commands/
+
+# Veille quotidienne : état local de scripts/veille/veiller.mjs.
+#
+# Le cache contient le TEXTE INTÉGRAL des documents relevés — programmes,
+# articles de presse — qui restent protégés par le droit d'auteur, et ce dépôt
+# est public. Les rapports et les journaux ne servent qu'à l'éditeur. La trace
+# publique de ce qui a été lu vit dans data/cases-non-couvertes.md et dans le
+# `consulteLe` de chaque source.
+data/veille/etat/
 
 # Éditeurs et systèmes
 .DS_Store

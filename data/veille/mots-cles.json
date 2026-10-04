@@ -1,0 +1,112 @@
+{
+  "commentaire": "Mots-clés de la veille, un jeu par affirmation du test. Une phrase correspond si elle contient au moins un terme de CHAQUE groupe. Comparaison sans casse ni accents, sur des débuts de mots : « retraite » trouve aussi « retraites ». Une correspondance n'est pas une position : elle dit où lire, l'éditeur code.",
+  "affirmations": {
+    "retraites-age-legal-60": [
+      ["retraite", "depart"],
+      ["60 ans", "soixante ans", "62 ans", "64 ans", "age legal", "age de depart"]
+    ],
+    "retraites-abrogation-reforme-2023": [
+      ["reforme des retraites", "reforme de 2023", "reforme borne", "reforme de 2023"],
+      ["abrog", "suspend", "revenir sur", "annul", "maintien", "conserver"]
+    ],
+    "retraites-indexation-esperance-vie": [["esperance de vie"], ["retraite", "age", "depart"]],
+    "retraites-part-capitalisation": [["capitalisation", "fonds de pension"]],
+    "fiscalite-impot-fortune": [
+      [
+        "isf",
+        "impot sur la fortune",
+        "impot de solidarite sur la fortune",
+        "taxe zucman",
+        "patrimoine des plus riches",
+        "ultra-riches",
+        "ultra riches"
+      ]
+    ],
+    "fiscalite-bareme-unique-capital-travail": [
+      ["flat tax", "prelevement forfaitaire", "pfu", "revenus du capital", "dividende"],
+      ["bareme", "impot sur le revenu", "travail", "taux", "taxer", "imposer", "fiscalit"]
+    ],
+    "budget-reduction-dette-par-depenses": [
+      ["dette", "deficit"],
+      ["depense", "economie", "milliards", "recette", "impot"]
+    ],
+    "chomage-reduction-duree-indemnisation": [
+      ["chomage", "assurance chomage", "indemnisation", "demandeurs d'emploi"],
+      ["duree", "mois", "reduire", "degressiv", "reforme"]
+    ],
+    "nationalite-suppression-droit-du-sol": [
+      ["droit du sol", "droit du sang", "nationalite francaise"]
+    ],
+    "immigration-plafond-titres-sejour": [
+      [
+        "titres de sejour",
+        "titre de sejour",
+        "immigration",
+        "immigres",
+        "migrant",
+        "visas",
+        "entrees sur le territoire"
+      ],
+      ["plafon", "quota", "limit", "reduire", "nombre", "par an", "chaque annee"]
+    ],
+    "immigration-regularisation-par-le-travail": [
+      ["regularis", "sans-papiers", "sans papiers", "titre de sejour metiers", "metiers en tension"]
+    ],
+    "vote-etrangers-elections-municipales": [
+      ["droit de vote", "vote des etrangers", "voter"],
+      ["etranger", "residents extra", "non europeen", "municipales", "locales"]
+    ],
+    "agriculture-renforcement-normes-environnementales": [
+      ["agricult", "agriculteur", "paysan", "pesticide", "glyphosate", "phytosanitaire"],
+      [
+        "norme",
+        "environnement",
+        "ecolog",
+        "pesticide",
+        "glyphosate",
+        "interdi",
+        "loi duplomb",
+        "pacte vert"
+      ]
+    ],
+    "energie-nouveaux-parcs-eoliens": [["eolien", "eolienne", "eoliennes"]],
+    "transport-suppression-zfe": [["zfe", "zones a faibles emissions", "zone a faibles emissions"]],
+    "energie-nouveaux-reacteurs-nucleaires": [["nucleaire", "reacteur", "epr", "smr", "centrale"]],
+    "institutions-proportionnelle-legislatives": [["proportionnelle", "scrutin proportionnel"]],
+    "institutions-referendum-initiative-citoyenne": [
+      [
+        "ric",
+        "referendum d'initiative citoyenne",
+        "referendum d'initiative partagee",
+        "rip",
+        "initiative populaire"
+      ]
+    ],
+    "institutions-maintien-article-49-3": [["49.3", "49-3", "49 3", "article 49"]],
+    "institutions-elargissement-champ-referendum": [
+      ["referendum", "article 11"],
+      ["immigration", "migratoire", "champ", "elargi", "etendre"]
+    ],
+    "europe-decisions-majorite-qualifiee": [
+      ["unanimite", "majorite qualifiee", "droit de veto", "veto"],
+      ["europe", "conseil", "union", "ue", "bruxelles"]
+    ],
+    "international-financement-soutien-ukraine": [
+      ["ukraine", "ukrainien", "kiev", "kyiv"],
+      ["aide", "soutien", "armes", "livraison", "financ", "militaire", "milliards"]
+    ],
+    "europe-controles-frontieres-schengen": [
+      [
+        "schengen",
+        "controles aux frontieres",
+        "frontieres nationales",
+        "controle des frontieres",
+        "controles frontaliers"
+      ]
+    ],
+    "europe-opposition-parlementaire-traite": [
+      ["traite", "traites europeens", "droit europeen", "primaute", "cjue", "cour de justice"],
+      ["parlement", "constitution", "souverain", "referendum", "s'opposer", "primaute"]
+    ]
+  }
+}
