@@ -65,8 +65,10 @@ position est marquée d'une coche sur disque vert (`--pour`) ou d'une croix sur 
 (`--contre`), parce que c'est le code qu'un primo-votant lit sans lire. Le cadre ne se négocie pas :
 la couleur dit un **sens**, jamais un candidat (même pastille pour tous dans une même colonne) ; elle
 n'est **jamais seule** (la forme ✓ / ✗ et le mot l'accompagnent toujours, la colonne aussi) ; le
-**texte reste à l'encre** ; et elle ne sort pas des pages de thème — `/resultat` garde sa teinte
-unique. La paire est validée au script de la skill `dataviz` pour la deutéranopie (voir §2).
+**texte reste à l'encre** ; et elle ne vaut que sur les pages de thème, la fiche candidat
+(27 septembre 2026) et le face-à-face `/comparer` (4 octobre 2026), toujours à côté d'un verdict
+écrit — jamais sur un score, une barre, un visage ou le trait d'un écart. `/resultat` garde sa
+teinte unique. La paire est validée au script de la skill `dataviz` pour la deutéranopie (voir §2).
 
 Les teintes de rubrique ne servent qu'aux contenus **pédagogiques** de `/comprendre`, qui
 expliquent comment on vote. Ce sont des repères de navigation, pas un jugement sur un acteur.
@@ -398,6 +400,20 @@ Ce qui bouge :
 **Tout survol est derrière `@media (hover: hover) and (pointer: fine)`.** Sur un écran tactile, un
 appui déclenche le survol et laisse l'élément soulevé après le relâchement.
 
+### Le trait du face-à-face (4 octobre 2026)
+
+Sur `/comparer/[a]/[b]`, le trait qui relie les deux visages **s'ouvre depuis le milieu de
+l'écart**, comme un rideau, quand la ligne entre dans la fenêtre : `scale: 0 1` vers `1 1`,
+`transform-box: fill-box`, `animation-timeline: view()`, `animation-range: entry 0% cover 35%`,
+`--va-et-vient`. C'est le seul mouvement de la page.
+
+**Les visages ne bougent jamais.** Un glissement au défilement les aurait montrés à un faux cran —
+le milieu de l'échelle, « ni d'accord, ni pas d'accord » — à quiconque lit la page sans la faire
+défiler : un robot, une capture pleine page, une impression. Le trait, lui, est **entier par
+défaut** : hors de l'écran, sans animation liée au défilement, avec « réduire les animations » et
+à l'impression. La bascule à zéro n'a lieu qu'au bord bas de l'écran, au moment où le trait
+apparaît.
+
 ### La révélation au défilement
 
 Elle est en **CSS pur** — `animation-timeline: view()` — donc **zéro octet de JavaScript**, aucun
@@ -457,8 +473,10 @@ clavier, dont le budget jusqu'au premier radio du quiz est plafonné à 25.
 `src/components/Navigation.astro` porte l'en-tête entier, styles compris. Son motif est celui du
 logo : **un rideau d'isoloir qui se ferme**.
 
-- **Grand écran (≥ 64 rem)** : logo, cinq liens au centre (Candidats, Thèmes, Comprendre, Méthode,
-  À propos, tirés de `NAV_PRINCIPALE` dans `src/lib/site.ts`), « Commencer le test » à droite.
+- **Grand écran (≥ 64 rem)** : logo, six liens au centre (Candidats, Thèmes, Comparer,
+  Comprendre, Méthode, À propos, tirés de `NAV_PRINCIPALE` dans `src/lib/site.ts`), « Commencer le
+  test » à droite. Le sixième, « Comparer », est entré le 4 octobre 2026 ; à 1024 px la barre le
+  tient sans déborder ni toucher l'action (vérifié par `tests/e2e/comparer.spec.ts`).
   Survoler un lien tire deux demi-rideaux `--couleur-surface-2` depuis ses bords jusqu'au centre ;
   la page en cours (`aria-current="page"`, rubrique et pages filles) garde le rideau fermé et
   prend l'encre de signature.
@@ -474,8 +492,8 @@ pied de page porte la navigation. Sans animation liée au défilement, la surfac
 visible. **Les propriétés d'animation s'écrivent détaillées**, jamais en raccourci : le minifieur
 fondait `animation` et `animation-timeline` en un raccourci que Chrome rejette en bloc.
 
-Budget clavier mesuré jusqu'au premier radio de `/test` : **4 tabulations à 375 px, 8 à 1280 px**,
-pour un plafond de 25.
+Budget clavier mesuré jusqu'au premier radio de `/test` : **4 tabulations à 375 px, 9 à 1280 px**
+(8 avant le lien « Comparer »), pour un plafond de 25.
 
 Contrastes du menu ouvert, sur l'aplat : libellés 8,2:1 (clair) et 7,8:1 (sombre), descriptions
 6,2:1 et 5,9:1, bordure du bouton « Fermer » 4,0:1 et 3,6:1.
@@ -719,12 +737,13 @@ enregistrée ici pour qu'elle reste traçable.
 | Dégradés décoratifs            | **Un seul** dégradé sur le site : le halo de l'accroche. Aucun autre.                  |
 | Entrées en fondu-glissé        | Autorisées, en **CSS pur**, avec plancher d'opacité à 0,3. Voir §5.                    |
 | Accent unique sous 2 %         | Six teintes, avec la frontière de la règle 1.1 : **jamais sur du politique**.          |
-| Vert et rouge (26/09/2026)     | Pour et Contre seulement, sur les pages de thème, forme et mot obligatoires (§1.1).    |
+| Vert et rouge (26/09/2026)     | Pour et Contre seulement : thèmes, fiche, face-à-face ; forme et mot obligatoires.     |
 
 ### Refus maintenus
 
 - **Aucune couleur de parti, nulle part.** Bleu, rouge, rose, vert, orange restent exclus de
-  l'interface, à la seule exception de la pastille Pour / Contre des pages de thème (§1.1).
+  l'interface, à la seule exception de la pastille Pour / Contre à côté d'un verdict écrit, sur
+  les pages de thème, la fiche et le face-à-face (§1.1).
 - **Aucune teinte sur un candidat, une position ou un score.** Les barres de `/resultat` gardent
   une seule couleur et une seule opacité, portée par un attribut `width`, jamais par un style.
 - **Aucune apparence officielle.** Pas de bleu-blanc-rouge, pas de Marianne. Le palais de l'Élysée
@@ -982,6 +1001,67 @@ phrases faites de plusieurs nombres sont donc composées en une chaîne dans le 
 **Mesures** — captures à 375 et 1280 px, clair et sombre, de `/methodologie`, `/donnees`,
 `/resultat` et `/corrections`, sans défilement horizontal ; `scripts/capturer.mjs --strict` : aucun
 couple sous son seuil.
+
+## 11 quinquies. Comparer deux candidats (4 octobre 2026)
+
+**`/comparer/[a]/[b]`** — le face-à-face. Gabarit libre, aucun script, citations jamais recopiées :
+chaque verdict renvoie à `/candidats/{slug}#{affirmation}`, où la fiche ouvre la ligne visée.
+
+- **En-tête** sur `--couleur-surface-2`, le même fond pour toutes les paires. Titre « A et B » (le
+  « et » à l'encre faible), une phrase, puis le **duel** : portrait 120 (96 sous 48 rem) de chaque
+  côté, nom, parti ; au centre, sur la **fente** — un filet vertical de 2 px à la signature, à
+  35 % d'opacité, le motif du logo —, « D'accord sur / **5** / des 10 affirmations comparables »,
+  le chiffre en signature, jamais sans sa couverture. Dessous, la proximité du moteur sur une
+  jauge de 8 px (piste tirée de l'encre à 25 %, le trait seul tombait à 1,4:1 sur ce fond), et
+  une ligne qui définit « d'accord ». Les réserves (aucune position en propre, candidature close)
+  en pleine encre, bordées comme sur la fiche. À partir de 64 rem, deux colonnes : le texte à
+  gauche, le duel à droite.
+- **Coup d'œil** : panneau à filets d'un pixel peints par le fond, une rangée par thème
+  (pictogramme à l'encre faible, **aucune teinte de thème**, « D'accord sur 2 des 3 »), quatre
+  cases-liens de 44 px au moins. Chaque case porte un **glyphe de relation**
+  (`GlypheRelation.astro`), dessiné avec les atomes de la ligne : disque plein = position connue,
+  cercle tireté = inconnue, distance entre les disques = écart (collés pour un cran, aux deux bouts
+  pour quatre), disque cerclé = même position, Phosphor `copy` = même document repris des deux
+  côtés. Une seule encre, aucune pastille de sens. L'intitulé court est sous la case à partir de
+  64 rem, dans le nom accessible en dessous. Légende réduite aux signes présents.
+- **En bref** : la phrase générée, puis « Où leurs positions s'écartent le plus » et « Où elles se
+  rejoignent », trois lignes au plus, règle mécanique. À côté du coup d'œil sur grand écran (7 / 5),
+  dessous sur téléphone.
+- **La ligne de partage** (`LignePartage.astro`), une par affirmation, groupées sous le bandeau de
+  thème de la fiche. Titre court et, à côté, l'écart (« 2 crans d'écart ») ; l'affirmation
+  entière en petit ; puis le **rail** : cinq colonnes, de « Tout à fait d'accord » à gauche à
+  « Pas du tout d'accord » à droite, un SVG derrière (ligne de base, cinq crans aux centres des
+  colonnes, trait de l'écart de 4 px à la signature) et les visages de 40 px (48 dès 48 rem)
+  placés par `data-a` / `data-b`, puisque la CSP refuse `style=""`. Même cran : les deux visages
+  accolés. Une seule position connue : un seul visage, l'autre n'est jamais posé au milieu. Aucune
+  : une phrase, sans rail. Sous le rail, les **verdicts face à face en deux colonnes** — le
+  premier à gauche, le second à droite, aligné à droite —, pastille ✓ / ✗, nom en lien, verdict
+  en gras, mentions courtes (« Reprise · Partielle ») dont la forme longue reste au lecteur
+  d'écran. À partir de 64 rem, l'énoncé à gauche et la mesure à droite sur 30 rem fixes : les
+  crans s'alignent dans tout le thème.
+- **Sur quoi repose la comparaison** : deux colonnes séparées d'un filet, dès 375 px ; « 3 sur 10
+  positions en propre » et une bande d'une case par affirmation comparée, **pleine en propre, en
+  contour pour une reprise** (le code des graphiques de couverture) ; origine, source la plus
+  récente, sources antérieures à 2026, programme, tag d'étape.
+- **Parmi les autres candidats** : pour chacun, une règle 0-100 % avec un tic par candidat
+  comparable, celui de l'autre plus long, à la signature et nommé ; une phrase de rang (aucun sous
+  trois partenaires) ; la liste dépliable par ordre alphabétique.
+- **Propositions relevées** : papillon par domaine, le premier vers la gauche, le second vers la
+  droite, un axe central à l'encre faible ; plein = du candidat, contour = de son parti ; « hors
+  score » écrit en tête.
+
+**`/comparer`** — mosaïque des visages comparables (3 par ligne à 375 px, 5 dès 40 rem) en
+**boutons radio** ; le combinateur de frère `:checked + label + .rangee` ouvre la rangée des
+partenaires, des pilules à portrait rond. Aucun choix par défaut, aucun pourcentage. `:has()`
+n'estompe que les images des visages non choisis. Un script de quelques lignes ramène la rangée à
+l'écran au toucher seulement. Dessous : toutes les comparaisons dans un `<details>`, puis « Pas
+encore comparables », chaque candidat en lice nommé en pilule avec sa couverture.
+
+**Fiche candidat** — section « Comparer avec un autre candidat » en fin de fiche, pilules dans
+l'ordre alphabétique de l'autre, sans pourcentage.
+
+**Mesures** — captures à 375 et 1280 px, clair et sombre, sans défilement horizontal ;
+`scripts/capturer.mjs --strict` sur `/comparer` et deux paires : aucun couple sous son seuil.
 
 ## 12. Ce qui reste à faire
 

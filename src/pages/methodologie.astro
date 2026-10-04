@@ -10,7 +10,9 @@ import DoubleCodage from "../components/schemas/DoubleCodage.astro";
 import CouvertureParTheme from "../components/schemas/CouvertureParTheme.astro";
 import ProgressionCouverture from "../components/schemas/ProgressionCouverture.astro";
 import { CONTACT_EMAIL, REPOSITORY_URL } from "../lib/site";
-import { SEUIL_PUBLICATION } from "../lib/seuils";
+import { PLANCHER_POURCENTAGE, SEUIL_PUBLICATION } from "../lib/seuils";
+import { COMPARABLES_MIN, LIGNES_SAILLANTES, paires } from "../lib/face-a-face";
+import { NOMBRE_AFFIRMATIONS } from "../lib/fiches";
 import { formatDateFr } from "../lib/date";
 import { DONNEES_MISES_A_JOUR } from "../lib/fiches";
 import {
@@ -64,12 +66,30 @@ function candidats(n: number): string {
  */
 const SEUIL_PERCENT = Math.round(SEUIL_PUBLICATION.couverture * 100);
 
+/*
+ * Comparaisons deux à deux : la règle et son état, lus dans le code. Phrases
+ * composées ici, pour la même raison que plus haut.
+ */
+const PAIRES = paires();
+const PAIRES_INDEXEES = PAIRES.filter((paire) => paire.indexable).length;
+const REGLE_PAIRES =
+  `Une comparaison s'ouvre quand les positions des deux candidats sont connues, et tirées de ` +
+  `documents distincts, sur au moins ${COMPARABLES_MIN} des ${NOMBRE_AFFIRMATIONS} affirmations : ` +
+  `${Math.round(PLANCHER_POURCENTAGE * 100)} %, le seuil à partir duquel le test affiche un ` +
+  `pourcentage. Au ${DATE_DONNEES}, ${PAIRES.length} paires l'atteignent, dont ${PAIRES_INDEXEES} ` +
+  `proposées aux moteurs de recherche.`;
+const REGLE_SAILLANTES =
+  `« Où leurs positions s'écartent le plus » retient ${LIGNES_SAILLANTES} affirmations au plus, ` +
+  `les plus grands écarts d'abord, puis l'ordre du test ; « où elles se rejoignent », les plus ` +
+  `petits. Aucun sujet n'est mis en avant par choix.`;
+
 /* Sections de la page, pour le sommaire : l'`id` de chaque titre et son texte. */
 const SOMMAIRE = [
   { id: "comment-une-position-est-etablie", texte: "Comment une position est établie" },
   { id: "ce-que-le-calcul-fait", texte: "Ce que le calcul fait" },
   { id: "ce-que-le-calcul-ne-fait-pas", texte: "Ce que le calcul ne fait pas" },
   { id: "candidats-non-classes", texte: "Pourquoi certains candidats ne sont pas classés" },
+  { id: "comparer-deux-candidats", texte: "Comparer deux candidats" },
   { id: "etat-de-la-couverture", texte: "Où en est la couverture" },
   { id: "candidatures-et-programmes", texte: "Candidatures et programmes" },
   { id: "double-codage", texte: "Double codage à l'aveugle" },
@@ -103,6 +123,7 @@ const INVARIANTS = [
   "Aucun avantage systématique ne bénéficie aux acteurs les mieux documentés : ni sur le score moyen, ni sur la fréquence du premier rang.",
   "Les échelles de réponse sont symétriques.",
   "Le résultat est stable : une même série de réponses produit toujours le même classement.",
+  "Comparer un candidat A à un candidat B donne exactement le même chiffre que comparer B à A, quel que soit l'ordre des données.",
 ];
 ---
 
@@ -239,6 +260,50 @@ const INVARIANTS = [
     Ce seuil ne supprime pas l'effet, il le borne. Au minimum de couverture admis, un candidat reste
     environ deux fois et demie plus susceptible d'occuper le premier rang qu'un candidat documenté
     sur tout. Ce rapport est mesuré à chaque publication, et l'audit échoue s'il dérive.
+  </p>
+
+  <h2 id="comparer-deux-candidats">Comparer deux candidats</h2>
+
+  <p>
+    La page <a href="/comparer">Comparer</a> met deux candidats face à face, affirmation par affirmation.
+    Elle ne range personne : elle mesure l'écart entre deux positions écrites.
+  </p>
+
+  <p>{REGLE_PAIRES}</p>
+
+  <p>
+    <strong>Le même calcul que le test.</strong> La proximité de deux candidats est celle que le test
+    calculerait pour une personne qui répondrait exactement comme le premier : même accord par affirmation,
+    chaque thème pesant autant. Le moteur est appelé tel quel, aucune formule n'est réécrite. Comparer
+    A à B donne exactement le même chiffre que comparer B à A, et l'audit le vérifie à chaque publication.
+    « D'accord » veut dire un cran d'écart au plus sur l'échelle du test, comme sur la page de résultat.
+  </p>
+
+  <p>
+    <strong>Le même document ne compte pas.</strong> Quand deux candidats reprennent tous deux la position
+    d'un même parti ou d'une même coalition, faute de déclaration personnelle, c'est la même position
+    des deux côtés. La compter comme un accord ferait dire « d'accord sur tout » à des candidats qui ne
+    se sont pas exprimés. Elle est montrée, nommée, et tenue hors du calcul et du seuil.
+  </p>
+
+  <p>
+    <strong>Hors des moteurs, quand ce n'est qu'une ligne de parti.</strong> Si l'un des deux candidats
+    n'a aucune position personnelle parmi les affirmations comparées, la page compare surtout la ligne
+    de son parti. Elle existe, elle le dit en tête, et elle n'est pas proposée aux moteurs de recherche.
+  </p>
+
+  <p>
+    <strong>Aucune paire n'est choisie à la main.</strong> Le cahier des charges prévoyait de ne publier
+    que « les paires les plus recherchées » ; personne ne les connaît sans mesure d'audience, et ce site
+    n'en a pas. Les choisir exposerait certains candidats plus que d'autres. Le premier nommé est le premier
+    dans l'ordre alphabétique, la règle de toutes les listes du site ; l'adresse dans l'autre ordre redirige
+    vers la même page. {REGLE_SAILLANTES}
+  </p>
+
+  <p>
+    <strong>Le rang parmi les autres candidats situe, il ne classe pas.</strong> Chaque proximité porte
+    sur ses propres affirmations comparables, qui changent d'une paire à l'autre. Aucun rang n'est donné
+    sous {SEUIL_PUBLICATION.acteursMin} candidats comparables.
   </p>
 
   <h2 id="etat-de-la-couverture">Où en est la couverture</h2>
