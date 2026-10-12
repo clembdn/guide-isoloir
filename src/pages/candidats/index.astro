@@ -27,7 +27,7 @@ import EtapeCandidature from "../../components/candidats/EtapeCandidature.astro"
 import EtapesCandidature from "../../components/schemas/EtapesCandidature.astro";
 import MarquePosition from "../../components/themes/MarquePosition.astro";
 import Icone from "../../components/Icone.astro";
-import { fiches, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
+import { estEnLice, fiches, NOMBRE_AFFIRMATIONS } from "../../lib/fiches";
 import { CRANS_CANDIDATURE, LEGENDE_ETAPES } from "../../lib/libelles";
 import { SITE_NAME, SITE_URL, ELECTION } from "../../lib/site";
 import { formatDateFr } from "../../lib/date";
@@ -35,12 +35,12 @@ import { formatDateFr } from "../../lib/date";
 const toutes = fiches();
 
 /*
- * Un candidat retiré garde sa fiche et reste listé, mais à part : le mêler aux
- * candidatures en cours laisserait croire qu'il est toujours en lice.
+ * Un candidat retiré, éliminé ou battu à une primaire garde sa fiche et reste
+ * listé, mais à part : le mêler aux candidatures en cours laisserait croire
+ * qu'il est toujours en lice.
  */
-const RETRAITS = new Set(["withdrawn", "eliminated"]);
-const enLice = toutes.filter((fiche) => !RETRAITS.has(fiche.candidature.status));
-const retirees = toutes.filter((fiche) => RETRAITS.has(fiche.candidature.status));
+const enLice = toutes.filter((fiche) => estEnLice(fiche.candidature));
+const retirees = toutes.filter((fiche) => !estEnLice(fiche.candidature));
 
 /** La liste change quand une fiche change : sa date est celle de la plus récente. */
 const UPDATED = toutes.map((fiche) => fiche.misAJour).reduce((a, b) => (a > b ? a : b));

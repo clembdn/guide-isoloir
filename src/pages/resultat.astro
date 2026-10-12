@@ -50,7 +50,7 @@ import {
 } from "../lib/previsualisation";
 import { SEUIL_PUBLICATION, seuilDepuisEnvironnement } from "../lib/seuils";
 import { media } from "../data/medias";
-import { DONNEES_MISES_A_JOUR, partiDe } from "../lib/fiches";
+import { candidatsClasses, DONNEES_MISES_A_JOUR, partiDe } from "../lib/fiches";
 import { formatDateFr } from "../lib/date";
 
 /*
@@ -68,14 +68,17 @@ const sources = validerSourcesPositions(SOURCES_POSITIONS);
 const positions = validerPositions(POSITIONS, { acteurs, questions: questionsValidees, sources });
 
 /*
- * Seuls les candidats sont CLASSÉS. Les partis, eux, sont passés en `annuaire` :
- * ils portent les positions reprises et doivent pouvoir être nommés, sans
- * occuper pour autant une ligne du classement. Les classer ajouterait vingt
- * lignes que personne n'a demandé à comparer ; ne pas les transmettre du tout
- * ferait afficher « parti-rassemblement-national » à la place du nom sous
- * chaque position héritée.
+ * Seuls les candidats EN LICE sont CLASSÉS. Les partis, eux, sont passés en
+ * `annuaire` : ils portent les positions reprises et doivent pouvoir être
+ * nommés, sans occuper pour autant une ligne du classement. Les classer
+ * ajouterait vingt lignes que personne n'a demandé à comparer ; ne pas les
+ * transmettre du tout ferait afficher « parti-rassemblement-national » à la
+ * place du nom sous chaque position héritée.
+ *
+ * Un candidat retiré, éliminé ou battu à une primaire garde sa fiche, mais
+ * sort du classement : voir `candidatsClasses`.
  */
-const candidats = acteurs.filter((acteur) => acteur.kind === "candidate");
+const candidats = candidatsClasses(acteurs, candidatures);
 const servies = positionsServies(positions);
 const publiees = positionsPubliables(positions).length;
 const nonRelues = positions.length - publiees;

@@ -37,6 +37,7 @@ import { dateAnterieureALaCampagne, SOURCE_ANTERIEURE_A_LA_CAMPAGNE_AVANT } from
 import {
   trierParNomAlphabetique,
   type Candidate,
+  type CandidateStatus,
   type EtatProgramme,
   type PoliticalActor,
   type DomaineProposition,
@@ -457,15 +458,39 @@ export function fiches(): Fiche[] {
   );
 }
 
+/** Statuts d'une candidature close : elle n'avance plus. */
+export const STATUTS_CLOS: ReadonlySet<CandidateStatus> = new Set<CandidateStatus>([
+  "withdrawn",
+  "eliminated",
+  "primary-defeated",
+]);
+
 /**
  * Candidature toujours en cours.
  *
- * Un candidat retiré ou éliminé garde sa fiche, mais ne figure plus dans les
- * pages qui comparent les candidats en lice : l'y laisser ferait croire qu'il
- * l'est encore.
+ * Un candidat retiré, éliminé ou battu à une primaire garde sa fiche, mais ne
+ * figure plus dans les pages qui comparent les candidats en lice : l'y laisser
+ * ferait croire qu'il l'est encore.
  */
 export function estEnLice(candidature: Pick<Candidate, "status">): boolean {
-  return candidature.status !== "withdrawn" && candidature.status !== "eliminated";
+  return !STATUTS_CLOS.has(candidature.status);
+}
+
+/**
+ * Les acteurs que le test CLASSE : les candidats en lice, et eux seuls.
+ *
+ * Le moteur ne lit pas les statuts : c'est ici que le tri se fait. Un candidat
+ * battu à une primaire porte encore des positions héritées de sa coalition ; le
+ * laisser dans le classement pouvait placer en tête quelqu'un qui n'est plus
+ * candidat. Les partis restent hors classement : ils ne servent qu'à nommer
+ * l'origine d'une position reprise.
+ */
+export function candidatsClasses<A extends Pick<PoliticalActor, "id" | "kind">>(
+  acteursConnus: readonly A[],
+  candidaturesConnues: readonly Pick<Candidate, "actorId" | "status">[],
+): A[] {
+  const enLice = new Set(candidaturesConnues.filter(estEnLice).map((c) => c.actorId));
+  return acteursConnus.filter((acteur) => acteur.kind === "candidate" && enLice.has(acteur.id));
 }
 
 /** Un candidat nommé dans une page de thème, et ce qu'il faut savoir de sa position. */

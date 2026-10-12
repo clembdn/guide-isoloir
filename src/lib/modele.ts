@@ -36,8 +36,20 @@ export type PoliticalActor = {
   status: "active" | "inactive" | "withdrawn" | "historical";
 };
 
+/**
+ * `primary-defeated` : candidature close par une primaire perdue. Ce n'est ni un
+ * retrait, que la personne décide, ni une élimination, qui se constate au
+ * premier tour : afficher l'un ou l'autre écrirait un fait faux sur la fiche.
+ */
 export type CandidateStatus =
-  "potential" | "declared" | "nominated" | "official" | "withdrawn" | "eliminated" | "finalist";
+  | "potential"
+  | "declared"
+  | "nominated"
+  | "official"
+  | "withdrawn"
+  | "eliminated"
+  | "primary-defeated"
+  | "finalist";
 
 export type Candidate = {
   actorId: string;

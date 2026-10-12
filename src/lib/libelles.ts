@@ -53,6 +53,7 @@ export const LIBELLES_STATUT_CANDIDATURE: Record<CandidateStatus, string> = {
   official: "Candidature validée par le Conseil constitutionnel",
   withdrawn: "Candidature retirée",
   eliminated: "Élimination au premier tour",
+  "primary-defeated": "Primaire perdue, candidature close",
   finalist: "Qualification pour le second tour",
 };
 
@@ -84,6 +85,7 @@ export const ETAPES_CANDIDATURE: Record<
   finalist: { rang: 4, court: "Qualification pour le second tour" },
   withdrawn: { rang: null, court: "Candidature retirée" },
   eliminated: { rang: null, court: "Élimination au premier tour" },
+  "primary-defeated": { rang: null, court: "Primaire perdue" },
 };
 
 /** Les quatre étapes, dans l'ordre, pour la légende du tag. */

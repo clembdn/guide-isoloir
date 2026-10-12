@@ -873,7 +873,9 @@ positions du test et l'état du programme. La carte entière est un seul lien (l
 elle se soulève au survol, le portrait ne bouge pas. L'ordre reste alphabétique : ni l'étape, ni
 les propositions, ni le bilan ne trient. L'aperçu des propositions a quitté la liste pour la
 fiche : répété vingt-huit fois, c'était lui qui rendait la page interminable. Les candidatures
-retirées suivent en pastilles, sans traitement d'image différent.
+closes (retirées, éliminées, primaire perdue) suivent en pastilles, sans traitement d'image
+différent. Une candidature close n'a pas de crans : le tag dit son statut seul (« Primaire
+perdue », 12 octobre 2026).
 
 **Le tag** (`src/components/candidats/EtapeCandidature.astro`) — quatre crans courts dans
 `--couleur-signature`, remplis jusqu'au rang tiré du statut (`ETAPES_CANDIDATURE`), puis le

@@ -267,23 +267,31 @@ function releverDansLaPage() {
    * couleur du fond, ne dit rien de sa lisibilité — son trait, si. Quand une
    * forme porte un contour visible, c'est lui qu'on mesure.
    */
+  /*
+   * SAUF UN HALO. Un trait exactement de la couleur du fond ne cerne rien : il
+   * détache la forme de ce qu'elle chevauche (les points de la courbe de
+   * couverture sur leur trait). Invisible par construction, il donnerait 1:1 ;
+   * c'est le remplissage qui porte la forme, et c'est lui qu'on mesure.
+   */
   const objets = [];
   for (const rect of document.querySelectorAll("svg rect, svg path, svg circle")) {
     const style = getComputedStyle(rect);
+    const couches = fondEffectif(rect.parentElement);
     const borde =
       style.stroke &&
       style.stroke !== "none" &&
       !TRANSPARENT.test(style.stroke) &&
       parseFloat(style.strokeWidth) > 0;
-    const couleur = borde ? style.stroke : style.fill;
+    const halo = borde && couches.length === 1 && style.stroke === couches[0];
+    const couleur = borde && !halo ? style.stroke : style.fill;
     if (!couleur || TRANSPARENT.test(couleur) || couleur === "none") continue;
-    const cle = "o~" + couleur + "~" + fondEffectif(rect.parentElement).join("|");
+    const cle = "o~" + couleur + "~" + couches.join("|");
     if (vus.has(cle)) continue;
     vus.add(cle);
     objets.push({
       selecteur: (rect.getAttribute("class") || rect.tagName).toString(),
       couleur,
-      couches: fondEffectif(rect.parentElement),
+      couches,
     });
   }
 

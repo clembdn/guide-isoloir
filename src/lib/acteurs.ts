@@ -91,6 +91,7 @@ export const CandidateSchema = z
       "official",
       "withdrawn",
       "eliminated",
+      "primary-defeated",
       "finalist",
     ]),
     baselineActorIds: z.array(IdentifiantSchema),
