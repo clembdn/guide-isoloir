@@ -49,14 +49,22 @@ describe("acteurs et candidatures", () => {
    * ne pourra jamais s'appliquer à lui et il restera vide sur toute affirmation
    * qu'il n'a pas commentée personnellement.
    *
-   * SAUF EXCEPTION ÉCRITE ICI. Depuis le 25 septembre 2026, deux candidats
-   * n'ont aucun parti auquel les sources lues les rattachent : Olivier Becht se
-   * dit « sans étiquette », Ségolène Royal concourt à une primaire sans parti
-   * nommé. Leur prêter une ligne serait leur attribuer des positions. L'exception
-   * est une liste fermée : une chaîne vide qui n'y figure pas reste une erreur,
-   * parce qu'elle est plus souvent un oubli qu'une décision.
+   * SAUF EXCEPTION ÉCRITE ICI. Certains candidats n'ont aucun parti auquel les
+   * sources lues les rattachent : Olivier Becht se dit « sans étiquette »,
+   * Ségolène Royal a concouru à une primaire sans parti nommé (25 septembre
+   * 2026) ; Gilles Platret est divers droite, Sylvain Pierre Durif et Benoît
+   * Mathieu sont classés « Divers » sans parti (12 octobre 2026). Leur prêter une
+   * ligne serait leur attribuer des positions. L'exception est une liste fermée :
+   * une chaîne vide qui n'y figure pas reste une erreur, parce qu'elle est plus
+   * souvent un oubli qu'une décision.
    */
-  const SANS_CHAINE_DE_REPRISE = new Set(["olivier-becht", "segolene-royal"]);
+  const SANS_CHAINE_DE_REPRISE = new Set([
+    "olivier-becht",
+    "segolene-royal",
+    "gilles-platret",
+    "sylvain-pierre-durif",
+    "benoit-mathieu",
+  ]);
 
   it("donnent à chaque candidature au moins un acteur de repli, existant, sauf exception écrite", () => {
     const connus = new Set(ACTEURS.map((acteur) => acteur.id));

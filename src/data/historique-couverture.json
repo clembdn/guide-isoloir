@@ -9,5 +9,27 @@
     "solides": 44,
     "classables": 10,
     "horsIncertitudeForte": 0
+  },
+  {
+    "date": "2026-10-11",
+    "candidats": 31,
+    "couples": 744,
+    "positionsPubliees": 122,
+    "documentees": 149,
+    "personnelles": 45,
+    "solides": 44,
+    "classables": 8,
+    "horsIncertitudeForte": 0
+  },
+  {
+    "date": "2026-10-12",
+    "candidats": 31,
+    "couples": 744,
+    "positionsPubliees": 145,
+    "documentees": 172,
+    "personnelles": 66,
+    "solides": 65,
+    "classables": 8,
+    "horsIncertitudeForte": 0
   }
 ]

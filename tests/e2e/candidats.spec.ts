@@ -28,10 +28,10 @@ test.describe("/candidats", () => {
     /*
      * La clé de tri est saisie à la main dans les données ; ici, on vérifie
      * seulement que l'ordre affiché suit le nom de famille, dernier mot du nom
-     * sauf particule. Deux cas du jeu réel suffisent à couvrir la règle.
+     * sauf particule. « Le Pen » couvre la particule, « Sylvain Pierre Durif »
+     * le double prénom.
      */
-    const cle = (nom: string) =>
-      nom.includes("Le Pen") ? "Le Pen" : nom.split(" ").slice(1).join(" ");
+    const cle = (nom: string) => (nom.includes("Le Pen") ? "Le Pen" : nom.split(" ").at(-1)!);
     const tries = [...noms].sort((a, b) => collator.compare(cle(a), cle(b)));
     expect(noms).toEqual(tries);
 
@@ -93,9 +93,14 @@ test.describe("fiche candidat", () => {
 
   test("nomme le parti quand une proposition vient de lui", async ({ page }) => {
     await page.goto("/candidats/marine-le-pen");
-    await expect(page.locator(".proposition .origine").first()).toContainText(
-      "Rassemblement national",
-    );
+    /*
+     * Pas la première : ses déclarations personnelles passent avant les
+     * documents du parti (12 octobre 2026, règle d'or). On cherche celle qui
+     * nomme le parti, où qu'elle soit dans la liste.
+     */
+    await expect(
+      page.locator(".proposition .origine", { hasText: "Rassemblement national" }).first(),
+    ).toBeVisible();
     await expect(page.locator(".reserve-candidature")).toContainText("cassation");
   });
 

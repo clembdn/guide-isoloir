@@ -30,14 +30,18 @@
  *                   adhérents LR, Roussel par un vote militant à 72 %, Tondelier
  *                   investie par les Écologistes ;
  *   - `potential` : a déclaré une candidature À UNE PRIMAIRE dont l'issue n'est
- *                   pas connue. Raphaël Glucksmann est candidat à la primaire
- *                   socialiste des 9 et 10 octobre, pas encore à la présidentielle.
- *                   Le confondre avec un candidat déclaré serait faux.
+ *                   pas connue. Le confondre avec un candidat déclaré serait faux ;
+ *   - `primary-defeated` : battu à cette primaire. Ce n'est ni un retrait, que
+ *                   la personne décide, ni une élimination au premier tour.
  *
- * RÉSERVE SUR LE PÔLE SOCIALISTE : la primaire fermée du PS des 9 et 10 octobre
- * 2026 reclassera probablement plusieurs candidatures rattachées à ce pôle. Karim
- * Bouamrane figure ici en `declared` parce que la source le classe ainsi ; à
- * revérifier après la primaire.
+ * LA PRIMAIRE SOCIALE-DÉMOCRATE EST TRANCHÉE. Organisée par le Parti socialiste
+ * et Place publique, votée en ligne du 9 au 11 octobre 2026 : Raphaël Glucksmann
+ * l'emporte dès le premier tour avec 66,17 % des suffrages exprimés (LCP et
+ * franceinfo, 11 octobre). Olivier Faure, Ségolène Royal, Emmanuel Maurel et
+ * Jérôme Guedj passent en `primary-defeated` ; leurs fiches restent, avec leur
+ * historique. Karim Bouamrane n'était pas candidat à cette primaire — aucune
+ * source lue ne l'y place, et LCP comme franceinfo ne le comptent pas parmi les
+ * cinq — : il reste en `declared`.
  *
  * `sortName` EST SAISI À LA MAIN, jamais déduit de `name` : « Le Pen, Marine » se
  * trie sous L, « Dupont-Aignan » sous D, « Les Écologistes » sous É. Aucune règle
@@ -92,6 +96,14 @@ export const ACTEURS = [
   },
 
   // ─── Partis et mouvements ────────────────────────────────────────────────
+  {
+    id: "parti-a-nous-maintenant",
+    kind: "party",
+    name: "À nous maintenant",
+    sortName: "À nous maintenant",
+    slug: "a-nous-maintenant",
+    status: "active",
+  },
   {
     id: "parti-debout-la-france",
     kind: "party",
@@ -181,6 +193,14 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "parti-les-ruches",
+    kind: "party",
+    name: "Les Ruches",
+    sortName: "Ruches, Les",
+    slug: "les-ruches",
+    status: "active",
+  },
+  {
     id: "parti-lutte-ouvriere",
     kind: "party",
     name: "Lutte ouvrière",
@@ -261,6 +281,14 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "parti-resistons",
+    kind: "party",
+    name: "Résistons",
+    sortName: "Résistons",
+    slug: "resistons",
+    status: "active",
+  },
+  {
     id: "parti-revolution-permanente",
     kind: "party",
     name: "Révolution permanente",
@@ -274,6 +302,14 @@ export const ACTEURS = [
     name: "Solution démocratique",
     sortName: "Solution démocratique",
     slug: "solution-democratique",
+    status: "active",
+  },
+  {
+    id: "parti-trajectoire",
+    kind: "party",
+    name: "Trajectoire",
+    sortName: "Trajectoire",
+    slug: "trajectoire",
     status: "active",
   },
   {
@@ -343,11 +379,27 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "juan-branco",
+    kind: "candidate",
+    name: "Juan Branco",
+    sortName: "Branco, Juan",
+    slug: "juan-branco",
+    status: "active",
+  },
+  {
     id: "nicolas-dupont-aignan",
     kind: "candidate",
     name: "Nicolas Dupont-Aignan",
     sortName: "Dupont-Aignan, Nicolas",
     slug: "nicolas-dupont-aignan",
+    status: "active",
+  },
+  {
+    id: "sylvain-pierre-durif",
+    kind: "candidate",
+    name: "Sylvain Pierre Durif",
+    sortName: "Durif, Sylvain Pierre",
+    slug: "sylvain-pierre-durif",
     status: "active",
   },
   {
@@ -407,6 +459,14 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "jean-lassalle",
+    kind: "candidate",
+    name: "Jean Lassalle",
+    sortName: "Lassalle, Jean",
+    slug: "jean-lassalle",
+    status: "active",
+  },
+  {
     id: "marine-le-pen",
     kind: "candidate",
     name: "Marine Le Pen",
@@ -415,11 +475,27 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "jean-francois-legendre",
+    kind: "candidate",
+    name: "Jean-François Legendre",
+    sortName: "Legendre, Jean-François",
+    slug: "jean-francois-legendre",
+    status: "active",
+  },
+  {
     id: "david-lisnard",
     kind: "candidate",
     name: "David Lisnard",
     sortName: "Lisnard, David",
     slug: "david-lisnard",
+    status: "active",
+  },
+  {
+    id: "benoit-mathieu",
+    kind: "candidate",
+    name: "Benoît Mathieu",
+    sortName: "Mathieu, Benoît",
+    slug: "benoit-mathieu",
     status: "active",
   },
   {
@@ -447,6 +523,14 @@ export const ACTEURS = [
     status: "active",
   },
   {
+    id: "manolo-mlekuz",
+    kind: "candidate",
+    name: "Manolo Mlekuz",
+    sortName: "Mlekuz, Manolo",
+    slug: "manolo-mlekuz",
+    status: "active",
+  },
+  {
     id: "edouard-philippe",
     kind: "candidate",
     name: "Édouard Philippe",
@@ -460,6 +544,14 @@ export const ACTEURS = [
     name: "Florian Philippot",
     sortName: "Philippot, Florian",
     slug: "florian-philippot",
+    status: "active",
+  },
+  {
+    id: "gilles-platret",
+    kind: "candidate",
+    name: "Gilles Platret",
+    sortName: "Platret, Gilles",
+    slug: "gilles-platret",
     status: "active",
   },
   {
@@ -529,7 +621,9 @@ export const ACTEURS = [
  *
  * UNE CHAÎNE VIDE EST UN CHOIX, PAS UN OUBLI. Olivier Becht se dit « sans
  * étiquette » et Ségolène Royal n'est rattachée à aucun parti par les sources
- * lues : leur prêter la ligne d'un groupe parlementaire ou d'un parti d'origine
+ * lues ; Gilles Platret est divers droite depuis 2024, Sylvain Pierre Durif et
+ * Benoît Mathieu sont classés « Divers » sans parti nommé (12 octobre 2026) :
+ * leur prêter la ligne d'un groupe parlementaire ou d'un parti d'origine
  * serait leur attribuer des positions qu'ils n'ont pas prises.
  *
  * LE NFP N'EST REPRIS QUE PAR LES PARTIS SIGNATAIRES ÉTABLIS (PS, LFI, PCF,
@@ -584,12 +678,21 @@ export const CANDIDATURES = [
     statutDepuis: "2026-08-26",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
+  // hors de la primaire sociale-démocrate : ni LCP ni franceinfo ne le comptent parmi les cinq
   {
     actorId: "karim-bouamrane",
     status: "declared",
     baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-socialiste"],
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
+  },
+  // « C'est officiel » : invité de Sud Radio le vendredi 19 décembre 2025
+  {
+    actorId: "juan-branco",
+    status: "declared",
+    baselineActorIds: ["parti-les-ruches"],
+    statutDepuis: "2025-12-19",
+    statutSourceIds: ["sudradio-branco-candidature-2025", "franceinfo-candidats-declares-2026"],
   },
   // annoncée en meeting le samedi 8 mars 2025
   {
@@ -599,6 +702,18 @@ export const CANDIDATURES = [
     statutDepuis: "2025-03-08",
     statutSourceIds: ["dlf-nda-candidature-2025", "lcp-liste-candidats-2026"],
   },
+  /*
+   * « annonce fin août sa candidature » selon la source, sans le jour : la date
+   * retenue est celle de la mise à jour de la liste. Classé « Divers », aucun
+   * parti nommé : aucune chaîne de reprise.
+   */
+  {
+    actorId: "sylvain-pierre-durif",
+    status: "declared",
+    baselineActorIds: [],
+    statutDepuis: "2026-10-08",
+    statutSourceIds: ["franceinfo-candidats-declares-2026"],
+  },
   {
     actorId: "clara-egger",
     status: "declared",
@@ -606,29 +721,35 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026", "sd-parrainage-egger-2026"],
   },
-  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
+  // battu à la primaire du 11 octobre (14,46 %) ; reste premier secrétaire du PS
   {
     actorId: "olivier-faure",
-    status: "potential",
+    status: "primary-defeated",
     baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-socialiste"],
-    statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+    statutDepuis: "2026-10-11",
+    statutSourceIds: ["lcp-primaire-resultats-2026", "franceinfo-primaire-resultats-2026"],
   },
-  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
+  /*
+   * Désigné par la primaire du Parti socialiste et de Place publique, dès le
+   * premier tour (66,17 %). LCP le dit « soutenu par le Parti socialiste et Place
+   * publique » : le PS entre dans sa chaîne, après son propre parti. Il n'a aucune
+   * position saisie, la reprise ne produit donc rien aujourd'hui. Pas de Nouveau
+   * Front populaire : il exclut tout accord avec LFI.
+   */
   {
     actorId: "raphael-glucksmann",
-    status: "potential",
-    baselineActorIds: ["parti-place-publique"],
-    statutDepuis: "2026-08-23",
-    statutSourceIds: ["lcp-primaire-sociale-democrate-2026", "lcp-liste-candidats-2026"],
+    status: "nominated",
+    baselineActorIds: ["parti-place-publique", "parti-parti-socialiste"],
+    statutDepuis: "2026-10-11",
+    statutSourceIds: ["lcp-primaire-resultats-2026", "franceinfo-primaire-resultats-2026"],
   },
-  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
+  // battu à la primaire du 11 octobre (5,83 %) ; soutient Raphaël Glucksmann
   {
     actorId: "jerome-guedj",
-    status: "potential",
+    status: "primary-defeated",
     baselineActorIds: ["coalition-nouveau-front-populaire", "parti-parti-socialiste"],
-    statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+    statutDepuis: "2026-10-11",
+    statutSourceIds: ["lcp-primaire-resultats-2026", "franceinfo-primaire-resultats-2026"],
   },
   // lancement officiel à la Fête de l'Humanité, le samedi 12 septembre 2026
   {
@@ -653,6 +774,14 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
+  // la liste ne date pas sa déclaration : date de mise à jour de la liste
+  {
+    actorId: "jean-lassalle",
+    status: "declared",
+    baselineActorIds: ["parti-resistons"],
+    statutDepuis: "2026-10-08",
+    statutSourceIds: ["franceinfo-candidats-declares-2026"],
+  },
   // date donnée par la source
   {
     actorId: "marine-le-pen",
@@ -666,6 +795,14 @@ export const CANDIDATURES = [
       sourceIds: ["touteleurope-le-pen-appel-2026"],
     },
   },
+  // la liste ne date pas sa déclaration : date de mise à jour de la liste
+  {
+    actorId: "jean-francois-legendre",
+    status: "declared",
+    baselineActorIds: ["parti-a-nous-maintenant"],
+    statutDepuis: "2026-10-08",
+    statutSourceIds: ["franceinfo-candidats-declares-2026"],
+  },
   {
     actorId: "david-lisnard",
     status: "declared",
@@ -673,13 +810,25 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
   },
-  // candidat à la primaire sociale-démocrate, pas encore à la présidentielle
+  /*
+   * « sillonne la France à vélo depuis mars 2026 pour récolter les 500 promesses
+   * de parrainages » selon la source, sans date de déclaration : date de mise à
+   * jour de la liste. Classé « Divers », aucun parti nommé.
+   */
+  {
+    actorId: "benoit-mathieu",
+    status: "declared",
+    baselineActorIds: [],
+    statutDepuis: "2026-10-08",
+    statutSourceIds: ["franceinfo-candidats-declares-2026"],
+  },
+  // battu à la primaire du 11 octobre (5,92 %)
   {
     actorId: "emmanuel-maurel",
-    status: "potential",
+    status: "primary-defeated",
     baselineActorIds: ["parti-gauche-republicaine-et-socialiste"],
-    statutDepuis: "2026-09-04",
-    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+    statutDepuis: "2026-10-11",
+    statutSourceIds: ["lcp-primaire-resultats-2026", "franceinfo-primaire-resultats-2026"],
   },
   {
     actorId: "jean-luc-melenchon",
@@ -696,6 +845,14 @@ export const CANDIDATURES = [
     statutDepuis: "2026-07-31",
     statutSourceIds: ["equinoxe-presidentielle-2027", "lcp-liste-candidats-2026"],
   },
+  // la liste ne date pas sa déclaration : date de mise à jour de la liste
+  {
+    actorId: "manolo-mlekuz",
+    status: "declared",
+    baselineActorIds: ["parti-trajectoire"],
+    statutDepuis: "2026-10-08",
+    statutSourceIds: ["franceinfo-candidats-declares-2026"],
+  },
   {
     actorId: "edouard-philippe",
     status: "declared",
@@ -709,6 +866,17 @@ export const CANDIDATURES = [
     baselineActorIds: ["parti-les-patriotes"],
     statutDepuis: "2026-09-16",
     statutSourceIds: ["lcp-liste-candidats-2026"],
+  },
+  /*
+   * Officialisée en réunion publique le jeudi 8 octobre 2026. Maire divers droite,
+   * ancien des Républicains : aucun parti à ce jour, aucune chaîne de reprise.
+   */
+  {
+    actorId: "gilles-platret",
+    status: "declared",
+    baselineActorIds: [],
+    statutDepuis: "2026-10-08",
+    statutSourceIds: ["lyoncapitale-platret-candidature-2026"],
   },
   // désigné par les adhérents LR
   {
@@ -726,13 +894,13 @@ export const CANDIDATURES = [
     statutDepuis: "2026-09-06",
     statutSourceIds: ["pcf-roussel-designe-2026", "lcp-liste-candidats-2026"],
   },
-  // candidate à la primaire sociale-démocrate ; aucun parti rattaché par les sources lues
+  // battue à la primaire du 11 octobre (7,62 %) ; aucun parti rattaché par les sources lues
   {
     actorId: "segolene-royal",
-    status: "potential",
+    status: "primary-defeated",
     baselineActorIds: [],
-    statutDepuis: "2026-09-16",
-    statutSourceIds: ["lcp-primaire-sociale-democrate-2026"],
+    statutDepuis: "2026-10-11",
+    statutSourceIds: ["lcp-primaire-resultats-2026", "franceinfo-primaire-resultats-2026"],
   },
   /*
    * Candidature annoncée sous condition — « S'il n'y a pas de primaire, moi j'y

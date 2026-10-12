@@ -732,6 +732,289 @@ export const PROPOSITIONS = [
     reviewStatus: "reconciled",
     updatedAt: "2026-09-25",
   },
+  {
+    id: "raphael-glucksmann--heritages-csg",
+    actorId: "raphael-glucksmann",
+    domaine: "fiscalite",
+    portee: "mesure",
+    intitule:
+      "Taxer les héritages de plus de deux millions d'euros pour baisser la CSG sur les salaires",
+    citation:
+      "met sur la table l'idée d'une taxation des \"méga héritages\", au-delà des deux millions d'euros pour financer une réduction de la CSG sur les salaires",
+    nature: "declaration-personnelle",
+    precisions:
+      "Rapporté au style indirect par LCP, sur le débat du 4 octobre 2026. Le barème n'est pas précisé.",
+    sourceIds: ["lcp-primaire-dernier-debat-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "raphael-glucksmann--avoirs-russes-ukraine",
+    actorId: "raphael-glucksmann",
+    domaine: "europe-international",
+    portee: "mesure",
+    intitule: "Saisir les avoirs publics russes pour financer l'aide à l'Ukraine",
+    citation: "Il a proposé de saisir les avoirs publics russes pour financer ce soutien",
+    nature: "declaration-personnelle",
+    precisions: "Rapporté au style indirect par LCP, sur le débat du 4 octobre 2026.",
+    sourceIds: ["lcp-primaire-dernier-debat-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "raphael-glucksmann--loi-programmation-ecole",
+    actorId: "raphael-glucksmann",
+    domaine: "education-jeunesse",
+    portee: "mesure",
+    intitule: "Une loi de programmation sur cinq ans pour l'école, premier acte du mandat",
+    citation:
+      'Raphaël Glucksmann a proposé d\'inscrire ces priorités dans une loi de programmation sur cinq ans, qui serait son "premier acte"',
+    nature: "declaration-personnelle",
+    precisions:
+      "« Ces priorités » : moins d'élèves par classe, meilleure rémunération des enseignants, rénovation des bâtiments, énumérées juste avant dans le débat.",
+    sourceIds: ["lcp-primaire-dernier-debat-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "raphael-glucksmann--cheque-energie",
+    actorId: "raphael-glucksmann",
+    domaine: "economie-salaires",
+    portee: "mesure",
+    intitule: "Tripler le chèque énergie pour ceux qui ont besoin de leur voiture pour travailler",
+    citation:
+      "le fondateur de Place Publique évoquant un “triplement du chèque énergie”, mesure qu'il réserve aux “classes populaires et moyennes qui ont besoin de leur voiture pour aller travailler”",
+    nature: "declaration-personnelle",
+    precisions:
+      "Avancé lors du premier débat de la primaire, le 23 septembre 2026, en réponse au prix des carburants.",
+    sourceIds: ["lcp-primaire-premier-debat-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "raphael-glucksmann--service-civique-obligatoire",
+    actorId: "raphael-glucksmann",
+    domaine: "education-jeunesse",
+    portee: "mesure",
+    intitule: "Un service civique obligatoire de dix mois pour les jeunes",
+    citation:
+      "Raphaël Glucksmann propose également d'instaurer un service civique obligatoire de dix mois pour toutes les jeunes Français",
+    nature: "declaration-personnelle",
+    precisions:
+      "Tiré de son livre de mai 2026. La dimension militaire resterait volontaire, selon la même source.",
+    sourceIds: ["lcp-glucksmann-livre-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "raphael-glucksmann--convention-citoyenne-immigration",
+    actorId: "raphael-glucksmann",
+    domaine: "immigration",
+    portee: "mesure",
+    intitule: "Une convention citoyenne sur l'immigration, suivie de lois votées au Parlement",
+    citation:
+      "Raphaël Glucksmann défend l'organisation d'une convention citoyenne sur l'immigration",
+    nature: "declaration-personnelle",
+    precisions:
+      "Tiré de son livre de mai 2026. Citoyens tirés au sort ; leurs propositions donneraient lieu à des textes votés au Parlement, selon la même source.",
+    sourceIds: ["lcp-glucksmann-livre-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "edouard-philippe--allocation-familiale-unique",
+    actorId: "edouard-philippe",
+    domaine: "famille-societe",
+    portee: "mesure",
+    intitule: "Une allocation familiale unique de 350 euros par mois dès le premier enfant",
+    citation:
+      "verser une allocation familiale unique de 350 euros par mois dès le premier enfant, dont le montant serait ensuite dégressif en fonction de l'impôt sur le revenu",
+    nature: "declaration-personnelle",
+    precisions:
+      "Annoncé sur France 2 le 8 octobre 2026, avec une réduction d'impôt d'environ 3 000 euros pour les familles qui travaillent.",
+    sourceIds: ["euronews-philippe-heure-de-verite-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "edouard-philippe--heures-supplementaires-exonerees",
+    actorId: "edouard-philippe",
+    domaine: "economie-salaires",
+    portee: "mesure",
+    intitule:
+      "Exonérer de cotisations les salariés qui travaillent deux heures de plus par semaine",
+    citation:
+      "exonérer de cotisations sociales les salariés qui accepteraient de travailler deux heures supplémentaires par semaine",
+    nature: "declaration-personnelle",
+    precisions: "Environ 1 000 euros de plus par an pour un salarié au Smic, selon lui.",
+    sourceIds: ["euronews-philippe-heure-de-verite-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "edouard-philippe--non-remplacement-fonctionnaires",
+    actorId: "edouard-philippe",
+    domaine: "fiscalite",
+    portee: "mesure",
+    intitule: "Ne pas remplacer un fonctionnaire sur trois partant à la retraite",
+    citation:
+      "réduire les effectifs de la fonction publique en ne remplaçant pas un agent sur trois partant à la retraite, ce qui représenterait environ 250 000 suppressions de postes sur cinq ans",
+    nature: "declaration-personnelle",
+    sourceIds: ["euronews-philippe-heure-de-verite-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "edouard-philippe--ordonnances-juillet-2027",
+    actorId: "edouard-philippe",
+    domaine: "institutions",
+    portee: "mesure",
+    intitule: "Une vingtaine d'ordonnances en session extraordinaire dès juillet 2027",
+    citation:
+      "présenter une vingtaine d'ordonnances lors d'une session extraordinaire du Parlement en juillet 2027",
+    nature: "declaration-personnelle",
+    precisions:
+      "Le contenu de chaque ordonnance n'est pas précisé ; entrée en vigueur « dès l'automne », selon lui.",
+    sourceIds: ["euronews-philippe-heure-de-verite-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "edouard-philippe--asile-pays-surs",
+    actorId: "edouard-philippe",
+    domaine: "immigration",
+    portee: "mesure",
+    intitule:
+      "Une liste européenne de pays sûrs dont les ressortissants ne pourraient plus demander l'asile",
+    citation:
+      "il souhaite que l'Union européenne établisse une liste commune de pays considérés comme sûrs, dont les ressortissants ne pourraient plus demander l'asile dans l'UE",
+    nature: "declaration-personnelle",
+    sourceIds: ["euronews-philippe-heure-de-verite-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "gabriel-attal--salaire-enseignants",
+    actorId: "gabriel-attal",
+    domaine: "education-jeunesse",
+    portee: "mesure",
+    intitule:
+      "Augmenter les enseignants de 200 euros net par mois, jusqu'à 500 euros en milieu de carrière",
+    citation:
+      "augmenter le salaire des enseignants «de 200 euros net par mois, jusqu'à 500 euros net pour les milieux de carrière»",
+    nature: "declaration-personnelle",
+    precisions:
+      "Annoncé au meeting de Lyon du 10 octobre 2026. Coût évalué par son équipe à 2,5 milliards d'euros, selon la même source.",
+    sourceIds: ["cnews-attal-lyon-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "gabriel-attal--certificat-etudes",
+    actorId: "gabriel-attal",
+    domaine: "education-jeunesse",
+    portee: "mesure",
+    intitule: "Rétablir le certificat d'études et conditionner l'entrée au lycée au brevet",
+    citation:
+      "le candidat prône le retour du certificat d'étude à la fin du primaire et veut que l'obtention du brevet permette d'accéder au lycée",
+    nature: "declaration-personnelle",
+    sourceIds: ["cnews-attal-lyon-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "marine-le-pen--regle-or-referendum",
+    actorId: "marine-le-pen",
+    domaine: "fiscalite",
+    portee: "mesure",
+    intitule: "Adopter par référendum une règle d'or budgétaire",
+    citation:
+      "La candidate du Rassemblement national Marine Le Pen proposera aux Français, si elle est élue présidente, d'adopter une «règle d'or budgétaire» par référendum, avec l'objectif à terme de ramener la dette publique de la France à 60% du Produit intérieur brut (PIB)",
+    nature: "declaration-personnelle",
+    precisions:
+      "Exposé dans une tribune à L'Opinion, selon CNews : un déficit toujours inférieur au seuil qui stabilise la dette.",
+    sourceIds: ["cnews-rn-contre-budget-2027"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "gilles-platret--abrogation-35-heures",
+    actorId: "gilles-platret",
+    domaine: "travail-retraites",
+    portee: "mesure",
+    intitule: "Abroger les 35 heures",
+    citation: "Parmi les propositions avancées figurent l'abrogation des 35 heures",
+    nature: "declaration-personnelle",
+    precisions:
+      "Avancé lors de sa déclaration du 8 octobre 2026, rapporté sans détail par Lyon Capitale.",
+    sourceIds: ["lyoncapitale-platret-candidature-2026"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "juan-branco--referendums-ue-euro",
+    actorId: "juan-branco",
+    domaine: "europe-international",
+    portee: "mesure",
+    intitule: "Référendums sur l'appartenance à l'Union européenne et à l'euro",
+    citation: "Référendums sur l'appartenance à l'Union Européenne et à l'euro",
+    nature: "programme-2027",
+    sourceIds: ["ruches-programme-2027"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "juan-branco--referendum-otan",
+    actorId: "juan-branco",
+    domaine: "europe-international",
+    portee: "mesure",
+    intitule: "Référendum sur la sortie de l'OTAN",
+    citation: "Référendum sur la sortie de l'OTAN",
+    nature: "programme-2027",
+    sourceIds: ["ruches-programme-2027"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "juan-branco--mandat-revocable",
+    actorId: "juan-branco",
+    domaine: "institutions",
+    portee: "mesure",
+    intitule: "Mandat révocable, et mandat impératif possible à toute échelle",
+    citation:
+      "Instauration du principe de mandat révocable, et de la possibilité permanente de transformer le mandat représentatif en mandat impératif, à toute échelle.",
+    nature: "programme-2027",
+    precisions: "Proposé par un référendum de l'article 11 de la Constitution, selon le programme.",
+    sourceIds: ["ruches-programme-2027"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "juan-branco--suppression-taxes",
+    actorId: "juan-branco",
+    domaine: "fiscalite",
+    portee: "mesure",
+    intitule: "Supprimer plus de 300 taxes, cotisations et impôts",
+    citation: "Suppression de plus de 300 taxes, cotisations et impôts",
+    nature: "programme-2027",
+    precisions: "Le programme ne liste pas les prélèvements visés à cet endroit.",
+    sourceIds: ["ruches-programme-2027"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
+  {
+    id: "juan-branco--nationalisations",
+    actorId: "juan-branco",
+    domaine: "economie-salaires",
+    portee: "mesure",
+    intitule: "Nationaliser l'électricité, l'eau, la santé, les télécoms et les autoroutes",
+    citation:
+      "Nationalisation du marché de l'électricité, de l'eau, de la santé, des télécoms et des autoroutes",
+    nature: "programme-2027",
+    sourceIds: ["ruches-programme-2027"],
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-12",
+  },
 ] as const satisfies readonly Proposition[];
 
 /**
@@ -788,11 +1071,24 @@ export const ETATS_PROGRAMME = [
     sourceIds: ["lcp-liste-candidats-2026"],
   },
   {
+    actorId: "juan-branco",
+    etat: "publie",
+    texte:
+      "« La Voie », programme intégral de 845 mesures en 24 thèmes, publié sur le site de son mouvement, Les Ruches, avec sa version PDF.",
+    sourceIds: ["ruches-programme-2027"],
+  },
+  {
     actorId: "nicolas-dupont-aignan",
     etat: "en-construction",
     texte:
       "Debout la France actualise son programme pour 2027 : seules les pages marquées « Projet 2027 » sont à jour.",
     sourceIds: ["dlf-projet-2027"],
+  },
+  {
+    actorId: "sylvain-pierre-durif",
+    etat: "non-publie",
+    texte: "Aucun programme présidentiel n'a été trouvé dans les sources lues au 12 octobre 2026.",
+    sourceIds: ["franceinfo-candidats-declares-2026"],
   },
   {
     actorId: "clara-egger",
@@ -805,22 +1101,22 @@ export const ETATS_PROGRAMME = [
     actorId: "olivier-faure",
     etat: "non-publie",
     texte:
-      "Candidat à la primaire sociale-démocrate des 9-10 et 16-17 octobre. Aucun programme présidentiel publié n'a été trouvé au 25 septembre 2026.",
-    sourceIds: ["lcp-primaire-sociale-democrate-2026"],
+      "Battu à la primaire sociale-démocrate du 11 octobre 2026, avec 14,46 % des suffrages exprimés. Aucun programme présidentiel publié n'avait été trouvé au 25 septembre 2026.",
+    sourceIds: ["lcp-primaire-resultats-2026", "lcp-primaire-sociale-democrate-2026"],
   },
   {
     actorId: "raphael-glucksmann",
     etat: "non-publie",
     texte:
-      "Candidat à la primaire sociale-démocrate. Aucun programme présidentiel publié n'a été trouvé au 25 septembre 2026.",
-    sourceIds: ["lcp-primaire-sociale-democrate-2026"],
+      "Désigné le 11 octobre 2026 par la primaire du Parti socialiste et de Place publique. Aucun programme présidentiel publié n'a été trouvé au 12 octobre 2026.",
+    sourceIds: ["lcp-primaire-resultats-2026"],
   },
   {
     actorId: "jerome-guedj",
     etat: "non-publie",
     texte:
-      "Candidat à la primaire sociale-démocrate. Aucun programme présidentiel publié n'a été trouvé au 25 septembre 2026.",
-    sourceIds: ["lcp-primaire-sociale-democrate-2026"],
+      "Battu à la primaire sociale-démocrate du 11 octobre 2026, avec 5,83 % des suffrages exprimés. Aucun programme présidentiel publié n'avait été trouvé au 25 septembre 2026.",
+    sourceIds: ["lcp-primaire-resultats-2026", "lcp-primaire-sociale-democrate-2026"],
   },
   {
     actorId: "anasse-kazib",
@@ -843,11 +1139,23 @@ export const ETATS_PROGRAMME = [
     sourceIds: ["lcp-liste-candidats-2026"],
   },
   {
+    actorId: "jean-lassalle",
+    etat: "non-publie",
+    texte: "Aucun programme présidentiel n'a été trouvé dans les sources lues au 12 octobre 2026.",
+    sourceIds: ["franceinfo-candidats-declares-2026"],
+  },
+  {
     actorId: "marine-le-pen",
     etat: "non-publie",
     texte:
       "Aucun programme présidentiel publié n'a été trouvé au 25 septembre 2026. Les mesures affichées ici viennent du contre-budget 2026 du groupe RN.",
     sourceIds: ["lcp-liste-candidats-2026", "rn-contre-budget-2026"],
+  },
+  {
+    actorId: "jean-francois-legendre",
+    etat: "non-publie",
+    texte: "Aucun programme présidentiel n'a été trouvé dans les sources lues au 12 octobre 2026.",
+    sourceIds: ["franceinfo-candidats-declares-2026"],
   },
   {
     actorId: "david-lisnard",
@@ -857,11 +1165,17 @@ export const ETATS_PROGRAMME = [
     sourceIds: ["lisnard-ambition"],
   },
   {
+    actorId: "benoit-mathieu",
+    etat: "non-publie",
+    texte: "Aucun programme présidentiel n'a été trouvé dans les sources lues au 12 octobre 2026.",
+    sourceIds: ["franceinfo-candidats-declares-2026"],
+  },
+  {
     actorId: "emmanuel-maurel",
     etat: "non-publie",
     texte:
-      "Candidat à la primaire sociale-démocrate. Aucun programme présidentiel publié n'a été trouvé au 25 septembre 2026.",
-    sourceIds: ["lcp-primaire-sociale-democrate-2026"],
+      "Battu à la primaire sociale-démocrate du 11 octobre 2026, avec 5,92 % des suffrages exprimés. Aucun programme présidentiel publié n'avait été trouvé au 25 septembre 2026.",
+    sourceIds: ["lcp-primaire-resultats-2026", "lcp-primaire-sociale-democrate-2026"],
   },
   {
     actorId: "jean-luc-melenchon",
@@ -878,6 +1192,12 @@ export const ETATS_PROGRAMME = [
     sourceIds: ["equinoxe-presidentielle-2027"],
   },
   {
+    actorId: "manolo-mlekuz",
+    etat: "non-publie",
+    texte: "Aucun programme présidentiel n'a été trouvé dans les sources lues au 12 octobre 2026.",
+    sourceIds: ["franceinfo-candidats-declares-2026"],
+  },
+  {
     actorId: "edouard-philippe",
     etat: "non-publie",
     texte: "Aucun programme présidentiel publié n'a été trouvé au 25 septembre 2026.",
@@ -889,6 +1209,13 @@ export const ETATS_PROGRAMME = [
     texte:
       "Les Patriotes ont publié en septembre 2026 des « Grandes orientations pour un projet patriote », édition 2026-2027.",
     sourceIds: ["lp-projet-patriote-2026"],
+  },
+  {
+    actorId: "gilles-platret",
+    etat: "non-publie",
+    texte:
+      "Il a avancé des propositions lors de sa déclaration du 8 octobre 2026. Aucun programme présidentiel publié n'a été trouvé au 12 octobre 2026.",
+    sourceIds: ["lyoncapitale-platret-candidature-2026"],
   },
   {
     actorId: "bruno-retailleau",
@@ -907,8 +1234,8 @@ export const ETATS_PROGRAMME = [
     actorId: "segolene-royal",
     etat: "non-publie",
     texte:
-      "Candidate à la primaire sociale-démocrate. Aucun programme présidentiel publié n'a été trouvé au 25 septembre 2026.",
-    sourceIds: ["lcp-primaire-sociale-democrate-2026"],
+      "Battue à la primaire sociale-démocrate du 11 octobre 2026, avec 7,62 % des suffrages exprimés. Aucun programme présidentiel publié n'avait été trouvé au 25 septembre 2026.",
+    sourceIds: ["lcp-primaire-resultats-2026", "lcp-primaire-sociale-democrate-2026"],
   },
   {
     actorId: "francois-ruffin",

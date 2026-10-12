@@ -252,3 +252,54 @@ huit au-dessus du seuil de publication.
 4. **Place publique** (Glucksmann, 4 cases). Sa qualité de signataire du Nouveau Front populaire
    n'a pas pu être confirmée sur une source fiable : la reprise de la coalition ne lui est donc
    pas appliquée, ni à Génération écologie. Une reprise attribuée à tort est pire qu'une case vide.
+
+## Relevé du 12 octobre 2026
+
+Après la primaire sociale-démocrate et la veille du 12 octobre. Tous les codages ci-dessous sont
+des **brouillons** (`draft`) ; voici ce qui a été lu sans pouvoir être codé.
+
+**Raphaël Glucksmann** (`raphael-glucksmann`). Documents lus : les comptes rendus LCP des trois
+débats de la primaire (23 septembre, 1er et 4 octobre), la synthèse LCP du 9 octobre, l'article
+LCP du 26 mai sur son livre, et franceinfo du 11 octobre. Codé : régularisation, Ukraine, veto
+européen, et une nouvelle formulation pour les 60 ans.
+
+| questionId                              | Constat                                                                                                                                                                                                                   |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `retraites-indexation-esperance-vie`    | Aborde sans répondre. Le livre veut intégrer « un critère d'espérance de vie en bonne santé » pour faire partir plus tôt les carrières pénibles et plus tard les cadres : une modulation, pas une indexation automatique. |
+| `retraites-part-capitalisation`         | Aborde sans répondre. Le compte rendu du 4 octobre écrit « ils y sont opposés » juste après une phrase sur Guedj et Faure : le sujet du verbe est ambigu, et rien ne nomme Glucksmann.                                    |
+| `fiscalite-impot-fortune`               | Aborde sans répondre. Il veut taxer les « méga héritages » et réformer le pacte Dutreil, ce qui est une autre mesure qu'un impôt sur la fortune. En propositions, hors score.                                             |
+| `budget-reduction-dette-par-depenses`   | Aborde sans répondre. L'État doit « montrer l'exemple », mais la dette « vient avant tout de la désindustrialisation » : aucune priorité de la dépense sur la recette.                                                    |
+| `energie-nouveaux-reacteurs-nucleaires` | Déjà codé (+1, partielle). « La France a besoin des deux », le 4 octobre, confirme sans parler de nouveaux réacteurs.                                                                                                     |
+
+**Édouard Philippe** (`edouard-philippe`). Euronews du 9 octobre (_L'Heure de vérité_, France 2,
+le 8) et CNews du 3 octobre. `international-financement-soutien-ukraine` : il « a réaffirmé son
+soutien à l'Ukraine », sans parler de financement ni de soutien militaire. Aborde sans répondre.
+
+**Rassemblement national** (`parti-rassemblement-national`). Le contre-budget 2027, présenté le
+6 octobre, n'a pas été trouvé en ligne au 12 octobre. L'article de CNews lu est paru le matin
+même : il en donne les annonces, pas le contenu. Rien n'a été codé, à reprendre quand le document
+sera publié. La « règle d'or » de Marine Le Pen plafonne un déficit, sans dire si la dette doit
+baisser d'abord par la dépense. `budget-reduction-dette-par-depenses` : aborde sans répondre.
+Elle figure en proposition.
+
+**Debout la France** (`parti-debout-la-france`). Page « Économie » du projet, modifiée le
+10 octobre. `budget-reduction-dette-par-depenses` : aborde sans répondre, car le déficit y est
+« le produit d'un excès de dépenses et d'une faiblesse de nos recettes ». Les deux leviers sont
+proposés, sans priorité énoncée.
+
+**Juan Branco** (`juan-branco`). Programme « La Voie », 845 mesures, lu en entier par mots-clés
+des 24 affirmations. Sept cases codées.
+
+| questionId                                  | Constat                                                                                                                                             |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `chomage-reduction-duree-indemnisation`     | Aborde sans répondre. « Dégressivité des allocations chômage à partir de la première année » : la dégressivité n'est pas la durée.                  |
+| `retraites-indexation-esperance-vie`        | Aborde sans répondre. Les taux de retour seraient fixés « selon l'espérance de vie par catégorie sociale et professionnelle » : le taux, pas l'âge. |
+| `immigration-regularisation-par-le-travail` | Aborde sans répondre. Des critères d'intégration « dans le cadre des régularisations », sans dire qui serait régularisé.                            |
+| `institutions-proportionnelle-legislatives` | Aborde sans répondre. La proportionnelle vise l'élection d'une assemblée constituante, pas celle des députés.                                       |
+| `energie-nouveaux-parcs-eoliens`            | Muet. Seul le photovoltaïque est traité.                                                                                                            |
+
+**Fabien Roussel**. CNews, le 3 octobre : il « n'a pas encore présenté de projet détaillé sur
+les retraites pour 2027 ». Sa position de 2022 n'est pas une source pour 2027 : rien n'est codé.
+
+**Bruno Retailleau**. La case `retraites-abrogation-reforme-2023` reste une inférence publiée le
+19 septembre. CNews ne parle pas de la réforme de 2023 à son sujet.

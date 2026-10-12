@@ -771,4 +771,151 @@ export const SOURCES_POSITIONS = [
     incoherenceRelevee:
       "Page sans date. Celle retenue est la date de consultation : elle atteste seulement ce que la page affichait ce jour-là.",
   },
+  /*
+   * ─── Mise à jour du 12 octobre 2026 ─────────────────────────────────────
+   *
+   * Résultat de la primaire sociale-démocrate, et candidatures déclarées qui
+   * manquaient au site. Toutes ouvertes et lues le 12 octobre 2026 dans le texte
+   * téléchargé par `veiller.mjs telecharger`.
+   */
+  {
+    id: "lcp-primaire-resultats-2026",
+    titre:
+      "Primaire socialiste : vainqueur dès le 1er tour, Raphaël Glucksmann sera le candidat de la gauche sociale-démocrate à la présidentielle",
+    media: "LCP – Assemblée nationale",
+    url: "https://lcp.fr/actualites/primaire-socialiste-vainqueur-des-le-1er-tour-raphael-glucksmann-sera-le-candidat-de-la",
+    dateDeclaration: "2026-10-11",
+    consulteLe: "2026-10-12",
+  },
+  {
+    id: "franceinfo-primaire-resultats-2026",
+    titre:
+      "Raphaël Glucksmann désigné dès le premier tour comme le candidat de la gauche sociale-démocrate",
+    media: "franceinfo, avec l'AFP",
+    url: "https://www.franceinfo.fr/elections/presidentielle/raphael-glucksmann-designe-des-le-premier-tour-comme-le-candidat-de-la-gauche-sociale-democrate_8232970.html",
+    dateDeclaration: "2026-10-11",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "L'article, publié le 11 octobre 2026 à 19 h 57, écrit « dimanche 11 septembre ». Le 11 octobre 2026 est un dimanche, et LCP proclame le résultat ce jour-là : la date retenue est le 11 octobre.",
+  },
+  {
+    id: "franceinfo-candidats-declares-2026",
+    titre:
+      "PORTRAITS. Qui sont les candidats (déjà) déclarés à l'élection présidentielle de 2027 ?",
+    media: "franceinfo",
+    url: "https://www.franceinfo.fr/elections/presidentielle/portraits-qui-sont-les-candidats-declares-a-l-election-presidentielle-de-2027_8208032.html",
+    dateDeclaration: "2026-10-08",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Publié le 3 octobre 2026 et mis à jour au fil des annonces. La page affiche « 31 candidats au 08/10/2026 », date retenue ; elle ne donne pas le jour de chaque déclaration.",
+  },
+  {
+    id: "lyoncapitale-platret-candidature-2026",
+    titre: "Gilles Platret, nouveau candidat à l'élection présidentielle de 2027",
+    media: "Lyon Capitale",
+    url: "https://www.lyoncapitale.fr/politique/gilles-platret-nouveau-candidat-a-lelection-presidentielle-de-2027",
+    dateDeclaration: "2026-10-08",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Article publié le 9 octobre 2026 ; la déclaration qu'il rapporte date de la réunion publique du jeudi 8 octobre au soir, date retenue.",
+  },
+  {
+    id: "sudradio-branco-candidature-2025",
+    titre: "L'avocat Juan Branco, candidat à la présidentielle",
+    media: "Sud Radio",
+    url: "https://www.sudradio.fr/sud-radio/lavocat-juan-branco-candidat-a-la-presidentielle",
+    dateDeclaration: "2025-12-19",
+    consulteLe: "2026-10-12",
+  },
+  {
+    id: "ruches-programme-2027",
+    titre: "Le Projet 2027 — La Voie, programme intégral (845 mesures, 24 thèmes)",
+    media: "Les Ruches (mouvement de Juan Branco)",
+    url: "https://ruches.org/le-projet",
+    dateDeclaration: "2026-10-12",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Page sans date. Celle retenue est la date de consultation : elle atteste seulement ce que la page affichait ce jour-là.",
+  },
+  {
+    id: "lcp-primaire-premier-debat-2026",
+    titre:
+      "Accord avec LFI, Moyen-Orient, pouvoir d'achat : ce qu'il faut retenir du premier débat de la primaire de gauche",
+    media: "LCP – Assemblée nationale",
+    url: "https://lcp.fr/actualites/accord-avec-lfi-moyen-orient-pouvoir-d-achat-ce-qu-il-faut-retenir-du-premier-debat-de",
+    dateDeclaration: "2026-09-23",
+    consulteLe: "2026-10-12",
+  },
+  {
+    id: "lcp-primaire-dernier-debat-2026",
+    titre:
+      "Glucksmann face à Royal, divisions sur LFI, lycées… Ce qu'il faut retenir du dernier débat de la primaire socialiste",
+    media: "LCP – Assemblée nationale",
+    url: "https://lcp.fr/actualites/glucksmann-face-a-royal-divisions-sur-lfi-lycees-ce-qu-il-faut-retenir-du-dernier-debat",
+    dateDeclaration: "2026-10-04",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Article publié le lundi 5 octobre 2026 à 0 h 07 ; il rend compte du débat diffusé par BFMTV le dimanche 4 octobre, date retenue.",
+  },
+  {
+    id: "lcp-glucksmann-livre-2026",
+    titre:
+      "Présidentielle : Raphaël Glucksmann dévoile les premières lignes de son possible programme",
+    media: "LCP – Assemblée nationale",
+    url: "https://lcp.fr/actualites/presidentielle-raphael-glucksmann-devoile-les-premieres-lignes-de-son-possible-programme",
+    dateDeclaration: "2026-05-26",
+    consulteLe: "2026-10-12",
+  },
+  {
+    id: "euronews-philippe-heure-de-verite-2026",
+    titre:
+      "Présidentielle 2027 : Édouard Philippe mise sur le travail et la réduction des dépenses publiques",
+    media: "Euronews",
+    url: "https://fr.euronews.com/2026/10/09/presidentielle-2027-edouard-philippe-mise-sur-le-travail-et-la-reduction-des-depenses-publ",
+    dateDeclaration: "2026-10-08",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Article publié le 9 octobre 2026 ; il rend compte de L'Heure de vérité, sur France 2, « jeudi », soit le 8 octobre 2026, date retenue.",
+  },
+  {
+    id: "cnews-retraites-candidats-2026",
+    titre:
+      "Retraites : voici les propositions des différents candidats à l'élection présidentielle 2027",
+    media: "CNews",
+    url: "https://www.cnews.fr/france/2026-10-03/retraites-voici-les-propositions-des-differents-candidats-lelection",
+    dateDeclaration: "2026-10-03",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Publié le 3 octobre 2026, l'article annonce un « tour d'horizon des positions connues au 30 septembre 2026 » : il synthétise des déclarations antérieures sans les dater une à une.",
+  },
+  {
+    id: "cnews-attal-lyon-2026",
+    titre:
+      "Présidentielle 2027 : pacte pour la jeunesse, IA, nucléaire... Ce qu'il faut retenir du discours de Gabriel Attal à Lyon",
+    media: "CNews",
+    url: "https://www.cnews.fr/france/2026-10-10/presidentielle-2027-pacte-pour-la-jeunesse-ia-nucleaire-ce-quil-faut-retenir-du",
+    dateDeclaration: "2026-10-10",
+    consulteLe: "2026-10-12",
+  },
+  {
+    id: "cnews-rn-contre-budget-2027",
+    titre:
+      "125 milliards d'euros d'économies : Marine Le Pen et Jordan Bardella dévoilent ce mardi leur stratégie budgétaire pour séduire les marchés",
+    media: "CNews",
+    url: "https://www.cnews.fr/france/2026-10-06/125-milliards-deuros-deconomies-marine-le-pen-et-jordan-bardella-devoilent-ce",
+    dateDeclaration: "2026-10-06",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Article publié le matin du 6 octobre 2026, avant la présentation du contre-budget : il en donne les annonces préalables, pas le document, qui n'a pas été trouvé en ligne au 12 octobre.",
+  },
+  {
+    id: "dlf-projet-economie-2027",
+    titre: "Économie",
+    media: "Debout la France",
+    url: "https://www.debout-la-france.fr/projet/economie-travail/",
+    dateDeclaration: "2026-10-10",
+    consulteLe: "2026-10-12",
+    incoherenceRelevee:
+      "Page du projet sans date affichée ; la date retenue est sa dernière modification selon ses métadonnées (10 octobre 2026), la version lue.",
+  },
 ] as const satisfies readonly SourcePosition[];
