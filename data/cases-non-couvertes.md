@@ -342,3 +342,27 @@ proposition plus récente : la retraite à 60 ans, le blocage des prix et la rè
 quatrième est le SMIC à 1 600 € net, que la page de La France insoumise porte désormais à 1 700 €.
 Le chapitre 17 (Europe) n'encadre aucune mesure. Les quelque 750 autres mesures du livre ne sont
 pas relevées : à ce volume, la fiche candidat devra d'abord être repensée.
+
+### Les Écologistes (`parti-les-ecologistes`), relevé intégral
+
+Même document que le 25 septembre :
+[Pour une prospérité écologique](https://lesecologistes.fr/document/3N4JsAEmq6vsx42IITGNZa/vdef-programme-1.pdf),
+208 pages, modifié le 25 août 2026 (même date de modification qu'à la première lecture), SHA-256
+`2fafd160291ff6677207c57ce1504ae6e62608cd19d8310e01a522b95beb50fc`. Il avait déjà été passé au
+crible des 24 affirmations, et **aucune position ne change**.
+
+**547 propositions ajoutées** au registre hors score. Le programme annonce 557 mesures mais en
+numérote 551 : la mesure 6 du chapitre 4 n'existe pas, et le chapitre 57 porte deux mesures 4.
+Les quatre mesures déjà relevées le 25 septembre gardent leur entrée (nucléaire, pesticides,
+proportionnelle, Ukraine). Deux anciennes entrées citent un passage situé à l'intérieur d'une
+mesure : l'ISF dans la mesure 17-1, le vote à 16 ans dans la mesure 49-4. Ces deux mesures ont
+désormais aussi leur entrée complète, puisqu'elles contiennent autre chose (taxe Zucman,
+inscription automatique).
+
+Le relevé est mécanique, et sa règle est écrite en tête du bloc dans `src/data/programmes.ts`.
+L'intitulé est le titre que le parti donne à la mesure (texte en vert du PDF). La citation est le
+début de la mesure, mot pour mot, coupé à une fin de phrase sous 320 signes. Le domaine suit le
+chapitre, et la portée suit une liste de verbes publiée. 539 citations ont été retrouvées mot pour
+mot dans le texte extrait par pdftotext. Les 12 autres viennent de la couche texte du PDF, où les
+colonnes s'enchaînent dans un ordre différent. Deux césures de fin de ligne y ont été recollées
+(« environne-mentaux », « souverai-neté »).
