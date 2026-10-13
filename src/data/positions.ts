@@ -549,6 +549,173 @@ export const POSITIONS = [
   },
 
   // ─────────────────────────────────────────────────────────────────────────
+  // L'AVENIR EN COMMUN, ÉDITION 2025 (PDF) — relevé du 13 octobre 2026.
+  //
+  // Le livre entier, lu intégralement. Il ne remplace aucune case déjà codée
+  // sur les chapitres de juillet 2026, plus récents : il comble celles que le
+  // contrat du NFP de juin 2024 tenait seul, ou que personne ne tenait. Daté de
+  // février 2025, avant la campagne : l'avertissement d'ancienneté s'affiche.
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: "jean-luc-melenchon--retraites-abrogation-reforme-2023",
+    actorId: "jean-luc-melenchon",
+    questionId: "retraites-abrogation-reforme-2023",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-8"],
+    citation: "Abroger la réforme d'Emmanuel Macron passant l'âge de départ à la retraite à 64 ans",
+    adequation: "directe",
+    rationale:
+      "Mesure clé du chapitre sur les retraites : l'abrogation de la réforme de 2023 est l'objet exact de l'affirmation. Elle remplace la reprise du contrat du NFP de juin 2024, qui disait la même chose. Le texte date de février 2025 et précède la campagne : l'avertissement d'ancienneté s'affiche.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--chomage-reduction-duree-indemnisation",
+    actorId: "jean-luc-melenchon",
+    questionId: "chomage-reduction-duree-indemnisation",
+    value: -1,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-8"],
+    citation:
+      "Revenir sur les réformes Macron en abrogeant l'éligibilité et les méthodes de calcul du montant et de la durée de l'allocation",
+    adequation: "partielle",
+    rationale:
+      "La durée de l'allocation est nommée, et les règles qui la fixent sont abrogées : le programme s'oppose à la réduction en vigueur depuis 2023. Il ne pose pas de principe sur la durée maximale elle-même, ce que demande l'affirmation : un pas de raisonnement, donc adéquation partielle, valeur plafonnée à 1. Même codage que le contrat du NFP, ici sur le texte du candidat (février 2025).",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--budget-reduction-dette-par-depenses",
+    actorId: "jean-luc-melenchon",
+    questionId: "budget-reduction-dette-par-depenses",
+    value: -1,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-6"],
+    citation:
+      "La dette publique est instrumentalisée pour justifier l'austérité et les privatisations",
+    adequation: "partielle",
+    rationale:
+      "Le chapitre « Refuser le chantage : annuler la dette publique » rejette la baisse des dépenses comme réponse à la dette et propose d'autres voies : rachat par la BCE, dettes perpétuelles à taux nul, audit citoyen. Il ne pose pas l'arbitrage entre dépense et recette que formule l'affirmation : adéquation partielle, valeur plafonnée à 1. Texte de février 2025.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--institutions-proportionnelle-legislatives",
+    actorId: "jean-luc-melenchon",
+    questionId: "institutions-proportionnelle-legislatives",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-1"],
+    citation: "Élire l'Assemblée nationale au scrutin proportionnel",
+    adequation: "directe",
+    rationale:
+      "Mesure rangée sous « Par la loi », sans condition : la mesure exactement posée. Texte de février 2025, qui remplace la reprise du contrat du NFP.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--institutions-maintien-article-49-3",
+    actorId: "jean-luc-melenchon",
+    questionId: "institutions-maintien-article-49-3",
+    value: -2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-1"],
+    citation:
+      "Abolir les procédures de « votes forcés » du Parlement comme l'article 49.3 de la Constitution de la Ve République",
+    adequation: "directe",
+    rationale:
+      "L'affirmation propose le maintien du 49.3 ; le programme demande son abolition, nommément. La mesure est rangée « Dans le cadre de l'Assemblée constituante » : elle passe par une nouvelle Constitution, pas par une révision immédiate, mais le sens ne laisse aucun doute. Texte de février 2025.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--institutions-referendum-initiative-citoyenne",
+    actorId: "jean-luc-melenchon",
+    questionId: "institutions-referendum-initiative-citoyenne",
+    value: 2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-1"],
+    citation:
+      "Instaurer le Référendum d'initiative citoyenne (RIC), par lequel les citoyens qui réunissent suffisamment de signatures peuvent révoquer des élus, proposer ou abroger une loi et modifier la Constitution",
+    adequation: "directe",
+    rationale:
+      "Mesure clé du chapitre : le RIC est nommé, et son champ — proposer ou abroger une loi — est celui que pose l'affirmation. Texte de février 2025, qui remplace la reprise du contrat du NFP.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--energie-nouveaux-reacteurs-nucleaires",
+    actorId: "jean-luc-melenchon",
+    questionId: "energie-nouveaux-reacteurs-nucleaires",
+    value: -2,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-13"],
+    citation:
+      "Sortir du nucléaire : abandonner les projets d'EPR (European Pressurized Reactor – Réacteur pressurisé européen)",
+    adequation: "directe",
+    rationale:
+      "Abandonner les projets d'EPR, c'est refuser exactement la construction de nouveaux réacteurs. La section l'annonce : « Le nucléaire n'est pas non plus une solution d'avenir. » Cette case était vide : le contrat du NFP se taisait délibérément sur le nucléaire, faute d'accord entre ses signataires. Texte de février 2025.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--energie-nouveaux-parcs-eoliens",
+    actorId: "jean-luc-melenchon",
+    questionId: "energie-nouveaux-parcs-eoliens",
+    value: 1,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-18"],
+    citation:
+      "Mettre en oeuvre un plan d'urgence pour l'éolien maritime d'un point de vue énergétique et industriel",
+    adequation: "partielle",
+    rationale:
+      "L'éolien est nommé et son développement demandé, mais seulement en mer ; le chapitre 13 vise « 100 % d'énergies renouvelables » sans nommer l'éolien terrestre, que l'affirmation englobe. Adéquation partielle, valeur plafonnée à 1, comme pour le contrat du NFP. Texte de février 2025.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--transport-suppression-zfe",
+    actorId: "jean-luc-melenchon",
+    questionId: "transport-suppression-zfe",
+    value: 0,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-13"],
+    citation:
+      "Décréter un moratoire sur les zones à faibles émissions (ZFE) dans leur conception actuelle",
+    adequation: "partielle",
+    rationale:
+      "Deux sens à la fois, et la valeur le dit. Le moratoire suspend les ZFE, ce qui va vers l'affirmation ; mais il vise leur « conception actuelle », que le texte juge socialement inégale et trop tolérante envers « certains véhicules, notamment les SUV » : il demande des ZFE autrement conçues, pas leur suppression. Valeur 0, adéquation partielle. Texte de février 2025.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "jean-luc-melenchon--europe-opposition-parlementaire-traite",
+    actorId: "jean-luc-melenchon",
+    questionId: "europe-opposition-parlementaire-traite",
+    value: 1,
+    provenance: "official-program",
+    confidence: "high",
+    sourceIds: ["aec2025-chapitre-17"],
+    citation:
+      "Cesser d'appliquer unilatéralement les normes incompatibles avec nos engagements écologiques et sociaux telles que la directive sur le détachement des travailleurs, les règles budgétaires",
+    adequation: "partielle",
+    rationale:
+      "Le refus d'appliquer des règles européennes en vigueur est explicite (« plan B »), mais il est porté par le gouvernement, pas par le Parlement comme organe, et vise des directives et des règles plutôt qu'un traité ratifié nommé. Deux paramètres autres : adéquation partielle, valeur plafonnée à 1, comme pour le contrat du NFP. Texte de février 2025.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
   // RAPHAËL GLUCKSMANN — presse, au style indirect.
   //
   // Les deux codages ci-dessous sont des `press-report` : le journaliste

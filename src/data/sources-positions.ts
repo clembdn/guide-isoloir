@@ -162,6 +162,195 @@ export const SOURCES_POSITIONS = [
     consulteLe: "2026-09-20",
   },
   /*
+   * L'AVENIR EN COMMUN, ÉDITION 2025 — LE LIVRE ENTIER, EN PDF.
+   *
+   * PLUS ANCIEN QUE LES CHAPITRES CI-DESSUS, ET C'EST CE QUI EST AFFICHÉ. Le PDF
+   * a été créé le 18 février 2025 et déposé dans `uploads/2025/02` du site de
+   * campagne ; les chapitres `aec2027-*` en sont une réactualisation mise en
+   * ligne en juillet 2026, dont le texte diffère. Au 13 octobre 2026, ces
+   * chapitres renvoient une erreur 404 et la page du livre annonce une nouvelle
+   * version : le PDF est le seul texte intégral encore en ligne.
+   *
+   * IL NE REMPLACE RIEN. Une case déjà codée sur un chapitre de juillet 2026
+   * le reste. Il comble ce que le programme de 2026 ne couvrait pas, à la place
+   * du contrat du NFP de juin 2024, plus ancien et plus bas dans la chaîne, et
+   * il porte l'avertissement d'ancienneté : il précède la campagne.
+   *
+   * UN CHAPITRE, UNE SOURCE, comme pour les chapitres en ligne. L'ancre
+   * `#page=` ouvre le PDF à la page où le chapitre commence (une page du PDF
+   * porte deux pages du livre). Lu intégralement le 13 octobre 2026.
+   */
+  {
+    id: "aec2025-introduction",
+    titre: "L'Avenir en commun, édition 2025 — Introduction : Vers une nouvelle France",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=5",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Aucune date imprimée. La date retenue est celle de création du PDF, le 18 février 2025, cohérente avec son dépôt dans le répertoire « 2025/02 » du site. Le texte annonce « une élection présidentielle anticipée » : il précède la campagne de 2027 et les chapitres réactualisés de juillet 2026.",
+  },
+  {
+    id: "aec2025-chapitre-1",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 1 : Le pouvoir au peuple",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=11",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-2",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 2 : Par delà la propriété privée",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=15",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-3",
+    titre:
+      "L'Avenir en commun, édition 2025 — Chapitre 3 : Citoyens dans l'entreprise et dans la ville",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=16",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-4",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 4 : Étendre le domaine de la liberté",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=17",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-5",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 5 : Élever le niveau d'instruction",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=20",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-6",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 6 : Partage des richesses",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=25",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-7",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 7 : La force de l'entraide",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=28",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-8",
+    titre:
+      "L'Avenir en commun, édition 2025 — Chapitre 8 : Travailler tous, travailler moins, travailler mieux",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=33",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-9",
+    titre:
+      "L'Avenir en commun, édition 2025 — Chapitre 9 : Produire nous-mêmes pour répondre aux besoins",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=37",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-10",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 10 : Faire place à la nouvelle France",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=39",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-11",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 11 : Humaniser par la culture et le sport",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=43",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-12",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 12 : Planification écologique",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=46",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-13",
+    titre:
+      "L'Avenir en commun, édition 2025 — Chapitre 13 : Les grands chantiers de la bifurcation écologique",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=48",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-14",
+    titre:
+      "L'Avenir en commun, édition 2025 — Chapitre 14 : Protection des biens communs et des droits de l'espèce",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=51",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-15",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 15 : Une approche de santé globale",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=55",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-16",
+    titre:
+      "L'Avenir en commun, édition 2025 — Chapitre 16 : Une diplomatie altermondialiste pour la paix",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=59",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-17",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 17 : Europe",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=64",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "aec2025-chapitre-18",
+    titre: "L'Avenir en commun, édition 2025 — Chapitre 18 : Nouvelles frontières de l'humanité",
+    media: "Jean-Luc Mélenchon, La France insoumise",
+    url: "https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf#page=66",
+    dateDeclaration: "2025-02-18",
+    consulteLe: "2026-10-13",
+  },
+  {
+    id: "melenchon2027-livre-reactualisation",
+    titre: "L'Avenir en commun, édition 2025 — page du livre",
+    media: "Jean-Luc Mélenchon, campagne présidentielle 2027",
+    url: "https://melenchon2027.fr/programme2025/livre/",
+    dateDeclaration: "2026-10-13",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "La page ne porte aucune date. La date retenue est celle de la consultation, où elle annonçait : « L'Avenir en commun est en cours de réactualisation. Sa nouvelle version sera bientôt publiée ! » Ses liens de chapitre renvoyaient alors une erreur 404.",
+  },
+  /*
    * PRESSE, SECOND MÉDIA SUR LE MÊME DÉBAT.
    *
    * France 24 et LCP ont couvert le débat du Medef séparément. Deux comptes

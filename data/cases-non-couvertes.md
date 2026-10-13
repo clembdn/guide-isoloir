@@ -303,3 +303,42 @@ les retraites pour 2027 ». Sa position de 2022 n'est pas une source pour 2027 :
 
 **Bruno Retailleau**. La case `retraites-abrogation-reforme-2023` reste une inférence publiée le
 19 septembre. CNews ne parle pas de la réforme de 2023 à son sujet.
+
+## Relevé du 13 octobre 2026
+
+### Jean-Luc Mélenchon (`jean-luc-melenchon`)
+
+Document lu intégralement :
+[L'Avenir en commun, édition 2025](https://melenchon2027.fr/wp-content/uploads/2025/02/A5-PROGRAMME-SITE.pdf),
+69 pages A5 (136 pages de livre), PDF créé le 18 février 2025, sans date imprimée, SHA-256
+`da9f73405a5e0f6efc4da9fd4f907de5a0822eeade54e993f8c6e9e60d0c78c8`. Il a été passé au crible des
+24 affirmations.
+
+**Ce texte est antérieur aux chapitres déjà cités.** Les sources `aec2027-chapitre-6`, `-8`,
+`-10`, `-13` et `-16` sont une réactualisation mise en ligne en juillet 2026, dont le texte
+diffère : sur les neuf citations qui en sont tirées, seules celles du chapitre 16 se retrouvent
+dans le PDF. **Au 13 octobre, ces cinq URL renvoient une erreur 404.** La page
+`programme2025/livre/` annonce une nouvelle version. Les huit positions concernées ne changent
+pas : le titre et la date de consultation de chaque source permettent encore de la vérifier.
+
+Dix cases sont codées à partir du PDF. Elles portent l'avertissement d'ancienneté :
+abrogation de la réforme de 2023, chômage, dette, proportionnelle, 49.3, RIC, nucléaire, éolien,
+ZFE et application des traités. Celle du nucléaire était vide : le contrat du NFP se taisait sur
+ce sujet. Celle des ZFE est codée 0, parce que le moratoire suspend les ZFE « dans leur
+conception actuelle » tout en leur reprochant de tolérer les SUV.
+
+| questionId                                    | Constat                                                                                                                                                                                                                                             |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `retraites-indexation-esperance-vie`          | Muet. « Indexer le montant des retraites sur les salaires » porte sur le montant, jamais sur l'âge.                                                                                                                                                 |
+| `retraites-part-capitalisation`               | Muet. Le mot « capitalisation » n'apparaît nulle part.                                                                                                                                                                                              |
+| `institutions-elargissement-champ-referendum` | Aborde sans répondre. Le RIC permettrait de « proposer ou abroger une loi », et le référendum deviendrait obligatoire pour un nouveau traité européen. Rien sur l'article 11 ni sur la politique migratoire. Même lecture que pour Les Écologistes. |
+| `europe-decisions-majorite-qualifiee`         | Muet. Le chapitre 17 veut « utiliser le droit de veto de la France », ce qui n'est pas une réponse sur l'extension de la majorité qualifiée. **La case reste tenue par le contrat du NFP (+2).**                                                    |
+| `international-financement-soutien-ukraine`   | Aborde sans répondre. « Agir pour créer un cadre diplomatique permettant d'obtenir un cessez-le-feu » ; ni armes ni financement. **La case reste tenue par le contrat du NFP (+2, « livraison d'armes ») : à relire.**                              |
+| `europe-controles-frontieres-schengen`        | Aborde sans répondre. « Sortir de l'impasse de la politique de Schengen et Frontex » ne dit pas si des contrôles intérieurs seraient rétablis.                                                                                                      |
+
+**83 propositions** (registre hors score) : toutes les « mesures clés » que le livre encadre
+lui-même, soit 87 sur ses 831 mesures, moins quatre. Trois sont déjà couvertes par une
+proposition plus récente : la retraite à 60 ans, le blocage des prix et la règle verte. La
+quatrième est le SMIC à 1 600 € net, que la page de La France insoumise porte désormais à 1 700 €.
+Le chapitre 17 (Europe) n'encadre aucune mesure. Les quelque 750 autres mesures du livre ne sont
+pas relevées : à ce volume, la fiche candidat devra d'abord être repensée.

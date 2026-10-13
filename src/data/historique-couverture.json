@@ -31,5 +31,16 @@
     "solides": 65,
     "classables": 8,
     "horsIncertitudeForte": 0
+  },
+  {
+    "date": "2026-10-13",
+    "candidats": 31,
+    "couples": 744,
+    "positionsPubliees": 155,
+    "documentees": 174,
+    "personnelles": 76,
+    "solides": 75,
+    "classables": 8,
+    "horsIncertitudeForte": 1
   }
 ]
