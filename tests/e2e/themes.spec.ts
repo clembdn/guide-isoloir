@@ -13,9 +13,11 @@
  *   3. LE TABLEAU RÉCAPITULATIF a une ligne par candidat, et chaque cellule dit
  *      son sens en toutes lettres.
  *   4. AUCUN DÉFILEMENT HORIZONTAL à 375 px, la largeur de référence.
- *   5. UNE PAGE HORS TEST SOUS LE SEUIL reste hors de l'index.
+ *   5. UNE PAGE HORS TEST SOUS LE SEUIL reste hors de l'index, et une page
+ *      au-dessus y entre.
  */
 import { test, expect } from "@playwright/test";
+import { pagesThemesPropositions } from "../../src/lib/fiches";
 
 test.describe("/themes sans JavaScript", () => {
   test.use({ javaScriptEnabled: false });
@@ -66,11 +68,25 @@ test.describe("/themes sans JavaScript", () => {
     }
   });
 
-  test("garde hors de l'index une page hors test sous le seuil", async ({ page }) => {
-    await page.goto("/themes/famille-et-societe");
-    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
-    await expect(page.locator(".plateau")).toHaveCount(0);
-    await expect(page.locator(".encadre")).toContainText("Aucune question du test");
+  /*
+   * Lu dans les données, pas écrit en dur : une page hors test passe le seuil
+   * dès qu'un programme est relevé (« Famille et société », le 13 octobre 2026),
+   * et un test qui nommerait la page vérifierait une donnée, pas la règle.
+   */
+  test("garde hors de l'index une page hors test sous le seuil, et seulement elle", async ({
+    page,
+  }) => {
+    for (const theme of pagesThemesPropositions()) {
+      await page.goto(`/themes/${theme.slug}`);
+      const robots = page.locator('meta[name="robots"]');
+      if (theme.indexable) {
+        await expect(robots, theme.slug).toHaveCount(0);
+      } else {
+        await expect(robots, theme.slug).toHaveAttribute("content", /noindex/);
+      }
+      await expect(page.locator(".plateau")).toHaveCount(0);
+      await expect(page.locator(".encadre")).toContainText("Aucune question du test");
+    }
   });
 });
 

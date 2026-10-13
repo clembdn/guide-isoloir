@@ -98,7 +98,9 @@ export type Candidate = {
  *   - `document-parti`          : texte du parti ou de son groupe, pas
  *                                 nécessairement repris mot pour mot par le candidat ;
  *   - `travail-parlementaire`   : proposition de loi, amendement, contre-budget ;
- *   - `programme-anterieur`     : programme d'une élection précédente.
+ *   - `programme-anterieur`     : programme publié avant la campagne — celui
+ *                                 d'une élection précédente, ou une édition
+ *                                 antérieure au seuil de campagne.
  */
 export type NatureProposition =
   | "programme-2027"

@@ -122,7 +122,7 @@ export const LIBELLES_NATURE_PROPOSITION: Record<NatureProposition, string> = {
   "declaration-personnelle": "Déclaration personnelle",
   "document-parti": "Document du parti",
   "travail-parlementaire": "Travail parlementaire",
-  "programme-anterieur": "Programme d'une élection précédente",
+  "programme-anterieur": "Programme antérieur à la campagne",
 };
 
 /**
