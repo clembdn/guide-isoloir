@@ -446,3 +446,39 @@ traités. Le livret Logement renvoie à un « projet immigration » qui n'était
 livret donne à la fiche, mot pour mot. J'ai essayé de citer plutôt la première phrase
 d'engagement (« Nous … ») de chaque fiche, et j'y ai renoncé : elle tombait trop souvent sur un
 constat ou une transition, par exemple « Nous mettrons fin à cette spirale. ».
+
+### Debout la France (`parti-debout-la-france`), les 32 chapitres
+
+Les **32 chapitres** de [Notre projet](https://www.debout-la-france.fr/notre-projet/) ont été
+relevés le 13 octobre 2026, chacun daté de sa dernière modification. Les dates vont du 5 février
+2024 (onze chapitres, dont Santé, Retraites et Culture) au 12 octobre 2026 (Éducation, Justice,
+IA). Les 25 chapitres qui n'avaient pas été lus le 20 septembre ont été passés au crible des 24
+affirmations par mots-clés ; les chapitres Économie et Affaires européennes ont été lus
+intégralement.
+
+**Une case nouvelle.** L'impôt sur la fortune passe à +2 : « Rétablir un impôt sur les très
+grandes fortunes », au chapitre Économie. La phrase était déjà dans la version lue le 12 octobre,
+mais elle n'avait pas été codée : c'est une omission, réparée ici.
+
+**Trois positions passent sur des chapitres plus récents et changent de valeur** ; elles ont une
+entrée au registre des corrections.
+
+- Nouveaux réacteurs : de +1 à +2, avec des EPR2 et des petits réacteurs « accélérés ».
+- Éolien : de −1 à −2, avec « Stopper les projets éoliens ».
+- Contrôles aux frontières Schengen : de +1 à +2, avec la sortie de l'espace Schengen.
+
+**Restent inchangées** : l'opposition aux traités, à +1 partielle. Le chapitre Justice veut
+« Rétablir par référendum dans la Constitution la primauté du droit français sur toute norme
+européenne » : c'est l'État et la Constitution, pas le Parlement face à un traité. La dette reste
+abordée sans réponse. La majorité qualifiée est muette, le projet proposant de quitter l'Union
+par référendum.
+
+**782 propositions** (registre hors score) : une par puce de premier niveau sous le titre
+« Nos mesures » de chaque chapitre. Ont été écartés les intertitres du chapitre Français de
+l'étranger, la définition de l'économie circulaire, une liste de critères portuaires, un fragment
+de phrase, et neuf doublons (des listes que certaines pages répètent). Une citation du chapitre
+Outre-mer s'arrête avant « et à définir des objectifs… », que le contrôle de publication prend
+pour un espace réservé ; `precisions` dit la suite.
+
+Les intitulés mécaniques de ce relevé et des précédents qui s'arrêtaient sur un mot-outil (« …de »,
+« …et ») ont été raccourcis jusqu'au dernier mot plein : 38 cas.

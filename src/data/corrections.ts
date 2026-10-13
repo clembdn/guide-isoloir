@@ -29,4 +29,11 @@ export const CORRECTIONS = [
       "Deux positions changent de source sans changer de valeur. Agriculture : le livret de février 2026 (réautorisation de néonicotinoïdes) remplace le programme européen de 2024 (moratoire sur les normes), -2. Éolien : le livret Électricité de mai 2026 (fin des appels d'offres publics) remplace le programme européen de 2024, -1.",
     origine: "Relecture interne : publication par le parti de livrets plus récents.",
   },
+  {
+    date: "2026-10-13",
+    portee: "Debout la France (repris par Nicolas Dupont-Aignan) — nucléaire, éolien et Schengen",
+    description:
+      "Trois positions passent sur des chapitres plus récents du projet, et changent de valeur. Nouveaux réacteurs : +1 → +2 (chapitre Économie, octobre 2026 : EPR2 et petits réacteurs accélérés). Éolien : -1 → -2 (chapitre Équilibre du territoire, février 2026 : « Stopper les projets éoliens »). Contrôles aux frontières Schengen : +1 → +2 (chapitre Affaires européennes, octobre 2026 : sortie de l'espace Schengen).",
+    origine: "Relecture interne : lecture des 32 chapitres du projet du parti.",
+  },
 ] as const satisfies readonly Correction[];
