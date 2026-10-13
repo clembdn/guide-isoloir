@@ -406,3 +406,43 @@ ajoutées à la main après vérification sur la page.
 du programme qui propose de qualifier la « Coalition des volontaires » d'opération extérieure : il
 la prenait pour un espace réservé oublié. La citation s'arrête désormais avant la parenthèse, et
 `precisions` dit ce qui suit.
+
+### Les Républicains (`parti-les-republicains`), pour Bruno Retailleau
+
+Documents lus : les huit livrets « Nos propositions pour la France » de
+[republicains.fr/nos-propositions](https://republicains.fr/nos-propositions/) :
+
+- Le travail gagnant, décembre 2025 ;
+- Produire plus, février 2026 ;
+- Agriculture, février 2026 ;
+- Électricité, mai 2026 ;
+- Famille, avril 2026 ;
+- Logement, mai 2026 ;
+- IA, juillet 2026 ;
+- École, septembre 2026.
+
+Les quatre premiers ont été lus intégralement. Les quatre autres ont été passés au crible des 24
+affirmations par mots-clés, et ne répondent à aucune.
+
+**Position remplacée, avec une entrée au registre des corrections.** Le programme européen de
+2024 tenait la case des nouveaux réacteurs nucléaires à +1 ; le livret Électricité la porte à +2
+(six EPR2, puis huit de plus).
+
+**Deux positions changent de source sans changer de valeur** : agriculture à −2 (réautorisation
+de néonicotinoïdes) et éolien à −1 (fin des appels d'offres publics, mais pas de moratoire). Elles
+ont aussi leur entrée au registre.
+
+**Deux cases nouvelles.** La durée d'indemnisation du chômage est à +2 : le parti reprend la
+réduction de 18 à 15 mois. La part de capitalisation est à +2 : un étage d'épargne retraite
+s'ajoute à la répartition. Sur la seconde, la position personnelle de Bruno Retailleau, plus
+récente, reste celle qui s'affiche.
+
+Restent tenues par le programme européen de 2024, faute de réponse dans les livrets : droit du
+sol, plafond des titres de séjour, régularisation, champ du référendum, Schengen, Ukraine et
+traités. Le livret Logement renvoie à un « projet immigration » qui n'était pas en ligne au
+13 octobre.
+
+**76 propositions** (registre hors score), une par fiche. Leur citation est le titre que le
+livret donne à la fiche, mot pour mot. J'ai essayé de citer plutôt la première phrase
+d'engagement (« Nous … ») de chaque fiche, et j'y ai renoncé : elle tombait trop souvent sur un
+constat ou une transition, par exemple « Nous mettrons fin à cette spirale. ».

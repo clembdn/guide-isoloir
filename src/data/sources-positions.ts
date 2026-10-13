@@ -739,6 +739,99 @@ export const SOURCES_POSITIONS = [
       "Discours prononcé le 24 mai 2026 à la fête de Lutte ouvrière, publié le 27 mai. La date retenue est celle où les mots ont été prononcés.",
   },
   /*
+   * LES RÉPUBLICAINS — livrets « Nos propositions pour la France »,
+   * décembre 2025 à septembre 2026.
+   *
+   * Huit livrets thématiques publiés par le parti que préside Bruno Retailleau,
+   * qui signe l'avant-propos du premier. Documents de parti : positions
+   * `party-platform`, propositions `document-parti`. Ils sont plus récents que
+   * le programme européen de 2024 et le remplacent là où ils répondent à la
+   * même affirmation. Tous lus le 13 octobre 2026 ; les quatre livrets Famille,
+   * Logement, IA et École ont été passés au crible des 24 affirmations par
+   * mots-clés.
+   */
+  {
+    id: "lr-travail-gagnant-2025",
+    titre: "Nos propositions pour la France — Le travail gagnant",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/01/51705_LesRepublicains_Brochures_A5-40P_DEF.pdf",
+    dateDeclaration: "2025-12-01",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "La brochure porte « Décembre 2025 », sans jour : le premier du mois est retenu. Le PDF a été créé le 9 janvier 2026 et déposé dans le répertoire 2026/01 du site.",
+  },
+  {
+    id: "lr-produire-plus-2026",
+    titre: "Nos propositions pour la France — Produire plus pour vivre mieux",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/02/LR_Produire_Plus_LIVRET.pdf",
+    dateDeclaration: "2026-02-18",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Aucune date imprimée. La date retenue est celle de création du PDF, le 18 février 2026.",
+  },
+  {
+    id: "lr-agriculture-2026",
+    titre: "Nos propositions pour la France — Réarmer notre agriculture",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/03/LR_Agriculture.pdf",
+    dateDeclaration: "2026-02-01",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Le livret porte « Février 2026 », sans jour : le premier du mois est retenu. Le PDF a été créé le 3 mars 2026.",
+  },
+  {
+    id: "lr-electricite-2026",
+    titre:
+      "Nos propositions pour la France — Électricité : notre électricité décarbonée, bon marché, pour tous les Français",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/05/LR_Electricite_vFF070626.pdf",
+    dateDeclaration: "2026-05-01",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Le livret porte « Mai 2026 », sans jour : le premier du mois est retenu. Le PDF a été créé le 6 mai 2026.",
+  },
+  {
+    id: "lr-famille-2026",
+    titre: "Nos propositions pour la France — Famille",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/05/LR_Famille_vFinale.pdf",
+    dateDeclaration: "2026-04-01",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Le livret porte « Avril 2026 », sans jour : le premier du mois est retenu. Le PDF a été créé le 28 avril 2026.",
+  },
+  {
+    id: "lr-logement-2026",
+    titre: "Nos propositions pour la France — Logement",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/05/LR_Logement.pdf",
+    dateDeclaration: "2026-05-01",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Le livret porte « Mai 2026 », sans jour : le premier du mois est retenu. Le PDF a été créé le 28 mai 2026.",
+  },
+  {
+    id: "lr-ia-2026",
+    titre: "Nos propositions pour la France — L'IA au service des Français",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/07/LR_IA.pdf",
+    dateDeclaration: "2026-07-01",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Le livret porte « Juillet 2026 », sans jour : le premier du mois est retenu. Le PDF a été créé le 7 juillet 2026.",
+  },
+  {
+    id: "lr-ecole-2026",
+    titre: "Nos propositions pour la France — École",
+    media: "Les Républicains",
+    url: "https://republicains.fr/wp-content/uploads/2026/09/LR_Ecole_vF.pdf",
+    dateDeclaration: "2026-09-01",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Le livret porte « Septembre 2026 », sans jour : le premier du mois est retenu, bien que le PDF ait été créé le 31 août 2026.",
+  },
+  /*
    * PLACE PUBLIQUE, « ACTE UN » — le projet du parti de Raphaël Glucksmann.
    *
    * UN DOCUMENT DE PARTI, PAS UN PROGRAMME PRÉSIDENTIEL. Quarante-deux

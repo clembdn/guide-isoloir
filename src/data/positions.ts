@@ -715,6 +715,40 @@ export const POSITIONS = [
     updatedAt: "2026-10-13",
   },
 
+  // ─── Les Républicains, livrets 2025-2026 : cases nouvelles ───────────────
+  {
+    id: "parti-les-republicains--chomage-reduction-duree-indemnisation",
+    actorId: "parti-les-republicains",
+    questionId: "chomage-reduction-duree-indemnisation",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["lr-travail-gagnant-2025"],
+    citation:
+      "Les règles de juin 2024 sur l'indemnisation du chômage, jamais appliquées, allaient dans la bonne direction. Elles prévoyaient une réduction de la durée maximale d'indemnisation (de 18 à 15 mois)",
+    adequation: "directe",
+    rationale:
+      "Le parti reprend à son compte la réduction de la durée maximale d'indemnisation de 18 à 15 mois, et y ajoute une durée limitée à six mois après une rupture conventionnelle : la mesure posée, chiffrée. Livret daté de décembre 2025, juste avant la campagne : l'avertissement d'ancienneté s'affiche.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-les-republicains--retraites-part-capitalisation",
+    actorId: "parti-les-republicains",
+    questionId: "retraites-part-capitalisation",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["lr-produire-plus-2026"],
+    citation:
+      "nous mettrons en place un étage de retraite fondé sur l'épargne individuelle, complémentaire et volontaire, venant compléter et renforcer notre système actuel de retraite par répartition sans s'y substituer",
+    adequation: "directe",
+    rationale:
+      "Un étage d'épargne retraite individuelle qui s'ajoute à la répartition sans la remplacer, avec un compte ouvert « pour chaque actif » : la mesure posée. Bruno Retailleau a une position personnelle plus récente, qui s'affiche avant celle-ci.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+
   // ─────────────────────────────────────────────────────────────────────────
   // PLACE PUBLIQUE, « ACTE UN » (juin 2025) — relevé du 13 octobre 2026.
   //
@@ -1333,14 +1367,14 @@ export const POSITIONS = [
     value: -2,
     provenance: "party-platform",
     confidence: "high",
-    sourceIds: ["lr-programme-europeennes-2024"],
+    sourceIds: ["lr-agriculture-2026"],
     citation:
-      "Nous proposons un moratoire sur toute nouvelle norme pour la prochaine mandature, notamment pour le secteur agricole",
+      "Nous autoriserons de nouveau l'usage de certains néonicotinoïdes, dont l'acétamipride",
     adequation: "directe",
     rationale:
-      "Un moratoire sur toute nouvelle norme agricole est le refus exact de la mesure posée. Le même chapitre demande « l'abrogation des dispositions du Pacte vert européen qui favorisent la décroissance agricole » et reproche au Green Deal d'avoir imposé aux agriculteurs des objectifs de conservation des terres, de réduction des engrais et d'agriculture biologique. Aucune ambiguïté, aucune condition.",
+      "Réautoriser des néonicotinoïdes interdits, abandonner l'objectif Ecophyto de réduction de 50 % des produits phytosanitaires et supprimer le principe de précaution de la Charte de l'environnement : le livret de février 2026 allège les obligations environnementales de l'agriculture, à l'inverse exact de l'affirmation. Il remplace le programme européen de 2024, qui codait déjà -2.",
     reviewStatus: "reconciled",
-    updatedAt: "2026-09-20",
+    updatedAt: "2026-10-13",
   },
   {
     id: "parti-les-republicains--energie-nouveaux-parcs-eoliens",
@@ -1349,29 +1383,30 @@ export const POSITIONS = [
     value: -1,
     provenance: "party-platform",
     confidence: "high",
-    sourceIds: ["lr-programme-europeennes-2024"],
-    citation: "Nous refusons de dénaturer nos paysages avec l'implantation déraisonnée d'éoliennes",
+    sourceIds: ["lr-electricite-2026"],
+    citation:
+      "il ne faut plus lancer d'appels d'offres publics pour le photovoltaïque et l'éolien en France métropolitaine",
     adequation: "partielle",
     rationale:
-      "L'opposition est nette mais qualifiée : c'est l'implantation « déraisonnée » qui est refusée, et le texte renvoie le développement des renouvelables « à l'appréciation des États membres ». Ce n'est donc pas l'arrêt de tout nouveau parc que l'affirmation met en jeu. Adéquation partielle, valeur plafonnée à 1.",
+      "Le parti met fin aux appels d'offres et aux subventions pour tout nouveau parc, mais précise qu'il s'agit « de la fin des subventions […] et non d'un moratoire » : un projet privé rentable sans aide pourrait encore être autorisé. Opposition nette aux nouveaux parcs portés par l'État, sans interdiction : adéquation partielle, -1. Le livret de mai 2026 remplace le programme européen de 2024, même valeur.",
     reviewStatus: "reconciled",
-    updatedAt: "2026-09-20",
+    updatedAt: "2026-10-13",
   },
   {
     id: "parti-les-republicains--energie-nouveaux-reacteurs-nucleaires",
     actorId: "parti-les-republicains",
     questionId: "energie-nouveaux-reacteurs-nucleaires",
-    value: 1,
+    value: 2,
     provenance: "party-platform",
     confidence: "high",
-    sourceIds: ["lr-programme-europeennes-2024"],
+    sourceIds: ["lr-electricite-2026"],
     citation:
-      "que le plan de relance européen soutienne prioritairement le développement de la filière nucléaire dans toute l'Europe",
-    adequation: "partielle",
+      "Si l'avancement des six premiers réacteurs s'avère satisfaisant, nous confirmerons la commande de huit EPR2 supplémentaires dès les deux premières années du mandat.",
+    adequation: "directe",
     rationale:
-      "Le soutien à la filière est explicite et prioritaire, et le texte l'oppose nommément au financement des éoliennes. Mais « développement de la filière » n'est pas « construction de nouveaux réacteurs » : un programme européen ne décide pas du parc français. Adéquation partielle.",
+      "Six EPR2 menés à terme et huit de plus commandés : la construction de nouveaux réacteurs, exactement. Le livret de mai 2026 remplace le programme européen de 2024, qui ne parlait que de « développement de la filière » (+1, partielle).",
     reviewStatus: "reconciled",
-    updatedAt: "2026-09-20",
+    updatedAt: "2026-10-13",
   },
   {
     id: "parti-les-republicains--nationalite-suppression-droit-du-sol",
