@@ -366,3 +366,43 @@ chapitre, et la portée suit une liste de verbes publiée. 539 citations ont ét
 mot dans le texte extrait par pdftotext. Les 12 autres viennent de la couche texte du PDF, où les
 colonnes s'enchaînent dans un ordre différent. Deux césures de fin de ligne y ont été recollées
 (« environne-mentaux », « souverai-neté »).
+
+### Place publique (`parti-place-publique`), pour Raphaël Glucksmann
+
+Document lu intégralement :
+[Acte un, notre vision pour la France](https://place-publique.eu/document/3Ari5O0s5O1L4iK1uyUhI0/pp-acte-un.pdf),
+88 pages, sans date imprimée. Le nom interne du fichier date le bon à tirer du 23 juin 2025 ; le
+PDF a été réenregistré le 25 mars 2026. SHA-256
+`271584d5d20716c879b0fec1bc54794df5973d42b646ca0f1526162d49e43c08`. Raphaël Glucksmann en est
+co-directeur de la publication, mais le texte reste celui du parti : les positions sont des
+`party-platform` et portent l'avertissement d'ancienneté.
+
+**Quatorze cases codées pour le parti.** Sept d'entre elles comblent des cases vides chez
+Raphaël Glucksmann, qui passe de 7 à 14 affirmations documentées : chômage, plafond des titres
+de séjour, vote des étrangers, agriculture, proportionnelle, RIC et 49.3. Les sept autres
+doublent une position plus récente du candidat lui-même, qui reste celle affichée.
+
+| questionId                                    | Constat                                                                                                                                                               |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `retraites-indexation-esperance-vie`          | Aborde sans répondre. Le parti veut fonder les retraites « sur les inégalités de conditions et d'espérance de vie » : une modulation, pas une indexation automatique. |
+| `retraites-part-capitalisation`               | Muet.                                                                                                                                                                 |
+| `fiscalite-impot-fortune`                     | Aborde sans répondre. « Effort fiscal nouveau, ciblé sur les très hauts patrimoines » : pas d'impôt sur la fortune nommé.                                             |
+| `fiscalite-bareme-unique-capital-travail`     | Aborde sans répondre. Un « rééquilibrage de la fiscalité entre le travail, le capital et l'héritage », sans barème commun.                                            |
+| `budget-reduction-dette-par-depenses`         | Aborde sans répondre. Un « mix responsable d'économies ciblées et de recettes nouvelles », sans priorité de l'un sur l'autre.                                         |
+| `nationalite-suppression-droit-du-sol`        | Muet.                                                                                                                                                                 |
+| `transport-suppression-zfe`                   | Muet.                                                                                                                                                                 |
+| `institutions-elargissement-champ-referendum` | Muet sur l'article 11 et sur la politique migratoire.                                                                                                                 |
+| `europe-controles-frontieres-schengen`        | Muet.                                                                                                                                                                 |
+| `europe-opposition-parlementaire-traite`      | Muet. Le projet est fédéraliste, mais il ne dit rien du Parlement face à un traité ratifié : rien n'est déduit.                                                       |
+
+**255 propositions** (registre hors score) : toutes les mesures des 42 chantiers et du chantier
+cadre. Le document ne titre pas ses mesures, donc l'intitulé reprend le début de la mesure. 254
+citations ont été retrouvées mot pour mot dans le texte extrait. La 255e (« Lancer une Coalition
+Internationale pour la démocratie et les droits. ») est éclatée par la mise en page et vient de la
+couche texte du PDF. Neuf mesures sans puce visible, sur les pages 34, 64, 78 et 82, ont été
+ajoutées à la main après vérification sur la page.
+
+**Correction sur Les Écologistes (mesure 62-7).** Le contrôle de publication a refusé la parenthèse
+du programme qui propose de qualifier la « Coalition des volontaires » d'opération extérieure : il
+la prenait pour un espace réservé oublié. La citation s'arrête désormais avant la parenthèse, et
+`precisions` dit ce qui suit.

@@ -716,6 +716,236 @@ export const POSITIONS = [
   },
 
   // ─────────────────────────────────────────────────────────────────────────
+  // PLACE PUBLIQUE, « ACTE UN » (juin 2025) — relevé du 13 octobre 2026.
+  //
+  // Le parti de Raphaël Glucksmann, premier de sa chaîne de reprise. Ces
+  // positions ne remplacent aucune de celles du candidat, plus récentes et plus
+  // haut dans la chaîne : elles comblent ce qu'il n'a pas dit lui-même, avec
+  // l'avertissement d'ancienneté.
+  // ─────────────────────────────────────────────────────────────────────────
+  {
+    id: "parti-place-publique--retraites-age-legal-60",
+    actorId: "parti-place-publique",
+    questionId: "retraites-age-legal-60",
+    value: -1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "fonder notre philosophie sur les inégalités de conditions et d'espérance de vie : certains doivent pouvoir partir à la retraite à 60 ans, d'autres devront travailler davantage",
+    adequation: "partielle",
+    rationale:
+      "Le parti veut « cesser la focalisation sur le seul âge légal » : départ à 60 ans pour certains, plus tard pour d'autres. Ce n'est pas l'abaissement général que pose l'affirmation, sans être son rejet pur : adéquation partielle, -1. Raphaël Glucksmann a une position plus récente, qui s'affiche avant celle-ci. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--retraites-abrogation-reforme-2023",
+    actorId: "parti-place-publique",
+    questionId: "retraites-abrogation-reforme-2023",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation: "Abroger la réforme Macron de 2023.",
+    adequation: "directe",
+    rationale:
+      "La mesure posée, en quatre mots, sans condition. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--chomage-reduction-duree-indemnisation",
+    actorId: "parti-place-publique",
+    questionId: "chomage-reduction-duree-indemnisation",
+    value: -1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation: "Abroger la réforme Macron de l'assurance chômage, injuste et inefficace.",
+    adequation: "partielle",
+    rationale:
+      "Même lecture que pour le contrat du NFP : abroger les réformes qui ont réduit la durée d'indemnisation revient à s'y opposer, mais le texte ne nomme aucune durée. Adéquation partielle, valeur plafonnée à 1. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--immigration-plafond-titres-sejour",
+    actorId: "parti-place-publique",
+    questionId: "immigration-plafond-titres-sejour",
+    value: -1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Généraliser la carte de séjour pluriannuelle en en faisant le titre de séjour de référence.",
+    adequation: "partielle",
+    rationale:
+      "Faire du titre pluriannuel la référence va à l'inverse d'un plafonnement annuel, sans en parler : adéquation partielle, -1, comme pour L'Avenir en commun. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--immigration-regularisation-par-le-travail",
+    actorId: "parti-place-publique",
+    questionId: "immigration-regularisation-par-le-travail",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation: "Faciliter les démarches de régularisation des travailleurs sans papiers",
+    adequation: "directe",
+    rationale:
+      "Faciliter la régularisation des travailleurs sans papiers est la mesure posée. Raphaël Glucksmann a une position plus récente, qui s'affiche avant celle-ci. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--vote-etrangers-elections-municipales",
+    actorId: "parti-place-publique",
+    questionId: "vote-etrangers-elections-municipales",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Ouvrir le droit de vote à 16 ans et pour les étrangers extra-communautaires aux élections locales",
+    adequation: "directe",
+    rationale:
+      "Les élections locales incluent les municipales, et les étrangers extra-communautaires sont ceux qui n'y votent pas aujourd'hui : la mesure posée. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--agriculture-renforcement-normes-environnementales",
+    actorId: "parti-place-publique",
+    questionId: "agriculture-renforcement-normes-environnementales",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Éliminer les produits chimiques dangereux en interdisant les pesticides les plus néfastes, glyphosate, néonicotinoïdes tueurs d'abeilles",
+    adequation: "directe",
+    rationale:
+      "Interdire le glyphosate et les néonicotinoïdes est une obligation environnementale renforcée, par la loi, sur l'agriculture : même lecture que pour Les Écologistes. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--energie-nouveaux-parcs-eoliens",
+    actorId: "parti-place-publique",
+    questionId: "energie-nouveaux-parcs-eoliens",
+    value: 1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Lancer un grand plan d'investissement pluriannuel dans toutes les énergies renouvelables.",
+    adequation: "partielle",
+    rationale:
+      "Le plan couvre toutes les renouvelables, dont le vent cité parmi les ressources régionales, mais ne parle pas d'installer de nouveaux parcs éoliens : adéquation partielle, +1. Raphaël Glucksmann a une position plus récente, qui s'affiche avant celle-ci. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--energie-nouveaux-reacteurs-nucleaires",
+    actorId: "parti-place-publique",
+    questionId: "energie-nouveaux-reacteurs-nucleaires",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Conforter le rôle du nucléaire, énergie pilotable et décarbonée, en assurant la sûreté des centrales existantes et la construction à temps de nouvelles unités.",
+    adequation: "directe",
+    rationale:
+      "« La construction à temps de nouvelles unités » : la mesure posée. Raphaël Glucksmann a une position plus récente, qui s'affiche avant celle-ci. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--institutions-proportionnelle-legislatives",
+    actorId: "parti-place-publique",
+    questionId: "institutions-proportionnelle-legislatives",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Instaurer immédiatement la proportionnelle, de préférence par circonscriptions régionales avec un fléchage départemental des candidats.",
+    adequation: "directe",
+    rationale:
+      "Mesure du chantier « Réformer les institutions » : la proportionnelle, immédiatement. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--institutions-referendum-initiative-citoyenne",
+    actorId: "parti-place-publique",
+    questionId: "institutions-referendum-initiative-citoyenne",
+    value: 1,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Instaurer un droit d'initiative citoyenne, permettant de déclencher des séquences démocratiques avec des référendums à l'échelle locale et nationale",
+    adequation: "partielle",
+    rationale:
+      "Les citoyens pourraient déclencher des référendums, mais le texte ne dit ni par quel seuil ni si l'accord du gouvernement ou du Parlement serait nécessaire, ce que pose l'affirmation : adéquation partielle, +1. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--institutions-maintien-article-49-3",
+    actorId: "parti-place-publique",
+    questionId: "institutions-maintien-article-49-3",
+    value: -2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      'instaurer la motion de censure "constructive" (censurer un gouvernement exigera de proposer un successeur), ce qui permettra de mettre fin au 49.3.',
+    adequation: "directe",
+    rationale:
+      "L'affirmation propose le maintien du 49.3 ; le parti veut « mettre fin au 49.3 ». Sens inverse, objet identique. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--europe-decisions-majorite-qualifiee",
+    actorId: "parti-place-publique",
+    questionId: "europe-decisions-majorite-qualifiee",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "un traité de refondation institutionnelle, clarifiant et démocratisant le fonctionnement de l'Union passant à la majorité qualifiée au Conseil européen",
+    adequation: "directe",
+    rationale:
+      "Passer à la majorité qualifiée au Conseil européen, par un nouveau traité porté « d'ici 2030 » : la mesure posée. Raphaël Glucksmann a une position plus récente, qui s'affiche avant celle-ci. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+  {
+    id: "parti-place-publique--international-financement-soutien-ukraine",
+    actorId: "parti-place-publique",
+    questionId: "international-financement-soutien-ukraine",
+    value: 2,
+    provenance: "party-platform",
+    confidence: "high",
+    sourceIds: ["pp-acte-un-2025"],
+    citation:
+      "Augmenter drastiquement l'aide militaire à l'Ukraine qui est notre première ligne de défense",
+    adequation: "directe",
+    rationale:
+      "Augmenter l'aide militaire va au-delà de la continuer : la mesure posée, sans réserve. Raphaël Glucksmann a une position plus récente, qui s'affiche avant celle-ci. Document du parti de juin 2025, antérieur à la campagne.",
+    reviewStatus: "reconciled",
+    updatedAt: "2026-10-13",
+  },
+
+  // ─────────────────────────────────────────────────────────────────────────
   // RAPHAËL GLUCKSMANN — presse, au style indirect.
   //
   // Les deux codages ci-dessous sont des `press-report` : le journaliste

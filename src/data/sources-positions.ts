@@ -738,6 +738,28 @@ export const SOURCES_POSITIONS = [
     incoherenceRelevee:
       "Discours prononcé le 24 mai 2026 à la fête de Lutte ouvrière, publié le 27 mai. La date retenue est celle où les mots ont été prononcés.",
   },
+  /*
+   * PLACE PUBLIQUE, « ACTE UN » — le projet du parti de Raphaël Glucksmann.
+   *
+   * UN DOCUMENT DE PARTI, PAS UN PROGRAMME PRÉSIDENTIEL. Quarante-deux
+   * chantiers, présentés comme « une vision et non un catalogue figé de
+   * mesures ». Raphaël Glucksmann en est co-directeur de la publication, avec
+   * Aurore Lalucq : le texte reste celui du parti, et il est daté de juin 2025,
+   * avant la campagne. Ses positions sont des `party-platform`, qui ne passent
+   * qu'après ce que le candidat a dit lui-même. Lu intégralement le 13 octobre
+   * 2026.
+   */
+  {
+    id: "pp-acte-un-2025",
+    titre:
+      "Acte un — Notre vision pour la France : les chantiers de Place publique pour redonner vie à la promesse républicaine",
+    media: "Place publique",
+    url: "https://place-publique.eu/document/3Ari5O0s5O1L4iK1uyUhI0/pp-acte-un.pdf",
+    dateDeclaration: "2025-06-23",
+    consulteLe: "2026-10-13",
+    incoherenceRelevee:
+      "Aucune date imprimée. Le nom interne du fichier (« 20250623_Projet_placepublique_acte1_BAT ») date le bon à tirer du 23 juin 2025 ; le PDF en ligne a été réenregistré le 25 mars 2026. Le texte cite des faits de 2024 et annonce « une année de débats » à venir.",
+  },
   {
     id: "pp13-glucksmann-2026",
     titre: "Candidature de Raphaël Glucksmann à la présidentielle : PP13 en place dès le 24 août",
