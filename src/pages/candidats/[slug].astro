@@ -281,19 +281,46 @@ const personne = {
             porte la nature du document d'où elle vient : un programme 2027 n'engage pas comme une
             proposition de loi ou un texte du parti.
           </p>
+          {/*
+           * UN DOMAINE PAR LIGNE, QUI SE DÉPLIE (13 octobre 2026). Un programme
+           * relevé en entier compte des centaines de mesures : déplié, il
+           * noyait la fiche. Même `<details>` natif que les positions : tout
+           * est dans le HTML servi, lu sans script, ouvert au clavier. Replié
+           * pour tous les candidats, quel que soit leur nombre de mesures.
+           */}
           {fiche.mesures.map((groupe) => (
-            <section class="domaine" aria-labelledby={`domaine-${groupe.domaine}`}>
-              <h3 id={`domaine-${groupe.domaine}`}>{groupe.libelle}</h3>
+            <details class="domaine-repli" id={`domaine-${groupe.domaine}`}>
+              <summary>
+                <span class="domaine-tete">
+                  <h3>{groupe.libelle}</h3>
+                  <span class="domaine-compte">
+                    {accorder(groupe.propositions.length, "proposition", "propositions")}
+                  </span>
+                </span>
+                <span class="deplier" aria-hidden="true">
+                  <Icone nom="caret-down" graisse="bold" />
+                </span>
+              </summary>
               <div class="propositions">
                 {groupe.propositions.map((proposition) => (
                   <Proposition proposition={proposition} />
                 ))}
               </div>
-            </section>
+            </details>
           ))}
           {fiche.orientations.length > 0 && (
-            <section class="domaine" aria-labelledby="orientations">
-              <h3 id="orientations">Grandes orientations</h3>
+            <details class="domaine-repli" id="orientations">
+              <summary>
+                <span class="domaine-tete">
+                  <h3>Grandes orientations</h3>
+                  <span class="domaine-compte">
+                    {accorder(fiche.orientations.length, "orientation", "orientations")}
+                  </span>
+                </span>
+                <span class="deplier" aria-hidden="true">
+                  <Icone nom="caret-down" graisse="bold" />
+                </span>
+              </summary>
               <p class="rappel">
                 Des axes revendiqués, sans mesure précise à ce stade : ils disent où va la campagne,
                 pas ce qu'elle ferait.
@@ -303,7 +330,7 @@ const personne = {
                   <Proposition proposition={proposition} />
                 ))}
               </div>
-            </section>
+            </details>
           )}
         </>
       )
@@ -635,12 +662,63 @@ const personne = {
     font-size: var(--t-petit);
   }
 
-  .domaine {
-    margin-top: var(--pas-5);
+  /*
+   * Une ligne par domaine, sur le modèle des positions : le nom et le compte en
+   * surface, les mesures au dépli. Un filet entre deux domaines.
+   */
+  .domaine-repli {
+    border-bottom: 1px solid var(--couleur-trait);
   }
 
-  .domaine h3 {
-    margin: 0 0 var(--pas-2);
+  .domaine-repli:first-of-type {
+    margin-top: var(--pas-3);
+    border-top: 1px solid var(--couleur-trait);
+  }
+
+  .domaine-repli summary {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--pas-2);
+    padding: var(--pas-3) var(--pas-1) var(--pas-3) 0;
+    cursor: pointer;
+    list-style: none;
+    border-radius: var(--rayon-carte);
+    transition: background-color var(--duree) var(--sortie);
+  }
+
+  .domaine-repli summary::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .domaine-repli summary:hover {
+      background: var(--couleur-surface-2);
+    }
+  }
+
+  .domaine-tete {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  .domaine-tete h3 {
+    margin: 0;
+  }
+
+  .domaine-compte {
+    font-size: var(--t-petit);
+    color: var(--couleur-encre-faible);
+  }
+
+  .domaine-repli[open] .deplier {
+    transform: rotate(180deg);
+  }
+
+  .domaine-repli > .propositions,
+  .domaine-repli > .rappel {
+    margin-bottom: var(--pas-4);
   }
 
   /*

@@ -903,6 +903,14 @@ c'est lui qu'on lisait en défilant, pas ce sur quoi il portait. `<details>` nat
 le HTML servi ; un script de quelques lignes ouvre la ligne visée par une ancre venue d'une page
 de thème. Les affirmations sans position portent la pastille « ? » en pointillé.
 
+**Programme replié par domaine (13 octobre 2026).** Avec 89 mesures dépliées, la fiche de
+Jean-Luc Mélenchon mesurait déjà 38 500 px à 375 px ; Les Écologistes en comptent 551. Chaque domaine est désormais une
+ligne `<details>` sur le modèle des questions : le nom du domaine (`h3`) et « N propositions » en
+surface, le chevron à droite, un filet entre deux lignes ; les mesures au dépli. Fermé pour tous
+les candidats, quel que soit leur nombre de mesures. L'`id` `domaine-{domaine}` reste sur le
+`<details>` : le lien d'une page de thème ouvre le bon domaine par le même script que les
+questions. La fiche de Marine Tondelier repasse de 10 000 à 9 100 px avec 553 mesures.
+
 **Portrait** — `src/components/candidats/Portrait.astro` est désormais le seul balisage de
 portrait des pages candidats : une taille par classe (64, 120), puisque la CSP refuse `style=""`.
 
@@ -947,6 +955,9 @@ qu'ils proposent » (second registre, dit hors score), l'appel au test et les au
 
 **Page d'un thème hors test** — même bandeau, un encadré qui dit qu'aucune question n'y porte,
 les propositions groupées par candidat, et les candidats sans proposition nommés en pastilles.
+Depuis le 13 octobre 2026, la liste de chaque candidat est repliée sous « N propositions » : le
+visage et le nom restent en surface, et un seul programme relevé en entier ne repousse plus les
+autres candidats hors de l'écran. Même traitement pour tous.
 Sous trois propositions, la page est servie en `noindex` et reste hors du sitemap.
 
 **Composants** — `src/components/themes/` : `MarquePosition`, `LegendePositions`,

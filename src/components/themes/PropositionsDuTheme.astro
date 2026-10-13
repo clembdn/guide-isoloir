@@ -12,8 +12,15 @@
  * Seul l'intitulé est repris, avec sa nature et sa date. Le verbatim et la
  * source vivent sur la fiche, où ce composant renvoie par l'ancre du domaine.
  * Une proposition d'un document de parti reste attribuée au parti.
+ *
+ * REPLIÉ PAR CANDIDAT (13 octobre 2026). Un programme relevé en entier met des
+ * dizaines de mesures dans un même domaine : déplié, un seul candidat
+ * repoussait tous les autres hors de l'écran. Le visage et le nom restent en
+ * surface, avec le nombre de propositions ; la liste attend qu'on l'ouvre.
+ * Même traitement pour tous, quel que soit ce nombre.
  */
 import Portrait from "../candidats/Portrait.astro";
+import Icone from "../Icone.astro";
 import { formatDateFr } from "../../lib/date";
 import type { PropositionsCandidat } from "../../lib/fiches";
 
@@ -23,6 +30,10 @@ type Props = {
 };
 
 const { parCandidat, domaine } = Astro.props;
+
+function accorder(nombre: number, singulier: string, pluriel: string): string {
+  return `${nombre} ${nombre > 1 ? pluriel : singulier}`;
+}
 ---
 
 <ul class="propositions">
@@ -33,19 +44,27 @@ const { parCandidat, domaine } = Astro.props;
           <Portrait nom={entree.nom} chemin={entree.portrait} taille={40} />
           <span class="nom">{entree.nom}</span>
         </a>
-        <ul class="mesures">
-          {entree.propositions.map((proposition) => (
-            <li>
-              <span class="intitule">{proposition.intitule}</span>
-              <span class="origine">
-                {proposition.natureLibelle}
-                {proposition.auteur && `, ${proposition.auteur}`}
-                {", "}
-                <time datetime={proposition.date}>{formatDateFr(proposition.date)}</time>
-              </span>
-            </li>
-          ))}
-        </ul>
+        <details class="repli">
+          <summary>
+            <span>{accorder(entree.propositions.length, "proposition", "propositions")}</span>
+            <span class="deplier" aria-hidden="true">
+              <Icone nom="caret-down" graisse="bold" />
+            </span>
+          </summary>
+          <ul class="mesures">
+            {entree.propositions.map((proposition) => (
+              <li>
+                <span class="intitule">{proposition.intitule}</span>
+                <span class="origine">
+                  {proposition.natureLibelle}
+                  {proposition.auteur && `, ${proposition.auteur}`}
+                  {", "}
+                  <time datetime={proposition.date}>{formatDateFr(proposition.date)}</time>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </details>
       </li>
     ))
   }
@@ -93,10 +112,54 @@ const { parCandidat, domaine } = Astro.props;
     }
   }
 
+  .repli summary {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--pas-1);
+    min-height: 44px;
+    padding-right: var(--pas-1);
+    cursor: pointer;
+    list-style: none;
+    font-size: var(--t-petit);
+    font-weight: 600;
+    color: var(--couleur-encre);
+    border-radius: var(--rayon-carte);
+    transition: background-color var(--duree) var(--sortie);
+  }
+
+  .repli summary::-webkit-details-marker {
+    display: none;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .repli summary:hover {
+      background: var(--couleur-surface-2);
+    }
+  }
+
+  .deplier {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    color: var(--couleur-signature);
+    transition: transform var(--duree) var(--sortie);
+  }
+
+  .deplier :global(.icone) {
+    display: block;
+    width: 0.875rem;
+    height: 0.875rem;
+  }
+
+  .repli[open] .deplier {
+    transform: rotate(180deg);
+  }
+
   .mesures {
     list-style: none;
     padding: 0;
-    margin: var(--pas-2) 0 0;
+    margin: var(--pas-1) 0 0;
     display: grid;
     gap: var(--pas-2);
   }

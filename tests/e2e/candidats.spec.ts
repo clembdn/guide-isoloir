@@ -87,8 +87,17 @@ test.describe("fiche candidat", () => {
     await expect(page.locator("section:has(> h2#programme) .rappel").first()).toContainText(
       "n'entrent pas dans le calcul du test",
     );
-    await expect(page.locator(".proposition").first()).toBeVisible();
+    // Repliées par domaine, mais dans le HTML servi : un clic les montre.
+    await expect(page.locator(".proposition").first()).toBeAttached();
+    await page.locator(".domaine-repli summary").first().click();
+    await expect(page.locator(".domaine-repli[open] .proposition").first()).toBeVisible();
     await expect(page.locator(".etapes [aria-current='step']")).toHaveCount(1);
+  });
+
+  test("ouvre le domaine qu'une page de thème vise par son ancre", async ({ page }) => {
+    await page.goto("/candidats/marine-tondelier#domaine-ecologie");
+    await expect(page.locator("details#domaine-ecologie")).toHaveAttribute("open", "");
+    await expect(page.locator("details#domaine-ecologie .proposition").first()).toBeVisible();
   });
 
   test("nomme le parti quand une proposition vient de lui", async ({ page }) => {
@@ -100,7 +109,7 @@ test.describe("fiche candidat", () => {
      */
     await expect(
       page.locator(".proposition .origine", { hasText: "Rassemblement national" }).first(),
-    ).toBeVisible();
+    ).toBeAttached();
     await expect(page.locator(".reserve-candidature")).toContainText("cassation");
   });
 
