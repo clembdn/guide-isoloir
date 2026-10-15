@@ -8,8 +8,10 @@
  *      reliée à sa case et à la ligne de la fiche qui porte la citation.
  *   2. L'ADRESSE CANONIQUE. L'ordre est celui de `/candidats` ; la paire
  *      inversée redirige en 301 ; une paire sans page répond 404.
- *   3. L'INDEX ET LE SITEMAP DISENT LA MÊME CHOSE : une page en `noindex` n'est
- *      pas proposée aux moteurs, et une page proposée n'est pas en `noindex`.
+ *   3. LE SITEMAP NE CONTREDIT PAS L'INDEX : une page en `noindex` n'y figure
+ *      jamais. L'inverse ne vaut plus depuis le 16 octobre 2026 : les paires
+ *      indexables sont sorties du sitemap (voir `PAIRES_AU_SITEMAP`), sans
+ *      prendre de `noindex`.
  *   4. LA COULEUR DE SENS RESTE À CÔTÉ DES MOTS : aucune pastille dans la
  *      grille du coup d'œil ni sur le rail des visages.
  *   5. LE SÉLECTEUR MARCHE AU CLAVIER, et rien ne déborde à 375 px ni dans la
@@ -137,20 +139,21 @@ test.describe("adresses des face-à-face", () => {
     expect((await request.get("/comparer/personne/inconnue")).status()).toBe(404);
   });
 
-  test("une page est en noindex si et seulement si elle est absente du sitemap", async ({
+  test("une page en noindex n'est jamais dans le sitemap, et des paires restent indexables", async ({
     page,
     request,
   }) => {
     const sitemap = await (await request.get("/sitemap.xml")).text();
-    let indexees = 0;
+    let indexables = 0;
     for (const chemin of await cheminsProposes(page)) {
       const html = await (await request.get(chemin)).text();
       const horsIndex = /<meta name="robots" content="noindex/.test(html);
       const dansSitemap = sitemap.includes(`<loc>${SITE}${chemin}</loc>`);
-      expect(dansSitemap, chemin).toBe(!horsIndex);
-      if (dansSitemap) indexees += 1;
+      if (horsIndex) expect(dansSitemap, chemin).toBe(false);
+      else indexables += 1;
     }
-    expect(indexees).toBeGreaterThan(0);
+    // Sortir les paires du sitemap ne doit pas les sortir de l'index.
+    expect(indexables).toBeGreaterThan(0);
     expect(sitemap).toContain(`<loc>${SITE}/comparer</loc>`);
   });
 });

@@ -59,6 +59,26 @@ const PAGES_FIXES: readonly SitemapEntry[] = [
   },
 ];
 
+/*
+ * Face-à-face proposés aux moteurs par le sitemap. VIDE À DESSEIN depuis le
+ * 16 octobre 2026.
+ *
+ * Search Console comptait alors 2 pages indexées sur plus de 60 soumises. Un
+ * site neuf, sans autorité, n'obtient qu'une part de l'exploration ; quarante
+ * paires générées diluent cette part au détriment des fiches, des thèmes et
+ * des articles, qui portent les intentions de recherche principales.
+ *
+ * Les paires restent indexables : aucune ne prend de `noindex`, chacune reste
+ * liée depuis `/comparer`, qui reste au sitemap. Elles sont seulement retirées
+ * de la liste qu'on soumet.
+ *
+ * Quand le site aura de l'autorité, on y remet à la main les paires les plus
+ * recherchées (candidats du même camp, d'abord), par leur chemin canonique :
+ * `/comparer/<a>/<b>` dans l'ordre de `/candidats`. Une paire en `noindex`
+ * inscrite ici reste exclue : le sitemap ne contredit jamais la page.
+ */
+const PAIRES_AU_SITEMAP: ReadonlySet<string> = new Set<string>([]);
+
 export const GET: APIRoute = async () => {
   const articles = await articlesPublies();
 
@@ -71,13 +91,15 @@ export const GET: APIRoute = async () => {
   const themes = [...pagesThemes(), ...pagesThemesPropositions().filter((t) => t.indexable)];
   const plusRecente = (dates: readonly string[]) => dates.reduce((a, b) => (a > b ? a : b));
   /*
-   * Face-à-face : seules les paires indexables. Une paire qui compare surtout
-   * la ligne d'un parti porte `noindex` ; la proposer aux moteurs la
-   * contredirait. L'index `/comparer` suit la plus récente des paires qu'il
-   * propose, toutes, indexables ou non.
+   * Face-à-face : seules les paires de `PAIRES_AU_SITEMAP`, et parmi elles les
+   * indexables. Une paire qui compare surtout la ligne d'un parti porte
+   * `noindex` ; la proposer aux moteurs la contredirait. L'index `/comparer`
+   * suit la plus récente des paires qu'il propose, toutes, indexables ou non.
    */
   const toutesPaires = paires();
-  const pairesIndexables = toutesPaires.filter((paire) => paire.indexable);
+  const pairesAuSitemap = toutesPaires.filter(
+    (paire) => paire.indexable && PAIRES_AU_SITEMAP.has(paire.chemin),
+  );
 
   const entrees: SitemapEntry[] = [
     ...PAGES_FIXES,
@@ -98,7 +120,7 @@ export const GET: APIRoute = async () => {
           },
         ]
       : []),
-    ...pairesIndexables.map((paire) => ({ path: paire.chemin, lastmod: paire.misAJour })),
+    ...pairesAuSitemap.map((paire) => ({ path: paire.chemin, lastmod: paire.misAJour })),
     { path: "/donnees", lastmod: DONNEES_MISES_A_JOUR },
     ...articles.map((article) => ({
       path: `/comprendre/${article.id}`,
